@@ -9,6 +9,8 @@
 #define AUDIO_EXIT_ON_FAIL
 #include <audio/audio.hpp>
 #include <physics/physics.hpp>
+#include <scripting/module/script_module.hpp>
+
 
 #include "module/testModule.hpp"
 
@@ -23,4 +25,5 @@ void LEGION_CCONV reportModules(Engine* engine)
     engine->reportModule<rendering::RenderingModule>();
     engine->reportModule<physics::PhysicsModule>();
     engine->reportModule<audio::AudioModule>();
+    engine->reportModule<scripting::ScriptModule>();
 }

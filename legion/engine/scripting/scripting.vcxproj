@@ -17,6 +17,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="delete_this.cpp" />
+    <ClCompile Include="module\script_module.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="hostfxr\hostfxr_helper.hpp" />
+    <ClInclude Include="hostfxr\linux_stubs.h" />
+    <ClInclude Include="hostfxr\windows_stubs.h" />
+    <ClInclude Include="systems\scripting_backend.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
