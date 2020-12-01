@@ -36,7 +36,7 @@ namespace legion::core::filesystem {
             to_process = strpath_manip::sanitize(to_process);
         }
 
-        if(root_domain.empty() || to_process.empty()) return Err(legion_fs_error("invalid syntax for path string, one or more properties empty"));
+        if(root_domain.empty()) return Err(legion_fs_error("invalid syntax for path string, one or more properties empty"));
         root_domain += std::string(":") + strpath_manip::separator() + strpath_manip::separator();
         if(!provider_registry::has_domain(root_domain)) return Err(legion_fs_error(("no start! no such domain: " + root_domain).c_str()));
 
@@ -51,8 +51,17 @@ namespace legion::core::filesystem {
         std::string path_for_resolver;
 
         //get first resolver
-		//TODO support multiple resolvers 
+		//TODO ~~support multiple resolvers ~~
+        //TODO get rid of multiple resolver support
         resolver = *provider_registry::domain_get_first_resolver(domain);
+
+
+        //TODO I think this is also broken
+        if(to_process.empty())
+        {
+            steps.emplace_back(resolver,".");
+            return Ok(steps);
+        }
 
         for (auto& token : tokens) {
 

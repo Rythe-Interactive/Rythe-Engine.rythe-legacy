@@ -54,7 +54,7 @@ namespace legion::core::filesystem {
          *  @note If this filesystem is nested it should be the path to the root of the fs otherwise it can be arbitrary.
          *  @param [in] ident The identifier of the filesystem.
          */
-        void set_identifier(const std::string& ident) { m_identifier = ident; }
+        void set_identifier(std::string ident) { m_identifier = std::move(ident); }
 
 
         /** @brief Sets the target path of the resolver.

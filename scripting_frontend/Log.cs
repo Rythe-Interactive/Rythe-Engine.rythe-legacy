@@ -1,5 +1,10 @@
-﻿namespace Legion
+﻿using System;
+using System.Linq;
+using JetBrains.Annotations;
+
+namespace Legion
 {
+    [PublicAPI]
     public static class Log
     {
         public delegate void LogFn(string param);
@@ -10,7 +15,9 @@
         private static LogFn InternalDebug;
         private static LogFn InternalTrace;
 
+        [PublicAPI("Used in Backend")]
         public delegate void RegisterLogFnsFn(LogFn err, LogFn warn, LogFn info, LogFn debug, LogFn trace);
+        [PublicAPI("Used in Backend")]
         public static void RegisterLogFns(LogFn err, LogFn warn, LogFn info, LogFn debug, LogFn trace)
         {
             InternalErr = err;
@@ -19,13 +26,21 @@
             InternalDebug = debug;
             InternalTrace = trace;
         }
-        private static void Apply(LogFn fn, object o) => fn?.Invoke(o.ToString());
+        private static void Apply(LogFn fn, params object[] args) => fn?.Invoke(
+            string.Join(",",args.Select(x => x.ToString()).ToArray()));
 
 
-        public static void Err(object o) => Apply(InternalErr, o);
-        public static void Warn(object o) => Apply(InternalWarn, o);
-        public static void Info(object o) => Apply(InternalInfo, o);
-        public static void Debug(object o) => Apply(InternalDebug, o);
-        public static void Trace(object o) => Apply(InternalTrace, o);
+        [StringFormatMethod("format")]
+        public static void Err(string format, params object[] args) => Apply(InternalErr, string.Format(format,args));
+        public static void Warn(string format, params object[] args) => Apply(InternalWarn, string.Format(format,args));
+        public static void Info(string format, params object[] args) => Apply(InternalInfo, string.Format(format,args));
+        public static void Debug(string format, params object[] args) => Apply(InternalDebug, string.Format(format,args));
+        public static void Trace(string format, params object[] args) => Apply(InternalTrace, string.Format(format,args));
+
+        public static void Err(params object[] args) => Apply(InternalErr, args);
+        public static void Warn(params object[] args) => Apply(InternalWarn, args);
+        public static void Info(params object[] args) => Apply(InternalInfo, args);
+        public static void Debug(params object[] args) => Apply(InternalDebug, args);
+        public static void Trace(params object[] args) => Apply(InternalTrace, args);
     }
 }

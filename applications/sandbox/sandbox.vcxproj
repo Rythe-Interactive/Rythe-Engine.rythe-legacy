@@ -121,6 +121,9 @@
   <ItemGroup>
     <Image Include="engine\resources\legion\icon.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="assemblies\test.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

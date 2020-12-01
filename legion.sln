@@ -55,6 +55,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sandbox", "applications\san
 		{07B99C45-60D0-4605-9A33-4BFEE86D588A} = {07B99C45-60D0-4605-9A33-4BFEE86D588A}
 		{749C658F-0217-4A86-A205-FD8A35C121B8} = {749C658F-0217-4A86-A205-FD8A35C121B8}
 		{FC6211BB-9E48-496A-8A77-5FF83CAF046D} = {FC6211BB-9E48-496A-8A77-5FF83CAF046D}
+		{68B63CE4-AE20-47B1-A138-CA81C9EA150B} = {68B63CE4-AE20-47B1-A138-CA81C9EA150B}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unit_tests", "applications\unit_tests\unit_tests.vcxproj", "{A946EE4C-D731-4F82-AEB9-A4BA3B99F941}"
@@ -104,7 +105,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "editor-rendering", "legion\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "editor-scripting", "legion\editor\editor-scripting\editor-scripting.vcxproj", "{88B43DA3-9889-477D-86CE-97CDEF3433B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "scripting_frontend", "scripting_frontend\scripting_frontend.csproj", "{BA16D1C8-58DF-4B9D-B4BF-DC3DA05D145A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "scripting_frontend", "scripting_frontend\scripting_frontend.csproj", "{BA16D1C8-58DF-4B9D-B4BF-DC3DA05D145A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sandbox_game", "SandboxGame\sandbox_game.csproj", "{68B63CE4-AE20-47B1-A138-CA81C9EA150B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -224,6 +227,14 @@ Global
 		{BA16D1C8-58DF-4B9D-B4BF-DC3DA05D145A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BA16D1C8-58DF-4B9D-B4BF-DC3DA05D145A}.Release|x64.ActiveCfg = Release|Any CPU
 		{BA16D1C8-58DF-4B9D-B4BF-DC3DA05D145A}.Release|x64.Build.0 = Release|Any CPU
+		{68B63CE4-AE20-47B1-A138-CA81C9EA150B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68B63CE4-AE20-47B1-A138-CA81C9EA150B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68B63CE4-AE20-47B1-A138-CA81C9EA150B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{68B63CE4-AE20-47B1-A138-CA81C9EA150B}.Debug|x64.Build.0 = Debug|Any CPU
+		{68B63CE4-AE20-47B1-A138-CA81C9EA150B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68B63CE4-AE20-47B1-A138-CA81C9EA150B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68B63CE4-AE20-47B1-A138-CA81C9EA150B}.Release|x64.ActiveCfg = Release|Any CPU
+		{68B63CE4-AE20-47B1-A138-CA81C9EA150B}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -247,6 +258,7 @@ Global
 		{91B7D0E7-E85C-40E1-9705-72803F68CD23} = {6735340E-5542-4CC8-84E0-20D740BBBD9B}
 		{88B43DA3-9889-477D-86CE-97CDEF3433B2} = {6735340E-5542-4CC8-84E0-20D740BBBD9B}
 		{BA16D1C8-58DF-4B9D-B4BF-DC3DA05D145A} = {F1668831-DACE-436F-BAD6-BA23AFC863CE}
+		{68B63CE4-AE20-47B1-A138-CA81C9EA150B} = {5ADCB9E3-B58C-47D0-A475-E515B05E6103}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D1B9D2B9-82AE-4AC1-9B5C-7FC79CB09C3E}

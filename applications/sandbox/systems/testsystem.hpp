@@ -368,6 +368,7 @@ public:
             auto ent = createEntity();
             ent.add_component<rendering::renderable>({ planeH, slateH });
             ent.add_components<transform>(position(0, 0.01f, 0), rotation(), scale(10));
+            ent.add_component<tag>("MyTestEntity");
         }
 
         {

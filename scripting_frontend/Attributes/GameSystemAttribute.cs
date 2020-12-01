@@ -1,9 +1,11 @@
 ﻿using System;
+using JetBrains.Annotations;
 
 namespace Legion.Attributes
 {
     [AttributeUsage(AttributeTargets.Class)]
-    class GameSystemAttribute : Attribute
+    [MeansImplicitUse(ImplicitUseTargetFlags.WithMembers)]
+    public class GameSystemAttribute : Attribute
     {
     }
 }

@@ -151,6 +151,9 @@ namespace legion::core::ecs
 
         entity_set& children = m_registry->getEntityData(m_id).children;
 
+        if (index >= children.size())
+            return entity_handle(invalid_id);
+
         return children[index];
     }
 

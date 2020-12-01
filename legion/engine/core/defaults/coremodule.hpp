@@ -18,6 +18,8 @@ namespace legion::core
         {
             filesystem::provider_registry::domain_create_resolver<filesystem::basic_resolver>("assets://", "./assets");
             filesystem::provider_registry::domain_create_resolver<filesystem::basic_resolver>("engine://", "./engine");
+            filesystem::provider_registry::domain_create_resolver<filesystem::basic_resolver>("asm://", "./assemblies");
+
 
             filesystem::AssetImporter::reportConverter<obj_mesh_loader>(".obj");
 

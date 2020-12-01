@@ -104,6 +104,9 @@ namespace legion::core::filesystem
             return get().decay().to<T>(std::forward<Args>(args)...);
         }
 
+        L_NODISCARD common::result_decay_more<std::vector<view>, fs_error> ls() const;
+        L_NODISCARD common::result_decay_more<std::set<std::string>,fs_error> ls_strings() const;
+
 
 #if  !defined( LEGION_DISABLE_POTENTIALLY_WEIRD_SYNTAX )
 
@@ -137,6 +140,7 @@ namespace legion::core::filesystem
 
         common::result<void,fs_error> make_solution() const;
 
+
         mutable navigator::solution m_foundSolution{};
     };
 
@@ -151,6 +155,8 @@ namespace legion::core::filesystem
        }
     }
 
+
+    //TODO(algo-ryth-mix): Actually add the combined view
 
 #if 0 //not ready yet
 

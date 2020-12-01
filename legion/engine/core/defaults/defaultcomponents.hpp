@@ -12,6 +12,36 @@
 
 namespace legion::core
 {
+    struct tag
+    {
+        tag() : hash(0){}
+        tag(const std::string& name) : hash(nameHash(name)) {}
+        tag(const char * name) : hash(nameHash(name)){}
+        tag(size_type hash_) : hash(hash_){}
+        tag(const tag& other) = default;
+        tag(tag&& other) noexcept = default;
+        tag& operator=(const tag& other) = default;
+        tag& operator=(tag&& other) noexcept = default;
+        ~tag() = default;
+
+        friend bool compare(tag lhs,tag rhs)
+        {
+            return lhs.hash == rhs.hash;
+        }
+
+        friend bool operator==(tag lhs,tag rhs)
+        {
+            return compare(lhs,rhs);
+        }
+
+        friend bool operator!=(tag lhs,tag rhs)
+        {
+            return !compare(lhs,rhs);
+        }
+
+        size_type hash;
+    };
+
     struct position : public math::vec3
     {
         position() : math::vec3(0, 0, 0) {}

@@ -55,4 +55,7 @@
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="assemblies\test.txt" />
+  </ItemGroup>
 </Project>

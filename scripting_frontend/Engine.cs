@@ -1,21 +1,57 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using JetBrains.Annotations;
 using Legion.Attributes;
 
 namespace Legion
 {
+    [PublicAPI("Used in Backend")]
     class Engine
     {
-        public static event Action onInitializeEvent;
-        public static event Action<float> onUpdateEvent;
+        public static event Action OnInitializeEvent;
+        public static event Action<float> OnUpdateEvent;
 
         private static List<object> m_gameSystems;
+
         
         public delegate void InitializeFn();
         public static void Initialize()
         {
+            //Load External "Game" Assemblies
+            foreach (var asmV in Directory.GetFiles(".\\assemblies", "*.dll", SearchOption.AllDirectories))
+            {
+
+                //do not load self
+                if (asmV.EndsWith("dotnetlegion.dll")) continue;
+
+                //read and load
+                byte[] b = File.ReadAllBytes(asmV);
+                Assembly a = Assembly.Load(b);
+            }
+
+
+            Log.Debug("assembling Dependency resolver");
+
+            //the assemblies are probably going to depend on dotnetlegion.dll itself
+            //thus we need to resolve their dependencies
+            //this also makes it so that we can load other dependencies in that folder
+            //automatically
+            AppDomain.CurrentDomain.AssemblyResolve += (object sender, ResolveEventArgs e) =>
+            {
+                foreach (var a in AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    Log.Trace($"{a.GetName().FullName}:{e.Name}");
+                    if (a.GetName().FullName == e.Name)
+                    {
+                        return a;
+                    }
+                }
+                return null;
+            };
+
 
             Log.Debug("collecting GameSystems");
 
@@ -32,7 +68,9 @@ namespace Legion
 
 
             var types = enumerationWithGameSystemAttributes.ToList();
+
             m_gameSystems = new List<object>(types.Count);
+
 
             //iterate over all types
             foreach (var type in types)
@@ -58,7 +96,7 @@ namespace Legion
                 if (init_method is not null)
                 {
                     Log.Debug("\t- Init hook registered");
-                    onInitializeEvent += () => init_method.Invoke(instance, null);
+                    OnInitializeEvent += () => init_method.Invoke(instance, null);
                 }
 
                 //get a ref to the Update Method of the instance if it has one and add it to the onUpdate event
@@ -66,18 +104,18 @@ namespace Legion
                 if (update_method is not null)
                 {
                     Log.Debug("\t- Update hook registered");
-                    onUpdateEvent += x => update_method.Invoke(instance, new object[] { x });
+                    OnUpdateEvent += x => update_method.Invoke(instance, new object[] { x });
                 }
             }
 
             //invoke the onInitialize event
-            onInitializeEvent?.Invoke();
+            OnInitializeEvent?.Invoke();
         }
 
         public delegate void UpdateFn(float delta);
         public static void Update(float delta)
         {
-            onUpdateEvent?.Invoke(delta);
+            OnUpdateEvent?.Invoke(delta);
         }
     }
 }
