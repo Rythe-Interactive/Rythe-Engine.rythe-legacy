@@ -34,7 +34,7 @@ namespace legion::scripting {
                 std::basic_string<char_t>(assembly_name);
 
             return loader->loadAssembly(
-                TO_CHAR_T("..\\..\\scripting_frontend\\bin\\Debug\\net5.0\\dotnetlegion.dll"),
+                TO_CHAR_T("..\\..\\legion\\engine\\scripting_frontend\\bin\\Debug\\net5.0\\dotnetlegion.dll"),
                 assemblyName.c_str(),
                 name,
                 delegateName.c_str()
