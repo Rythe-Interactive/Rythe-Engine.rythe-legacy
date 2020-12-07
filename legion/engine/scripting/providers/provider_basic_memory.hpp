@@ -1,6 +1,4 @@
 #pragma once
-#pragma once
-#pragma once
 #include <core/core.hpp>
 #include <scripting/providers/provider_base.hpp>
 

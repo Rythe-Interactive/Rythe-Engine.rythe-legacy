@@ -59,5 +59,8 @@
     <ClInclude Include="data\get_in.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="providers\provider_core_eventbus.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

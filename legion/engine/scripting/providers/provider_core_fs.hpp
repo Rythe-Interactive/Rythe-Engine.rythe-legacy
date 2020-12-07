@@ -1,5 +1,4 @@
 #pragma once
-#pragma once
 #include <core/core.hpp>
 #include <core/common/result.hpp>
 #include <scripting/data/get_in.hpp>

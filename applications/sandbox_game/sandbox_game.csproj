@@ -13,4 +13,8 @@
     <PackageReference Include="JetBrains.Annotations" Version="2020.3.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\legion\engine\scripting_frontend\scripting_frontend.csproj" />
+  </ItemGroup>
+
 </Project>

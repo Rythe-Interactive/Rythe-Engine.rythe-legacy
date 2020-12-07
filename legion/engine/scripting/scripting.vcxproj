@@ -28,6 +28,7 @@
     <ClInclude Include="providers\provider_base.hpp" />
     <ClInclude Include="providers\provider_basic_memory.hpp" />
     <ClInclude Include="providers\provider_core_ecs.hpp" />
+    <ClInclude Include="providers\provider_core_eventbus.hpp" />
     <ClInclude Include="providers\provider_core_fs.hpp" />
     <ClInclude Include="providers\provider_core_logging.hpp" />
     <ClInclude Include="systems\scripting_backend.hpp" />

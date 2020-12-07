@@ -6,6 +6,10 @@ using System.Reflection;
 using JetBrains.Annotations;
 using Legion.Attributes;
 
+
+//TODO(algo-ryth-mix): make this stuff faster with "unsafe features" (clearly .NET developers never saw any of my CPP code)
+//https://levelup.gitconnected.com/the-hidden-unsafe-features-of-c-63895400800a
+
 namespace Legion
 {
     [PublicAPI("Used in Backend")]

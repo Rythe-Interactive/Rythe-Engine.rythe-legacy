@@ -7,6 +7,7 @@
 #include <scripting/providers/provider_base.hpp>
 #include <scripting/providers/provider_basic_memory.hpp>
 #include <scripting/providers/provider_core_ecs.hpp>
+#include <scripting/providers/provider_core_eventbus.hpp>
 #include <scripting/providers/provider_core_fs.hpp>
 #include <scripting/providers/provider_core_logging.hpp>
 #include <scripting/util/to_char_t.hpp>
@@ -65,8 +66,15 @@ namespace legion::scripting {
 
                 CSharpCoreEcsProvider::registry = m_ecs;
 
+                std::vector<std::pair<std::string,id_type>> events = {
+                    std::make_pair("core::exit", events::exit::id)
+                };
+                CSharpCoreEventBusProvider* ebp = new CSharpCoreEventBusProvider(events);
+
+
                 std::pair<const char *,std::unique_ptr<CSharpProviderBase>> providers[] = {
                     {"GetOut Provider",std::make_unique<CSharpBasicMemoryProvider>()},
+                    {"EventBus Provider",std::unique_ptr<CSharpCoreEventBusProvider>(ebp)},
                     {"Entity Provider",std::make_unique<CSharpCoreEcsProvider>()},
                     {"Logging Provider",std::make_unique<CSharpCoreLoggingProvider>()},
                     {"Filesystem Provider",std::make_unique<CSharpCoreFilesystemProvider>()}
