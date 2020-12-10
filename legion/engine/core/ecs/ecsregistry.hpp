@@ -176,7 +176,7 @@ namespace legion::core::ecs
             return std::make_tuple(getComponent<component_type>(entityId), getComponent<component_types>(entityId)...);
         }
 
-        template<typename archetype_type, typename = inherits_from<archetype_type, archetype_base>>
+        template<typename archetype_type, typename... component_types, typename = inherits_from<archetype_type, archetype_base>>
         L_NODISCARD auto getComponents(id_type entityId)
         {
             return archetype_type::get(this, entityId);
@@ -251,6 +251,15 @@ namespace legion::core::ecs
          */
         component_handle_base createComponent(id_type entityId, id_type componentTypeId, void* value);
 
+        /**
+         * @brief Copies a component from entity to another.
+         * @param destinationEntity The entity you want to copy the component onto.
+         * @param sourceEntity The entity you want to copy the component from.
+         * @param componentTypeId The component you want to copy
+         * @return component_handle_base Component handle to the copied component.
+        */
+        component_handle_base copyComponent(id_type destinationEntity, id_type sourceEntity, id_type componentTypeId);
+
         /**@brief Destroy component of a certain type attached to a certain entity.
          * @param entityId Id of the entity you wish to remove the component from.
          * @param componentTypeId Type id of component you wish to destroy.
@@ -290,7 +299,6 @@ namespace legion::core::ecs
 
         /**@brief Create new entity.
          * @returns entity_handle Entity handle pointing to the newly created entity.
-         * @throws legion_entity_exists_error When the next entity id is somehow already taken. (only possible if someone else messed with my/Glyn's code)
          */
         L_NODISCARD entity_handle createEntity(id_type entityId = invalid_id);
 

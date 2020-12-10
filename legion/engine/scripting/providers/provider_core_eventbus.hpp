@@ -9,7 +9,7 @@ namespace legion::scripting {
     {
     public:
 
-        CSharpCoreEventBusProvider(std::vector<std::pair<std::string, id_type>> evs) : m_registered_events(std::move(evs)) {}
+        CSharpCoreEventBusProvider(std::vector<std::pair<std::string, id_type>> evs,events::EventBus* evbus) : m_registered_events(std::move(evs)) {}
 
         bool onHostFXRRegister(HostFXRLoader* loader) override
         {
@@ -95,7 +95,7 @@ namespace legion::scripting {
 
         static void wrapped_emit(void* event, id_type id)
         {
-
+            
 
         }
 
@@ -107,6 +107,7 @@ namespace legion::scripting {
         inline static id_type m_id;
         inline static int m_payload_type;
         inline static HostFXRLoader* m_loader;
+        inline static events::EventBus* m_eventBus;
 
     };
 }

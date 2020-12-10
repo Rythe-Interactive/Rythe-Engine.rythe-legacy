@@ -22,6 +22,8 @@ namespace legion::core
 
 
             filesystem::AssetImporter::reportConverter<obj_mesh_loader>(".obj");
+            filesystem::AssetImporter::reportConverter<gltf_binary_mesh_loader>(".glb");
+            filesystem::AssetImporter::reportConverter<gltf_ascii_mesh_loader>(".gltf");
 
             for (cstring extension : stb_image_loader::extensions)
                 filesystem::AssetImporter::reportConverter<stb_image_loader>(extension);
@@ -33,6 +35,8 @@ namespace legion::core
             reportComponentType<position>();
             reportComponentType<rotation>();
             reportComponentType<scale>();
+            reportComponentType<velocity>();
+            reportComponentType<mesh_filter>();
             reportComponentType<scenemanagement::scene>();
             reportSystem <scenemanagement::SceneManager>();
         }
