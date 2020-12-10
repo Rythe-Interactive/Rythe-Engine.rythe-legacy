@@ -60,7 +60,7 @@ namespace Legion
 
         // ========================== ====================== ========================== 
 
-        private Entity(ulong id)
+        internal Entity(ulong id)
         {
             this.id = id;
         }

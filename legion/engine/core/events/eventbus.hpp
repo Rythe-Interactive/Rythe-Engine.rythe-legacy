@@ -19,6 +19,7 @@ namespace legion::core::events
     {
         sparse_map<id_type, hashed_sparse_set<event_base*>> m_events;
         sparse_map<id_type, multicast_delegate<void(event_base*)>> m_eventCallbacks;
+        multicast_delegate<void(event_base*,size_type)> m_allEventCallbacks;
 
     public:
         ~EventBus()
@@ -50,7 +51,8 @@ namespace legion::core::events
             else
                 eventptr = &event;
 
-            force_value_cast<multicast_delegate<void(event_type*)>>(m_eventCallbacks[event_type::id]).invoke(eventptr); // Notify.            
+            force_value_cast<multicast_delegate<void(event_type*)>>(m_eventCallbacks[event_type::id]).invoke(eventptr); // Notify.
+            m_allEventCallbacks.invoke(eventptr,sizeof(event_type));
         }
 
         /**@brief Check if an event is active.
@@ -133,6 +135,11 @@ namespace legion::core::events
         void bindToEvent(delegate<void(event_type*)> callback)
         {
             m_eventCallbacks[event_type::id] += force_value_cast<delegate<void(event_base*)>>(callback);
+        }
+
+        void bindToAllEvents(delegate<void(event_base*,size_type)> callback)
+        {
+            m_allEventCallbacks += callback;
         }
     };
 }

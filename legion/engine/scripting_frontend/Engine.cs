@@ -19,6 +19,7 @@ namespace Legion
         public static event Action<float> OnUpdateEvent;
 
         private static List<object> m_gameSystems;
+        public static List<object> GameSystems => m_gameSystems;
 
         
         public delegate void InitializeFn();

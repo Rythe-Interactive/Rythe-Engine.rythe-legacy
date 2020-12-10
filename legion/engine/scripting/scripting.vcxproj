@@ -16,12 +16,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="delete_this.cpp" />
     <ClCompile Include="module\script_module.hpp" />
     <ClCompile Include="providers\impl.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="data\get_in.hpp" />
+    <ClInclude Include="events\csnotifyone.hpp" />
     <ClInclude Include="hostfxr\hostfxr_helper.hpp" />
     <ClInclude Include="hostfxr\linux_stubs.h" />
     <ClInclude Include="hostfxr\windows_stubs.h" />

@@ -23,7 +23,6 @@ public class Game
 
     public void Update(float dt)
     {
-        Log.Info("C# Stinky");
 
         if (m_counter > 100)
         {
@@ -33,6 +32,13 @@ public class Game
         }
 
         m_counter++;
+    }
+
+    [OnEvent]
+    public void OnTransformCreated(NotifyOne no)
+    {
+        Log.Info("Received event from EventBus");
+
     }
 }
 

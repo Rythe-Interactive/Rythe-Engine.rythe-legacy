@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="delete_this.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="module\script_module.hpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -60,6 +57,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="providers\provider_core_eventbus.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="events\csnotifyone.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

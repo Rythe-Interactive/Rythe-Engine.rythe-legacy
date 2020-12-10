@@ -11,7 +11,7 @@ public:
     virtual ~CSharpProviderBase() = default;
 
 protected:
-     Assembly engineFunction(
+     static Assembly engineFunction(
             HostFXRLoader* loader,
             const char_t* name)
         {
@@ -36,7 +36,7 @@ protected:
                 delegateName.c_str()
             );
         }
-        const char_t* classname;
-        const char_t* assembly_name = TO_CHAR_T("dotnetlegion");
+        inline static const char_t* classname;
+        inline static const char_t* assembly_name = TO_CHAR_T("dotnetlegion");
 };
 }

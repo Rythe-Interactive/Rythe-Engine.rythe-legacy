@@ -64,7 +64,7 @@ namespace legion::core::compute
     Kernel& Kernel::setBuffer(Buffer buffer, cl_uint index)
     {
         //set kernel argument
-        const cl_int ret = clSetKernelArg(m_func, index, sizeof(cl_mem), &buffer.m_memory_object);
+        const cl_int ret = clSetKernelArg(m_func, index, buffer.m_data ? sizeof(cl_mem):sizeof(cl_sampler), &buffer.m_memory_object);
 
         //check clSetKernelArg
         if (ret != CL_SUCCESS)

@@ -11,6 +11,7 @@
 
 #include "pointcloud_particlesystem.hpp"
 #include <rendering/components/particle_emitter.hpp>
+#include <scripting/events/csnotifyone.hpp>
 
 using namespace legion;
 
@@ -30,6 +31,7 @@ public:
         rendering::material_handle vertexColor;
         rendering::material_handle directionalLightMH;
 
+        createProcess<&TestSystem2::update>("Update");
 
         app::window window = m_ecs->world.get_component_handle<app::window>().read();
 
@@ -89,8 +91,12 @@ public:
         }
     }
 
-    virtual void update()
+    void update(time::span dt)
     {
-        
+        static int i = 0;
+        if (i++ == 10000){
+            raiseEvent<scripting::csnotifyone>();
+            i = 0;
+        }
     }
 };
