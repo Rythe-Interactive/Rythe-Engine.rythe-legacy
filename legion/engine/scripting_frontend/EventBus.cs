@@ -37,7 +37,7 @@ namespace Legion
     [PublicAPI]
     public class EventBus
     {
-        public delegate void EmitEventImplFn(IntPtr ev, ulong id);
+        public delegate void EmitEventImplFn(IntPtr ev,ulong size, ulong id);
         private static EmitEventImplFn EmitEventImpl;
 
         public delegate void RegisterEmitEventImplFnFn(EmitEventImplFn fn);
@@ -79,10 +79,8 @@ namespace Legion
             public IntPtr data;
         }
 
-
-
         public delegate void OnPendingDataFn();
-        public static unsafe void OnPendingData()
+        public static void OnPendingData()
         {
 
             var ctr = GetPendingData();
@@ -120,15 +118,15 @@ namespace Legion
 
         public static void Subscribe<T>(Action<T> evt)
         {
-            var attribs = typeof(T).GetCustomAttributes(typeof(EventAttribute), false);
-            if (!(attribs.Length > 0)) throw new InvalidOperationException("You can only subscribe to Events that have the [Event] Attribute");
-
+            
             if (m_events.ContainsKey(typeof(T)))
             {
                 RegisterToType(evt);
             }
             else
             {
+                var attribs = typeof(T).GetCustomAttributes(typeof(EventAttribute), false);
+                if (!(attribs.Length > 0)) throw new InvalidOperationException("You can only subscribe to Events that have the [Event] Attribute");
                 CreateEventType<T>((EventAttribute)attribs[0]);
                 RegisterToType(evt);
             }
@@ -139,12 +137,30 @@ namespace Legion
             //TODO(algo-ryth-mix): Get CPP backend & registries and emit event on eventbus
             //Also need to find a way to convert C# structs to Unmarshaled type (aka IntPtr)
 
-            IntPtr ptr = new IntPtr();
-            Marshal.StructureToPtr(evt,ptr,false);
+            if (m_events.ContainsKey(typeof(T)))
+            {
+                EmitInner(evt);
+
+            }
+            else
+            {
+                var attribs = typeof(T).GetCustomAttributes(typeof(EventAttribute), false);
+                if (!(attribs.Length > 0))
+                    throw new InvalidOperationException(
+                        "You can only subscribe to Events that have the [Event] Attribute");
+                CreateEventType<T>((EventAttribute) attribs[0]);
+                EmitInner(evt);
+            }
+        }
+
+        private static void EmitInner<T>(T evt)
+        {
+            IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf<T>());
+            Marshal.StructureToPtr(evt, ptr, false);
+
             var id = m_events[typeof(T)];
 
-            EmitEventImpl(ptr, id);
-
+            EmitEventImpl(ptr, (ulong) Marshal.SizeOf<T>(), id);
         }
 
         private static void RegisterToType<T>(Action<T> evt)

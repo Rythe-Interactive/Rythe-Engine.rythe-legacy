@@ -36,7 +36,11 @@ namespace legion::scripting {
                 std::basic_string<char_t>(assembly_name);
 
             return loader->loadAssembly(
+                #if defined(_DEBUG) || defined(DEBUG)
                 TO_CHAR_T("..\\..\\legion\\engine\\scripting_frontend\\bin\\Debug\\net5.0\\dotnetlegion.dll"),
+                #else
+                TO_CHAR_T("..\\..\\legion\\engine\\scripting_frontend\\bin\\Release\\net5.0\\dotnetlegion.dll"),
+                #endif
                 assemblyName.c_str(),
                 name,
                 delegateName.c_str()
@@ -50,6 +54,8 @@ namespace legion::scripting {
         Assembly m_init_assembly = nullptr;
         Assembly m_update_assembly = nullptr;
         std::queue<events::event_base*> m_eventQueue;
+        HostFXRLoader m_loader;
+
 
         //sorry glyn but your locks are too buggy for me
         mutable std::mutex m_lock;
@@ -77,15 +83,14 @@ namespace legion::scripting {
 
             m_eventQueue.emplace(reinterpret_cast<events::event_base*>(buffer));
         }
-
         bool prepared = false;
         void update(time::span dt)
         {
             if (!prepared) {
-                HostFXRLoader loader("hostfxr.dll");
-                loader.initHostFXR(TO_CHAR_T("dotnet.runtimeconfig.json"));
-
+                m_loader = HostFXRLoader("hostfxr.dll");
+                m_loader.initHostFXR(TO_CHAR_T("dotnet.runtimeconfig.json"));
                 CSharpCoreEcsProvider::registry = m_ecs;
+                CSharpCoreEventBusProvider::eventBus = m_eventBus;
 
                 ebp = new CSharpCoreEventBusProvider(events);
                 std::pair<const char*, std::unique_ptr<CSharpProviderBase>> providers[] = {
@@ -98,16 +103,16 @@ namespace legion::scripting {
                 for (auto& [str, provider] : providers)
                 {
                     log::trace("Assembling Registries for: {}", str);
-                    provider->onHostFXRRegister(&loader);
+                    provider->onHostFXRRegister(&m_loader);
                 }
-                m_init_assembly = detail::internalCall(&loader, TO_CHAR_T("Initialize"));
-                m_update_assembly = detail::internalCall(&loader, TO_CHAR_T("Update"));
+                m_init_assembly = detail::internalCall(&m_loader, TO_CHAR_T("Initialize"));
+                m_update_assembly = detail::internalCall(&m_loader, TO_CHAR_T("Update"));
 
                 m_init_assembly.invoke<void>();
                 prepared = true;
             }
+            //detail::internalCall(&m_loader, TO_CHAR_T("Update")).invoke<void>(static_cast<float>(dt));
             m_update_assembly.invoke<void>(static_cast<float>(dt));
-
             {
                 std::lock_guard<std::mutex> guard(m_lock);
                 while (!m_eventQueue.empty())

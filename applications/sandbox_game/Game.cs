@@ -29,15 +29,17 @@ public class Game
             Log.Info("Game has been updated 100 times");
             Log.Info($"Delta Time of this frame: {dt}");
             m_counter = 0;
+
+           
+            EventBus.Emit(new ExitEvent());
         }
 
         m_counter++;
     }
 
     [OnEvent]
-    public void OnTransformCreated(NotifyOne no)
+    public void OnNotifyOne(NotifyOne no)
     {
-        Log.Info("Received event from EventBus");
 
     }
 }

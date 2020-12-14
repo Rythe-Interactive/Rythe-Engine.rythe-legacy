@@ -18,9 +18,6 @@
     <ClCompile Include="module\script_module.hpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="providers\impl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="systems\scripting_backend.hpp">
@@ -60,6 +57,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="events\csnotifyone.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="events\csevent.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\free_cs_mem.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

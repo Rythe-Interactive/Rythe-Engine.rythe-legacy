@@ -15,6 +15,7 @@
 #include <rendering/systems/pointcloud_particlesystem.hpp>
 #include <rendering/components/particle_emitter.hpp>
 #include <scripting/events/csnotifyone.hpp>
+#include <scripting/util/free_cs_mem.hpp>
 
 
 using namespace legion;
@@ -104,6 +105,7 @@ public:
         rendering::material_handle directionalLightMH;
 
         createProcess<&TestSystem2::update>("Update");
+        bindToEvent<scripting::csevent, &TestSystem2::onCsEvent>();
 
         app::window window = m_ecs->world.get_component_handle<app::window>().read();
 
@@ -171,21 +173,31 @@ public:
             z = -depth + rnd() * (depth - (-depth));
             points.push_back(math::vec3(x, y, z));
         }
-        voronoi = physics::PhysicsStatics::GenerateVoronoi(points);
+        //voronoi = physics::PhysicsStatics::GenerateVoronoi(points);
 
         createProcess<&TestSystem2::update>("Update");
+    }
+
+    void onCsEvent(scripting::csevent* event)
+    {
+        log::debug("received event from cs");
+
+        free_cs_mem(event->ptr);
+        //free(event->ptr);
     }
 
     void update(time::span dt)
     {
         static int i = 0;
-        if (i++ == 10000){
+        if (i++ == 10000) {
             raiseEvent<scripting::csnotifyone>();
             i = 0;
         }
+        /*
         for (auto point : voronoi)
         {
             debug::drawLine(point[0], point[1], math::colors::magenta);
         }
+        */
     }
 };

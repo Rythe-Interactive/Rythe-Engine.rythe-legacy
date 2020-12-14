@@ -7,6 +7,8 @@
 
 #include<rendering/systems/pointcloudgeneration.hpp>
 
+#include "../systems/testsystem2.hpp"
+
 using namespace legion;
 
 class TestModule : public Module
@@ -17,8 +19,8 @@ public:
 
         if (true)
         {
-            reportSystem<pointcloudtestsystem2>();
-        //    reportSystem<PointCloudGeneration>();
+            //reportSystem<pointcloudtestsystem2>();
+            //reportSystem<PointCloudGeneration>();
         }
         else
         {
@@ -26,7 +28,7 @@ public:
             reportComponentType<sah>();
             reportSystem<TestSystem>();
         }
-        //reportSystem<TestSystem2>();
+        reportSystem<TestSystem2>();
         reportSystem<SimpleCameraController>();
     }
 

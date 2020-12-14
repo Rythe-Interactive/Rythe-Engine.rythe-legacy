@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/core.hpp>
+#include <scripting/events/csevent.hpp>
 #include <scripting/providers/provider_base.hpp>
 
 namespace legion::scripting {
@@ -9,14 +10,19 @@ namespace legion::scripting {
     {
     public:
 
-        CSharpCoreEventBusProvider(std::vector<std::pair<std::string, id_type>> evs,events::EventBus* evbus) : m_registered_events(std::move(evs)) {}
+        inline static events::EventBus* eventBus;
+
+
+        CSharpCoreEventBusProvider(std::vector<std::pair<std::string, id_type>> evs) : m_registered_events(std::move(evs))
+        {
+        }
 
         bool onHostFXRRegister(HostFXRLoader* loader) override
         {
             m_loader = loader;
             classname = TO_CHAR_T("EventBus");
 
-            engineFunction(loader,TO_CHAR_T("RegisterEmitEventImplFn")).invoke<void>(&wrapped_emit);
+            engineFunction(loader, TO_CHAR_T("RegisterEmitEventImplFn")).invoke<void>(&wrapped_emit);
             engineFunction(loader, TO_CHAR_T("RegisterGetPendingDataFunc")).invoke<void>(&wrapped_get_pending_data);
             m_pending_data_fn = engineFunction(loader, TO_CHAR_T("OnPendingData"));
 
@@ -64,9 +70,9 @@ namespace legion::scripting {
         {
             Payload* payload = nullptr;
 
-            if(m_payload_type == 0)
+            if (m_payload_type == 0)
             {
-                payload= new Payload
+                payload = new Payload
                 {
                     m_payload_type,
                     sizeof(MessageEmitEvent),
@@ -77,9 +83,9 @@ namespace legion::scripting {
                     }
                 };
             }
-            if(m_payload_type == 0xFF)
+            if (m_payload_type == 0xFF)
             {
-                payload= new Payload
+                payload = new Payload
                 {
                     m_payload_type,
                     sizeof(MessageRegisterEvent),
@@ -90,13 +96,12 @@ namespace legion::scripting {
                     }
                 };
             }
-            return get_in{payload,sizeof(Payload)};
+            return get_in{ payload,sizeof(Payload) };
         }
 
-        static void wrapped_emit(void* event, id_type id)
+        static void wrapped_emit(void* event,size_type size, id_type id)
         {
-            
-
+            eventBus->raiseEvent<csevent>(id, size, event);
         }
 
         std::vector<std::pair<std::string, id_type>> m_registered_events;
@@ -107,7 +112,6 @@ namespace legion::scripting {
         inline static id_type m_id;
         inline static int m_payload_type;
         inline static HostFXRLoader* m_loader;
-        inline static events::EventBus* m_eventBus;
 
     };
 }

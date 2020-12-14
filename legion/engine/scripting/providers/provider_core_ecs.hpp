@@ -9,7 +9,7 @@ namespace legion::scripting{
     {
     public:
 
-        static ecs::EcsRegistry* registry;
+        inline static ecs::EcsRegistry* registry;
 
         bool onHostFXRRegister(HostFXRLoader* loader) override
         {

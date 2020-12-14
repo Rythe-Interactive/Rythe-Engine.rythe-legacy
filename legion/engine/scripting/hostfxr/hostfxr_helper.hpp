@@ -60,6 +60,8 @@ namespace detail
 	class Module
 	{
 	public:
+        Module(std::nullptr_t) : m_module(nullptr){};
+
 		Module(const char* path)
 		{
 			m_module = load_library(path);
@@ -138,8 +140,6 @@ namespace detail
 	
 }
 
-
-
 class Assembly
 {
 public:
@@ -165,6 +165,8 @@ private:
 class HostFXRLoader
 {
 public:
+
+    HostFXRLoader() : m_module(nullptr){}
 
 	HostFXRLoader(const char * path) : m_module(path)
 	{

@@ -17,10 +17,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="module\script_module.hpp" />
-    <ClCompile Include="providers\impl.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="data\get_in.hpp" />
+    <ClInclude Include="events\csevent.hpp" />
     <ClInclude Include="events\csnotifyone.hpp" />
     <ClInclude Include="hostfxr\hostfxr_helper.hpp" />
     <ClInclude Include="hostfxr\linux_stubs.h" />
@@ -32,6 +32,7 @@
     <ClInclude Include="providers\provider_core_fs.hpp" />
     <ClInclude Include="providers\provider_core_logging.hpp" />
     <ClInclude Include="systems\scripting_backend.hpp" />
+    <ClInclude Include="util\free_cs_mem.hpp" />
     <ClInclude Include="util\to_char_t.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
