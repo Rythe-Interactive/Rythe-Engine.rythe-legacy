@@ -30,6 +30,8 @@ public:
         log::filter(log::severity_debug);
         log::debug("ExampleSystem setup");
 
+        serialization::SerializationRegistry::register_component<serialization::MyRecord>();
+
         app::InputSystem::createBinding<tonemap_action>(app::inputmap::method::F2);
         app::InputSystem::createBinding<reload_shaders_action>(app::inputmap::method::F3);
         app::InputSystem::createBinding<switch_skybox_action>(app::inputmap::method::F4);
