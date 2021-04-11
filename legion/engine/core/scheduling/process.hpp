@@ -1,4 +1,5 @@
 #pragma once
+#include <unordered_set>
 
 #include <core/platform/platform.hpp>
 #include <core/types/primitives.hpp>
