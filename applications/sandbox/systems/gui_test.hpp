@@ -8,11 +8,13 @@
 #include <rendering/pipeline/gui/stages/imguirenderstage.hpp>
 #include <rendering/systems/renderer.hpp>
 
+LEGION_CLANG_SUPPRESS_WARNING_WITH_PUSH("-Wdeprecated-declarations")
+
 namespace legion
 {
     using namespace legion::rendering;
     using namespace legion::core::filesystem::literals;
-    using namespace legion::core::scenemanagement;
+    //using namespace legion::core::scenemanagement;
 
     class GuiTestSystem : public System<GuiTestSystem>
     {
@@ -30,22 +32,21 @@ namespace legion
             captured = false;
         }
 
-    private:
-        ecs::EntityQuery cameraQuery = createQuery<camera, transform>();
-        ecs::entity_handle selected = invalid_id;
+        ecs::filter<camera, transform> cameraQuery;
+        ecs::entity selected;
 
         math::mat4 view = math::mat4(1.0f);
         math::mat4 projection = math::mat4(1.0f);
         math::mat4 model = math::mat4(1.0f);
 
-        void setup() override
+        void setup()
         {
             static_cast<DefaultPipeline*>(Renderer::getMainPipeline())->attachStage<ImGuiStage>();
 
             //gui code goes here
             ImGuiStage::addGuiRender<GuiTestSystem, &GuiTestSystem::onGUI>(this);
 
-            app::window window = m_ecs->world.get_component_handle<app::window>().read();
+            app::window& window = ecs::world.get_component<app::window>();
 
             model_handle cubeModel;
             material_handle decalMaterial;
@@ -53,7 +54,7 @@ namespace legion
             {
                 application::context_guard guard(window);
 
-                cubeModel = ModelCache::create_model("cube", "assets://models/cube.obj"_view);
+                cubeModel = ModelCache::create_model("cube", "assets://models/Cube.obj"_view);
                 decalMaterial = MaterialCache::create_material("decal", "assets://shaders/decal.shs"_view);
                 decalMaterial.set_param(SV_ALBEDO, TextureCache::create_texture("engine://resources/default/albedo"_view));
                 decalMaterial.set_param(SV_NORMALHEIGHT, TextureCache::create_texture("engine://resources/default/normalHeight"_view));
@@ -63,19 +64,17 @@ namespace legion
                 decalMaterial.set_param("skycolor", math::color(0.1f, 0.3f, 1.0f));
             }
 
-            auto decalEntity = createEntity();
+            auto decalEntity = createEntity("Decal");
             selected = decalEntity;
-            hierarchy hry;
-            hry.name = "Decal";
-            decalEntity.add_component(hry);
 
             position pos(5.f, 0.f, 5.f);
             scale scal(3.f, 2.f, 3.f);
             rotation rot = angleAxis(math::quarter_pi<float>(), math::vec3::up);
             model = compose(scal, rot, pos);
 
-            decalEntity.add_components<transform>(pos, rot, scal);
-            decalEntity.add_components<mesh_renderable>(mesh_filter(cubeModel.get_mesh()), mesh_renderer(decalMaterial));
+            decalEntity.add_component<transform>(pos, rot, scal);
+            decalEntity.add_component(gfx::mesh_renderer(decalMaterial, cubeModel));
+
         }
 
         // BuildTree creates a rudimentary Entity View, as entities do currently not have the ability to be named
@@ -83,219 +82,133 @@ namespace legion
         // In how the Scene is currently structured, it will also try to show the names of the components of the
         // entities, which makes identifying them easier
         //
-        bool BuildTree(ecs::entity_handle handle)
+        bool BuildTree(ecs::entity handle)
         {
             static bool isEditingName = false;
             static char buffer[512];
 
-            std::string nodeName;
-
-            if (handle == world)
-                nodeName = "World";
-            else if (handle.has_component<camera>())
-                nodeName = "camera";
-            else if (handle.has_component<hierarchy>())
-            {
-                auto hry = handle.read_component<hierarchy>();
-                if (hry.name.empty())
-                    nodeName = std::to_string(handle.get_id());
-                else
-                    nodeName = hry.name;
-            }
-            else
-                nodeName = std::to_string(handle.get_id());
-
-            if (ImGui::TreeNode(reinterpret_cast<void*>(handle.get_id()), "%s", nodeName.c_str()))
+            if (ImGui::TreeNode(reinterpret_cast<void*>(handle->id), "%s", handle->name.c_str()))
             {
                 if (ImGui::IsItemClicked())
                 {
                     selected = handle;
                 }
 
-                if (handle.has_component<hierarchy>())
+                if (handle->name.empty())
                 {
-                    auto hry = handle.read_component<hierarchy>();
-
-                    if (hry.name.empty())
-                    {
-                        if (handle == world)
-                            hry.name = "World";
-                        else if (selected.has_component<camera>())
-                            hry.name = "camera";
-                        else
-                            hry.name = "Entity " + std::to_string(handle.get_id());
-
-                        handle.write_component(hry);
-
-                        if (selected == handle && isEditingName)
-                            strcpy(buffer, hry.name.data());
-                    }
-
-                    if (!handle.has_component<camera>())
-                    {
-                        if (selected == handle && isEditingName)
-                        {
-                            if (ImGui::InputText(" ###", buffer, 512, ImGuiInputTextFlags_EnterReturnsTrue))
-                            {
-                                hry.name = buffer;
-                                handle.write_component(hry);
-                                isEditingName = false;
-                            }
-                            if (ImGui::IsItemClicked())
-                            {
-                                selected = handle;
-                            }
-                        }
-                        else
-                        {
-                            ImGui::Text("");
-                        }
-
-                        ImGui::SameLine();
-                        if (ImGui::Button("Change Name"))
-                        {
-                            if (selected == handle && isEditingName)
-                            {
-                                hry.name = buffer;
-                                handle.write_component(hry);
-                                isEditingName = false;
-                            }
-                            else
-                            {
-                                if (isEditingName)
-                                {
-                                    auto selHry = selected.read_component<hierarchy>();
-                                    selHry.name = buffer;
-                                    selected.write_component(selHry);
-                                }
-                                selected = handle;
-                                isEditingName = true;
-                                strcpy(buffer, hry.name.data());
-                            }
-                        }
-                    }
+                    if (handle == ecs::world)
+                        handle->name = "World";
+                    else if (selected.has_component<camera>())
+                        handle->name = "camera";
                     else
-                        ImGui::Text("");
+                        handle->name = "Entity " + std::to_string(handle->id);
 
-                    if (handle != world && !handle.has_component<camera>() && !handle.has_component<scene>())
-                    {
-                        ImGui::SameLine();
-                        if (ImGui::Button("Destroy"))
-                        {
-                            handle.destroy();
-                            ImGui::TreePop();
-                            return false;
-                        }
-                    }
+                    if (selected == handle && isEditingName)
+                        strcpy(buffer, handle->name.data());
+                }
 
-                    if (selected != handle)
+                if (!handle.has_component<camera>())
+                {
+                    if (selected == handle && isEditingName)
                     {
-                        ImGui::SameLine();
-                        if (ImGui::Button("Select"))
+                        if (ImGui::InputText(" ###", buffer, 512, ImGuiInputTextFlags_EnterReturnsTrue))
                         {
-                            if (isEditingName)
-                            {
-                                auto selHry = selected.read_component<hierarchy>();
-                                selHry.name = buffer;
-                                selected.write_component(selHry);
-                            }
+                            handle->name = buffer;
                             isEditingName = false;
-                            selected = handle;
                         }
-                    }
-
-                    ImGui::Separator();
-
-                    if (ImGui::TreeNode("Children"))
-                    {
                         if (ImGui::IsItemClicked())
                         {
                             selected = handle;
                         }
-
-                        ImGui::SameLine();
-                        if (ImGui::Button("Add child"))
-                        {
-                            auto child = createEntity(false);
-                            hierarchy chldHry;
-                            chldHry.parent = handle;
-                            chldHry.name = "New Child";
-                            child.add_component(chldHry);
-                            hry.children.insert(child);
-                            handle.write_component(hry);
-                        }
-
-                        std::vector<ecs::entity_handle> toErase;
-                        for (auto child : hry.children)
-                        {
-                            if (!BuildTree(child))
-                                toErase.push_back(child);
-                        }
-
-                        if (toErase.size())
-                        {
-                            for (auto child : toErase)
-                                hry.children.erase(child);
-
-                            handle.write_component(hry);
-                        }
-
-                        ImGui::TreePop();
                     }
-                    else if (ImGui::IsItemClicked())
+                    else
+                    {
+                        ImGui::Text("");
+                    }
+
+                    ImGui::SameLine();
+                    if (ImGui::Button("Change Name"))
+                    {
+                        if (selected == handle && isEditingName)
+                        {
+                            handle->name = buffer;
+                            isEditingName = false;
+                        }
+                        else
+                        {
+                            if (isEditingName)
+                            {
+                                selected->name = buffer;
+                            }
+                            selected = handle;
+                            isEditingName = true;
+                            strcpy(buffer, handle->name.data());
+                        }
+                    }
+                }
+                else
+                    ImGui::Text("");
+
+                if (handle != ecs::world && !handle.has_component<camera>()/* && !handle.has_component<scene>()*/)
+                {
+                    ImGui::SameLine();
+                    if (ImGui::Button("Destroy"))
+                    {
+                        handle.destroy();
+                        ImGui::TreePop();
+                        return false;
+                    }
+                }
+
+                if (selected != handle)
+                {
+                    ImGui::SameLine();
+                    if (ImGui::Button("Select"))
+                    {
+                        if (isEditingName)
+                        {
+                            selected->name = buffer;
+                        }
+                        isEditingName = false;
+                        selected = handle;
+                    }
+                }
+
+                ImGui::Separator();
+
+                if (ImGui::TreeNode("Children"))
+                {
+                    if (ImGui::IsItemClicked())
                     {
                         selected = handle;
                     }
 
+                    ImGui::SameLine();
+                    if (ImGui::Button("Add child"))
+                    {
+                        (void)createEntity(handle);
+                    }
+
+                    std::vector<ecs::entity> toErase;
+                    for (auto child : handle)
+                    {
+                        if (!BuildTree(child))
+                            toErase.push_back(child);
+                    }
+
+                    if (toErase.size())
+                    {
+                        for (auto child : toErase)
+                            handle.remove_child(child);
+                    }
+
+                    ImGui::TreePop();
                 }
-                else
+                else if (ImGui::IsItemClicked())
                 {
-                    ImGui::Text("");
-                    if (!handle.has_component<camera>())
-                    {
-                        ImGui::SameLine();
-                        if (ImGui::Button("Add Name"))
-                        {
-                            handle.add_component<hierarchy>();
-                            if (isEditingName)
-                            {
-                                auto selHry = selected.read_component<hierarchy>();
-                                selHry.name = buffer;
-                                selected.write_component(selHry);
-                            }
-                            selected = handle;
-                            isEditingName = true;
-                        }
-                    }
-
-                    if (handle != world && !handle.has_component<camera>() && !handle.has_component<scene>())
-                    {
-                        ImGui::SameLine();
-                        if (ImGui::Button("Destroy"))
-                        {
-                            handle.destroy();
-                            ImGui::TreePop();
-                            return false;
-                        }
-                    }
-
-                    if (selected != handle)
-                    {
-                        ImGui::SameLine();
-                        if (ImGui::Button("Select"))
-                        {
-                            if (isEditingName)
-                            {
-                                auto selHry = selected.read_component<hierarchy>();
-                                selHry.name = buffer;
-                                selected.write_component(selHry);
-                            }
-                            isEditingName = false;
-                            selected = handle;
-                        }
-                    }
-                    ImGui::Separator();
+                    selected = handle;
                 }
+
 
                 if (ImGui::TreeNode("Components")) {
                     if (ImGui::IsItemClicked())
@@ -304,7 +217,7 @@ namespace legion
                     }
                     for (id_type id : handle.component_composition())
                     {
-                        ImGui::Text("%s", m_ecs->getFamilyName(id).c_str());
+                        ImGui::Text("%s", ecs::Registry::getFamilyName(id).c_str());
                         if (ImGui::IsItemClicked())
                         {
                             selected = handle;
@@ -329,39 +242,39 @@ namespace legion
         {
             if (ImGui::BeginMainMenuBar())
             {
-                if (ImGui::BeginMenu("File"))
-                {
-                    if (ImGui::BeginMenu("Save Scene"))
-                    {
-                        if (!SceneManager::currentScene)
-                        {
-                            SceneManager::currentScene = SceneManager::create_scene();
-                        }
-                        auto sceneEntity = SceneManager::currentScene.entity;
-                        std::string sceneName = sceneEntity.get_name();
+                //if (ImGui::BeginMenu("File"))
+                //{
+                //    if (ImGui::BeginMenu("Save Scene"))
+                //    {
+                //        if (!SceneManager::currentScene)
+                //        {
+                //            SceneManager::currentScene = SceneManager::create_scene();
+                //        }
+                //        auto sceneEntity = SceneManager::currentScene.entity;
+                //        std::string sceneName = sceneEntity.get_name();
 
-                        std::string text = "Save scene as:";
-                        text += sceneName;
-                        if (ImGui::Button(text.c_str()))
-                        {
-                            SceneManager::create_scene(sceneName, sceneEntity);
-                        }
-                        ImGui::EndMenu();
-                    }
+                //        std::string text = "Save scene as:";
+                //        text += sceneName;
+                //        if (ImGui::Button(text.c_str()))
+                //        {
+                //            SceneManager::create_scene(sceneName, sceneEntity);
+                //        }
+                //        ImGui::EndMenu();
+                //    }
 
-                    if (ImGui::BeginMenu("Load Scene"))
-                    {
-                        for (auto& [id, name] : SceneManager::sceneNames)
-                        {
-                            if (id && ImGui::MenuItem(name.c_str()))
-                            {
-                                SceneManager::load_scene(name);
-                            }
-                        }
-                        ImGui::EndMenu();
-                    }
-                    ImGui::EndMenu();
-                }
+                //    if (ImGui::BeginMenu("Load Scene"))
+                //    {
+                //        for (auto& [id, name] : SceneManager::sceneNames)
+                //        {
+                //            if (id && ImGui::MenuItem(name.c_str()))
+                //            {
+                //                SceneManager::load_scene(name);
+                //            }
+                //        }
+                //        ImGui::EndMenu();
+                //    }
+                //    ImGui::EndMenu();
+                //}
                 ImGui::EndMainMenuBar();
             }
         }
@@ -655,10 +568,10 @@ namespace legion
             return false;
         }
 
-        void onGUI(app::window& context, camera& cam, const camera::camera_input& camInput, time::span deltaTime)
+        void onGUI(L_MAYBEUNUSED app::window& context, camera& cam, const camera::camera_input& camInput, L_MAYBEUNUSED time::span deltaTime)
         {
-            if (!SceneManager::currentScene)
-                SceneManager::currentScene = SceneManager::create_scene();
+            //if (!SceneManager::currentScene)
+              //  SceneManager::currentScene = SceneManager::create_scene();
 
             ImGuiIO& io = ImGui::GetIO();
 
@@ -683,19 +596,17 @@ namespace legion
             {
                 windowName += "  (selected:";
 
-                auto hry = selected.read_component<hierarchy>();
-
-                if (hry.name.empty())
+                if (selected->name.empty())
                 {
-                    if (selected == world)
-                        hry.name = "World";
+                    if (selected == ecs::world)
+                        selected->name = "World";
                     else if (selected.has_component<camera>())
-                        hry.name = "camera";
+                        selected->name = "camera";
                     else
-                        hry.name = "Entity " + std::to_string(selected.get_id());
+                        selected->name = "Entity " + std::to_string(selected->id);
                 }
 
-                windowName += hry.name;
+                windowName += selected->name;
 
                 windowName += ")";
             }
@@ -704,7 +615,7 @@ namespace legion
 
             if (base::Begin(windowName.c_str()))
             {
-                BuildTree(m_ecs->world);
+                BuildTree(ecs::world);
             }
             base::End();
 
@@ -726,35 +637,32 @@ namespace legion
 
                     if (showGizmo)
                     {
-                        auto pos = selected.read_component<position>();
-                        auto rot = selected.read_component<rotation>();
-                        auto scal = selected.read_component<scale>();
+                        position& pos = selected.get_component<position>();
+                        rotation& rot = selected.get_component<rotation>();
+                        scale& scal = selected.get_component<scale>();
                         model = compose(scal, rot, pos);
                         gizmo::EditTransform(value_ptr(view), value_ptr(projection), value_ptr(model), true);
                         decompose(model, scal, rot, pos);
-                        selected.write_component<position>(pos);
-                        selected.write_component<rotation>(rot);
-                        selected.write_component<scale>(scal);
                     }
                 }
                 else if (ImGui::Button("Add Transform"))
                 {
-                    selected.add_components<transform>();
+                    selected.add_component<transform>();
                 }
 
-                if (selected.has_components<mesh_renderable>())
+                if (selected.has_component<mesh_renderable>())
                 {
-                    static ecs::entity_handle lastSelected;
+                    static ecs::entity lastSelected;
                     static char modelBuffer[512];
                     static char shaderBuffer[512];
                     static char variantBuffer[512];
 
-                    mesh_renderer renderer = selected.read_component<mesh_renderer>();
-                    mesh_filter mesh = selected.read_component<mesh_filter>();
+                    mesh_renderer& renderer = selected.get_component<mesh_renderer>();
+                    mesh_filter& mesh = selected.get_component<mesh_filter>();
 
                     std::string modelPath;
 
-                    if(mesh.id != invalid_id)
+                    if (mesh.id != invalid_id)
                     {
                         auto [lock, data] = mesh.get();
                         async::readonly_guard guard(lock);
@@ -773,7 +681,6 @@ namespace legion
                             auto copy = default_mesh_settings;
                             copy.contextFolder = filesystem::view(modelPath).parent();
                             mesh.id = ModelCache::create_model(modelPath, filesystem::view(modelPath), copy).id;
-                            selected.write_component(mesh);
                         }
                     }
 
@@ -789,10 +696,9 @@ namespace legion
                         if (shaderPath != shaderBuffer)
                         {
                             shaderPath = shaderBuffer;
-                            std::string materialName = std::to_string(selected.get_id()) + shaderPath;
+                            std::string materialName = std::to_string(selected->id) + shaderPath;
                             shader = ShaderCache::create_shader(fs::view(shaderPath));
                             renderer.material = MaterialCache::create_material(materialName, shader);
-                            selected.write_component(renderer);
                         }
                     }
 
@@ -815,9 +721,14 @@ namespace legion
                         }
                     }
 
+                    auto currentVariant = renderer.material.current_variant();
+                    if (currentVariant == 0)
+                        currentVariant = nameHash("default");
+
+
                     for (auto& [variantId, variantInfo] : shader.get_uniform_info())
                     {
-                        if (variantId != renderer.material.current_variant())
+                        if (variantId != currentVariant)
                             continue;
 
                         for (auto& [name, location, type] : variantInfo)
@@ -831,7 +742,7 @@ namespace legion
                 }
                 else if (ImGui::Button("Add Renderable"))
                 {
-                    selected.add_components<gfx::mesh_renderable>();
+                    selected.add_component<gfx::mesh_renderable>();
                 }
             }
             else
@@ -849,3 +760,5 @@ namespace legion
     };
 
 }
+
+LEGION_CLANG_SUPPRESS_WARNING_POP

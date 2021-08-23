@@ -7,8 +7,8 @@ namespace legion::physics
 {
     struct ColliderFaceToVert;
 
-	struct HalfEdgeFace
-	{
+    struct HalfEdgeFace
+    {
         /**@class face_angle_relation
          * @brief Enum Struct to indicate the angle relation between two faces
          * Coplaner:    The faces could be merged, the angle between them is 180 degrees
@@ -28,7 +28,7 @@ namespace legion::physics
         HalfEdgeEdge* startEdge = nullptr;
         ColliderFaceToVert* faceToVert = nullptr; 
         
-		HalfEdgeFace(HalfEdgeEdge* newStartEdge, math::vec3 newNormal);
+        HalfEdgeFace(HalfEdgeEdge* newStartEdge, math::vec3 newNormal);
 
         /**@brief Given that the face has a startEdge,a normal, and a centroid,
          * initializes the face so that it can be used for collision detection in a convex hull

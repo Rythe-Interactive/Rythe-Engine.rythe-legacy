@@ -1,7 +1,7 @@
 name: analyze-action
 on:
   pull_request:
-    branches: [main, develop, develop/*, develop*, feature/*, feature* ]
+    branches: [main, develop, develop/*, develop*, feature*, feature/* ]
 
 jobs:
   analyze:
@@ -31,6 +31,9 @@ jobs:
     
     - name: build legion dependencies
       run: make CXX=clang++-11 config=debug64 legion-core  
+
+    - name: build legion dependencies
+      run: make CXX=clang++-11 config=debug64 legion-core
 
     - name: intercept-build & analyze-build
       run: |

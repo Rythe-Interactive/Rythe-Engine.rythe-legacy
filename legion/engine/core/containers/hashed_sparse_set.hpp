@@ -44,6 +44,8 @@ namespace legion::core
 
         using reverse_iterator = typename dense_container::reverse_iterator;
         using const_reverse_iterator = typename dense_container::const_reverse_iterator;
+        using reverse_itr_range = pair_range<reverse_iterator>;
+        using const_reverse_itr_range = pair_range<const_reverse_iterator>;
 
     private:
         dense_container m_dense;
@@ -53,27 +55,27 @@ namespace legion::core
         size_type m_capacity = 0;
 
     public:
-        L_NODISCARD dense_container& dense() { return m_dense; }
-        L_NODISCARD const dense_container& dense() const { return m_dense; }
+        L_NODISCARD dense_container& dense() noexcept { return m_dense; }
+        L_NODISCARD const dense_container& dense() const noexcept { return m_dense; }
 
-        L_NODISCARD iterator begin() { return m_dense.begin(); }
-        L_NODISCARD const_iterator begin() const { return m_dense.cbegin(); }
-        L_NODISCARD const_iterator cbegin() const { return m_dense.cbegin(); }
+        L_NODISCARD iterator begin() noexcept { return m_dense.begin(); }
+        L_NODISCARD const_iterator begin() const noexcept { return m_dense.cbegin(); }
+        L_NODISCARD const_iterator cbegin() const noexcept { return m_dense.cbegin(); }
 
-        L_NODISCARD iterator end() { return m_dense.begin() + m_size; }
-        L_NODISCARD const_iterator end() const { return m_dense.cbegin() + m_size; }
-        L_NODISCARD const_iterator cend() const { return m_dense.cbegin() + m_size; }
+        L_NODISCARD iterator end() noexcept { return m_dense.begin() + m_size; }
+        L_NODISCARD const_iterator end() const noexcept { return m_dense.cbegin() + m_size; }
+        L_NODISCARD const_iterator cend() const noexcept { return m_dense.cbegin() + m_size; }
 
-        L_NODISCARD reverse_iterator rbegin() { return m_dense.rbegin() + (m_dense.size() - m_size); }
-        L_NODISCARD const_reverse_iterator rbegin() const { return m_dense.crbegin() + (m_dense.size() - m_size); }
-        L_NODISCARD const_reverse_iterator crbegin() const { return m_dense.crbegin() + (m_dense.size() - m_size); }
+        L_NODISCARD reverse_iterator rbegin() noexcept { return m_dense.rbegin() + (m_dense.size() - m_size); }
+        L_NODISCARD const_reverse_iterator rbegin() const noexcept { return m_dense.crbegin() + (m_dense.size() - m_size); }
+        L_NODISCARD const_reverse_iterator crbegin() const noexcept { return m_dense.crbegin() + (m_dense.size() - m_size); }
 
-        L_NODISCARD reverse_iterator rend() { return m_dense.rend(); }
-        L_NODISCARD const_reverse_iterator rend() const { return m_dense.crend(); }
-        L_NODISCARD const_reverse_iterator crend() const { return m_dense.crend(); }
+        L_NODISCARD reverse_iterator rend() noexcept { return m_dense.rend(); }
+        L_NODISCARD const_reverse_iterator rend() const noexcept { return m_dense.crend(); }
+        L_NODISCARD const_reverse_iterator crend() const noexcept { return m_dense.crend(); }
 
-        L_NODISCARD pair_range<reverse_iterator> reverse_range() { return pair_range<reverse_iterator>(rbegin(), rend()); }
-        L_NODISCARD pair_range<const_reverse_iterator> reverse_range() const { return pair_range<const_reverse_iterator>(crbegin(), crend()); }
+        L_NODISCARD reverse_itr_range reverse_range() noexcept { return pair_range{ rbegin(), rend() }; }
+        L_NODISCARD const_reverse_itr_range reverse_range() const noexcept { return pair_range{ crbegin(), crend() }; }
 
         /**@brief Returns the amount of items in the sparse_map.
          * @returns size_type Current amount of items contained in sparse_map.
@@ -87,7 +89,7 @@ namespace legion::core
 
         /**@brief Returns the maximum number of items the hashed_sparse_set could at most store without crashing.
          * @note This value typically reflects the theoretical limit on the size of the container, at most std::numeric_limits<difference_type>::max().
-         *		 At runtime, the size of the container may be limited to a value smaller than max_size() by the amount of RAM available.
+         *       At runtime, the size of the container may be limited to a value smaller than max_size() by the amount of RAM available.
          * @returns size_type
          */
         L_NODISCARD size_type max_size() const noexcept { return m_dense.max_size(); }
@@ -100,7 +102,12 @@ namespace legion::core
         /**@brief Clears sparse_map.
          * @note Will not update capacity.
          */
-        void clear() noexcept { m_size = 0; }
+        void clear() noexcept {
+            m_size = 0;
+            m_dense.clear();
+            m_sparse.clear();
+            m_capacity = 0;
+        }
 
         /**@brief Reserves space in dense container for more items.
          * @param size Amount of items to reserve space for (would be the new capacity).
@@ -239,7 +246,7 @@ namespace legion::core
         {
             OPTICK_EVENT();
             if (contains(val))
-                return begin() + m_sparse[val];
+                return begin() + m_sparse.at(val);
             return end();
         }
 
@@ -251,7 +258,7 @@ namespace legion::core
         {
             OPTICK_EVENT();
             if (contains(val))
-                return begin() + m_sparse[val];
+                return begin() + m_sparse.at(val);
             return end();
         }
 #pragma endregion
@@ -272,7 +279,7 @@ namespace legion::core
                 auto itr = m_dense.begin() + m_size;
                 *itr = val;
 
-                m_sparse[val] = m_size;
+                m_sparse.insert_or_assign(val, m_size);
                 ++m_size;
                 return std::make_pair(itr, true);
             }
@@ -294,7 +301,7 @@ namespace legion::core
                 auto itr = m_dense.begin() + m_size;
                 *itr = std::move(val);
 
-                m_sparse[*itr] = m_size;
+                m_sparse.insert_or_assign(*itr, m_size);
                 ++m_size;
                 return std::make_pair(itr, true);
             }
@@ -309,7 +316,6 @@ namespace legion::core
         template<typename... Arguments>
         std::pair<iterator, bool> emplace(Arguments&&... arguments)
         {
-            OPTICK_EVENT();
             return insert(std::forward<value_type>(value_type(arguments...)));
         }
 #pragma endregion

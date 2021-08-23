@@ -9,12 +9,9 @@
 
 namespace legion::core
 {
-    common::result_decay_more<image, fs_error> stb_image_loader::load(const filesystem::basic_resource& resource, image_import_settings&& settings)
+    common::result<image, fs_error> stb_image_loader::load(const filesystem::basic_resource& resource, image_import_settings&& settings)
     {
         OPTICK_EVENT();
-        using common::Err, common::Ok;
-        // Decay overloads the operator of ok_type and operator== for valid_t.
-        using decay = common::result_decay_more<image, fs_error>;
 
         // Prefetch data from the resource.
         const byte_vec& data = resource.get();
@@ -35,35 +32,37 @@ namespace legion::core
         // Load the image data using stb_image.
         switch (settings.fileFormat)
         {
-        default: [[fallthrough]];
+        default:
         case channel_format::eight_bit:
         {
-            imageData = stbi_load_from_memory(data.data(), data.size(), &image.size.x, &image.size.y, reinterpret_cast<int*>(&components), static_cast<int>(settings.components));
-            dataSize = image.size.x * image.size.y * static_cast<int>(settings.components) * sizeof(byte);
+            imageData = stbi_load_from_memory(data.data(), static_cast<int>(data.size()), &image.size.x, &image.size.y, reinterpret_cast<int*>(&components), static_cast<int>(settings.components));
+            dataSize = static_cast<size_type>(image.size.x * image.size.y) * static_cast<size_type>(settings.components) * sizeof(byte);
             break;
         }
         case channel_format::sixteen_bit:
         {
-            imageData = stbi_load_16_from_memory(data.data(), data.size(), &image.size.x, &image.size.y, reinterpret_cast<int*>(&components), static_cast<int>(settings.components));
-            dataSize = image.size.x * image.size.y * static_cast<int>(settings.components) * sizeof(uint16);
+            imageData = stbi_load_16_from_memory(data.data(), static_cast<int>(data.size()), &image.size.x, &image.size.y, reinterpret_cast<int*>(&components), static_cast<int>(settings.components));
+            dataSize = static_cast<size_type>(image.size.x * image.size.y) * static_cast<size_type>(settings.components) * sizeof(uint16);
             break;
         }
         case channel_format::float_hdr:
         {
-            imageData = stbi_loadf_from_memory(data.data(), data.size(), &image.size.x, &image.size.y, reinterpret_cast<int*>(&components), static_cast<int>(settings.components));
-            dataSize = image.size.x * image.size.y * static_cast<int>(settings.components) * sizeof(float);
+            imageData = stbi_loadf_from_memory(data.data(), static_cast<int>(data.size()), &image.size.x, &image.size.y, reinterpret_cast<int*>(&components), static_cast<int>(settings.components));
+            dataSize = static_cast<size_type>(image.size.x * image.size.y) * static_cast<size_type>(settings.components) * sizeof(float);
             break;
         }
+        case channel_format::depth_stencil:
+            return legion_fs_error("invalid channel format");
         }
 
         image.format = settings.fileFormat;
-        image.data = new byte[dataSize];
         image.dataSize = dataSize;
+        image.data = std::make_shared<byte_vec>(dataSize);
         image.components = settings.components;
 
-        memmove(image.data, imageData, dataSize);
+        memmove(image.data->data(), imageData, dataSize);
         stbi_image_free(imageData);
 
-        return decay(Ok(image));
+        return std::move(image);
     }
 }

@@ -13,10 +13,17 @@ namespace legion::rendering
             return;
 
         OPTICK_EVENT();
-        if (!log::impl::thread_names.count(std::this_thread::get_id()))
+
+        static bool checkedNames = false;
+
+        if (!checkedNames)
         {
-            log::impl::thread_names[std::this_thread::get_id()] = "OpenGL";
-            async::set_thread_name("OpenGL");
+            async::readonly_guard guard(log::impl::threadNamesLock);
+            if (!log::impl::threadNames.count(std::this_thread::get_id()))
+            {
+                log::impl::threadNames[std::this_thread::get_id()] = "OpenGL";
+                async::set_thread_name("OpenGL");
+            }
         }
 
         cstring s;
@@ -101,10 +108,16 @@ namespace legion::rendering
     void Renderer::debugCallbackARB(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, L_MAYBEUNUSED const void* userParam)
     {
         OPTICK_EVENT();
-        if (!log::impl::thread_names.count(std::this_thread::get_id()))
+        static bool checkedNames = false;
+
+        if (!checkedNames)
         {
-            log::impl::thread_names[std::this_thread::get_id()] = "OpenGL";
-            async::set_thread_name("OpenGL");
+            async::readonly_guard guard(log::impl::threadNamesLock);
+            if (!log::impl::threadNames.count(std::this_thread::get_id()))
+            {
+                log::impl::threadNames[std::this_thread::get_id()] = "OpenGL";
+                async::set_thread_name("OpenGL");
+            }
         }
 
         cstring s;
@@ -180,10 +193,16 @@ namespace legion::rendering
     void Renderer::debugCallbackAMD(GLuint id, GLenum category, GLenum severity, GLsizei length, const GLchar* message, L_MAYBEUNUSED void* userParam)
     {
         OPTICK_EVENT();
-        if (!log::impl::thread_names.count(std::this_thread::get_id()))
+        static bool checkedNames = false;
+
+        if (!checkedNames)
         {
-            log::impl::thread_names[std::this_thread::get_id()] = "OpenGL";
-            async::set_thread_name("OpenGL");
+            async::readonly_guard guard(log::impl::threadNamesLock);
+            if (!log::impl::threadNames.count(std::this_thread::get_id()))
+            {
+                log::impl::threadNames[std::this_thread::get_id()] = "OpenGL";
+                async::set_thread_name("OpenGL");
+            }
         }
 
         cstring c;
@@ -305,50 +324,42 @@ namespace legion::rendering
     void Renderer::setup()
     {
         OPTICK_EVENT();
-        RenderPipelineBase::m_ecs = m_ecs;
-        RenderPipelineBase::m_scheduler = m_scheduler;
-        RenderPipelineBase::m_eventBus = m_eventBus;
-
-        RenderStageBase::m_ecs = m_ecs;
-        RenderStageBase::m_scheduler = m_scheduler;
-        RenderStageBase::m_eventBus = m_eventBus;
 
         bindToEvent<events::exit, &Renderer::onExit>();
 
         createProcess<&Renderer::render>("Rendering");
 
-        m_scheduler->sendCommand(m_scheduler->getChainThreadId("Rendering"), [&]()
+        {
+            OPTICK_EVENT("Initialization");
+            log::trace("Waiting on main window.");
+
+            while (!ecs::world.has_component<app::window>())
+                std::this_thread::yield();
+
+            app::window& window = ecs::world.get_component<app::window>();
+
+            log::trace("Initializing context.");
+
+            bool result = false;
+
             {
-                OPTICK_EVENT("Initialization");
-                log::trace("Waiting on main window.");
-
-                while (!world.has_component<app::window>())
-                    std::this_thread::yield();
-
-                app::window window = world.get_component_handle<app::window>().read();
-
-                log::trace("Initializing context.");
-
-                bool result = false;
-
+                app::context_guard guard(window);
+                if (!guard.contextIsValid())
                 {
-                    app::context_guard guard(window);
-                    if (!guard.contextIsValid())
-                    {
-                        log::error("Failed to initialize context.");
-                        return;
-                    }
-                    result = initContext(window);
-                }
-
-                if (!result)
                     log::error("Failed to initialize context.");
-                else
-                    setThreadPriority();
-            }).wait();
+                    return;
+                }
+                result = initContext(window);
+            }
+
+            if (!result)
+                log::error("Failed to initialize context.");
+            else
+                setThreadPriority();
+        }
     }
 
-    void Renderer::onExit(events::exit* event)
+    void Renderer::onExit(events::exit& event)
     {
         OPTICK_EVENT();
         m_exiting.store(true, std::memory_order_release);
@@ -358,19 +369,22 @@ namespace legion::rendering
     {
         OPTICK_EVENT();
 
-        if (m_pipelineProvider.isNull())
+        if (!m_pipelineProvider)
             return;
 
-        static auto cameraQuery = createQuery<camera>();
-        cameraQuery.queryEntities();
+        static ecs::filter<camera> cameraQuery{};
+
         for (auto ent : cameraQuery)
         {
-            auto cam = ent.get_component_handle<camera>().read();
-            app::window win = cam.targetWindow.read();
-            if (!win)
-                win = m_ecs->world.get_component_handle<app::window>().read();
-            if (!win)
+            camera& cam = ent.get_component<camera>();
+
+            auto targetWin = cam.targetWindow;
+            if (!targetWin)
+                targetWin = ecs::world.get_component<app::window>();
+            if (!targetWin)
                 continue;
+
+            app::window& win = targetWin.get();
 
             math::ivec2 viewportSize;
             {
@@ -386,9 +400,9 @@ namespace legion::rendering
             if (viewportSize.x == 0 || viewportSize.y == 0)
                 continue;
 
-            position camPos = ent.get_component_handle<position>().read();
-            rotation camRot = ent.get_component_handle<rotation>().read();
-            scale camScale = ent.get_component_handle<scale>().read();
+            position& camPos = ent.get_component<position>();
+            rotation& camRot = ent.get_component<rotation>();
+            scale& camScale = ent.get_component<scale>();
 
             math::mat4 view(1.f);
             math::compose(view, camScale, camRot, camPos);
@@ -409,7 +423,7 @@ namespace legion::rendering
     L_NODISCARD RenderPipelineBase* Renderer::getPipeline(app::window& context)
     {
         OPTICK_EVENT();
-        if (m_pipelineProvider.isNull())
+        if (!m_pipelineProvider)
             return nullptr;
 
         if (context == app::invalid_window)
@@ -426,10 +440,10 @@ namespace legion::rendering
     L_NODISCARD RenderPipelineBase* Renderer::getMainPipeline()
     {
         OPTICK_EVENT();
-        if (m_pipelineProvider.isNull())
+        if (!m_pipelineProvider)
             return nullptr;
 
-        auto context = world.get_component_handle<app::window>().read();
+        app::window& context = ecs::world.get_component<app::window>();
         if (context == app::invalid_window)
             return nullptr;
 

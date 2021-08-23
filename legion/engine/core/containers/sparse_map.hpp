@@ -57,6 +57,12 @@ namespace legion::core
         size_type m_capacity = 0;
 
     public:
+        sparse_map() = default;
+        sparse_map(size_type capacity)
+        {
+            reserve(capacity);
+        }
+
         L_NODISCARD dense_value_container& values() noexcept { return m_dense_value; }
         L_NODISCARD const dense_value_container& values() const noexcept { return m_dense_value; }
 
@@ -83,7 +89,7 @@ namespace legion::core
 
         /**@brief Returns the maximum number of items the sparse_map could at most store without crashing.
          * @note This value typically reflects the theoretical limit on the size of the container, at most std::numeric_limits<difference_type>::max().
-         *		 At runtime, the size of the container may be limited to a value smaller than max_size() by the amount of RAM available.
+         *       At runtime, the size of the container may be limited to a value smaller than max_size() by the amount of RAM available.
          * @returns size_type
          */
         L_NODISCARD size_type max_size() const noexcept { return m_dense_value.max_size(); }
@@ -96,7 +102,13 @@ namespace legion::core
         /**@brief Clears sparse_map.
          * @note Will not update capacity.
          */
-        void clear() noexcept { m_size = 0; }
+        void clear() noexcept
+        {
+            m_size = 0;
+            m_dense_value.clear();
+            m_dense_key.clear();
+            m_sparse.clear();
+        }
 
         /**@brief Reserves space in dense container for more items.
          * @param size Amount of items to reserve space for (would be the new capacity).
@@ -107,8 +119,8 @@ namespace legion::core
             OPTICK_EVENT();
             if (size > m_capacity)
             {
-                m_dense_value.resize(size);
-                m_dense_key.resize(size);
+                m_dense_value.reserve(size);
+                m_dense_key.reserve(size);
                 m_capacity = size;
             }
         }
@@ -151,7 +163,7 @@ namespace legion::core
                 return false;
 
             const size_type& sparseval = m_sparse.at(key);
-            return sparseval >= 0 && sparseval < m_dense_key.size() && sparseval < m_size && m_dense_key.at(sparseval) == key;
+            return sparseval >= 0 && sparseval < m_dense_key.size() && sparseval < m_size&& m_dense_key.at(sparseval) == key;
         }
 
         /**@brief Checks whether a certain key is contained in the sparse_map.
@@ -163,9 +175,9 @@ namespace legion::core
             OPTICK_EVENT();
             if (!m_sparse.count(key))
                 return false;
-            
+
             const size_type& sparseval = m_sparse.at(key);
-            return sparseval >= 0 && sparseval < m_dense_key.size() && sparseval < m_size && m_dense_key.at(sparseval) == key;
+            return sparseval >= 0 && sparseval < m_dense_key.size() && sparseval < m_size&& m_dense_key.at(sparseval) == key;
         }
 
         /**@brief Checks if all keys in sparse_map are inside this map as well.
@@ -236,7 +248,9 @@ namespace legion::core
         L_NODISCARD iterator find(value_const_reference val)
         {
             OPTICK_EVENT();
-            return std::find(begin(), end(), val);
+            if (contains(val))
+                return begin() + m_sparse.at(val);
+            return end();
         }
 
         /**@brief Finds the iterator of a value using std::find.
@@ -246,7 +260,9 @@ namespace legion::core
         L_NODISCARD const_iterator find(value_const_reference val) const
         {
             OPTICK_EVENT();
-            return std::find(begin(), end(), val);
+            if (contains(val))
+                return begin() + m_sparse.at(val);
+            return end();
         }
 #pragma endregion
 
@@ -264,15 +280,12 @@ namespace legion::core
                 if (m_size >= m_capacity)
                     reserve(m_size + 1);
 
-                auto itr_value = m_dense_value.begin() + m_size;
-                *itr_value = val;
+                m_dense_value.emplace_back(val);
+                m_dense_key.emplace_back(key);
 
-                auto itr_key = m_dense_key.begin() + m_size;
-                *itr_key = key;
-
-                m_sparse[key] = m_size;
+                m_sparse.insert_or_assign(key, m_size);
                 ++m_size;
-                return std::make_pair(iterator(itr_key, itr_value), true);
+                return std::make_pair(iterator(m_dense_key.end() - 1, m_dense_value.end() - 1), true);
             }
             return std::make_pair(end(), false);
         }
@@ -290,15 +303,12 @@ namespace legion::core
                 if (m_size >= m_capacity)
                     reserve(m_size + 1);
 
-                auto itr_value = m_dense_value.begin() + m_size;
-                *itr_value = val;
+                m_dense_value.emplace_back(val);
+                auto key_ref = m_dense_key.emplace_back(std::move(key));
 
-                auto itr_key = m_dense_key.begin() + m_size;
-                *itr_key = std::move(key);
-
-                m_sparse[*itr_key] = m_size;
+                m_sparse.insert_or_assign(key_ref, m_size);
                 ++m_size;
-                return std::make_pair(iterator(itr_key, itr_value), true);
+                return std::make_pair(iterator(m_dense_key.end() - 1, m_dense_value.end() - 1), true);
             }
             return std::make_pair(end(), false);
         }
@@ -316,15 +326,12 @@ namespace legion::core
                 if (m_size >= m_capacity)
                     reserve(m_size + 1);
 
-                auto itr_value = m_dense_value.begin() + m_size;
-                *itr_value = std::move(val);
+                m_dense_value.emplace_back(std::move(val));
+                m_dense_key.emplace_back(key);
 
-                auto itr_key = m_dense_key.begin() + m_size;
-                *itr_key = key;
-
-                m_sparse[key] = m_size;
+                m_sparse.insert_or_assign(key, m_size);
                 ++m_size;
-                return std::make_pair(iterator(itr_key, itr_value), true);
+                return std::make_pair(iterator(m_dense_key.end() - 1, m_dense_value.end() - 1), true);
             }
             return std::make_pair(end(), false);
         }
@@ -342,15 +349,12 @@ namespace legion::core
                 if (m_size >= m_capacity)
                     reserve(m_size + 1);
 
-                auto itr_value = m_dense_value.begin() + m_size;
-                *itr_value = std::move(val);
+                m_dense_value.emplace_back(std::move(val));
+                auto key_ref = m_dense_key.emplace_back(std::move(key));
 
-                auto itr_key = m_dense_key.begin() + m_size;
-                *itr_key = std::move(key);
-
-                m_sparse[*itr_key] = m_size;
+                m_sparse.insert_or_assign(key_ref, m_size);
                 ++m_size;
-                return std::make_pair(iterator(itr_key, itr_value), true);
+                return std::make_pair(iterator(m_dense_key.end() - 1, m_dense_value.end() - 1), true);
             }
             return std::make_pair(end(), false);
         }
@@ -370,16 +374,14 @@ namespace legion::core
                 if (m_size >= m_capacity)
                     reserve(m_size + 1);
 
-                auto itr_value = m_dense_value.begin() + m_size;
-                *itr_value = value_type(arguments...);
+                m_dense_value.emplace_back(arguments...);
 
-                auto itr_key = m_dense_key.begin() + m_size;
-                *itr_key = key;
+                m_dense_key.emplace_back(key);
 
-                m_sparse[key] = m_size;
+                m_sparse.insert_or_assign(key, m_size);
                 ++m_size;
 
-                return std::make_pair(iterator(itr_key, itr_value), true);
+                return std::make_pair(iterator(m_dense_key.end() - 1, m_dense_value.end() - 1), true);
             }
 
             return std::make_pair(end(), false);
@@ -398,21 +400,83 @@ namespace legion::core
                 if (m_size >= m_capacity)
                     reserve(m_size + 1);
 
-                auto itr_value = m_dense_value.begin() + m_size;
-                *itr_value = value_type(arguments...);
+                m_dense_value.emplace_back(arguments...);
 
-                auto itr_key = m_dense_key.begin() + m_size;
-                *itr_key = std::move(key);
+                auto key_ref = m_dense_key.emplace_back(std::move(key));
 
-                m_sparse[*itr_key] = m_size;
+                m_sparse.insert_or_assign(key_ref, m_size);
                 ++m_size;
 
-                return std::make_pair(iterator(itr_key, itr_value), true);
+                return std::make_pair(iterator(m_dense_key.end() - 1, m_dense_value.end() - 1), true);
             }
 
             return std::make_pair(end(), false);
         }
 #pragma endregion
+
+    private:
+        inline L_ALWAYS_INLINE iterator _itr_at(index_type index) noexcept
+        {
+            return iterator(m_dense_key.begin() + index, m_dense_value.begin() + index);
+        }
+
+    public:
+
+#pragma region try_emplace
+        /**@brief Construct item in place.
+         * @param key Key to which the item should be created.
+         * @param arguments Arguments to pass to the item constructor.
+         */
+        template<typename... Arguments>
+        std::pair<iterator, bool> try_emplace(key_const_reference key, Arguments&&... arguments)
+        {
+            OPTICK_EVENT();
+            if (!contains(key))
+            {
+                if (m_size >= m_capacity)
+                    reserve(m_size + 1);
+
+                m_dense_value.emplace_back(arguments...);
+
+                m_dense_key.emplace_back(key);
+
+                m_sparse.insert_or_assign(key, m_size);
+                ++m_size;
+
+                return std::make_pair(iterator(m_dense_key.end() - 1, m_dense_value.end() - 1), true);
+            }
+
+            return std::make_pair(_itr_at(m_sparse.at(key)), false);
+        }
+
+        /**@brief Construct item in place.
+         * @param key Key to which the item should be created.
+         * @param arguments Arguments to pass to the item constructor.
+         */
+        template<typename... Arguments>
+        std::pair<iterator, bool> try_emplace(key_type&& key, Arguments&&... arguments)
+        {
+            OPTICK_EVENT();
+            if (!contains(key))
+            {
+                if (m_size >= m_capacity)
+                    reserve(m_size + 1);
+
+                m_dense_value.emplace_back(arguments...);
+
+                auto key_ref = m_dense_key.emplace_back(std::move(key));
+
+                m_sparse.insert_or_assign(key_ref, m_size);
+                ++m_size;
+
+                return std::make_pair(iterator(m_dense_key.end() - 1, m_dense_value.end() - 1), true);
+            }
+
+            return std::make_pair(_itr_at(m_sparse.at(key)), false);
+        }
+
+#pragma endregion
+
 
 #pragma region operator[]
         /**@brief Returns item from sparse_map, inserts default value if it doesn't exist yet.
@@ -421,25 +485,22 @@ namespace legion::core
         value_reference operator[](key_type&& key)
         {
             OPTICK_EVENT();
-            key_type k;
+            size_type index;
             if (!contains(key))
             {
                 if (m_size >= m_capacity)
                     reserve(m_size + 1);
 
-                auto itr_value = m_dense_value.begin() + m_size;
-                *itr_value = value_type();
+                m_dense_value.emplace_back();
+                auto key_ref = m_dense_key.emplace_back(std::move(key));
 
-                auto itr_key = m_dense_key.begin() + m_size; // Find iterator location at which to store the key.
-                *itr_key = std::move(key); // Move the key into the location.
-                k = *itr_key; // Fetch a copy of the key for reuse in the rest of the function.
-                m_sparse[k] = m_size;
+                index = m_sparse.insert_or_assign(key_ref, m_size).first->second;
                 ++m_size;
             }
             else
-                k = key;
+                index = m_sparse.at(key);
 
-            return m_dense_value.at(m_sparse.at(k));
+            return m_dense_value.at(index);
         }
 
         /**@brief Returns item from sparse_map, inserts default value if it doesn't exist yet.
@@ -448,22 +509,23 @@ namespace legion::core
         value_reference operator[](key_const_reference key)
         {
             OPTICK_EVENT();
+            size_type index;
             if (!contains(key))
             {
                 if (m_size >= m_capacity)
                     reserve(m_size + 1);
 
-                auto itr_value = m_dense_value.begin() + m_size;
-                *itr_value = value_type();
+                m_dense_value.emplace_back();
 
-                auto itr_key = m_dense_key.begin() + m_size;
-                *itr_key = key;
+                m_dense_key.emplace_back(key);
 
-                m_sparse[key] = m_size;
+                index = m_sparse.insert_or_assign(key, m_size).first->second;
                 ++m_size;
             }
+            else
+                index = m_sparse.at(key);
 
-            return m_dense_value.at(m_sparse.at(key));
+            return m_dense_value.at(index);
         }
 
         /**@brief Returns const item from const sparse_map.
@@ -548,7 +610,6 @@ namespace legion::core
                     m_sparse.at(m_dense_key.at(m_size - 1)) = std::move(m_sparse.at(key));
                 }
                 --m_size;
-                --m_capacity;
                 m_dense_value.resize(m_size);
                 m_dense_key.resize(m_size);
                 return true;

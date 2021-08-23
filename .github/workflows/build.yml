@@ -2,9 +2,9 @@ name: build-action
 
 on:
   push:
-    branches: [main, develop, develop/*, develop*, feature/*, feature* ]
+    branches: [main, develop, develop/*, develop*, feature*, feature/* ]
   pull_request:
-    branches: [main, develop, develop/*, develop*, feature/*, feature* ]
+    branches: [main, develop, develop/*, develop*, feature*, feature/* ]
 
 jobs:
   build:
@@ -32,6 +32,9 @@ jobs:
 
     - name: make
       run: make CXX=clang++-11 config=debug64 all
+
+    - name: run unit tests
+      run: cp -R applications/unit_tests/assets . && bin/Debug64/unit_tests -nobenchmark
 
 
 

@@ -18,7 +18,7 @@ namespace legion::physics
 
         virtual void setup() override
         {
-            addProcessChain("Physics");
+            createProcessChain("Physics");
             reportSystem<PhysicsSystem>();
             reportComponentType<physicsComponent>();
             reportComponentType<rigidbody>();
