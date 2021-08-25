@@ -1,12 +1,12 @@
 #pragma once
 #include <core/core.hpp>
+#include <application/application.hpp>
 #include <rendering/components/renderable.hpp>
 #include <physics/cube_collider_params.hpp>
 using namespace legion;
 
 struct extendedPhysicsContinue : public app::input_action<extendedPhysicsContinue> {};
 struct nextPhysicsTimeStepContinue : public app::input_action<nextPhysicsTimeStepContinue> {};
-
 struct QHULL : public app::input_action<QHULL>{};
 struct AddRigidbody : public app::input_action<AddRigidbody> {};
 struct SpawnRandomHullOnCameraLoc : public app::input_action< SpawnRandomHullOnCameraLoc> {};
@@ -14,7 +14,7 @@ struct SpawnHullActive : public app::input_action< SpawnHullActive> {};
 
 struct ObjectToFollow
 {
-    ecs::entity_handle ent;
+    ecs::entity ent;
 };
 
 namespace legion::physics
@@ -23,9 +23,8 @@ namespace legion::physics
     {
     public:
 
-        virtual void setup();
-
-        virtual void colliderDraw(time::span dt);
+        void setup();
+        void colliderDraw(time::span dt);
 
     private:
 
@@ -47,23 +46,23 @@ namespace legion::physics
 
         void createQuickhullTestObject(math::vec3 position, rendering::model_handle cubeH, rendering::material_handle TextureH,math::mat3 inertia = math::mat3(6.0f));
 
-        void PopulateFollowerList(ecs::entity_handle physicsEnt,int index);
+        void PopulateFollowerList(ecs::entity physicsEnt,int index);
        
         void addStaircase(math::vec3 position,float breadthMult = 1.0f,float widthMult = 27.0f);
 
         //FUNCTION BINDED ACTIONS
 
-        void ActivateSpawnRandomHull(SpawnHullActive*action);
+        void ActivateSpawnRandomHull(SpawnHullActive& action);
 
-        void spawnRandomConvexHullOnCameraLocation(SpawnRandomHullOnCameraLoc*action);
+        void spawnRandomConvexHullOnCameraLocation(SpawnRandomHullOnCameraLoc& action);
 
-        void extendedContinuePhysics(extendedPhysicsContinue* action);
+        void extendedContinuePhysics(extendedPhysicsContinue& action);
 
-        void OneTimeContinuePhysics(nextPhysicsTimeStepContinue* action);
+        void OneTimeContinuePhysics(nextPhysicsTimeStepContinue& action);
 
-        void quickHullStep(QHULL * action);
+        void quickHullStep(QHULL& action);
 
-        void AddRigidbodyToQuickhulls(AddRigidbody * action);
+        void AddRigidbodyToQuickhulls(AddRigidbody& action);
 
         void drawPhysicsColliders();
 
@@ -99,15 +98,15 @@ namespace legion::physics
         rendering::model_handle suzzaneH;
         rendering::model_handle teapotH;
 
-        ecs::entity_handle smallExplosionEnt;
-        ecs::entity_handle mediumExplosionEnt;
-        ecs::entity_handle largeExplosionEnt;
+        ecs::entity smallExplosionEnt;
+        ecs::entity mediumExplosionEnt;
+        ecs::entity largeExplosionEnt;
 
-        ecs::entity_handle staticToAABBEntLinear, staticToAABBEntRotation, staticToOBBEnt, staticToEdgeEnt;
+        ecs::entity staticToAABBEntLinear, staticToAABBEntRotation, staticToOBBEnt, staticToEdgeEnt;
 
 
-        std::vector< ecs::entity_handle> registeredColliderColorDraw;
+        std::vector< ecs::entity> registeredColliderColorDraw;
 
-        std::vector<std::vector<ecs::entity_handle>> folowerObjects;
+        std::vector<std::vector<ecs::entity>> folowerObjects;
     };
 }

@@ -60,11 +60,6 @@ namespace legion::physics
         return ent;
     }
 
-    void PrimitiveMesh::SetECSRegistry(ecs::EcsRegistry* ecs)
-    {
-        m_ecs = ecs;
-    }
-
     void PrimitiveMesh::populateMesh(mesh& mesh,
         const math::mat4& originalTransform , math::vec3& outOffset,math::vec3& scale)
     {
