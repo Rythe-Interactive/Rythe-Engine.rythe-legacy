@@ -2,15 +2,15 @@
 
 namespace legion::physics
 {
-    void MeshSplitter::InitializePolygons(ecs::entity_handle entity)
+    void MeshSplitter::InitializePolygons(ecs::entity entity)
     {
         owner = entity;
 
-        auto [meshFilter, meshRenderer] = entity.get_component_handles<rendering::mesh_renderable>();
+        auto [meshFilter, meshRenderer] = entity.get_component<rendering::mesh_renderable>();
 
-        ownerMaterialH = meshRenderer.read().material;
+        ownerMaterialH = meshRenderer.get().material;
 
-        auto [posH, rotH, scaleH] = entity.get_component_handles<transform>();
+        auto [posH, rotH, scaleH] = entity.get_component<position,rotation,scale>();
 
         if (meshFilter && posH && rotH && scaleH)
         {
@@ -18,9 +18,9 @@ namespace legion::physics
             std::queue<meshHalfEdgePtr> meshHalfEdges;
 
             //auto renderable = renderable.read();
-            mesh& mesh = meshFilter.read().get().second;
+            mesh& mesh = meshFilter.get().get().second;
 
-            const math::mat4 transform = math::compose(scaleH.read(), rotH.read(), posH.read());
+            const math::mat4 transform = math::compose(scaleH.get(), rotH.get(), posH.get());
             //debugHelper.DEBUG_transform = transform;
           
             HalfEdgeFinder edgeFinder;
@@ -50,12 +50,12 @@ namespace legion::physics
     }
 
     void MeshSplitter::MultipleSplitMesh(const std::vector<MeshSplitParams>& splittingPlanes,
-        std::vector<ecs::entity_handle>& entitiesGenerated, bool keepBelow, int debugAt)
+        std::vector<ecs::entity>& entitiesGenerated, bool keepBelow, int debugAt)
     {
         int currentDebug = 0;
 
-        auto [posH, rotH, scaleH] = owner.get_component_handles<transform>();
-        const math::mat4& transform = math::compose(scaleH.read(), rotH.read(), posH.read());
+        auto [posH, rotH, scaleH] = owner.get_component<position,rotation,scale>();
+        const math::mat4& transform = math::compose(scaleH.get(), rotH.get(), posH.get());
 
         //-------------------------------- copy polygons of original mesh and add it to the output list -----------------------------------------//
 

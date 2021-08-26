@@ -41,8 +41,9 @@ namespace legion::physics
         auto refLabel = refEdge->label;
         auto incLabel = incEdge->label;
 
-        contact.label = EdgeLabel(std::make_pair(refLabel.firstEdge.first, refLabel.firstEdge.second),
+        auto edgeLabel = EdgeLabel(std::make_pair(refLabel.firstEdge.first, refLabel.firstEdge.second),
             std::make_pair(incLabel.nextEdge.first, incLabel.nextEdge.second));
+        contact.label = &edgeLabel;
 
         contact.refCollider = refCollider;
         contact.IncWorldContact = incContactPoint;

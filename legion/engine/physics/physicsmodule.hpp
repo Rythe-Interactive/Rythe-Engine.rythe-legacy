@@ -20,14 +20,16 @@ namespace legion::physics
         {
             createProcessChain("Physics");
             reportSystem<PhysicsSystem>();
-            reportComponentType<physicsComponent>();
-            reportComponentType<rigidbody>();
-            reportComponentType<identifier>();
-            reportComponentType<MeshSplitter>();
-            reportComponentType<Fracturer>();
-            reportComponentType<FractureCountdown>();
-            reportComponentType<ObjectToFollow>();
+            registerComponentType<physicsComponent>();
+            registerComponentType<rigidbody>();
+            registerComponentType<identifier>();
+            registerComponentType<MeshSplitter>();
+            registerComponentType<Fracturer>();
+            registerComponentType<FractureCountdown>();
+            registerComponentType<ObjectToFollow>();
             //reportComponentType <addRB>();
+
+            lgn::log::debug("PhysicsModule setup");
         }
 
         virtual priority_type priority() override

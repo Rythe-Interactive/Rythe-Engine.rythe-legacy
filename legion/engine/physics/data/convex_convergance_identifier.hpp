@@ -19,7 +19,7 @@ namespace legion::physics
 
         bool IsEqual(physics_contact& contact) override
         {
-            return label == contact.label;
+            return label == *contact.label;
         }
 
 

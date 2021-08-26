@@ -13,8 +13,6 @@ namespace legion::physics
     {
         createProcess<&PhysicsSystem::fixedUpdate>("Physics", m_timeStep);
 
-        manifoldPrecursorQuery = createQuery<position, rotation, scale, physicsComponent>();
-
         //std::make_unique<BroadphaseUniformGrid>(math::vec3(2,2,2),1);
         //std::make_unique<BroadphaseBruteforce>();
         //std::make_unique<BroadphaseUniformGridNoCaching>(math::vec3(2, 2, 2));
@@ -22,6 +20,98 @@ namespace legion::physics
         m_broadPhase = std::make_unique<BroadphaseUniformGridNoCaching>(math::vec3(3, 3, 3));
 
     }
+
+    void PhysicsSystem::fixedUpdate(time::time_span<fast_time> deltaTime)
+    {
+        static time::timer physicsTimer;
+        //log::debug("{}ms", physicsTimer.restart().milliseconds());
+        OPTICK_EVENT();
+
+        //static time::timer pt;
+        //log::debug("frametime: {}ms", pt.restart().milliseconds());
+
+        ecs::component_container<rigidbody> rigidbodies;
+        std::vector<byte> hasRigidBodies;
+        size_type size = manifoldPrecursorQuery.size();
+
+        {
+            OPTICK_EVENT("Fetching data");
+            rigidbodies.resize(size);
+            hasRigidBodies.resize(size);
+
+            queueJobs(size, [&]() {
+                id_type index = async::this_job::get_id();
+                auto entity = manifoldPrecursorQuery[index];
+                if (entity.has_component<rigidbody>())
+                {
+                    hasRigidBodies[index] = true;
+                    rigidbodies[index] = entity.get_component<rigidbody>();
+                }
+                else
+                    hasRigidBodies[index] = false;
+                }).wait();
+        }
+
+        auto& physComps = manifoldPrecursorQuery.get<physicsComponent>();
+        auto& positions = manifoldPrecursorQuery.get<position>();
+        auto& rotations = manifoldPrecursorQuery.get<rotation>();
+        auto& scales = manifoldPrecursorQuery.get<scale>();
+
+        if (!IsPaused)
+        {
+            integrateRigidbodies(hasRigidBodies, rigidbodies, deltaTime);
+            runPhysicsPipeline(hasRigidBodies, rigidbodies, physComps, positions, rotations, scales, deltaTime);
+            integrateRigidbodyQueryPositionAndRotation(hasRigidBodies, positions, rotations, rigidbodies, deltaTime);
+        }
+
+        if (oneTimeRunActive)
+        {
+            oneTimeRunActive = false;
+
+            integrateRigidbodies(hasRigidBodies, rigidbodies, deltaTime);
+            runPhysicsPipeline(hasRigidBodies, rigidbodies, physComps, positions, rotations, scales, deltaTime);
+            integrateRigidbodyQueryPositionAndRotation(hasRigidBodies, positions, rotations, rigidbodies, deltaTime);
+        }
+
+        {
+            OPTICK_EVENT("Writing data");
+            queueJobs(size, [&]() {
+                id_type index = async::this_job::get_id();
+                if (hasRigidBodies[index])
+                {
+                    auto entity = manifoldPrecursorQuery[index];
+                    entity.get_component<rigidbody>() = rigidbodies[index];
+                }
+                }).wait();
+
+                //collisionPrecursorQuery.submit<physicsComponent>();
+                //collisionPrecursorQuery.submit<position>();
+                //collisionPrecursorQuery.submit<rotation>();
+        }
+
+        /* auto splitterDrawQuery = createQuery<MeshSplitter>();
+         splitterDrawQuery.queryEntities();
+
+         for (auto ent : splitterDrawQuery)
+         {
+             auto splitterHandle = ent.get_component_handle<MeshSplitter>();
+
+             if (splitterHandle )
+             {
+                 auto [posH,rotH,scaleH] = ent.get_component_handles<transform>();
+                 debug::drawLine
+                 (posH.read(), posH.read() + math::vec3(0, 5, 0), math::colors::red, 20.0f, 0.0f, true);
+
+                 auto splitter = splitterHandle.read();
+                 math::mat4 transform = math::compose(scaleH.read(), rotH.read(), posH.read());
+
+                 splitter.DEBUG_DrawPolygonData(transform);
+             }
+         }*/
+
+
+    }
+
 
     void PhysicsSystem::runPhysicsPipeline(
         std::vector<byte>& hasRigidBodies,
@@ -79,7 +169,7 @@ namespace legion::physics
                         {
                             idPairings.insert(precursorPairing);
                         }
-                       
+
 
                         auto& precursorPhyCompA = *precursorA.physicsComp;
                         auto& precursorPhyCompB = *precursorB.physicsComp;
@@ -119,12 +209,11 @@ namespace legion::physics
 
 
             //explosion event
-        auto countdownQuery = createQuery<FractureCountdown>();
-        countdownQuery.queryEntities();
+        ecs::filter<FractureCountdown> countdownQuery;
 
         for (auto ent : countdownQuery)
         {
-            auto fractureCountdown = ent.read_component<FractureCountdown>();
+            auto fractureCountdown = ent.get_component<FractureCountdown>().get();
             fractureCountdown.fractureTime -= 0.02f;
             //log::debug(" fractureCountdown.fractureTime {}", fractureCountdown.fractureTime);
 
@@ -132,19 +221,13 @@ namespace legion::physics
             {
                 log::debug("Entity is exploding");
 
-                auto fracturerH = ent.get_component_handle<Fracturer>();
-                auto fracturer = fracturerH.read();
+                auto fracturer = ent.get_component<Fracturer>().get();
                 log::debug("fractureCountdown.explosionPoint {} ", fractureCountdown.explosionPoint);
                 log::debug("fractureCountdown.fractureStrength {} ", fractureCountdown.fractureStrength);
                 FractureParams params(fractureCountdown.explosionPoint, fractureCountdown.fractureStrength);
 
                 fracturer.ExplodeEntity(ent, params);
-
-                fracturerH.write(fracturer);
-
             }
-
-            ent.write_component(fractureCountdown);
         }
 
 
@@ -208,9 +291,9 @@ namespace legion::physics
             initializeManifolds(manifoldsToSolve, manifoldValidity);
 
             auto largestPenetration = [](const physics_contact& contact1, const physics_contact& contact2)
-            -> bool {
-            return math::dot(contact1.RefWorldContact - contact1.IncWorldContact, -contact1.collisionNormal)
-            > math::dot(contact2.RefWorldContact - contact2.IncWorldContact, -contact2.collisionNormal);};
+                -> bool {
+                return math::dot(contact1.RefWorldContact - contact1.IncWorldContact, -contact1.collisionNormal)
+            > math::dot(contact2.RefWorldContact - contact2.IncWorldContact, -contact2.collisionNormal); };
 
             for (auto& manifold : manifoldsToSolve)
             {

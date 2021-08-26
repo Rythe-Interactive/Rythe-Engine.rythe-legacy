@@ -18,8 +18,8 @@ namespace legion::physics
     struct MeshSplitter
     {
 
-        ecs::entity_handle owner;
-        std::vector<ecs::entity_handle> splitTester;
+        ecs::entity owner;
+        std::vector<ecs::entity> splitTester;
 
         rendering::material_handle ownerMaterialH;
 
@@ -34,7 +34,7 @@ namespace legion::physics
         /** @brief Creates a Half-Edge Data structure around the mesh and
        * @param entity the entity that this MeshSplitter is attached to
        */
-        void InitializePolygons(ecs::entity_handle entity);
+        void InitializePolygons(ecs::entity entity);
        
 
         /** @brief Given a queue of edges and a transform,
@@ -145,7 +145,7 @@ namespace legion::physics
 
         /** @brief Given a list of splitting planes, splits the mesh based on the list of splitting planes
         */
-        void MultipleSplitMesh(const std::vector<MeshSplitParams>& splittingPlanes, std::vector<ecs::entity_handle>& entitiesGenerated,
+        void MultipleSplitMesh(const std::vector<MeshSplitParams>& splittingPlanes, std::vector<ecs::entity>& entitiesGenerated,
             bool keepBelow = true,int debugAt = -1);
        
         /** @brief Given a list of polygons to split in 'polygonsToSplit', splits them based on a splitting plane defined by
@@ -319,11 +319,11 @@ namespace legion::physics
 
         //--------------------------------------------------------- Functions related to Debugging ---------------------------------------------------//
 
-        void DestroyTestSplitter(ecs::EcsRegistry* m_ecs)
+        void DestroyTestSplitter()
         {
             for (auto splitObject : splitTester)
             {
-                m_ecs->destroyEntity(splitObject);
+                ecs::Registry::destroyEntity(splitObject);
             }
 
             splitTester.clear();
@@ -338,14 +338,14 @@ namespace legion::physics
 
                 for (auto splitObject : splitTester)
                 {
-                    auto [posH, rotH, scaleH] = splitObject.get_component_handles<transform>();
-                    const math::mat4 transform = math::compose(scaleH.read(), rotH.read(), posH.read());
+                    auto [posH, rotH, scaleH] = splitObject.get_component<position,rotation,scale>();
+                    const math::mat4 transform = math::compose(scaleH.get(), rotH.get(), posH.get());
                     const math::vec3 worldUp = transform * math::vec4(0, 1, 0, 0);
 
-                    splittingPlanes.push_back(MeshSplitParams(posH.read(), math::normalize(worldUp)));
+                    splittingPlanes.push_back(MeshSplitParams(posH.get(), math::normalize(worldUp)));
 
                 }
-                std::vector<ecs::entity_handle> entities;
+                std::vector<ecs::entity> entities;
                 MultipleSplitMesh(splittingPlanes, entities);
 
             }

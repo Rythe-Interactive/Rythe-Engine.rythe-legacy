@@ -3,29 +3,28 @@
 
 namespace legion::physics
 {
-    ecs::EcsRegistry* PrimitiveMesh::m_ecs = nullptr;
     int PrimitiveMesh::count = 0;
 
     PrimitiveMesh::PrimitiveMesh
-    (ecs::entity_handle pOriginalEntity, std::vector<std::shared_ptr<SplittablePolygon>>& pPolygons, rendering::material_handle pOriginalMaterial)
+    (ecs::entity pOriginalEntity, std::vector<std::shared_ptr<SplittablePolygon>>& pPolygons, rendering::material_handle pOriginalMaterial)
         : polygons(std::move(pPolygons)), originalMaterial(pOriginalMaterial), originalEntity(pOriginalEntity)
     {
 
     }
 
-    ecs::entity_handle PrimitiveMesh::InstantiateNewGameObject()
+    ecs::entity PrimitiveMesh::InstantiateNewGameObject()
     {
-        auto [originalPosH, originalRotH, originalScaleH] = originalEntity.get_component_handles<transform>();
-        math::mat4 trans = math::compose(originalScaleH.read(), originalRotH.read(), originalPosH.read());
-      
-        auto ent = m_ecs->createEntity();
+        auto [originalPosH, originalRotH, originalScaleH] = originalEntity.get_component<position, rotation, scale>();
+        math::mat4 trans = math::compose(originalScaleH.get(), originalRotH.get(), originalPosH.get());
+
+        auto ent = ecs::Registry::createEntity();
         math::vec3 offset;
 
         mesh newMesh;
 
-        math::vec3 scale = originalScaleH.read();
+        math::vec3 scale = originalScaleH.get();
         populateMesh(newMesh, trans, offset, scale);
-      
+
         newMesh.calculate_tangents(&newMesh);
 
         sub_mesh newSubMesh;
@@ -40,28 +39,28 @@ namespace legion::physics
         count++;
 
         //create renderable
-        mesh_filter meshFilter = mesh_filter( meshH );
+        mesh_filter meshFilter = mesh_filter(meshH);
 
-        ent.add_components<rendering::mesh_renderable>(meshFilter,rendering::mesh_renderer( originalMaterial));
+        ent.add_component<rendering::mesh_renderable>(meshFilter, rendering::mesh_renderer(originalMaterial));
 
         //create transform
-      
-        auto [posH, rotH ,scaleH] = m_ecs->createComponents<transform>(ent);
-        math::vec3 newEntityPos = originalPosH.read() + offset;
-        posH.write(newEntityPos);
-        rotH.write(originalRotH.read());
+
+        auto [posH, rotH, scaleH] = ecs::Registry::createComponent<transform>(ent);
+        math::vec3 newEntityPos = originalPosH.get() + offset;
+        posH = newEntityPos;
+        rotH = originalRotH.get();
         //scaleH.write(originalScaleH.read());
 
-        math::vec3 initialPos = originalPosH.read();
+        math::vec3 initialPos = originalPosH.get();
         //+ math::vec3(7, 0, 0)
-        originalPosH.write(initialPos );
+        originalPosH = initialPos;
         //m_ecs->destroyEntity(originalEntity);
 
         return ent;
     }
 
     void PrimitiveMesh::populateMesh(mesh& mesh,
-        const math::mat4& originalTransform , math::vec3& outOffset,math::vec3& scale)
+        const math::mat4& originalTransform, math::vec3& outOffset, math::vec3& scale)
     {
         std::vector<uint>& indices = mesh.indices;
         std::vector<math::vec3>& vertices = mesh.vertices;
@@ -150,11 +149,11 @@ namespace legion::physics
             indices.push_back(i);
         }
 
-        for (int i = 0; i < vertices.size(); i+=3)
+        for (int i = 0; i < vertices.size(); i += 3)
         {
             math::vec3& v1 = vertices.at(i);
-            math::vec3& v2 = vertices.at(i+1);
-            math::vec3& v3 = vertices.at(i+2);
+            math::vec3& v2 = vertices.at(i + 1);
+            math::vec3& v3 = vertices.at(i + 2);
 
             math::vec3 normal = math::cross(v2 - v1, v3 - v1);
 

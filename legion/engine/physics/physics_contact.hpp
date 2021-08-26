@@ -15,7 +15,7 @@ namespace legion::physics
     {
         PhysicsCollider* refCollider;
 
-        EdgeLabel label;
+        EdgeLabel* label;
 
         rigidbody* rbRef;
         rigidbody* rbInc;

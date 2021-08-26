@@ -11,7 +11,7 @@ namespace legion::physics
 {
     void ConvexCollider::AddConverganceIdentifier(const physics_contact& contact)
     {
-        if (contact.label.IsSet())
+        if (contact.label->IsSet())
         {
             converganceIdentifiers.push_back(
                 std::make_unique<ConvexConverganceIdentifier>(contact.label, contact.totalLambda,

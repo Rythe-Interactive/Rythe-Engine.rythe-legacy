@@ -7,7 +7,6 @@
 
 namespace legion::physics
 {
-    ecs::EcsRegistry* Fracturer::registry = nullptr;
 
     void Fracturer::HandleFracture(physics_manifold& manifold, bool& manifoldValid,bool isfracturingA)
     {
@@ -28,16 +27,16 @@ namespace legion::physics
         ExplodeEntity(fracturedEnt, params, collider);
     }
 
-    void Fracturer::ExplodeEntity(ecs::entity_handle ownerEntity, const FractureParams& fractureParams, PhysicsCollider* entityCollider)
+    void Fracturer::ExplodeEntity(ecs::entity ownerEntity, const FractureParams& fractureParams, PhysicsCollider* entityCollider)
     {
         log::debug("------------------------------------- ExplodeEntity ---------------------------------------");
 
         if (!entityCollider)
         {
             log::debug("colliders size {} "
-                , ownerEntity.read_component<physicsComponent>().colliders.size());
+                , ownerEntity.get_component<physicsComponent>().get().colliders.size());
 
-            auto physicsComp = ownerEntity.get_component_handle<physicsComponent>().read();
+            auto physicsComp = ownerEntity.get_component<physicsComponent>().get();
             entityCollider = physicsComp.colliders.at(0).get();
 
         }
@@ -84,7 +83,9 @@ namespace legion::physics
         InstantiateColliderMeshPairingWithEntity(ownerEntity,
             colliderToMeshPairings);
 
-        for (size_t i = 0; i < ownerEntity.child_count(); i++)
+        auto children = ownerEntity.children();
+        auto size = children.size();
+        for (size_t i = 0; i < size; i++)
         {
             auto child = ownerEntity.get_child(i);
 
@@ -92,7 +93,7 @@ namespace legion::physics
                 colliderToMeshPairings);
         }
 
-        std::vector<ecs::entity_handle> entitiesGenerated;
+        std::vector<ecs::entity> entitiesGenerated;
 
         //-----------------------------------------------------------------------------------------------------------------------------//
                                 //From the mesh about to be fractured, get the pairs of colliders to Mesh  //
@@ -102,30 +103,30 @@ namespace legion::physics
             voronoiColliders, ownerEntity);
 
 
-        auto originalRB = ownerEntity.get_component_handle<rigidbody>().read();
+        auto originalRB = ownerEntity.get_component<rigidbody>().get();
         float fragmentMass = 1.0f / originalRB.inverseMass;
         fragmentMass /= entitiesGenerated.size();
 
         int colliderIter = 0;
         for (auto ent : entitiesGenerated)
         {
-            auto [posH, rotH, scaleH] = ent.get_component_handles<transform>();
-            math::mat4 trans = math::compose(scaleH.read(), rotH.read(), posH.read());
+            auto [posH, rotH, scaleH] = ent.get_component<position,rotation,scale>();
+            math::mat4 trans = math::compose(scaleH.get(), rotH.get(), posH.get());
             //generate hull
             auto physicsCompHandle = ent.add_component<physicsComponent>();
-            auto physicsComp = physicsCompHandle.read();
-            auto meshFilter = ent.read_component<mesh_filter>();
+            auto physicsComp = physicsCompHandle.get();
+            auto meshFilter = ent.get_component<mesh_filter>();
             auto convexCollider = physicsComp.constructConvexHull(meshFilter);
-            physicsCompHandle.write(physicsComp);
+            physicsCompHandle = physicsComp;
 
             //add rigidbody 
-            auto posHandle = ent.get_component_handle<position>();
+            auto posHandle = ent.get_component<position>();
             auto rbH = ent.add_component<rigidbody>();
-            auto fragmentRB = rbH.read();
-            fragmentRB.globalCentreOfMass = posH.read();
+            auto fragmentRB = rbH.get();
+            fragmentRB.globalCentreOfMass = posH.get();
 
             //add force based on distance from explosion point
-            math::vec3 distanceFromCentroid = posH.read() - fractureParams.explosionCentroid ;
+            math::vec3 distanceFromCentroid = posH.get() - fractureParams.explosionCentroid ;
             math::vec3 forceDir = math::normalize(distanceFromCentroid);
             float forceAmount = (1.0f / (math::length(distanceFromCentroid))) * fractureParams.strength;
 
@@ -147,12 +148,12 @@ namespace legion::physics
             math::vec3 explosionPoint = trans * math::vec4(chosenFace->centroid, 1);
 
             fragmentRB.addForceAt(explosionPoint,forceDir * forceAmount);
-            rbH.write(fragmentRB);
+            rbH = fragmentRB;
            
             colliderIter++;
         }
 
-        registry->destroyEntity(ownerEntity );
+        ecs::Registry::destroyEntity(ownerEntity );
 
 
         fractureCount++;
@@ -223,10 +224,10 @@ namespace legion::physics
         }
     }
 
-    void Fracturer::GenerateFractureFragments(std::vector<ecs::entity_handle>& entitiesGenerated
+    void Fracturer::GenerateFractureFragments(std::vector<ecs::entity>& entitiesGenerated
         , std::vector< FracturerColliderToMeshPairing>& colliderToMeshPairings
         ,std::vector< std::shared_ptr<ConvexCollider>>& voronoiColliders
-        ,ecs::entity_handle fracturedEnt)
+        ,ecs::entity fracturedEnt)
     {
         
         fast_time totalMeshSplitting = 0;
@@ -245,16 +246,16 @@ namespace legion::physics
 
 
                 auto ownerEntity = meshToColliderPairing.meshSplitterPairing.
-                    entity;
-                auto [posH, rotH, scaleH] = ownerEntity.get_component_handles<transform>();
+                    owner;
+                auto [posH, rotH, scaleH] = ownerEntity.get_component<position,rotation,scale>();
 
-                auto transformB = math::compose(scaleH.read(), rotH.read(), posH.read());
+                auto transformB = math::compose(scaleH.get(), rotH.get(), posH.get());
 
                 time::timer convexConvexCollision;
  /*               PhysicsStatics::DetectConvexConvexCollision(instantiatedVoronoiCollider.get()
                     , meshToColliderPairing.colliderPair.get(), math::mat4(1.0f), transformB, collisionInfo, manifold);*/
                 manifold.isColliding = true;
-                totalCollisionDetection += convexConvexCollision.elapsedTime().milliseconds();
+                totalCollisionDetection += convexConvexCollision.elapsed_time().milliseconds();
 
                 if (manifold.isColliding)
                 {
@@ -277,12 +278,12 @@ namespace legion::physics
                                 math::color(color.x, color.y, color.z, 1), 15.0f, FLT_MAX, true);*/
                         }
 
-                        auto splitter = meshToColliderPairing.meshSplitterPairing.read();
+                        auto splitter = meshToColliderPairing.meshSplitterPairing.get();
                         time::timer meshSplitting;
                         splitter.MultipleSplitMesh(splittingParams, entitiesGenerated, true, -1);
-                        totalMeshSplitting += meshSplitting.elapsedTime().milliseconds();
+                        totalMeshSplitting += meshSplitting.elapsed_time().milliseconds();
 
-                        meshToColliderPairing.meshSplitterPairing.write(splitter);
+                        meshToColliderPairing.meshSplitterPairing = splitter;
 
                     }
 
@@ -292,7 +293,7 @@ namespace legion::physics
             }
         }
 
-        registry->destroyEntity(fracturedEnt);
+        ecs::Registry::destroyEntity(fracturedEnt);
 
        
     }
@@ -352,13 +353,13 @@ namespace legion::physics
 
         bool isAtMomentumThreshold = false;
 
-        auto rbH =fractureInstigator.get_component_handle<rigidbody>();
+        auto rbH =fractureInstigator.get_component<rigidbody>();
 
         if (rbH)
         {
-            auto rb = rbH.read();
+            auto rb = rbH.get();
             auto mass = (1.0f / rb.inverseMass);
-            isAtMomentumThreshold = math::length(rbH.read().velocity * mass) > 5.0f;
+            isAtMomentumThreshold = math::length(rbH.get().velocity * mass) > 5.0f;
         }
 
         return fractureCount == 0 && isAtMomentumThreshold;
@@ -370,30 +371,30 @@ namespace legion::physics
 
     }
 
-    void Fracturer::InvestigateColliderToMeshPairing(ecs::entity_handle ent, std::vector<FracturerColliderToMeshPairing> colliderToMeshPairings)
+    void Fracturer::InvestigateColliderToMeshPairing(ecs::entity ent, std::vector<FracturerColliderToMeshPairing> colliderToMeshPairings)
     {
-        ecs::component<mesh_filter> meshFilterHandle = ent.get_component_handle<mesh_filter>();
-        ecs::component<physicsComponent> physicsComponentHandle = ent.get_component_handle<physicsComponent>();
+        ecs::component<mesh_filter> meshFilterHandle = ent.get_component<mesh_filter>();
+        ecs::component<physicsComponent> physicsComponentHandle = ent.get_component<physicsComponent>();
 
         if (!meshFilterHandle || !physicsComponentHandle) { return; }
     }
 
-    void Fracturer::InstantiateColliderMeshPairingWithEntity(ecs::entity_handle ent,
+    void Fracturer::InstantiateColliderMeshPairingWithEntity(ecs::entity ent,
         std::vector<FracturerColliderToMeshPairing>& colliderToMeshPairings)
     {
         //the fracturer is setup in a way that fragments are all stored in a different entity
-        auto physicsCompHandle = ent.get_component_handle<physics::physicsComponent>();
+        auto physicsCompHandle = ent.get_component<physics::physicsComponent>();
         std::shared_ptr<ConvexCollider> convexCollider = nullptr;
         assert(physicsCompHandle);
 
-        auto physicsCollider = physicsCompHandle.read().colliders.at(0);
+        auto physicsCollider = physicsCompHandle.get().colliders.at(0);
 
         if (physicsCompHandle)
         {
             convexCollider = std::dynamic_pointer_cast<ConvexCollider>(physicsCollider);
         }
 
-        auto meshSplitterHandle = ent.get_component_handle<MeshSplitter>();
+        auto meshSplitterHandle = ent.get_component<MeshSplitter>();
         //assert(meshSplitterHandle);
 
         if (meshSplitterHandle && convexCollider)

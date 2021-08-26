@@ -8,6 +8,7 @@
 #include <rendering/components/camera.hpp>
 #include <rendering/rendering.hpp>
 #include <physics/components/fracturecountdown.hpp>
+#include <random>
 
 namespace legion::physics
 {
@@ -136,9 +137,9 @@ namespace legion::physics
             auto [posH, rotH, scaleH] = ent.get_component<transform>();
             auto [posH2, rotH2, scaleH2] = objToFollow.get().ent.get_component<transform>();
 
-            posH.write(posH2.read());
-            rotH.write(rotH2.read());
-            scaleH.write(scaleH2.read());
+            posH = posH2;
+            rotH = rotH2;
+            scaleH = scaleH2;
         }
 
 
@@ -183,8 +184,8 @@ namespace legion::physics
         for (auto ent : cameraQuery)
         {
             auto [positionCamH, rotationCamH, scaleCamH] = ent.get_component<transform>();
-            cameraDirection = rotationCamH.read() * math::vec3(0, 0, 1);
-            positionH = positionCamH + cameraDirection * 2.5f;
+            cameraDirection = rotationCamH.get() * math::vec3(0, 0, 1);
+            positionH = positionCamH.get() + cameraDirection * 2.5f;
         }
 
         //randomly generated a number of vertices
@@ -459,14 +460,14 @@ namespace legion::physics
         auto entPhyHande = ent.add_component<physics::physicsComponent>();
         physics::physicsComponent physicsComponent2;
         physicsComponent2.AddBox(cubeParams);
-        entPhyHande=physicsComponent2;
+        entPhyHande = physicsComponent2;
 
         auto ent2 = createEntity();
         ent2.add_component<rendering::mesh_renderable>(mesh_filter(cubeH.get_mesh()), rendering::mesh_renderer(defaultStairMaterial));
 
         auto [position2H, rotation2H, scale2H] = ecs::Registry::createComponent<transform>(ent2);
         position2H = position;
-        scale2H=math::vec3(cubeParams.width, 1.0f, breadthMult);
+        scale2H = math::vec3(cubeParams.width, 1.0f, breadthMult);
     }
 
     void PhysicsTestSystem::createQuickhullTestObject(math::vec3 position, rendering::model_handle cubeH, rendering::material_handle TextureH, math::mat3 inertia)
@@ -479,7 +480,7 @@ namespace legion::physics
         auto ent = createEntity();
 
         auto [positionH, rotationH, scaleH] = ecs::Registry::createComponent<transform>(ent);
-        positionH=position;
+        positionH = position;
 
         ent.add_component<rendering::mesh_renderable>(mesh_filter(cubeH.get_mesh()), rendering::mesh_renderer(TextureH));
 
@@ -488,7 +489,7 @@ namespace legion::physics
         auto rbH = ent.add_component<rigidbody>();
         auto rb = rbH.get();
         rb.localInverseInertiaTensor = inertia;
-        rbH =rb;
+        rbH = rb;
 
         registeredColliderColorDraw.push_back(ent);
     }
@@ -589,7 +590,7 @@ namespace legion::physics
 
 
             auto [positionH, rotationH, scaleH] = ecs::Registry::createComponent<transform>(newEnt);
-            positionH=posH.get();
+            positionH = posH.get();
             count++;
 
             ObjectToFollow followObj;
@@ -728,7 +729,7 @@ namespace legion::physics
                 //[1] Get transform
                 auto [posH, rotH, scaleH] = ent.get_component<transform>();
 
-                math::mat4 transform = math::compose(scaleH, rotH, posH);
+                math::mat4 transform = math::compose(scaleH.get(), rotH.get(), posH.get());
 
                 //auto 
                 auto meshFilter = ent.get_component<mesh_filter>().get();
@@ -804,20 +805,20 @@ namespace legion::physics
 
                 physics::physicsComponent physicsComponent2;
                 physicsComponent2.AddBox(scaledCubeParams);
-                entPhyHande=physicsComponent2;
+                entPhyHande = physicsComponent2;
 
                 //floor.add_components<rendering::mesh_renderable>(mesh_filter(cubeH.get_mesh()), rendering::mesh_renderer(woodTextureH));
 
                 auto idH = floor5.add_component<physics::identifier>();
                 auto id = idH.get();
                 id.id = "floor";
-                idH=id;
+                idH = id;
 
 
                 auto [positionH, rotationH, scaleH] = ecs::Registry::createComponent<transform>(floor5);
-                positionH=position;
+                positionH = position;
                 rotationH = rot;
-                scaleH =math::vec3(1.0f, 1.0f, 1.0f);
+                scaleH = math::vec3(1.0f, 1.0f, 1.0f);
             }
 
         }
@@ -856,19 +857,19 @@ namespace legion::physics
     void PhysicsTestSystem::createBoxEntity(math::vec3 position, rendering::model_handle cubeH,
         rendering::material_handle materials, physics::cube_collider_params cubeParams, bool useQuickhull, bool rigidbody, float mass, math::mat3 inverseInertia)
     {
-        auto ent = m_ecs->createEntity();
+        auto ent = createEntity();
 
         if (rigidbody)
         {
             auto rbH = ent.add_component<physics::rigidbody>();
-            auto rb = rbH.read();
-            rb.setMass(mass);
-            rb.localInverseInertiaTensor = inverseInertia;
+            auto rb = rbH;
+            rb->setMass(mass);
+            rb->localInverseInertiaTensor = inverseInertia;
 
-            rbH.write(rb);
+            rbH = rb;
         }
 
-        ent.add_components<rendering::mesh_renderable>(mesh_filter(cubeH.get_mesh()), rendering::mesh_renderer(materials));
+        ent.add_component<rendering::mesh_renderable>(mesh_filter(cubeH.get_mesh()), rendering::mesh_renderer(materials));
 
         physics::physicsComponent physicsComponent;
         auto entPhyHande = ent.add_component<physics::physicsComponent>();
@@ -882,12 +883,12 @@ namespace legion::physics
             physicsComponent.AddBox(cubeParams);
         }
 
-        entPhyHande.write(physicsComponent);
+        entPhyHande = physicsComponent;
 
 
 
-        auto [positionH, rotationH, scaleH] = m_ecs->createComponents<transform>(ent);
-        positionH.write(position);
+        auto [positionH, rotationH, scaleH] = ecs::Registry::createComponent<transform>(ent);
+        positionH = position;
     }
 
 }

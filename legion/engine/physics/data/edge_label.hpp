@@ -34,6 +34,12 @@ namespace legion::physics
             nextEdge = rhs.nextEdge;
         }
 
+        EdgeLabel operator=(const EdgeLabel& rhs)
+        {
+            firstEdge = rhs.firstEdge;
+            nextEdge = rhs.nextEdge;
+        }
+
         bool operator==(const EdgeLabel& rhs)
         {
             return firstEdge == rhs.firstEdge && nextEdge == rhs.nextEdge;

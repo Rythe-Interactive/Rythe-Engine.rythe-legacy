@@ -263,7 +263,7 @@ namespace legion::physics
     }
 
     std::pair< math::vec3, math::vec3> PhysicsStatics::ConstructAABBFromPhysicsComponentWithTransform
-    (ecs::component_handle<physicsComponent> physicsComponentToUse,const math::mat4& transform)
+    (ecs::component<physicsComponent> physicsComponentToUse,const math::mat4& transform)
     {
         math::vec3 min, max;
 
@@ -542,7 +542,8 @@ namespace legion::physics
            
         // Normalize normal and fill in the plane equation fields
         outPlaneNormal = math::normalize(outPlaneNormal);
-        distToCentroid = math::dot(centroid, outPlaneNormal) / v.size(); // �centroid / n� is the true centroid point
+        distToCentroid = math::dot(centroid, outPlaneNormal) / v.size(); // �centroid / n� is the true centroid point
+
     }
 
     bool PhysicsStatics::attemptBuildMinkowskiFace(HalfEdgeEdge* edgeA, HalfEdgeEdge* edgeB, const math::mat4& transformA, const math::mat4& transformB)

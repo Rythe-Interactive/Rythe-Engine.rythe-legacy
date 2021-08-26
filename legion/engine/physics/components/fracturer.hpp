@@ -14,7 +14,7 @@ namespace legion::physics
             ecs::component<MeshSplitter> pMeshSplitterPairing) :
             colliderPair(pColliderPair) , meshSplitterPairing(pMeshSplitterPairing)
         {
-            assert(pMeshSplitterPairing.entity);
+            assert(pMeshSplitterPairing.owner);
         }
 
         std::shared_ptr<ConvexCollider> colliderPair;
@@ -32,17 +32,17 @@ namespace legion::physics
 
         void HandleFracture(physics_manifold& manifold,bool& manifoldValid, bool isfracturingA);
 
-        void ExplodeEntity(ecs::entity_handle ownerEntity,
+        void ExplodeEntity(ecs::entity ownerEntity,
             const FractureParams& fractureParams, PhysicsCollider* entityCollider = nullptr);;
 
         bool IsFractureConditionMet(physics_manifold& manifold, bool isfracturingA);
 
         void InitializeVoronoi(ecs::component<physicsComponent> physicsComponent);
 
-        void InvestigateColliderToMeshPairing(ecs::entity_handle ent
+        void InvestigateColliderToMeshPairing(ecs::entity ent
             ,std::vector<FracturerColliderToMeshPairing> colliderToMeshPairings);
 
-        void InstantiateColliderMeshPairingWithEntity(ecs::entity_handle ent,
+        void InstantiateColliderMeshPairingWithEntity(ecs::entity ent,
             std::vector< FracturerColliderToMeshPairing>& colliderToMeshPairings);
 
         void GetVoronoiPoints(std::vector<std::vector<math::vec3>>& groupedPoints,
@@ -51,10 +51,10 @@ namespace legion::physics
         void InstantiateVoronoiColliders(std::vector<std::shared_ptr<ConvexCollider>>& voronoiColliders
             , std::vector<std::vector<math::vec3>>& groupedPoints);
 
-        void GenerateFractureFragments(std::vector<ecs::entity_handle>& entitiesGenerated
+        void GenerateFractureFragments(std::vector<ecs::entity>& entitiesGenerated
             , std::vector< FracturerColliderToMeshPairing>& colliderToMeshPairings
             , std::vector< std::shared_ptr<ConvexCollider>>& voronoiColliders
-            , ecs::entity_handle fracturedEnt);
+            , ecs::entity fracturedEnt);
 
         void QuadrantVoronoi(math::vec3& min, math::vec3& max, std::vector<math::vec3>& voronoiPoints);
 
@@ -67,7 +67,6 @@ namespace legion::physics
         std::vector<std::vector<math::vec3>> verticesList;
         std::vector<std::shared_ptr<ConvexCollider>> debugVectorcolliders;
         std::vector<math::mat4> transforms;
-        static ecs::EcsRegistry* registry;
     };
 
    

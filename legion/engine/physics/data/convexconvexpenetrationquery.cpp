@@ -76,7 +76,8 @@ namespace legion::physics
                 contact.refCollider = refCollider;
                 contact.IncWorldContact = incidentContact.position;
                 contact.RefWorldContact = referenceContact;
-                contact.label = incidentContact.label;
+                auto label = incidentContact.label;
+                contact.label = &label;
 
                 refCollider->AttemptFindAndCopyConverganceID(contact);
 
