@@ -27,7 +27,6 @@ namespace legion::physics
             registerComponentType<Fracturer>();
             registerComponentType<FractureCountdown>();
             registerComponentType<ObjectToFollow>();
-            //reportComponentType <addRB>();
 
             lgn::log::debug("PhysicsModule setup");
         }

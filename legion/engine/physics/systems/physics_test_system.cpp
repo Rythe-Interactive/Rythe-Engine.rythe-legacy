@@ -177,7 +177,7 @@ namespace legion::physics
         auto [positionH, rotationH, scaleH] = ecs::Registry::createComponent<transform>(ent);
 
         //get camera position and set transform to camera postiion 
-        ecs::filter <rendering::camera, transform> cameraQuery;
+        ecs::filter <rendering::camera, position,rotation,scale> cameraQuery;
 
         math::vec3 cameraDirection;
 
@@ -727,7 +727,7 @@ namespace legion::physics
             for (auto ent : registeredColliderColorDraw)
             {
                 //[1] Get transform
-                auto [posH, rotH, scaleH] = ent.get_component<transform>();
+                auto [posH, rotH, scaleH] = ent.get_component<position,rotation,scale>();
 
                 math::mat4 transform = math::compose(scaleH.get(), rotH.get(), posH.get());
 
