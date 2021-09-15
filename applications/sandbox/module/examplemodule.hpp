@@ -2,6 +2,7 @@
 #include <core/core.hpp>
 
 using namespace legion;
+#include "../systems/mysystem.hpp"
 #include "../systems/examplesystem.hpp"
 #include "../systems/simplecameracontroller.hpp"
 #include "../systems/gui_test.hpp"
@@ -22,8 +23,7 @@ public:
             0
         );
 
-        lgn::log::debug("ExampleModule setup");
-
+        //reportSystem<MySystem>();
         reportSystem<SimpleCameraController>();
         reportSystem<ExampleSystem>();
         reportSystem<GuiTestSystem>();

@@ -9,6 +9,8 @@
 #   define PROJECT_NAME user_project
 #endif
 
+#define COMMA ,
+
 #define EXPAND(x) x
 #define CALL(x, y) x(y)
 
@@ -131,7 +133,7 @@
 // turn: 0, 1, 2
 // into: decltype(0), decltype(1), decltype(2)
 #define decltypes_count(count, ...) EXPAND(CONCAT_DEFINE(decltype_, count)(__VA_ARGS__))
-#define decltypes(...) EXPAND(CONCAT_DEFINE(decltype_, NARGS(__VA_AGRS__))(__VA_ARGS__))
+#define decltypes(...) EXPAND(CONCAT_DEFINE(decltype_, NARGS(__VA_ARGS__))(__VA_ARGS__))
 
 // turn: Foo, x, y, z
 // into: Foo::x, Foo::y, Foo::z
@@ -148,7 +150,60 @@ type() = default;\
 type(const type&) = default;\
 type(type&&) = default;\
 type& operator=(const type&) = default;\
+type& operator=(type&&) = default;\
+~type() = default;
+
+#define RULE_OF_5_NOEXCEPT(type)\
+type() noexcept = default;\
+type(const type&) noexcept = default;\
+type(type&&) noexcept = default;\
+type& operator=(const type&) noexcept = default;\
+type& operator=(type&&) noexcept = default;\
+~type() = default;
+
+#define NO_DEF_CTOR_RULE5(type)\
+type(const type&) = default;\
+type(type&&) = default;\
+type& operator=(const type&) = default;\
+type& operator=(type&&) = default;\
+~type() = default;
+
+#define NO_DEF_CTOR_RULE5_NOEXCEPT(type)\
+type(const type&) noexcept = default;\
+type(type&&) noexcept = default;\
+type& operator=(const type&) noexcept = default;\
+type& operator=(type&&) noexcept = default;\
+~type() = default;
+
+#define NO_DTOR_RULE5(type)\
+type() = default;\
+type(const type&) = default;\
+type(type&&) = default;\
+type& operator=(const type&) = default;\
 type& operator=(type&&) = default;
+
+#define NO_DTOR_RULE5_NOEXCEPT(type)\
+type() noexcept = default;\
+type(const type&) noexcept = default;\
+type(type&&) noexcept = default;\
+type& operator=(const type&) noexcept = default;\
+type& operator=(type&&) noexcept = default;
+
+#define COPY_FUNCS(type)\
+type(const type&) = default;\
+type& operator=(const type&) = default;
+
+#define COPY_FUNCS_NOEXCEPT(type)\
+type(const type&) noexcept = default;\
+type& operator=(const type&) noexcept = default;
+
+#define MOVE_FUNCS(type)\
+type(type&&) = default;\
+type& operator=(type&&) = default;
+
+#define MOVE_FUNCS_NOEXCEPT(type)\
+type(type&&) noexcept = default;\
+type& operator=(type&&) noexcept = default;
 
 #define LEGION_DEBUG_VALUE 1
 #define LEGION_RELEASE_VALUE 2
