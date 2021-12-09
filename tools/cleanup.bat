@@ -10,9 +10,9 @@ Echo Git settings set to:
 Echo 	core.autocrlf=input
 
 :Prompt
-Echo Convert all source file EOL from CRLF to LF and tabs to 4 spaces? (y/n)
-Set /p convertFiles=
-If /i "%convertFiles%" Neq "y" Goto End
+Echo Adding file headers...
+"./lgn_cleanup/exe/lgn_cleanup" "../legion" -ex="**/glm/" -ex="**/glad/" -ex="**/ini.c" -ex="**/imgui_impl/" -ex="**/KHR/" -ex="**/delete_this"
+
 Echo Converting legion files...
 Call :convertDir ../legion
 

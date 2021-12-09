@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "lgn_cleanup": {
+      "commandName": "Project",
+      "commandLineArgs": "\"../legion\" -ex=\"**/glm/\" -ex=\"**/glad/\" -ex=\"**/ini.c\" -ex=\"**/imgui_impl/\" -ex=\"**/KHR/\"",
+      "workingDirectory": ".."
+    }
+  }
+}
