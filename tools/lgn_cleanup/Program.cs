@@ -8,6 +8,9 @@ namespace lgn_cleanup
 {
     class Program
     {
+        static int filesCleaned = 0;
+        static int filesChecked = 0;
+
         static void Main(string[] args)
         {
             if (args.Length == 0 || args[0] == "-help" || args[0] == "-h")
@@ -56,6 +59,8 @@ namespace lgn_cleanup
             {
                 ProcessDir(searchPath, excludePatterns);
             }
+
+            Console.WriteLine($"Checked {filesChecked} files and added {filesCleaned} headers in total.");
         }
 
         static void ProcessDir(string path, List<Regex> excludePatterns)
@@ -94,6 +99,7 @@ namespace lgn_cleanup
                 using (var sr = new StreamReader(path))
                 {
                     contents = sr.ReadToEnd();
+                    filesChecked++;
                     Match match = headerRegex.Match(contents);
                     if (!match.Success)
                     {
@@ -110,18 +116,26 @@ namespace lgn_cleanup
                             " * @brief  This is an auto-generated file header.\n" +
                             " * \n" +
                             " * Copyright(c) " + year.ToString() + " Rythe-Interactive All rights reserved\n" +
-                            " *********************************************************************/\n";
+                            " *********************************************************************/\n\n";
 
                         if (isHeader)
                         {
-                            if (contents.Contains("#pragma once"))
-                                contents = contents.Replace("#pragma once", "#pragma once\n" + copyrightHeader);
-                            else
-                                contents = "#pragma once\n" + copyrightHeader + "\n" + contents;
+                            var sections = contents.Split(new String[] { "#pragma once\n" }, StringSplitOptions.RemoveEmptyEntries);
+                            var pragmaCount = sections.Length - 1;
+
+                            contents = "#pragma once\n" + copyrightHeader;
+                            foreach (var section in sections)
+                            {
+                                if (section.StartsWith('\n'))
+                                    contents += section.Substring(1);
+                                else
+                                    contents += section;
+                            }
                         }
                         else
                             contents = copyrightHeader + contents;
 
+                        filesCleaned++;
                         Console.WriteLine("\tAdded auto-generated file header to: " + path);
                     }
                 }
