@@ -7,7 +7,6 @@
 #include "../systems/gui_test.hpp"
 #include "../systems/physics_test_system.hpp"
 
-
 class ExampleModule : public legion::Module
 {
 public:

@@ -59,13 +59,13 @@ namespace legion::core::ecs
 
     void Registry::onInit()
     {
+        reportDependency<FilterRegistry>();
         create();
 
         for (auto& [id, componentType] : componentTypes())
             tryEmplaceFamily(id, componentType->create_pool());
 
         world = getWorld();
-        reportDependency<FilterRegistry>();
     }
 
     void Registry::onShutdown()

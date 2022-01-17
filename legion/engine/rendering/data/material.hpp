@@ -85,8 +85,6 @@ namespace legion::rendering
         friend struct material_handle;
     private:
         shader_handle m_shader;
-        bool m_canLoadOrSave = true;
-
 
         void init(const shader_handle& shader)
         {

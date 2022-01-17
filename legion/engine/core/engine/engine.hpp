@@ -1,4 +1,10 @@
 #pragma once
+#include <map>
+#include <vector>
+#include <memory>
+
+#include <argh.h>
+
 #include <core/platform/platform.hpp>
 #include <core/engine/module.hpp>
 #include <core/types/primitives.hpp>
