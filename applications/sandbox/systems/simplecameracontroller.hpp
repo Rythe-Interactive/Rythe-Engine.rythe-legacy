@@ -239,7 +239,7 @@ public:
             return;
 
         rotation& rot = camera.get_component<rotation>();
-        rot = math::angleAxis(action.value * action.input_delta * 500.f, math::vec3::up) * rot;
+        rot = math::angleAxis(action.value * action.input_delta , math::vec3::up) * rot;
     }
 
     void onPlayerLookY(player_look_y& action)
@@ -257,7 +257,7 @@ public:
         math::vec3 up = rotMat * math::vec3::up;
         float angle = math::orientedAngle(fwd, up, right);
 
-        angle += action.value * action.input_delta * 500.f;
+        angle += action.value * action.input_delta;
 
         if (angle > -0.001f)
             angle = -0.001f;
