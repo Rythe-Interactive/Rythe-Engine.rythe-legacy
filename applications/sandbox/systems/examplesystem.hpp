@@ -26,58 +26,54 @@ public:
         app::window& win = ecs::world.get_component<app::window>();
         app::context_guard guard(win);
 
-        auto model = gfx::ModelCache::create_model("Sphere", fs::view("assets://models/sphere.obj"));
-
-        auto material = gfx::MaterialCache::create_material("Texture", fs::view("assets://shaders/texture.shs"));
-        material.set_param("_texture", gfx::TextureCache::create_texture(fs::view("engine://resources/default/albedo")));
-        {
-            auto ent = createEntity("Sun");
-            ent.add_component(gfx::light::directional(math::color(1, 1, 0.8f), 10.f));
-            auto [pos, rot, scal] = ent.add_component<transform>();
-            rot = rotation::lookat(math::vec3::zero, math::vec3(-1, -1, -1));
-        }
-
-#if defined(LEGION_DEBUG)
-        for (int i = 0; i < 2000; i++)
-#else
-        for (int i = 0; i < 20000; i++)
-#endif
-        {
-            auto ent = createEntity();
-
-            auto [pos, rot, scal] = ent.add_component<transform>();
-            pos = math::sphericalRand(5.f);
-            scal = scale(0.1f, 0.1f, 0.1f);
-
-            ent.add_component<example_comp, velocity>();
-            ent.add_component(gfx::mesh_renderer(material, model));
-        }
-
-        {
-            model = gfx::ModelCache::create_model("Cube", fs::view("assets://models/Cube.obj"));
-            auto ent = createEntity();
-            auto [pos, rot, scal] = ent.add_component<transform>();
-            pos->z = 30.f;
-            scal = scale(2.f);
-            ent.add_component(gfx::mesh_renderer(material, model));
-        }
-
-        model = gfx::ModelCache::create_model("Sponza", fs::view("assets://models/Sponza/Sponza.gltf"));
-
-        material = gfx::MaterialCache::create_material("Test", fs::view("assets://shaders/uv.shs"));
-
-        auto ent = createEntity();
-        ent.add_component<transform>();
-        ent.add_component(gfx::mesh_renderer(material, model));
-
-        model = gfx::ModelCache::create_model("Fire place", fs::view("assets://models/fireplace.glb"));
-
-        ent = createEntity();
-        auto [pos, rot, scal] = ent.add_component<transform>();
-        pos->x = 30.f;
-        scal = scale(2.f);
-        ent.add_component(gfx::mesh_renderer(material, model));
-
+//        auto model = gfx::ModelCache::create_model("Sphere", fs::view("assets://models/sphere.obj"));
+//
+//        auto material = gfx::MaterialCache::create_material("Texture", fs::view("assets://shaders/texture.shs"));
+//        material.set_param("_texture", gfx::TextureCache::create_texture(fs::view("engine://resources/default/albedo")));
+//        {
+//            auto ent = createEntity("Sun");
+//            ent.add_component(gfx::light::directional(math::color(1, 1, 0.8f), 10.f));
+//            auto [pos, rot, scal] = ent.add_component<transform>();
+//            rot = rotation::lookat(math::vec3::zero, math::vec3(-1, -1, -1));
+//        }
+//
+//#if defined(LEGION_DEBUG)
+//        for (int i = 0; i < 2000; i++)
+//#else
+//        for (int i = 0; i < 20000; i++)
+//#endif
+//        {
+//            auto ent = createEntity();
+//            auto [pos, rot, scal] = ent.add_component<transform>();
+//            pos = math::sphericalRand(5.f);
+//            scal = scale(0.1f, 0.1f, 0.1f);
+//            ent.add_component(gfx::mesh_renderer(material, model));
+//        }
+//
+//        {
+//            model = gfx::ModelCache::create_model("Cube", fs::view("assets://models/Cube.obj"));
+//            auto ent = createEntity();
+//            auto [pos, rot, scal] = ent.add_component<transform>();
+//            pos->z = 30.f;
+//            scal = scale(2.f);
+//            ent.add_component(gfx::mesh_renderer(material, model));
+//        }
+//
+//        model = gfx::ModelCache::create_model("Sponza", fs::view("assets://models/Sponza/Sponza.gltf"));
+//
+//        material = gfx::MaterialCache::create_material("Test", fs::view("assets://shaders/uv.shs"));
+//
+//        auto ent = createEntity();
+//        ent.add_component<transform>();
+//        ent.add_component(gfx::mesh_renderer(material, model));
+//
+//        model = gfx::ModelCache::create_model("Fire place", fs::view("assets://models/fireplace.glb"));
+//
+//        ent = createEntity();
+//        auto [pos, rot, scal] = ent.add_component<transform>();
+//        pos->x = 30.f;
+//        scal = scale(2.f);
+//        ent.add_component(gfx::mesh_renderer(material, model));
 
         bindToEvent<events::exit, &ExampleSystem::onExit>();
     }
@@ -195,7 +191,6 @@ public:
         }
         else
         {
-
             raiseEvent<events::exit>();
         }
     }

@@ -451,6 +451,10 @@
     <ClInclude Include="types\prototype.hpp" />
     <ClInclude Include="ecs\data\component_type.hpp" />
     <ClInclude Include="async\lock_guard.hpp" />
+    <ClInclude Include="particles\particle.hpp" />
+    <ClInclude Include="particles\particleemitter.hpp" />
+    <ClInclude Include="particles\particles.hpp" />
+    <ClInclude Include="particles\particlesystem.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="platform\cpp.hint" />
