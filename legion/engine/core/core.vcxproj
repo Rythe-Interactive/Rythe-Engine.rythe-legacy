@@ -194,8 +194,9 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="ecs\prototypes\component_prototype.hpp" />
     <ClInclude Include="ecs\prototypes\entity_prototype.hpp" />
     <ClInclude Include="engine\enginesubsystem.hpp" />
-    <ClInclude Include="particles\particle.hpp" />
+    <ClInclude Include="particles\particlebuffer.hpp" />
     <ClInclude Include="particles\particleemitter.hpp" />
+    <ClInclude Include="particles\particlepolicy.hpp" />
     <ClInclude Include="particles\particles.hpp" />
     <ClInclude Include="particles\particlesystem.hpp" />
     <ClInclude Include="scheduling\clock.hpp" />
@@ -574,6 +575,7 @@ del /q ".\xcopyexclude"</Command>
     <ClCompile Include="compute\program.cpp" />
     <ClCompile Include="logging\logging.cpp" />
     <ClCompile Include="math\glm\detail\glm.cpp" />
+    <ClCompile Include="particles\particleemitter.cpp" />
     <ClCompile Include="scenemanagement\scenemanager.cpp" />
     <ClCompile Include="scheduling\clock.cpp" />
     <ClCompile Include="scheduling\process.cpp" />
