@@ -2,7 +2,7 @@
 #include<core/engine/system.hpp>
 #include<core/ecs/ecs.hpp>
 #include<core/particles/particleemitter.hpp>
-
+#include <core/time/time.hpp>
 /**
  * @file particlesystem.hpp
  * @brief A particle system manages one or more emitters
@@ -12,7 +12,7 @@ namespace legion::core
 {
     class ParticleSystem : public System<ParticleSystem>
     {
-        void Update(float deltaTime)
+        void update(legion::time::span deltaTime)
         {
             ecs::filter<particle_emitter<>> filter;
             for (auto& entity : filter)
@@ -22,13 +22,9 @@ namespace legion::core
                 while (emitter.spawnBuffer >= emitter.spawnRate)
                 {
                     emitter.spawnBuffer -= emitter.spawnRate;
+                    emitter.Emit();
                 }
-
-                for (auto& lifeTime : emitter.getBuffer<int>())
-                    lifeTime += deltaTime;
-
-                for (auto& [id, policy] : emitter.policies)
-                    policy.get();
+                emitter.Update(deltaTime);
             }
         }
     };

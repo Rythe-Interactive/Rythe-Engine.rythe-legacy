@@ -41,8 +41,6 @@
     <ClCompile Include="data\loaders\objmeshloader.cpp" />
     <ClCompile Include="data\loaders\gltfmeshloader.cpp" />
     <ClCompile Include="time\main_clock.cpp" />
-    <ClCompile Include="defaults\coremodule.cpp" />
-    <ClCompile Include="particles\particlesystem.cpp" />
     <ClCompile Include="particles\particleemitter.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -454,10 +452,11 @@
     <ClInclude Include="types\prototype.hpp" />
     <ClInclude Include="ecs\data\component_type.hpp" />
     <ClInclude Include="async\lock_guard.hpp" />
-    <ClInclude Include="particles\particle.hpp" />
+    <ClInclude Include="particles\particlebuffer.hpp" />
     <ClInclude Include="particles\particleemitter.hpp" />
     <ClInclude Include="particles\particles.hpp" />
     <ClInclude Include="particles\particlesystem.hpp" />
+    <ClInclude Include="particles\particlepolicy.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="platform\cpp.hint" />
@@ -623,8 +622,5 @@
     <None Include="data\image.inl" />
     <None Include="engine\enginesubsystem.inl" />
     <None Include="engine\module.inl" />
-    <None Include="particles\particleemitter.inl" />
-    <None Include="particles\particlebuffer.inl" />
-    <None Include="particles\particleuniform.inl" />
   </ItemGroup>
 </Project>

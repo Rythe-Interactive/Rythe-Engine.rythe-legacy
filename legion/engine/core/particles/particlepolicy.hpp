@@ -1,7 +1,7 @@
 #pragma once
 #include <core/math/math.hpp>
 #include <core/defaults/defaultcomponents.hpp>
-
+#include <core/particles/particlebuffer.hpp>
 /**
  * @file particlepolicy.hpp
  * @brief
@@ -9,28 +9,61 @@
 
 namespace legion::core
 {
-    struct particle_emitter;
-
-    template<typename bufferType>
-    struct particle_buffer;
-    template<typename uniformType>
-    struct particle_uniform;
-
     struct particle_policy_base
     {
-        NO_DTOR_RULE5_NOEXCEPT(particle_policy_base);
-        virtual ~particle_policy_base() = default;
+        std::unordered_map<id_type, std::unique_ptr<particle_buffer_base>> buffers;
 
-        virtual void setup(particle_emitter& emitter) LEGION_IMPURE;
-        virtual void onInit(particle_emitter& emitter, size_type start, size_type end) LEGION_IMPURE;
-        virtual void onUpdate(particle_emitter& emitter, float deltaTime, size_type count) LEGION_IMPURE;
-        virtual void onDestroy(particle_emitter& emitter, size_type start, size_type end) LEGION_IMPURE;
+        virtual void OnInit(size_type begin, size_type end) = 0;
+        virtual void OnUpdate(float deltaTime, size_type count) = 0;
+        virtual void OnDestroy() = 0;
     };
 
-    template<typename policy>
+    template<typename policy, typename ...buffers>
     struct particle_policy : public particle_policy_base
     {
-        NO_DTOR_RULE5_NOEXCEPT(particle_policy);
-        virtual ~particle_policy() = default;
+        particle_policy()
+        {
+            auto& _buffers = { ...buffers };
+            for (auto& buffer : _buffers)
+            {
+                buffers.emplace(typeHash<_buffers::value_type>(),make_unique(buffer));
+            }
+        }
+        virtual void OnInit(size_type begin, size_type end) = 0;
+        virtual void OnUpdate(float deltaTime, size_type count) = 0;
+        virtual void OnDestroy() = 0;
+
+        template<typename bufferType>
+        particle_buffer<bufferType>& getBuffer()
+        {
+            return buffers[typeHash<bufferType>()].get();
+        }
+    };
+
+    struct example_policy : public particle_policy<example_policy, float>
+    {
+        void OnInit(size_type begin, size_type end) override
+        {
+            for (size_type particleId = begin; particleId != end; particleId++)
+            {
+                auto& floatBuffer = getBuffer<float>();
+                floatBuffer[particleId] = 10;
+            }
+        }
+
+        void OnUpdate(float deltaTime, size_type count) override
+        {
+            auto& floatBuffer = getBuffer<float>();
+            for (size_type particleId =0; particleId < count; particleId++)
+            {
+                floatBuffer[particleId] -= deltaTime;
+                log::debug("ID: %u =%f",particleId,floatBuffer[particleId]);
+            }
+        }
+
+        void OnDestroy() override
+        {
+            log::debug("Destroyed");
+        }
     };
 }
