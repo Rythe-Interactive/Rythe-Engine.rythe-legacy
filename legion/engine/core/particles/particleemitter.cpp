@@ -1,4 +1,5 @@
-#include <core/particles/particleemitter.hpp>namespace legion::core{    void particle_emitter::set_alive(size_type idx, bool alive)    {        m_livingBuffer[idx] = alive;    }    void particle_emitter::set_alive(size_type start, size_type end, bool alive)    {        std::fill_n(m_livingBuffer.begin() + start, end - start, alive);    }    bool particle_emitter::is_alive(size_type idx) const    {        if (idx < m_livingBuffer.size())            return m_livingBuffer[idx];        return false;    }    void particle_emitter::swap(size_type idx1, size_type idx2)    {        std::iter_swap(m_livingBuffer.begin() + idx1, m_livingBuffer.begin() + idx2);        for (auto& [id, buffer] : m_particleBuffers)            m_particleBuffers[id]->swap(idx1, idx2);    }
+#include <core/particles/particleemitter.hpp>
+namespace legion::core
+{
 
-    size_type particle_emitter::size() noexcept
-    {        return currentParticleCount;    }    void particle_emitter::resize(size_type size)    {        m_livingBuffer.resize(size);        m_capacity = size;        for (auto& [id, buffer] : m_particleBuffers)            m_particleBuffers[id]->resize(size);    }    size_type particle_emitter::capacity() const noexcept    {        return m_capacity;    }}
+}

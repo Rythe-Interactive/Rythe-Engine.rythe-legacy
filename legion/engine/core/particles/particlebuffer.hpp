@@ -1,9 +1,6 @@
 #pragma once
-#include <algorithm>
-
-#include <core/platform/platform.hpp>
-#include <core/types/types.hpp>
-
+#include <core/math/math.hpp>
+#include <core/defaults/defaultcomponents.hpp>
 /**
  * @file particlebuffer.hpp
  * @brief
@@ -13,26 +10,53 @@ namespace legion::core
 {
     struct particle_buffer_base
     {
-        NO_DTOR_RULE5_NOEXCEPT(particle_buffer_base);
-        virtual ~particle_buffer_base() = default;
+    private:
+        std::unordered_map<id_type, void*> buffer;
+    public:
+        void*& operator[] (size_type& id)
+        {
+            return buffer[id];
+        }
 
-        virtual void swap(size_type idx1, size_type idx2) LEGION_PURE;
-        virtual size_type size() const noexcept LEGION_PURE;
-        virtual void resize(size_type size) LEGION_PURE;
+        std::unordered_map<id_type, void*>::iterator begin()
+        {
+            return buffer.begin();
+        }
+
+        std::unordered_map<id_type, void*>::iterator end()
+        {
+            return buffer.end();
+        }
+
+        void emplace(id_type id)
+        {
+            buffer.emplace(id, nullptr);
+        }
+
+        void erase(id_type id)
+        {
+            buffer.erase(id);
+        }
     };
 
     template<typename bufferType>
-    struct particle_buffer : public particle_buffer_base, std::vector<bufferType>
+    struct particle_buffer : public particle_buffer_base
     {
-        using std::vector<bufferType>::vector;
-        using std::vector<bufferType>::operator=;
-        using std::vector<bufferType>::operator[];
-        ~particle_buffer() = default;
+        particle_buffer() = default;
 
-        virtual void swap(size_type idx1, size_type idx2) override;
-        virtual size_type size() const noexcept override;
-        virtual void resize(size_type size) override;
+        bufferType& operator[] (size_type& id)
+        {
+            return buffer[id];
+        }
+
+        typename std::unordered_map<id_type, bufferType>::iterator begin()
+        {
+            return buffer.begin();
+        }
+
+        typename std::unordered_map<id_type, bufferType>::iterator end()
+        {
+            return buffer.end();
+        }
     };
 }
-
-#include <core/particles/particlebuffer.inl>
