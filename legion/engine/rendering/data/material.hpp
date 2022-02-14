@@ -172,9 +172,6 @@ namespace legion::rendering
 
             return m_variants[m_currentVariant].parameters;
         }
-
-        void make_unsavable();
-
     };
 
     /**@class material_handle

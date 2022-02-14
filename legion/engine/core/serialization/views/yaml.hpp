@@ -1,24 +1,24 @@
 #pragma once
-#include <core/serialization/serializer_views/serializer_view.hpp>
-
-#include <nlohmann/json.hpp>
-
+#include <core/serialization/views/serializer_view.hpp>
+#define YAML_CPP_STATIC_DEFINE
+#include <yaml-cpp/yaml.h>
 #include <stack>
 
 namespace legion::core::serialization
 {
-    struct json : public serializer_view
+
+    struct yaml : public serializer_view
     {
     protected:
         struct entry
         {
             std::string key;
-            nlohmann::ordered_json item;
+            YAML::Node item;
             size_type currentReadIndex = 0;
 
             RULE_OF_5_NOEXCEPT(entry);
 
-            entry(const std::string& k, const nlohmann::ordered_json& j, size_type idx = 0) : key(k), item(j), currentReadIndex(idx) {}
+            entry(const std::string& k, const YAML::Node& j, size_type idx = 0) : key(k), item(j), currentReadIndex(idx) {}
         };
 
         entry root;
@@ -29,8 +29,8 @@ namespace legion::core::serialization
         entry& current_item();
 
     public:
-        json() = default;
-        virtual ~json() = default;
+        yaml() = default;
+        virtual ~yaml() = default;
 
         virtual void serialize_int(const std::string& name, int serializable) override;
         virtual void serialize_float(const std::string& name, float serializable) override;
@@ -45,6 +45,8 @@ namespace legion::core::serialization
         L_NODISCARD virtual common::result<bool, fs_error> deserialize_bool(const std::string& name) override;
         L_NODISCARD virtual common::result<std::string, fs_error> deserialize_string(const std::string& name) override;
         L_NODISCARD virtual common::result<id_type, fs_error> deserialize_id_type(const std::string& name) override;
+
+        L_NODISCARD virtual bool has_item(const std::string& name) override;
 
         virtual void start_object() override;
         virtual void start_object(const std::string& name) override;

@@ -1,4 +1,4 @@
-#include <core/serialization/serializer_views/serializer_view.hpp>
+#include <core/serialization/views/serializer_view.hpp>
 
 namespace legion::core::serialization
 {

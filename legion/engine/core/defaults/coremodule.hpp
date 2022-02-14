@@ -7,6 +7,8 @@
 #include <core/filesystem/provider_registry.hpp>
 #include <core/filesystem/basic_resolver.hpp>
 #include <core/compute/context.hpp>
+#include <core/serialization/serialization.hpp>
+#include <core/ecs/serialization/entity_serializer.hpp>
 
 /**
  * @file coremodule.hpp
@@ -29,6 +31,9 @@ namespace legion::core
 
             assets::AssetCache<image>::addLoader<GltfFauxImageLoader>();
             assets::AssetCache<image>::addLoader<StbImageLoader>();
+
+            serialization::SerializerRegistry::registerSerializer<ecs::entity>();
+            serialization::SerializerRegistry::registerSerializer<ecs::entity_data>();
 
             createProcessChain("Update");
         }

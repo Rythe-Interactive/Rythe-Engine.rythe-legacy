@@ -118,19 +118,6 @@ namespace legion::core::ecs
 
         L_NODISCARD static entity createEntity(const std::string& name, entity parent);
 
-        /**@brief Creates empty entity with a specific entity as its parent. Entity is serialized from a prototype.
-         *        This function will also create any components or child entities in the prototype structure.
-         * @param parent Entity to assign as the parent of the new entity.
-         * @param prototype Prototype to serialize entity from. 
-         */
-        //static entity createEntity(entity parent, const serialization::entity_prototype& prototype);
-
-        /**@brief Creates empty entity with the world as its parent. Entity is serialized from a prototype.
-         *        This function will also create any components or child entities in the prototype structure.
-         * @param prototype Prototype to serialize entity from.
-         */
-        //static entity createEntity(const serialization::entity_prototype& prototype);
-
         /**@brief Destroys an entity and all its components.
          * @param target Entity to destroy.
          * @param recurse Whether to recursively destroy all the child entities as well. True by default.
@@ -193,17 +180,6 @@ namespace legion::core::ecs
         template<typename component_type0, typename component_type1, typename... component_typeN>
         static component_ref_tuple<component_type0, component_type1, component_typeN...> createComponent(entity target, const component_type0& value0, const component_type1& value1, const component_typeN&... valueN);
 
-        /**@brief Creates a new component of a certain type for a specific entity. Component is serialized from a prototype.
-         * @tparam component_type Type of component to create.
-         * @param target Entity to create the component for.
-         * @param prototype Prototype to serialize component from.
-         * @return Reference to the created component.
-         */
-        //template<typename component_type>
-        //static component_type& createComponent(entity target, const serialization::component_prototype<component_type>& prototype);
-        //template<typename component_type>
-        //static component_type& createComponent(entity target, serialization::component_prototype<component_type>&& prototype);
-
         static void* createComponent(id_type typeId, entity target, const void* component);
 
         /**@brief Creates a new component of a certain type for a specific entity.
@@ -212,15 +188,6 @@ namespace legion::core::ecs
          * @return Pointer to the created component.
          */
         static void* createComponent(id_type typeId, entity target);
-
-        /**@brief Creates a new component of a certain type for a specific entity. Component is serialized from a prototype.
-         * @param typeId Type hash of component type to create.
-         * @param target Entity to create the component for.
-         * @param prototype Prototype to serialize component from.
-         * @return Pointer to the created component.
-         */
-        //static void* createComponent(id_type typeId, entity target, const serialization::component_prototype_base& prototype);
-        //static void* createComponent(id_type typeId, entity target, serialization::component_prototype_base&& prototype);
 
         /**@brief Destroys a certain component on a specific entity.
          * @tparam component_type Type of the component to destroy.

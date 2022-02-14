@@ -3,8 +3,6 @@
 #include <core/types/types.hpp>
 #include <core/filesystem/filesystem.hpp>
 
-#include <iostream>
-
 namespace legion::core::serialization
 {
     struct serializer_view
@@ -34,6 +32,8 @@ namespace legion::core::serialization
         L_NODISCARD virtual common::result<std::string, fs_error> deserialize_string(const std::string& name) LEGION_PURE;
         L_NODISCARD virtual common::result<id_type, fs_error> deserialize_id_type(const std::string& name) LEGION_PURE;
 
+        L_NODISCARD virtual bool has_item(const std::string& name) LEGION_PURE;
+
         virtual void start_object() LEGION_PURE;
         virtual void start_object(const std::string& name) LEGION_PURE;
         virtual void end_object() LEGION_PURE;
@@ -59,5 +59,5 @@ namespace legion::core::serialization
     };
 }
 
-#include <core/serialization/serializer_views/serializer_view.inl>
+#include <core/serialization/views/serializer_view.inl>
 

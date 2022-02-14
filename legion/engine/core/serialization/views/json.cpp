@@ -1,4 +1,4 @@
-#include <core/serialization/serializer_views/json.hpp>
+#include <core/serialization/views/json.hpp>
 
 namespace legion::core::serialization
 {
@@ -236,6 +236,15 @@ namespace legion::core::serialization
             return item.get<id_type>();
         }
         return legion_fs_error("Current json object is invalid.");
+    }
+
+    bool json::has_item(const std::string& name)
+    {
+        auto& [currentName, current, readIndex] = current_item();
+
+        if (current.is_object())
+            return current.find(name) != current.end();
+        return false;
     }
 
     void json::start_object()

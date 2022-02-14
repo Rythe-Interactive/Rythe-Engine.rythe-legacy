@@ -1,4 +1,4 @@
-#include <core/serialization/serializer_views/yaml.hpp>
+#include <core/serialization/views/yaml.hpp>
 
 namespace legion::core::serialization
 {
@@ -235,6 +235,15 @@ namespace legion::core::serialization
             return item.as<id_type>();
         }
         return legion_fs_error("Current yaml object is invalid.");
+    }
+
+    bool yaml::has_item(const std::string& name)
+    {
+        auto& [currentName, current, readIndex] = current_item();
+        if (current.IsMap())
+            return !current[name].IsNull();
+
+        return false;
     }
 
     void yaml::start_object()

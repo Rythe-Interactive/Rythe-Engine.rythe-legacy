@@ -54,7 +54,7 @@ namespace legion::core::assets
         static void onShutdown();
 
         template<typename... Args>
-        static common::result<asset_ptr> createInternal(id_type nameHash, Args&&... args);
+        static asset_ptr createInternal(id_type nameHash, Args&&... args);
 
         static const detail::asset_info& info(id_type nameHash);
 

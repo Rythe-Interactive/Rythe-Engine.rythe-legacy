@@ -1,4 +1,4 @@
-#include <core/serialization/serializationregistry.hpp>
+#include <core/serialization/registry/serializationregistry.hpp>
 #pragma once
 
 namespace legion::core::serialization

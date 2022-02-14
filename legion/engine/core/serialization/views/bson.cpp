@@ -1,4 +1,4 @@
-#include <core/serialization/serializer_views/bson.hpp>
+#include <core/serialization/views/bson.hpp>
 
 namespace legion::core::serialization
 {

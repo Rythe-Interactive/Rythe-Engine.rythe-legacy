@@ -130,6 +130,7 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="assets\assets.hpp" />
     <ClInclude Include="assets\functionalbinds.hpp" />
     <ClInclude Include="assets\import_settings.hpp" />
+    <ClInclude Include="assets\serialization\asset_serializer.hpp" />
     <ClInclude Include="async\async.hpp" />
     <ClInclude Include="async\async_operation.hpp" />
     <ClInclude Include="async\async_runnable.hpp" />
@@ -189,16 +190,19 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="ecs\filters\filterregistry.hpp" />
     <ClInclude Include="ecs\handles\component.hpp" />
     <ClInclude Include="ecs\handles\entity.hpp" />
+    <ClInclude Include="ecs\serialization\entity_serializer.hpp" />
     <ClInclude Include="engine\enginesubsystem.hpp" />
     <ClInclude Include="scheduling\clock.hpp" />
     <ClInclude Include="scheduling\process.hpp" />
     <ClInclude Include="scheduling\processchain.hpp" />
     <ClInclude Include="scheduling\scheduler.hpp" />
     <ClInclude Include="scheduling\scheduling.hpp" />
+    <ClInclude Include="serialization\detail\serialize_container.inl" />
+    <ClInclude Include="serialization\functionalbinds\functionalbinds.hpp" />
     <ClInclude Include="serialization\serialization.hpp" />
-    <ClInclude Include="serialization\serializer_views\bson.hpp" />
+    <ClInclude Include="serialization\views\bson.hpp" />
     <ClInclude Include="serialization\serializer_views\bson_view.hpp" />
-    <ClInclude Include="serialization\serializer_views\json.hpp" />
+    <ClInclude Include="serialization\views\json.hpp" />
     <ClInclude Include="serialization\serializer_views\json_view.hpp" />
     <ClInclude Include="ecs\registry.hpp" />
     <ClInclude Include="engine\engine.hpp" />
@@ -522,10 +526,10 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="scenemanagement\components\scene.hpp" />
     <ClInclude Include="scenemanagement\scene.hpp" />
     <ClInclude Include="scenemanagement\scenemanager.hpp" />
-    <ClInclude Include="serialization\serializationregistry.hpp" />
-    <ClInclude Include="serialization\serializer.hpp" />
-    <ClInclude Include="serialization\serializer_views\serializer_view.hpp" />
-    <ClInclude Include="serialization\serializer_views\yaml.hpp" />
+    <ClInclude Include="serialization\registry\serializationregistry.hpp" />
+    <ClInclude Include="serialization\serializer\serializer.hpp" />
+    <ClInclude Include="serialization\views\serializer_view.hpp" />
+    <ClInclude Include="serialization\views\yaml.hpp" />
     <ClInclude Include="time\main_clock.hpp" />
     <ClInclude Include="time\utils.hpp" />
     <ClInclude Include="types\prototype.hpp" />
@@ -578,11 +582,11 @@ del /q ".\xcopyexclude"</Command>
     <ClCompile Include="scheduling\process.cpp" />
     <ClCompile Include="scheduling\processchain.cpp" />
     <ClCompile Include="scheduling\scheduler.cpp" />
-    <ClCompile Include="serialization\serializationregistry.cpp" />
-    <ClCompile Include="serialization\serializer_views\bson.cpp" />
-    <ClCompile Include="serialization\serializer_views\json.cpp" />
-    <ClCompile Include="serialization\serializer_views\serializer_view.cpp" />
-    <ClCompile Include="serialization\serializer_views\yaml.cpp" />
+    <ClCompile Include="serialization\registry\serializationregistry.cpp" />
+    <ClCompile Include="serialization\views\bson.cpp" />
+    <ClCompile Include="serialization\views\json.cpp" />
+    <ClCompile Include="serialization\views\serializer_view.cpp" />
+    <ClCompile Include="serialization\views\yaml.cpp" />
     <ClCompile Include="time\main_clock.cpp" />
     <ClCompile Include="types\type_util.cpp" />
   </ItemGroup>
@@ -591,6 +595,7 @@ del /q ".\xcopyexclude"</Command>
     <None Include="..\..\.editorconfig" />
     <None Include="assets\assets.inl" />
     <None Include="assets\functionalbinds.inl" />
+    <None Include="assets\serialization\asset_serializer.inl" />
     <None Include="common\hash.inl" />
     <None Include="containers\data_view.inl" />
     <None Include="containers\shared_data_view.inl" />
@@ -603,6 +608,7 @@ del /q ".\xcopyexclude"</Command>
     <None Include="ecs\handles\entity.inl" />
     <None Include="ecs\handles\filter.inl" />
     <None Include="ecs\registry.inl" />
+    <None Include="ecs\serialization\entity_serializer.cpp" />
     <None Include="engine\engine.inl" />
     <None Include="engine\enginesubsystem.inl" />
     <None Include="engine\module.inl" />
@@ -748,11 +754,11 @@ del /q ".\xcopyexclude"</Command>
     <None Include="scheduling\process.inl" />
     <None Include="scheduling\processchain.inl" />
     <None Include="scheduling\scheduler.inl" />
-    <None Include="serialization\serialization.inl" />
+    <None Include="serialization\functionalbinds\functionalbinds.inl" />
     <None Include="time\utils.inl" />
-    <None Include="serialization\serializationregistry.inl" />
-    <None Include="serialization\serializer.inl" />
-    <None Include="serialization\serializer_views\serializer_view.inl" />
+    <None Include="serialization\registry\serializationregistry.inl" />
+    <None Include="serialization\serializer\serializer.inl" />
+    <None Include="serialization\views\serializer_view.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

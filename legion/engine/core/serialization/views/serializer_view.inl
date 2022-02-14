@@ -1,4 +1,4 @@
-#include <core/serialization/serializer_views/serializer_view.hpp>
+#include <core/serialization/views/serializer_view.hpp>
 #pragma once
 
 namespace legion::core::serialization
@@ -38,6 +38,18 @@ namespace legion::core::serialization
             serialize_id_type(name, value);
             return true;
         }
+        else
+        {
+            static_assert(
+                !std::is_same_v<raw_type, int>
+                &!std::is_same_v<raw_type, float>
+                &!std::is_same_v<raw_type, double>
+                &!std::is_same_v<raw_type, bool>
+                &!std::is_same_v<raw_type, std::string>
+                &!std::is_same_v<raw_type, id_type>,
+                "Type is not a primitive serializable type."
+                );
+        }
         return false;
     }
 
@@ -70,6 +82,18 @@ namespace legion::core::serialization
         {
             return deserialize_id_type(name);
         }
-        return legion_fs_error("Type was not a primitive serializable type.");
+        else
+        {
+            static_assert(
+                !std::is_same_v<raw_type, int>
+                &!std::is_same_v<raw_type, float>
+                &!std::is_same_v<raw_type, double>
+                &!std::is_same_v<raw_type, bool>
+                &!std::is_same_v<raw_type, std::string>
+                &!std::is_same_v<raw_type, id_type>,
+                "Type is not a primitive serializable type."
+                );
+        }
+        return legion_fs_error("Type is not a primitive serializable type.");
     }
 }

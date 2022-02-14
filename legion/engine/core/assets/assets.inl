@@ -6,7 +6,7 @@ namespace legion::core::assets
 {
     template<typename AssetType>
     template<typename... Args>
-    inline common::result<asset<AssetType>> AssetCache<AssetType>::createInternal(id_type nameHash, Args && ...args)
+    inline asset<AssetType> AssetCache<AssetType>::createInternal(id_type nameHash, Args && ...args)
     {
         static_assert(std::is_constructible_v<AssetType, Args...>, "Asset type is not constructible with given argument types.");
 
@@ -444,7 +444,7 @@ namespace legion::core::assets
     template<typename... Args>
     inline L_ALWAYS_INLINE asset<AssetType> AssetLoader<AssetType>::create(id_type nameHash, Args&&...args) const
     {
-        return *AssetCache<AssetType>::createInternal(nameHash, std::forward<Args>(args)...);
+        return AssetCache<AssetType>::createInternal(nameHash, std::forward<Args>(args)...);
     }
 
     template<typename AssetType>

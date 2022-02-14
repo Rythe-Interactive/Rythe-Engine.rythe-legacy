@@ -147,11 +147,6 @@ namespace legion::rendering
         return invalid_material_handle;
     }
 
-    void material::make_unsavable()
-    {
-        m_canLoadOrSave = false;
-    }
-
     id_type material_handle::current_variant() const
     {
         async::readonly_guard guard(MaterialCache::m_materialLock);

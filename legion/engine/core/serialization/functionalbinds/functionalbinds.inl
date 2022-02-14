@@ -1,4 +1,4 @@
-#include <core/serialization/serialization.hpp>
+#include <core/serialization/functionalbinds/functionalbinds.hpp>
 #pragma once
 
 namespace legion::core::serialization

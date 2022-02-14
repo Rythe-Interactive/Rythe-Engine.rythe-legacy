@@ -96,7 +96,6 @@ public:
 
         //Serialization Test
         srl::SerializerRegistry::registerSerializer<example_comp>();
-        srl::SerializerRegistry::registerSerializer<ecs::entity>();
         //srl::SerializerRegistry::registerSerializer<position>();
         //srl::SerializerRegistry::registerSerializer<rotation>();
         //srl::SerializerRegistry::registerSerializer<velocity>();

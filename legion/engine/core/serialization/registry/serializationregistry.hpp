@@ -1,9 +1,9 @@
 #pragma once
 #include <core/common/hash.hpp>
 #include <core/containers/pointer.hpp>
-#include <core/serialization/serializer.hpp>
+#include <core/serialization/serializer/serializer.hpp>
 
-#include <map>
+#include <unordered_map>
 
 namespace legion::core::serialization
 {
@@ -20,7 +20,3 @@ namespace legion::core::serialization
         static pointer<serializer_base> getSerializer(id_type typeId);
     };
 }
-
-#include <core/serialization/serializer.inl>
-#include <core/serialization/serializationregistry.inl>
-
