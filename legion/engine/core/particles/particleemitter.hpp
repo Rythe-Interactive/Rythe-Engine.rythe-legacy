@@ -26,11 +26,12 @@ namespace legion::core
         float maxLifeTime = 2;
         std::unordered_map<id_type, std::unique_ptr<particle_buffer_base>> particleBuffers;
         std::unordered_map<id_type, std::unique_ptr<particle_policy_base>> particlePolicies;
-        std::tuple<std::unique_ptr<particle_policy_base>> policies;
+        std::vector<std::unique_ptr<particle_policy_base>> policies;
 
         particle_emitter()
         {
-            polices = std::make_tuple(std::make_unique(...Policies));
+            policies = { std::make_unique(...Policies) };
+            //polices = std::make_tuple(std::make_unique(...Policies));
         }
         ~particle_emitter() = default;
 
@@ -51,7 +52,7 @@ namespace legion::core
             for (auto& [id, lifeTime] : emitter.getBuffer<life_time>())
                 lifeTime.max = mineLifeTime + std::rand() * (maxLifeTime-minLifeTime);
 
-            std::apply([](auto&... policy) {((policy->OnInit()), ...); }, policies);
+            //std::apply([](auto&... policy) {((policy->OnInit()), ...); }, policies);
         }
 
         void Update(float deltaTime)
@@ -66,7 +67,7 @@ namespace legion::core
             }
 
             //particle policy updates
-            std::apply([](auto&... policy) {((policy->OnUpdate(deltaTime,spawnCount)), ...); },policies);
+            //std::apply([](auto&... policy) {((policy->OnUpdate(deltaTime,spawnCount)), ...); },policies);
         }
     };
 }
