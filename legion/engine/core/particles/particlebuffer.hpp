@@ -10,7 +10,7 @@ namespace legion::core
 {
     struct particle_buffer_base
     {
-    private:
+    protected:
         std::unordered_map<id_type, void*> buffer;
     public:
         void*& operator[] (size_type& id)
@@ -46,7 +46,7 @@ namespace legion::core
 
         bufferType& operator[] (size_type& id)
         {
-            return buffer[id];
+            return *static_cast<bufferType*>(buffer[id]);
         }
 
         typename std::unordered_map<id_type, bufferType>::iterator begin()

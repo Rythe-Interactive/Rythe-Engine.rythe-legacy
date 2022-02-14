@@ -26,7 +26,7 @@ namespace legion::core
             auto& _buffers = { ...buffers };
             for (auto& buffer : _buffers)
             {
-                buffers.emplace(typeHash<_buffers::value_type>(),make_unique(buffer));
+                buffers.emplace(typeHash<_buffers::value_type>(), make_unique(buffer));
             }
         }
         virtual void OnInit(size_type begin, size_type end) = 0;
@@ -34,9 +34,9 @@ namespace legion::core
         virtual void OnDestroy() = 0;
 
         template<typename bufferType>
-        particle_buffer<bufferType>& getBuffer()
+        particle_buffer<bufferType> getBuffer()
         {
-            return buffers[typeHash<bufferType>()].get();
+            return *static_cast<particle_buffer<float>*>(buffers[typeHash<bufferType>()].get());
         }
     };
 
@@ -46,18 +46,16 @@ namespace legion::core
         {
             for (size_type particleId = begin; particleId != end; particleId++)
             {
-                auto& floatBuffer = getBuffer<float>();
-                floatBuffer[particleId] = 10;
+                getBuffer<float>()[particleId] = 10;
             }
         }
 
         void OnUpdate(float deltaTime, size_type count) override
         {
-            auto& floatBuffer = getBuffer<float>();
-            for (size_type particleId =0; particleId < count; particleId++)
+            for (size_type particleId = 0; particleId < count; particleId++)
             {
-                floatBuffer[particleId] -= deltaTime;
-                log::debug("ID: %u =%f",particleId,floatBuffer[particleId]);
+                getBuffer<float>()[particleId] -= deltaTime;
+                log::debug("ID: %u =%f", particleId, getBuffer<float>()[particleId]);
             }
         }
 

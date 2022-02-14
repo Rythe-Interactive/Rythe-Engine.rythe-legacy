@@ -12,7 +12,7 @@ namespace legion::core
 {
     class ParticleSystem : public System<ParticleSystem>
     {
-        void update(legion::time::span deltaTime)
+        void update(time::span deltaTime)
         {
             ecs::filter<particle_emitter<>> filter;
             for (auto& entity : filter)
