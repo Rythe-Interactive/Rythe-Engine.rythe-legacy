@@ -622,5 +622,6 @@
     <None Include="data\image.inl" />
     <None Include="engine\enginesubsystem.inl" />
     <None Include="engine\module.inl" />
+    <None Include="particles\particleemitter.inl" />
   </ItemGroup>
 </Project>
