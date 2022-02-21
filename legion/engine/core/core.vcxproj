@@ -743,6 +743,7 @@ del /q ".\xcopyexclude"</Command>
     <None Include="math\glm\gtx\vector_angle.inl" />
     <None Include="math\glm\gtx\vector_query.inl" />
     <None Include="math\glm\gtx\wrap.inl" />
+    <None Include="particles\particleemitter.inl" />
     <None Include="platform\cpp.hint" />
     <None Include="scheduling\process.inl" />
     <None Include="scheduling\processchain.inl" />
