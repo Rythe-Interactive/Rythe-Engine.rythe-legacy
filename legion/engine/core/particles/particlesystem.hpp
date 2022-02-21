@@ -14,7 +14,7 @@ namespace legion::core
     {
         void update(time::span deltaTime)
         {
-            ecs::filter<particle_emitter<>> filter;
+            ecs::filter<particle_emitter> filter;
             for (auto& entity : filter)
             {
                 auto& emitter = entity.get_component<particle_emitter<>>().get();
