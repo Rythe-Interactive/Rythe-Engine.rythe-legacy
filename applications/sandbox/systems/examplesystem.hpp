@@ -27,7 +27,29 @@ public:
         app::context_guard guard(win);
 
         auto ent = createEntity("Particle Emitter");
-        ent.add_component<particle_emitter<10, example_policy>>();
+        ent.add_component<transform>();
+        auto emitter = ent.add_component<particle_emitter>();
+        emitter->spawnRate = 1;
+        emitter->maxSpawnCount = 10000;
+        emitter->minLifeTime = 5;
+        emitter->maxLifeTime = 20;
+        //auto& buffer = emitter->getBuffer<float>();
+        //for (int i = 0; i < 10; i++)
+        //{
+        //    buffer.get(i) = i * sin(i);
+        //}
+
+        //auto& modBuffer = emitter->getBuffer<float>();
+        //for (int i = 0; i < modBuffer.buffer.size(); i++)
+        //{
+        //    log::debug(modBuffer.get(i));
+        //}
+
+        //auto& lifeTime = emitter->getBuffer<life_time>();
+        //lifeTime.get(0).max = 10;
+        //log::debug(lifeTime.get(0).max);
+
+        //emitter->add_policy<example_policy>();
 
         //        auto model = gfx::ModelCache::create_model("Sphere", fs::view("assets://models/sphere.obj"));
         //
