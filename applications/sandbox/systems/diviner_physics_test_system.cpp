@@ -1,4 +1,4 @@
-#include "physics_test_system.hpp"
+#include "diviner_physics_test_system.hpp"
 #include <physics/diviner/components/dvr_internal_physics_component.hpp>
 #include <rendering/debugrendering.hpp>
 #include <rendering/components/camera.hpp>
@@ -10,7 +10,7 @@ using namespace legion;
 
 namespace legion::physics
 {
-    void PhysicsTestSystem::setup()
+    void DivinerPhysicsTestSystem::setup()
     {
         using namespace legion::core::fs::literals;
         
@@ -68,13 +68,13 @@ namespace legion::physics
         #pragma endregion
         
         #pragma region Function binding
-        bindToEvent<extendedPhysicsContinue, &PhysicsTestSystem::extendedContinuePhysics>();
-        bindToEvent<nextPhysicsTimeStepContinue, &PhysicsTestSystem::OneTimeContinuePhysics>();
+        bindToEvent<extendedPhysicsContinue, &DivinerPhysicsTestSystem::extendedContinuePhysics>();
+        bindToEvent<nextPhysicsTimeStepContinue, &DivinerPhysicsTestSystem::OneTimeContinuePhysics>();
        
-        bindToEvent<QHULL, &PhysicsTestSystem::quickHullStep>();
-        bindToEvent<AddRigidbody, &PhysicsTestSystem::AddRigidbodyToQuickhulls>();
-        bindToEvent< SpawnRandomHullOnCameraLoc, &PhysicsTestSystem::spawnRandomConvexHullOnCameraLocation>();
-        bindToEvent< SpawnHullActive, &PhysicsTestSystem::ActivateSpawnRandomHull>();
+        bindToEvent<QHULL, &DivinerPhysicsTestSystem::quickHullStep>();
+        bindToEvent<AddRigidbody, &DivinerPhysicsTestSystem::AddRigidbodyToQuickhulls>();
+        bindToEvent< SpawnRandomHullOnCameraLoc, &DivinerPhysicsTestSystem::spawnRandomConvexHullOnCameraLocation>();
+        bindToEvent< SpawnHullActive, &DivinerPhysicsTestSystem::ActivateSpawnRandomHull>();
 
         #pragma endregion
 
@@ -90,12 +90,12 @@ namespace legion::physics
             sun.add_component<transform>(position(10, 10, 10), rotation::lookat(math::vec3(1, 1, -1), math::vec3::zero), scale());
         }
 
-        createProcess<&PhysicsTestSystem::colliderDraw>("Physics",0.02f);
+        createProcess<&DivinerPhysicsTestSystem::colliderDraw>("Physics",0.02f);
 
         quickhullTestScene();
     }
 
-    void PhysicsTestSystem::colliderDraw(time::span dt)
+    void DivinerPhysicsTestSystem::colliderDraw(time::span dt)
     {
         ecs::filter<ObjectToFollow> objectToFollowQuery;
 
@@ -112,7 +112,7 @@ namespace legion::physics
         }
     }
 
-    void PhysicsTestSystem::ActivateSpawnRandomHull(SpawnHullActive& action)
+    void DivinerPhysicsTestSystem::ActivateSpawnRandomHull(SpawnHullActive& action)
     {
         if (!action.value)
         {
@@ -121,7 +121,7 @@ namespace legion::physics
         }
     }
 
-    void PhysicsTestSystem::spawnRandomConvexHullOnCameraLocation(SpawnRandomHullOnCameraLoc& action)
+    void DivinerPhysicsTestSystem::spawnRandomConvexHullOnCameraLocation(SpawnRandomHullOnCameraLoc& action)
     {
         if (!m_throwingHullActivated || action.value) { return; }
 
@@ -296,7 +296,7 @@ namespace legion::physics
 
     rendering::material_handle defaultStairMaterial;
 
-    void PhysicsTestSystem::initializeLitMaterial(rendering::material_handle& materialToInitialize, rendering::shader_handle& litShader,
+    void DivinerPhysicsTestSystem::initializeLitMaterial(rendering::material_handle& materialToInitialize, rendering::shader_handle& litShader,
         const fs::view& albedoFile, const fs::view& normalFile, const fs::view& roughnessFile)
     {
         static size_t litCount = 0;
@@ -324,7 +324,7 @@ namespace legion::physics
         litCount++;
     }
 
-    void PhysicsTestSystem::quickhullTestScene()
+    void DivinerPhysicsTestSystem::quickhullTestScene()
     {
         math::mat3 elongatedBlockInertia = math::mat3(math::vec3(6.0f, 0, 0), math::vec3(0.0f, 3.0f, 0), math::vec3(0, 0, 6.0f));
 
@@ -359,7 +359,7 @@ namespace legion::physics
         }
     }
 
-    void PhysicsTestSystem::BoxStackScene()
+    void DivinerPhysicsTestSystem::BoxStackScene()
     {
         cube_collider_params cubeParams;
         cubeParams.breadth = 1.0f;
@@ -373,7 +373,7 @@ namespace legion::physics
         addStaircase(math::vec3(5.0f, -1, 5.0f), 10.0f, 10.0f);
     }
 
-    void PhysicsTestSystem::stabilityComparisonScene()
+    void DivinerPhysicsTestSystem::stabilityComparisonScene()
     {
         cube_collider_params cubeParams;
         cubeParams.breadth = 1.0f;
@@ -387,7 +387,7 @@ namespace legion::physics
         addStaircase(math::vec3(0.0f, -1, 0.0f), 4.0f, 4.0f);
     }
 
-    void PhysicsTestSystem::monkeyStackScene()
+    void DivinerPhysicsTestSystem::monkeyStackScene()
     {
         cube_collider_params cubeParams;
         cubeParams.breadth = 1.0f;
@@ -401,7 +401,7 @@ namespace legion::physics
         addStaircase(math::vec3(5.0f, -1, 5.0f), 10.0f, 10.0f);
     }
 
-    void PhysicsTestSystem::addStaircase(math::vec3 position, float breadthMult, float widthMult )
+    void DivinerPhysicsTestSystem::addStaircase(math::vec3 position, float breadthMult, float widthMult )
     {
         physics::cube_collider_params cubeParams;
         cubeParams.breadth = breadthMult;
@@ -425,7 +425,7 @@ namespace legion::physics
         scale2H = math::vec3(cubeParams.width, 1.0f, breadthMult);
     }
 
-    void PhysicsTestSystem::createQuickhullTestObject(math::vec3 position, rendering::model_handle cubeH, rendering::material_handle TextureH, math::mat3 inertia )
+    void DivinerPhysicsTestSystem::createQuickhullTestObject(math::vec3 position, rendering::model_handle cubeH, rendering::material_handle TextureH, math::mat3 inertia )
     {
         physics::cube_collider_params cubeParams;
         cubeParams.breadth = 1.0f;
@@ -448,7 +448,7 @@ namespace legion::physics
         registeredColliderColorDraw.push_back(ent);
     }
 
-    void PhysicsTestSystem::PopulateFollowerList(ecs::entity physicsEnt, int index)
+    void DivinerPhysicsTestSystem::PopulateFollowerList(ecs::entity physicsEnt, int index)
     {
         app::window& window = ecs::world.get_component<app::window>();
 
@@ -551,7 +551,7 @@ namespace legion::physics
         }
     }
 
-    void PhysicsTestSystem::drawPhysicsColliders()
+    void DivinerPhysicsTestSystem::drawPhysicsColliders()
     {
         static float offset = 0.005f;
         ecs::filter< physics::diviner::physics_component,transform> physicsQuery;
@@ -623,7 +623,7 @@ namespace legion::physics
         }
     }
 
-    void PhysicsTestSystem::quickHullStep(QHULL& action)
+    void DivinerPhysicsTestSystem::quickHullStep(QHULL& action)
     {
         if (!action.value)
         {
@@ -648,11 +648,11 @@ namespace legion::physics
             }
 
             m_step++;
-            log::debug("PhysicsTestSystem::quickHullStep");
+            log::debug("DivinerPhysicsTestSystem::quickHullStep");
         }
     }
 
-    void PhysicsTestSystem::AddRigidbodyToQuickhulls(AddRigidbody& action)
+    void DivinerPhysicsTestSystem::AddRigidbodyToQuickhulls(AddRigidbody& action)
     {
         if (!action.value)
         {
@@ -664,7 +664,7 @@ namespace legion::physics
         }
     }
 
-    void PhysicsTestSystem::extendedContinuePhysics(extendedPhysicsContinue & action)
+    void DivinerPhysicsTestSystem::extendedContinuePhysics(extendedPhysicsContinue & action)
     {
         if (action.value)
         {
@@ -672,7 +672,7 @@ namespace legion::physics
         }
     }
 
-    void PhysicsTestSystem::OneTimeContinuePhysics(nextPhysicsTimeStepContinue & action)
+    void DivinerPhysicsTestSystem::OneTimeContinuePhysics(nextPhysicsTimeStepContinue & action)
     {
         if (!(action.value))
         {
@@ -682,7 +682,7 @@ namespace legion::physics
         }
     }
 
-    void PhysicsTestSystem::createStack(int widthCount, int breadthCount, int heightCount, math::vec3 firstBlockPos, math::vec3 offset,
+    void DivinerPhysicsTestSystem::createStack(int widthCount, int breadthCount, int heightCount, math::vec3 firstBlockPos, math::vec3 offset,
         rendering::model_handle cubeH, rendering::material_handle materials, physics::cube_collider_params cubeParams, bool useQuickhull, bool rigidbody , float mass , math::mat3 inverseInertia )
     {
         for (size_t y = 0; y < heightCount; y++)
@@ -698,7 +698,7 @@ namespace legion::physics
         }
     }
 
-    void PhysicsTestSystem::createBoxEntity(math::vec3 position, rendering::model_handle cubeH,
+    void DivinerPhysicsTestSystem::createBoxEntity(math::vec3 position, rendering::model_handle cubeH,
         rendering::material_handle materials, physics::cube_collider_params cubeParams, bool useQuickhull, bool rigidbody , float mass , math::mat3 inverseInertia )
     {
         auto ent = createEntity();

@@ -5,7 +5,8 @@
 #include "../systems/examplesystem.hpp"
 #include "../systems/simplecameracontroller.hpp"
 #include "../systems/gui_test.hpp"
-#include "../systems/physics_test_system.hpp"
+#include "../systems/diviner_physics_test_system.hpp"
+#include "../systems/physx_test_system.hpp"
 
 class ExampleModule : public legion::Module
 {
@@ -25,7 +26,7 @@ public:
 
         //reportSystem<MySystem>();
         reportSystem<SimpleCameraController>();
-        reportSystem<physics::PhysicsTestSystem>();
+        reportSystem<physics::PhysXTestSystem>();
         reportSystem<GuiTestSystem>();
     }
 };
