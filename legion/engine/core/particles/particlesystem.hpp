@@ -1,7 +1,6 @@
 #pragma once
-#include<core/engine/system.hpp>
-#include<core/ecs/ecs.hpp>
-#include<core/particles/particleemitter.hpp>
+#include <core/engine/system.hpp>
+#include <core/ecs/ecs.hpp>
 #include <core/time/time.hpp>
 /**
  * @file particlesystem.hpp
@@ -10,22 +9,15 @@
 
 namespace legion::core
 {
-    class ParticleSystem : public System<ParticleSystem>
+    struct particle_emitter;
+
+    class ParticleSystem final : public System<ParticleSystem>
     {
-        void update(time::span deltaTime)
-        {
-            ecs::filter<particle_emitter> filter;
-            for (auto& entity : filter)
-            {
-                auto& emitter = entity.get_component<particle_emitter<>>().get();
-                emitter.spawnBuffer += deltaTime;
-                while (emitter.spawnBuffer >= emitter.spawnRate)
-                {
-                    emitter.spawnBuffer -= emitter.spawnRate;
-                    emitter.Emit();
-                }
-                emitter.Update(deltaTime);
-            }
-        }
+    public:
+        void setup();
+        void shutdown();
+        void update(time::span deltaTime);
+        void emit(particle_emitter& emitter);
+        void maintanence(particle_emitter& emitter, float deltaTime);
     };
 }

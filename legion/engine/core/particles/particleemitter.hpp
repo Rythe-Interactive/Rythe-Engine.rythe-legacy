@@ -11,32 +11,28 @@ namespace legion::core
 {
     struct life_time
     {
-        float age;
-        float max;
+        float age = 0.f;
+        float max = 1.f;
     };
 
-    template<typename... Policies>
     struct particle_emitter
     {
-        id_type id;
-        float spawnRate;
-        float spawnBuffer;
-        float spawnCount;
-        float minLifeTime = 1;
-        float maxLifeTime = 2;
+        float spawnRate = 2.f;
+        float maxSpawnCount = 1000.f;
+        float currentParticleCount = 0.f;
+
+        float minLifeTime = 1.f;
+        float maxLifeTime = 2.f;
+
         std::unordered_map<id_type, std::unique_ptr<particle_buffer_base>> particleBuffers;
-        std::unordered_map<id_type, std::unique_ptr<particle_policy_base>> particlePolicies;
+        //std::unordered_map<id_type, pointer<particle_policy_base>> particlePolicies;
 
-        particle_emitter(size_type particleCount)  : spawnCount(particleCount)
-        {
-            //handle policies stuff
-        };
-        ~particle_emitter() = default;
-
-        template<typename buffer>
-        particle_buffer<buffer> getBuffer();
-        void Emit();
-        void Update(float deltaTime);
+        particle_emitter() = default;
+        MOVE_FUNCS(particle_emitter);
+        particle_emitter(const particle_emitter&) = delete;
+     
+        template<typename bufferType>
+        particle_buffer<bufferType>& getBuffer();
     };
 }
 

@@ -10,53 +10,27 @@ namespace legion::core
 {
     struct particle_buffer_base
     {
-    protected:
-        std::unordered_map<id_type, void*> buffer;
-    public:
-        void*& operator[] (size_type& id)
+        std::unordered_map<id_type, void*> buffer{};
+
+        NO_DTOR_RULE5_NOEXCEPT(particle_buffer_base);
+        virtual ~particle_buffer_base() = default;
+
+        void* operator[](id_type id)
         {
             return buffer[id];
-        }
-
-        std::unordered_map<id_type, void*>::iterator begin()
-        {
-            return buffer.begin();
-        }
-
-        std::unordered_map<id_type, void*>::iterator end()
-        {
-            return buffer.end();
-        }
-
-        void emplace(id_type id)
-        {
-            buffer.emplace(id, nullptr);
-        }
-
-        void erase(id_type id)
-        {
-            buffer.erase(id);
         }
     };
 
     template<typename bufferType>
     struct particle_buffer : public particle_buffer_base
     {
-        particle_buffer() = default;
+        std::unordered_map<id_type, bufferType> buffer{};
 
-        bufferType& operator[] (size_type& id)
-        {
-            return *static_cast<bufferType*>(buffer[id]);
-        }
+        NO_DTOR_RULE5_NOEXCEPT(particle_buffer);
+        ~particle_buffer() = default;
 
-        typename std::unordered_map<id_type, bufferType>::iterator begin()
-        {
-            return buffer.begin();
-        }
-
-        typename std::unordered_map<id_type, bufferType>::iterator end()
-        {
-            return buffer.end();
-        }
+        bufferType& get(id_type id);
     };
 }
+
+#include <core/particles/particlebuffer.inl>
