@@ -26,6 +26,11 @@ namespace legion::physics
     constexpr size_type defaultPVDListeningPort = 5425;
     constexpr size_type defaultPVDHostTimeout = 10;
 
+    PhysXPhysicsSystem::PhysXPhysicsSystem()
+    {
+        sSelfInstanceCounter++;
+    }
+
     void PhysXPhysicsSystem::setup()
     {
         {
@@ -96,6 +101,28 @@ namespace legion::physics
         }
 
         PS::foundation->release();
+    }
+
+    void PhysXPhysicsSystem::fixedUpdate(time::time_span<fast_time> deltaTime)
+    {
+        m_physxScene->simulate(m_timeStep);
+        m_physxScene->fetchResults(true);
+    }
+
+    void PhysXPhysicsSystem::releasePhysXVariables()
+    {
+        sPhysicsStatics.dispatcher->release();
+        gPhysics->release();
+
+        if (sPhysicsStatics.pvd)
+        {
+            PxPvdTransport* transport = sPhysicsStatics.pvd->getTransport();
+            sPhysicsStatics.pvd->release();
+            sPhysicsStatics.pvd = nullptr;
+            transport->release();
+        }
+
+        sPhysicsStatics.foundation->release();
     }
 
     void PhysXPhysicsSystem::fixedUpdate(time::time_span<fast_time> deltaTime)
