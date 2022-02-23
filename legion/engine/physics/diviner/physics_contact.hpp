@@ -1,6 +1,6 @@
 #pragma once
 
-#include <physics/diviner/components/rigidbody.hpp>
+#include <physics/diviner/components/dvr_internal_rigidbody.hpp>
 #include <core/core.hpp>
 #include <physics/diviner/data/identifier.hpp>
 #include <physics/diviner/data/edge_label.hpp>
@@ -347,9 +347,9 @@ namespace legion::physics
 
 
 
-        void logRigidbodyState()
+        void logdvrInternalRigidbodyState()
         {
-            log::debug("//--------logRigidbodyState----------//");
+            log::debug("//--------logdvrInternalRigidbodyState----------//");
             log::debug("rbInc->velocity {} ", math::to_string(rbInc->velocity));
             log::debug("rbInc->angularVelocity {} ", math::to_string(rbInc->angularVelocity));
 

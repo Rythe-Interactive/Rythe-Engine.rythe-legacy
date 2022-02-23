@@ -1,8 +1,8 @@
 #pragma once
 #include <core/core.hpp>
 #include <physics/diviner/systems/physicssystem.hpp>
-#include <physics/diviner/components/physics_component.hpp>
-#include <physics/diviner/components/rigidbody.hpp>
+#include <physics/diviner/components/dvr_internal_physics_component.hpp>
+#include <physics/diviner/components/dvr_internal_rigidbody.hpp>
 #include <physics/physx/systems/physx_physics_system.hpp>
 
 namespace legion::physics
