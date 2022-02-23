@@ -578,6 +578,7 @@ del /q ".\xcopyexclude"</Command>
     <ClCompile Include="compute\program.cpp" />
     <ClCompile Include="logging\logging.cpp" />
     <ClCompile Include="math\glm\detail\glm.cpp" />
+    <ClCompile Include="particles\particlebuffer.cpp" />
     <ClCompile Include="particles\particleemitter.cpp" />
     <ClCompile Include="particles\particlesystem.cpp" />
     <ClCompile Include="scenemanagement\scenemanager.cpp" />
