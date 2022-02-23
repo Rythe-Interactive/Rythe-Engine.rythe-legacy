@@ -11,7 +11,7 @@ namespace legion::core
 {
     struct particle_policy_base
     {
-        std::unordered_map<id_type, std::unique_ptr<particle_buffer_base>> buffers;
+        //std::unordered_map<id_type, std::unique_ptr<particle_buffer_base>> buffers;
 
         virtual void OnInit(size_type begin, size_type end) = 0;
         virtual void OnUpdate(float deltaTime, size_type count) = 0;
@@ -21,44 +21,35 @@ namespace legion::core
     template<typename policy, typename ...buffers>
     struct particle_policy : public particle_policy_base
     {
-        particle_policy()
-        {
-            auto& _buffers = { ...buffers };
-            for (auto& buffer : _buffers)
-            {
-                buffers.emplace(typeHash<_buffers::value_type>(),make_unique(buffer));
-            }
-        }
+        particle_policy() = default;
         virtual void OnInit(size_type begin, size_type end) = 0;
         virtual void OnUpdate(float deltaTime, size_type count) = 0;
         virtual void OnDestroy() = 0;
 
-        template<typename bufferType>
-        particle_buffer<bufferType>& getBuffer()
-        {
-            return buffers[typeHash<bufferType>()].get();
-        }
+        //template<typename bufferType>
+        //particle_buffer<bufferType> getBuffer()
+        //{
+        //    return *static_cast<particle_buffer<float>*>(buffers[typeHash<bufferType>()].get());
+        //}
     };
 
     struct example_policy : public particle_policy<example_policy, float>
     {
         void OnInit(size_type begin, size_type end) override
         {
-            for (size_type particleId = begin; particleId != end; particleId++)
-            {
-                auto& floatBuffer = getBuffer<float>();
-                floatBuffer[particleId] = 10;
-            }
+            //for (size_type particleId = begin; particleId != end; particleId++)
+            //{
+            //    getBuffer<float>()[particleId] = 10;
+            //}
         }
 
         void OnUpdate(float deltaTime, size_type count) override
         {
-            auto& floatBuffer = getBuffer<float>();
-            for (size_type particleId =0; particleId < count; particleId++)
-            {
-                floatBuffer[particleId] -= deltaTime;
-                log::debug("ID: %u =%f",particleId,floatBuffer[particleId]);
-            }
+            //for (size_type particleId = 0; particleId < count; particleId++)
+            //{
+            //    getBuffer<float>()[particleId] -= deltaTime;
+            //    log::debug("ID: %u =%f", particleId, getBuffer<float>()[particleId]);
+            //}
         }
 
         void OnDestroy() override

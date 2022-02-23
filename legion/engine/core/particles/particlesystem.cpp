@@ -1,14 +1,14 @@
-#include <core/particles/particles.hpp>
+#include <core/particles/particlesystem.hpp>
+#include <core/particles/particleemitter.hpp>
 #include <core/common/debugrendering.hpp>
-
 
 namespace legion::core
 {
+
     void ParticleSystem::setup()
     {
+        log::filter(log::severity_debug);
         log::debug("ParticleSystem setup");
-
-        bindToEvent<events::component_creation<particle_emitter>, &ParticleSystem::emitter_setup>();
     }
 
     void ParticleSystem::shutdown()
@@ -21,87 +21,85 @@ namespace legion::core
         ecs::filter<particle_emitter> filter;
         for (auto& ent : filter)
         {
-            auto& emitter = ent.get_component<particle_emitter>().get();
-            emitter.elapsedTime += deltaTime;
+            auto emitter = ent.get_component<particle_emitter>();
+            if (emitter->currentParticleCount < emitter->maxSpawnCount)
+                emit(emitter);
 
-            if (emitter.currentParticleCount < emitter.m_capacity)
-            {
-                float scaledSpawnRate = (deltaTime / emitter.spawnInterval) * emitter.spawnRate;
-                emitter.spawnBuffer += scaledSpawnRate;
-                if (emitter.spawnBuffer > emitter.spawnRate)
-                {
-                    emitter.spawnBuffer = math::min(emitter.spawnBuffer, (float)emitter.m_capacity);
-                    emit(emitter, emitter.spawnBuffer);
-                    emitter.spawnBuffer -= math::trunc(emitter.spawnBuffer);
-                }
-            }
-
-            maintenance(emitter, deltaTime);
+            maintanence(emitter, deltaTime);
         }
     }
 
-    void ParticleSystem::emitter_setup(L_MAYBEUNUSED events::component_creation<particle_emitter>& event)
+    void ParticleSystem::emit(particle_emitter& emitter)
     {
-        auto& emitter = event.entity.get_component<particle_emitter>().get();
-        emitter.resize(emitter.m_capacity);
-        log::debug("Emitter setup");
-    }
 
-    void ParticleSystem::emit(particle_emitter& emitter, size_type count)
-    {
-        log::debug("Emitting");
-        auto startCount = emitter.currentParticleCount;
-        auto targetCount = emitter.currentParticleCount + count;
-        if (targetCount >= emitter.m_capacity)
-            targetCount = emitter.m_capacity - startCount;
-
-        emitter.set_alive(startCount, targetCount, true);
-        emitter.currentParticleCount = targetCount;
-
-        auto& ageBuffer = emitter.get_buffer<life_time>("lifetimeBuffer");
-        for (size_type idx = startCount; idx < targetCount; idx++)
+        int startIdx = emitter.currentParticleCount;
+        int targetIdx = startIdx + emitter.spawnRate;
+        for (int i = startIdx; i < targetIdx; i++)
         {
-            ageBuffer.at(idx).age = 0;
-            ageBuffer.at(idx).max = math::linearRand(emitter.minLifeTime, emitter.maxLifeTime);
+            log::debug("spawned particle: " + std::to_string(i));
+            emitter.getBuffer<life_time>().get(i).max = math::linearRand(emitter.minLifeTime, emitter.maxLifeTime);
+            emitter.getBuffer<position>().get(i) = math::sphericalRand(1.f);
+            auto color = math::sphericalRand(1.f);
+            emitter.getBuffer<math::color>().get(i) = math::color(color.x, color.y, color.z, 1.f);
+            emitter.getBuffer<velocity>().get(i) = math::sphericalRand(1.f);
         }
 
-        for (auto& policy : emitter.m_particlePolicies)
-            policy->onInit(emitter, startCount, targetCount);
+        emitter.currentParticleCount += emitter.spawnRate;
+        if (emitter.currentParticleCount >= emitter.maxSpawnCount)
+            log::debug("Done Spawning");
     }
 
-
-    void ParticleSystem::maintenance(particle_emitter& emitter, float deltaTime)
+    void ParticleSystem::maintanence(particle_emitter& emitter, float deltaTime)
     {
-        auto& ageBuffer = emitter.get_buffer<life_time>("lifetimeBuffer");
-        size_type destroyed = 0;
-        size_type activeCount = 0;
-        for (activeCount = 0; activeCount < emitter.currentParticleCount; activeCount++)
+        auto& buffer = emitter.getBuffer<life_time>();
+        std::vector<id_type> toDelete;
+        for (auto& [id, lifeTime] : buffer.buffer)
         {
-            if (!emitter.is_alive(activeCount))
-                break;
-
-            auto& lifeTime = ageBuffer[activeCount];
             lifeTime.age += deltaTime;
-        }
-        if (!emitter.infinite)
-        {
-            for (size_type i = 0; i < activeCount; i++)
+
+            if (lifeTime.age > lifeTime.max)
             {
-                auto& lifeTime = ageBuffer[i];
-                if (lifeTime.age > lifeTime.max)
-                {
-                    emitter.set_alive(i, false);
-                    emitter.swap(i, emitter.currentParticleCount - 1);
-                    emitter.currentParticleCount--;
-                    destroyed++;
-                }
+                log::debug("particle destroyed: " + std::to_string(id));
+                toDelete.push_back(id);
             }
-            auto targetCount = emitter.currentParticleCount + destroyed;
-            for (auto& policy : emitter.m_particlePolicies)
-                policy->onDestroy(emitter, emitter.currentParticleCount, targetCount);
         }
 
-        for (auto& policy : emitter.m_particlePolicies)
-            policy->onUpdate(emitter, deltaTime, emitter.currentParticleCount);
+        auto& posBuffer = emitter.getBuffer<position>();
+        auto& colorBuffer = emitter.getBuffer<math::color>();
+        auto& velBuffer = emitter.getBuffer<velocity>();
+
+        for (auto id : toDelete)
+        {
+            buffer.buffer.erase(id);
+            posBuffer.buffer.erase(id);
+            colorBuffer.buffer.erase(id);
+            velBuffer.buffer.erase(id);
+        }
+
+        for (auto& [id, pos] : posBuffer.buffer)
+        {
+            math::vec3 perp;
+
+            auto& vel = emitter.getBuffer<velocity>().get(id);
+
+            perp = math::normalize(math::cross(vel, math::vec3::up));
+
+            math::vec3 rotated = (math::axisAngleMatrix(vel, math::perlin(pos) * math::pi<float>()) * math::vec4(perp.x, perp.y, perp.z, 0)).xyz();
+            rotated.y -= 0.5f;
+            rotated = math::normalize(rotated);
+
+            vel = math::normalize(vel + rotated * deltaTime);
+
+            if (math::abs(vel.y) >= 0.9f)
+            {
+                auto rand = math::circularRand(1.f);
+                vel.y = 0.9f;
+                vel = math::normalize(vel + math::vec3(rand.x, 0.f, rand.y));
+            }
+
+            pos += vel * 0.3f * deltaTime;
+
+            debug::drawLine(math::vec3::zero, pos, colorBuffer.get(id));
+        }
     }
 }
