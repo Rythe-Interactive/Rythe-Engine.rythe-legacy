@@ -267,4 +267,26 @@ namespace legion::physics
 
         rigidbody.rigidbodyData.resetModificationFlags();
     }
+
+    void PhysXPhysicsSystem::releasePhysXVariables()
+    {
+        sPhysicsStatics.dispatcher->release();
+        gPhysics->release();
+
+        if (sPhysicsStatics.pvd)
+        {
+            PxPvdTransport* transport = sPhysicsStatics.pvd->getTransport();
+            sPhysicsStatics.pvd->release();
+            sPhysicsStatics.pvd = nullptr;
+            transport->release();
+        }
+
+        sPhysicsStatics.foundation->release();
+    }
+
+    void PhysXPhysicsSystem::fixedUpdate(time::time_span<fast_time> deltaTime)
+    {
+        m_physxScene->simulate(m_timeStep);
+        m_physxScene->fetchResults(true);
+    }
 }
