@@ -11,62 +11,29 @@ namespace legion::core
 {
     struct life_time
     {
-        float age;
-        float max;
+        float age = 0.f;
+        float max = 1.f;
     };
 
-    template<size_type size = 0, typename... Policies>
     struct particle_emitter
     {
-        id_type id;
-        float spawnRate;
-        float spawnBuffer;
-        float spawnCount;
-        float minLifeTime = 1;
-        float maxLifeTime = 2;
+        float spawnRate = 2.f;
+        float maxSpawnCount = 1000.f;
+        float currentParticleCount = 0.f;
+
+        float minLifeTime = 1.f;
+        float maxLifeTime = 2.f;
+
         std::unordered_map<id_type, std::unique_ptr<particle_buffer_base>> particleBuffers;
-        std::unordered_map<id_type, std::unique_ptr<particle_policy_base>> particlePolicies;
-        std::tuple<std::unique_ptr<particle_policy_base>> policies;
+        //std::unordered_map<id_type, pointer<particle_policy_base>> particlePolicies;
 
-        particle_emitter()
-        {
-            polices = std::make_tuple(std::make_unique(...Policies));
-        }
-        ~particle_emitter() = default;
-
-        template<typename buffer>
-        particle_buffer<buffer> getBuffer()
-        {
-            return particleBuffers[typeHash<buffer>()].get();
-        }
-
-        void Emit()
-        {
-            //add particle id to all buffers
-            if (spawnCount < size)
-                for (id_type& bufferId : particleBuffers)
-                    particleBuffers[bufferId]->emplace(spawnCount++, );
-
-            //initialize particle lifetime
-            for (auto& [id, lifeTime] : emitter.getBuffer<life_time>())
-                lifeTime.max = mineLifeTime + std::rand() * (maxLifeTime-minLifeTime);
-
-            std::apply([](auto&... policy) {((policy->OnInit()), ...); }, policies);
-        }
-
-        void Update(float deltaTime)
-        {
-            //particle lifetime updates
-            for (auto& [id, lifeTime] : emitter.getBuffer<life_time>())
-            {
-                lifeTime.age += deltaTime;
-                if (lifeTime.age >= lifeTime.max)
-                    for (id_type& bufferId : particleBuffers)
-                        particleBuffers[bufferId]->erase(id);
-            }
-
-            //particle policy updates
-            std::apply([](auto&... policy) {((policy->OnUpdate(deltaTime,spawnCount)), ...); },policies);
-        }
+        particle_emitter() = default;
+        MOVE_FUNCS(particle_emitter);
+        particle_emitter(const particle_emitter&) = delete;
+     
+        template<typename bufferType>
+        particle_buffer<bufferType>& getBuffer();
     };
 }
+
+#include <core/particles/particleemitter.inl>
