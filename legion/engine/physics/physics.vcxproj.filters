@@ -179,5 +179,11 @@
     <ClInclude Include="diviner\components\rigidbody.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="physx\data\physx_wrapper.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="physx\data\physx_wrapper_container.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

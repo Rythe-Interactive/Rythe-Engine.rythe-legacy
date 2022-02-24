@@ -1,5 +1,6 @@
 #pragma once
 #include <core/core.hpp>
+#include <physics/physx/data/physx_wrapper_container.hpp>
 
 namespace physx
 {
@@ -28,8 +29,15 @@ namespace legion::physics
 
         void setupDefaultScene();
 
+        void executePreSimulationActions();
+
+        void executePostSimulationActions();
+
         static constexpr float m_timeStep = 0.02f;
 
         physx::PxScene* m_physxScene;
+        PhysxWrapperContainer m_physxWrapperContainer;
+
+        std::mutex m_setupShutdownMutex;
     };
 };

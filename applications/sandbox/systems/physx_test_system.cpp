@@ -58,6 +58,8 @@ namespace legion::physics
         {
             auto unrotatedBlockPC = unrotatedBlock.add_component<physicsComponent>();
             unrotatedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1, 1, 1));
+
+            unrotatedBlock.add_component<rigidbody>();
         }
 
         //add rotated default cube on top
@@ -65,6 +67,8 @@ namespace legion::physics
         {
             auto shiftedBlockPC = shiftedBlock.add_component<physicsComponent>();
             shiftedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1, 1, 1));
+
+            unrotatedBlock.add_component<rigidbody>();
         }
 
         //enable player to shoot blocks

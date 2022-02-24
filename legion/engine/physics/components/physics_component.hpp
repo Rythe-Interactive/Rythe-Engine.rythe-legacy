@@ -3,7 +3,7 @@
 
 namespace legion::physics
 {
-    constexpr size_t invalid_physics_component = 0;
+    constexpr size_t invalid_physics_component = std::numeric_limits<size_type>::max();
 
     struct physicsComponent
     {

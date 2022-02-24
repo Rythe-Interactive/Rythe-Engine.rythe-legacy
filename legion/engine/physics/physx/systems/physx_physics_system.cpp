@@ -1,5 +1,7 @@
 #include "physx_physics_system.hpp"
 #include <physx/PxPhysicsAPI.h>
+#include <physics/components/physics_component.hpp>
+#include <physics/components/rigidbody.hpp>
 
 namespace legion::physics
 {
@@ -100,8 +102,53 @@ namespace legion::physics
 
     void PhysXPhysicsSystem::fixedUpdate(time::time_span<fast_time> deltaTime)
     {
+        executePreSimulationActions();
+
         m_physxScene->simulate(m_timeStep);
         m_physxScene->fetchResults(true);
+
+        executePostSimulationActions();
+    }
+
+    void PhysXPhysicsSystem::executePreSimulationActions()
+    {
+        //iterate through all entities that have a physics component
+            //if an unregistered physics component is found
+                //create physx wrapper
+        ecs::filter<physicsComponent> physicsComponentFilter;
+
+        for (auto entity : physicsComponentFilter)
+        {
+            auto& physComp = *entity.get_component<physicsComponent>();
+
+            if (physComp.physicsComponentID == invalid_physics_component)
+            {
+                m_physxWrapperContainer.createPhysxWrapper(physComp);
+            }
+        }
+
+        ecs::filter<physicsComponent,rigidbody> physicsAndRigidbodyComponentFilter;
+
+        for (auto entity : physicsAndRigidbodyComponentFilter)
+        {
+            auto& rbComp = *entity.get_component<rigidbody>();
+
+            if (rbComp.rigidbodyIndex)
+            {
+                //m_physxWrapperContainer.CreatePhysxWrapper(physComp);
+            }
+        }
+
+        //at this point all physics components and rigidbodies are registered, we can go through its events now
+            //
+    }
+
+    void PhysXPhysicsSystem::executePostSimulationActions()
+    {
+        //update positions of actors
+
+        //go through actor void pointers
+            //if entity 
     }
 
     void PhysXPhysicsSystem::releasePhysXVariables()
