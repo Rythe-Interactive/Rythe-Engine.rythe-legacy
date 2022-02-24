@@ -30,6 +30,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="data\colliders\convex_collider_data.hpp" />
+    <ClInclude Include="data\physics_component_data.hpp" />
     <ClInclude Include="data\rigibody_data.hpp" />
     <ClInclude Include="diviner\broadphasecollisionalgorithms\broadphasebruteforce.hpp" />
     <ClInclude Include="diviner\broadphasecollisionalgorithms\broadphasecollisionalgorithm.hpp" />
@@ -68,6 +70,7 @@
     <ClInclude Include="diviner\components\dvr_internal_physics_component.hpp" />
     <ClInclude Include="module\physicsmodule.hpp" />
     <ClInclude Include="diviner\components\dvr_internal_rigidbody.hpp" />
+    <ClInclude Include="components\physics_component.hpp" />
     <ClInclude Include="physx\systems\physx_physics_system.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

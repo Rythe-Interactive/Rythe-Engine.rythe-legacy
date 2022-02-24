@@ -1,5 +1,9 @@
 #pragma once
 #include <core/core.hpp>
+
+#include <physics/components/rigidbody.hpp>
+#include <physics/components/physics_component.hpp>
+
 #include <physics/diviner/systems/physicssystem.hpp>
 #include <physics/diviner/components/dvr_internal_physics_component.hpp>
 #include <physics/diviner/components/dvr_internal_rigidbody.hpp>
@@ -20,6 +24,8 @@ namespace legion::physics
             registerComponentType<identifier>();
 
             reportSystem<PhysXPhysicsSystem>();
+            registerComponentType<physicsComponent>();
+            registerComponentType<rigidbody>();
         }
 
         virtual priority_type priority() override

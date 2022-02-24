@@ -112,6 +112,7 @@
     <ClCompile Include="source.cpp" />
     <ClCompile Include="systems\gui_test.cpp" />
     <ClCompile Include="systems\diviner_physics_test_system.cpp" />
+    <ClCompile Include="systems\physx_test_system.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="data\pp_bloom.hpp" />
