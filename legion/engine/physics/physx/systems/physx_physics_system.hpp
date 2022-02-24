@@ -18,9 +18,6 @@ namespace legion::physics
     {
     public:
 
-        PhysXPhysicsSystem();
-        ~PhysXPhysicsSystem();
-
         virtual void setup();
 
         virtual void shutdown();
