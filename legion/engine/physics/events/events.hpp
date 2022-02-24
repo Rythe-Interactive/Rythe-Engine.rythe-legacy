@@ -1,6 +1,7 @@
 #pragma once
 #include <core/events/event.hpp>
 #include <physics/diviner/data/physics_manifold.hpp>
+#include <physics/data/colliders/convex_collider_data.hpp>
 
 namespace legion::physics {
 
@@ -78,6 +79,8 @@ namespace legion::physics {
         rb_modify_mass(float mass) : newMass{ mass } { }
     };
 
+    //-------------------------------- Rigidbody Component ------------------------------------------------//
+
     struct rb_modify_inertia_tensor final : public core::events::event<rb_modify_inertia_tensor>
     {
         math::mat3 newInertiaTensor;
@@ -106,5 +109,12 @@ namespace legion::physics {
         rb_modify_angular_drag(float angularDrag) : newAngularDrag{ angularDrag } { }
     };
 
+    //-------------------------------- Physics Component ------------------------------------------------//
 
+    struct add_box_collider final : public core::events::event<add_box_collider>
+    {
+        math::vec3 newExtents;
+
+        add_box_collider(const math::vec3& extents) : newExtents{ extents } { }
+    };
 }
