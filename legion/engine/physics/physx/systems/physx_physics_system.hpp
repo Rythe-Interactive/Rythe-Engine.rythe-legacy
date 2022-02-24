@@ -4,11 +4,6 @@
 namespace physx
 {
     class PxScene;
-    class PxFoundation;
-    class PxPvd;
-    class PxDefaultCpuDispatcher;
-    class PxDefaultAllocator;
-    class PxDefaultErrorCallback;
 };
 
 namespace legion::physics
@@ -16,9 +11,6 @@ namespace legion::physics
     class PhysXPhysicsSystem final : public System<PhysXPhysicsSystem>
     {
     public:
-
-        PhysXPhysicsSystem();
-        ~PhysXPhysicsSystem();
 
         virtual void setup();
 
@@ -40,11 +32,5 @@ namespace legion::physics
 
         physx::PxScene* m_physxScene;
 
-        physx::PxDefaultAllocator* m_defaultAllocator = nullptr;
-        physx::PxDefaultErrorCallback* m_defaultErrorCallback = nullptr;
-
-        static physXStatics sPhysicsStatics;
-
-        static size_type sSelfInstanceCounter;
     };
 };
