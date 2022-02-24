@@ -107,7 +107,7 @@ namespace legion::physics
     void PhysXPhysicsSystem::releasePhysXVariables()
     {
         physXStatics::dispatcher->release();
-        gPhysics->release();
+        physXStatics::phyxSDK->release();
 
         if (physXStatics::pvd)
         {
