@@ -270,18 +270,18 @@ namespace legion::physics
 
     void PhysXPhysicsSystem::releasePhysXVariables()
     {
-        sPhysicsStatics.dispatcher->release();
+        physXStatics::dispatcher->release();
         gPhysics->release();
 
-        if (sPhysicsStatics.pvd)
+        if (physXStatics::pvd)
         {
-            PxPvdTransport* transport = sPhysicsStatics.pvd->getTransport();
-            sPhysicsStatics.pvd->release();
-            sPhysicsStatics.pvd = nullptr;
+            PxPvdTransport* transport = physXStatics::pvd->getTransport();
+            physXStatics::pvd->release();
+            physXStatics::pvd = nullptr;
             transport->release();
         }
 
-        sPhysicsStatics.foundation->release();
+        physXStatics::foundation->release();
     }
 
     void PhysXPhysicsSystem::fixedUpdate(time::time_span<fast_time> deltaTime)
