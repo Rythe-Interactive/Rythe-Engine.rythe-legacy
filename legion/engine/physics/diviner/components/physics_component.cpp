@@ -7,7 +7,7 @@ namespace legion::physics
 {
     void physicsComponent::calculateNewLocalCenterOfMass()
     {
-        localCenterOfMass = math::vec3::zero;
+        localCenterOfMass = math::float3::zero;
 
         for (auto collider : colliders)
         {
