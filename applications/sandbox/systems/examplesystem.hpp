@@ -26,79 +26,28 @@ public:
         app::window& win = ecs::world.get_component<app::window>();
         app::context_guard guard(win);
 
+        auto model = gfx::ModelCache::create_model("Sphere", fs::view("assets://models/sphere.obj"));
+        auto material = gfx::MaterialCache::create_material("Default", fs::view("assets://shaders/pbr.shs"));
+        material.set_param(SV_ALBEDO, gfx::TextureCache::create_texture(fs::view("engine://resources/default/albedo")));
+        material.set_param(SV_NORMALHEIGHT, gfx::TextureCache::create_texture(fs::view("engine://resources/default/normalHeight")));
+        material.set_param(SV_MRDAO, gfx::TextureCache::create_texture(fs::view("engine://resources/default/MRDAo")));
+        material.set_param(SV_EMISSIVE, gfx::TextureCache::create_texture(fs::view("engine://resources/default/emissive")));
+        material.set_param(SV_HEIGHTSCALE, 1.f);
+        material.set_param("discardExcess", false);
+        material.set_param("skycolor", math::color(0.1f, 0.3f, 1.0f));
+
         auto ent = createEntity("Particle Emitter");
-        ent.add_component<transform>();
+        auto [pos, rot, scal] = ent.add_component<transform>();
+        scal = scale(3.0f);
+        ent.add_component(gfx::mesh_renderer(material, model));
         auto emitter = ent.add_component<particle_emitter>();
-        emitter->spawnRate = 1;
-        emitter->maxSpawnCount = 10000;
-        emitter->minLifeTime = 5;
-        emitter->maxLifeTime = 20;
-        //auto& buffer = emitter->getBuffer<float>();
-        //for (int i = 0; i < 10; i++)
-        //{
-        //    buffer.get(i) = i * sin(i);
-        //}
-
-        //auto& modBuffer = emitter->getBuffer<float>();
-        //for (int i = 0; i < modBuffer.buffer.size(); i++)
-        //{
-        //    log::debug(modBuffer.get(i));
-        //}
-
-        //auto& lifeTime = emitter->getBuffer<life_time>();
-        //lifeTime.get(0).max = 10;
-        //log::debug(lifeTime.get(0).max);
-
-        //emitter->add_policy<example_policy>();
-
-        //        auto model = gfx::ModelCache::create_model("Sphere", fs::view("assets://models/sphere.obj"));
-        //
-        //        auto material = gfx::MaterialCache::create_material("Texture", fs::view("assets://shaders/texture.shs"));
-        //        material.set_param("_texture", gfx::TextureCache::create_texture(fs::view("engine://resources/default/albedo")));
-        //        {
-        //            auto ent = createEntity("Sun");
-        //            ent.add_component(gfx::light::directional(math::color(1, 1, 0.8f), 10.f));
-        //            auto [pos, rot, scal] = ent.add_component<transform>();
-        //            rot = rotation::lookat(math::vec3::zero, math::vec3(-1, -1, -1));
-        //        }
-        //
-        //#if defined(LEGION_DEBUG)
-        //        for (int i = 0; i < 2000; i++)
-        //#else
-        //        for (int i = 0; i < 20000; i++)
-        //#endif
-        //        {
-        //            auto ent = createEntity();
-        //            auto [pos, rot, scal] = ent.add_component<transform>();
-        //            pos = math::sphericalRand(5.f);
-        //            scal = scale(0.1f, 0.1f, 0.1f);
-        //            ent.add_component(gfx::mesh_renderer(material, model));
-        //        }
-        //
-        //        {
-        //            model = gfx::ModelCache::create_model("Cube", fs::view("assets://models/Cube.obj"));
-        //            auto ent = createEntity();
-        //            auto [pos, rot, scal] = ent.add_component<transform>();
-        //            pos->z = 30.f;
-        //            scal = scale(2.f);
-        //            ent.add_component(gfx::mesh_renderer(material, model));
-        //        }
-        //
-        //        model = gfx::ModelCache::create_model("Sponza", fs::view("assets://models/Sponza/Sponza.gltf"));
-        //
-        //        material = gfx::MaterialCache::create_material("Test", fs::view("assets://shaders/uv.shs"));
-        //
-        //        auto ent = createEntity();
-        //        ent.add_component<transform>();
-        //        ent.add_component(gfx::mesh_renderer(material, model));
-        //
-        //        model = gfx::ModelCache::create_model("Fire place", fs::view("assets://models/fireplace.glb"));
-        //
-        //        ent = createEntity();
-        //        auto [pos, rot, scal] = ent.add_component<transform>();
-        //        pos->x = 30.f;
-        //        scal = scale(2.f);
-        //        ent.add_component(gfx::mesh_renderer(material, model));
+        emitter->infinite = false;
+        emitter->spawnInterval = .1f;
+        emitter->maxSpawnCount = 200;
+        emitter->minLifeTime = 60;
+        emitter->maxLifeTime = 60;
+        emitter->add_policy<orbital_policy>();
+        emitter->add_policy<example_policy>();
 
         bindToEvent<events::exit, &ExampleSystem::onExit>();
     }
@@ -216,7 +165,7 @@ public:
         }
         else
         {
-            raiseEvent<events::exit>();
+            //raiseEvent<events::exit>();
         }
     }
 };

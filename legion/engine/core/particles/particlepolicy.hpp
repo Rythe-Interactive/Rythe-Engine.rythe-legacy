@@ -1,7 +1,7 @@
 #pragma once
 #include <core/math/math.hpp>
 #include <core/defaults/defaultcomponents.hpp>
-#include <core/particles/particlebuffer.hpp>
+
 /**
  * @file particlepolicy.hpp
  * @brief
@@ -9,52 +9,26 @@
 
 namespace legion::core
 {
+    struct particle_emitter;
+
     struct particle_policy_base
     {
-        //std::unordered_map<id_type, std::unique_ptr<particle_buffer_base>> buffers;
+        NO_DTOR_RULE5_NOEXCEPT(particle_policy_base);
+        virtual ~particle_policy_base() = default;
 
-        virtual void OnInit(size_type begin, size_type end) = 0;
-        virtual void OnUpdate(float deltaTime, size_type count) = 0;
-        virtual void OnDestroy() = 0;
+        virtual void OnInit(particle_emitter& emitter, size_type idx) LEGION_PURE;
+        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) LEGION_PURE;
+        virtual void OnDestroy(particle_emitter& emitter) LEGION_PURE;
     };
 
-    template<typename policy, typename ...buffers>
+    template<typename policy>
     struct particle_policy : public particle_policy_base
     {
-        particle_policy() = default;
-        virtual void OnInit(size_type begin, size_type end) = 0;
-        virtual void OnUpdate(float deltaTime, size_type count) = 0;
-        virtual void OnDestroy() = 0;
+        NO_DTOR_RULE5_NOEXCEPT(particle_policy);
+        virtual ~particle_policy() = default;
 
-        //template<typename bufferType>
-        //particle_buffer<bufferType> getBuffer()
-        //{
-        //    return *static_cast<particle_buffer<float>*>(buffers[typeHash<bufferType>()].get());
-        //}
-    };
-
-    struct example_policy : public particle_policy<example_policy, float>
-    {
-        void OnInit(size_type begin, size_type end) override
-        {
-            //for (size_type particleId = begin; particleId != end; particleId++)
-            //{
-            //    getBuffer<float>()[particleId] = 10;
-            //}
-        }
-
-        void OnUpdate(float deltaTime, size_type count) override
-        {
-            //for (size_type particleId = 0; particleId < count; particleId++)
-            //{
-            //    getBuffer<float>()[particleId] -= deltaTime;
-            //    log::debug("ID: %u =%f", particleId, getBuffer<float>()[particleId]);
-            //}
-        }
-
-        void OnDestroy() override
-        {
-            log::debug("Destroyed");
-        }
+        virtual void OnInit(particle_emitter& emitter, size_type idx) LEGION_PURE;
+        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) LEGION_PURE;
+        virtual void OnDestroy(particle_emitter& emitter) LEGION_PURE;
     };
 }
