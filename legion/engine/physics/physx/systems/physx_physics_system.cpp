@@ -289,4 +289,9 @@ namespace legion::physics
         m_physxScene->simulate(m_timeStep);
         m_physxScene->fetchResults(true);
     }
+    
+    void PhysXPhysicsSystem::processPhysicsComponentEvents(physicsComponent& physicsComponentToProcess)
+    {
+
+    }
 }
