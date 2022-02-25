@@ -12,7 +12,6 @@ namespace legion::physics
 
     enum class physics_body_type
     {
-        none,
         static_collider,
         rigidbody
     };
@@ -23,6 +22,6 @@ namespace legion::physics
        
         std::vector<physx::PxActor*> physicsActors;
 
-        physics_body_type bodyType = physics_body_type::none;
+        physics_body_type bodyType = physics_body_type::static_collider;
     };
 }

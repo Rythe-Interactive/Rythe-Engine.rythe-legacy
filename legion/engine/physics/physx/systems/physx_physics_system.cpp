@@ -112,9 +112,8 @@ namespace legion::physics
 
     void PhysXPhysicsSystem::executePreSimulationActions()
     {
-        //iterate through all entities that have a physics component
-            //if an unregistered physics component is found
-                //create physx wrapper
+        //[1] Identify new physics components
+
         ecs::filter<physicsComponent> physicsComponentFilter;
 
         for (auto entity : physicsComponentFilter)
@@ -127,20 +126,36 @@ namespace legion::physics
             }
         }
 
+        //[2] Identify new physics components
+
         ecs::filter<physicsComponent,rigidbody> physicsAndRigidbodyComponentFilter;
 
         for (auto entity : physicsAndRigidbodyComponentFilter)
         {
-            auto& rbComp = *entity.get_component<rigidbody>();
+            auto& physComp = *entity.get_component<physicsComponent>();
+            auto optionalPhysxWrapper = m_physxWrapperContainer.findWrapperWithID(physComp.physicsComponentID);
 
-            if (rbComp.rigidbodyIndex)
+            if (optionalPhysxWrapper->get().bodyType != physics::physics_body_type::rigidbody)
             {
-                //m_physxWrapperContainer.CreatePhysxWrapper(physComp);
+                //the user has switched this body from static to dynamic, reallocate this object to a dynamic object
+                optionalPhysxWrapper->get().bodyType = physics::physics_body_type::rigidbody;
             }
         }
 
         //at this point all physics components and rigidbodies are registered, we can go through its events now
-            //
+        for (auto entity : physicsComponentFilter)
+        {
+            auto& physComp = *entity.get_component<physicsComponent>();
+
+            
+        }
+
+        for (auto entity : physicsAndRigidbodyComponentFilter)
+        {
+            auto& rbComp = *entity.get_component<rigidbody>();
+           
+
+        }
     }
 
     void PhysXPhysicsSystem::executePostSimulationActions()

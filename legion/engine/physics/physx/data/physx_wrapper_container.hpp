@@ -10,6 +10,8 @@ namespace legion::physics
 
         PhysxInternalWrapper& createPhysxWrapper(physicsComponent& unregisteredPhysXWrapper);
 
+        std::optional<std::reference_wrapper< PhysxInternalWrapper>> findWrapperWithID(size_type id);
+
     private:
         sparse_set<size_type> m_wrapperIDSet;
         std::vector<PhysxInternalWrapper> m_physxWrappers;
