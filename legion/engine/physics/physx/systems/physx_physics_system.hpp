@@ -33,11 +33,17 @@ namespace legion::physics
 
         void executePostSimulationActions();
 
+        void processPhysicsComponentEvents( physicsComponent& physicsComponentToProcess );
+
         static constexpr float m_timeStep = 0.02f;
 
         physx::PxScene* m_physxScene;
         PhysxWrapperContainer m_physxWrapperContainer;
 
         std::mutex m_setupShutdownMutex;
+
+        using physicsEventProcessFunc = delegate<void(core::events::event_base*, physx::PxScene*, PhysxInternalWrapper& wrapper, ecs::entity)>;
+
+        std::unordered_map<size_t, physicsEventProcessFunc> m_eventHashToPCEventProcess;
     };
 };

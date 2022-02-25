@@ -14,6 +14,11 @@ namespace legion::physics
             m_modifyPhysicsComponentEvents.push_back(std::make_unique<add_box_collider>(extents));
         }
 
+        std::vector<std::unique_ptr<core::events::event_base>>& GetGeneratedPhysicsComponentEvents()
+        {
+            return m_modifyPhysicsComponentEvents;
+        };
+
     private:
 
         std::vector<convexColliderData> m_convexColliderData;
