@@ -44,6 +44,8 @@
     <ClCompile Include="pipeline\default\postfx\bloom.cpp" />
     <ClCompile Include="pipeline\default\postfx\depthoffield.cpp" />
     <ClCompile Include="util\matini.cpp" />
+    <ClCompile Include="pipeline\default\stages\particlebatchingstage.cpp" />
+    <ClCompile Include="pipeline\default\stages\particlerenderingstage.cpp" />
     <ClCompile Include="pipeline\default\postfx\skybox.cpp" />
     <ClCompile Include="pipeline\default\stages\transparencyrenderstage.cpp" />
   </ItemGroup>
@@ -93,6 +95,8 @@
     <ClInclude Include="components\point.hpp" />
     <ClInclude Include="pipeline\default\postfx\bloom.hpp" />
     <ClInclude Include="pipeline\default\postfx\depthoffield.hpp" />
+    <ClInclude Include="pipeline\default\stages\particlebatchingstage.hpp" />
+    <ClInclude Include="pipeline\default\stages\particlerenderingstage.hpp" />
     <ClInclude Include="pipeline\default\postfx\skybox.hpp" />
     <ClInclude Include="pipeline\default\stages\transparencyrenderstage.hpp" />
   </ItemGroup>

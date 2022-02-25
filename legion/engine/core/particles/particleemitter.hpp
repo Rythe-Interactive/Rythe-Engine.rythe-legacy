@@ -1,7 +1,8 @@
 #pragma once
+#include <unordered_map>
+
 #include <core/types/types.hpp>
-#include <core/particles/particlebuffer.hpp>
-#include <core/particles/particlepolicy.hpp>
+
 /**
  * @file particleemitter.hpp
  * @brief Particle emitters handle spawning, maintenance, and destruction of particles
@@ -9,30 +10,42 @@
 
 namespace legion::core
 {
-    struct life_time
-    {
-        float age = 0.f;
-        float max = 1.f;
-    };
+    struct particle_policy_base;
+    struct particle_buffer_base;
+    template<typename bufferTye>
+    struct particle_buffer;
 
     struct particle_emitter
     {
-        float spawnRate = 2.f;
-        float maxSpawnCount = 1000.f;
-        float currentParticleCount = 0.f;
-
+        size_type maxSpawnCount = 1000;
+        float spawnInterval = 1.f;
         float minLifeTime = 1.f;
         float maxLifeTime = 2.f;
 
+        size_type currentParticleCount = 0;
+        float elapsedTime = 0.f;
+        bool spawn = true;
+        bool infinite = false;
+
+        std::vector<bool> livingBuffer{};
+
         std::unordered_map<id_type, std::unique_ptr<particle_buffer_base>> particleBuffers;
-        //std::unordered_map<id_type, pointer<particle_policy_base>> particlePolicies;
+        std::vector<std::unique_ptr<particle_policy_base>> particlePolicies;
 
         particle_emitter() = default;
         MOVE_FUNCS(particle_emitter);
         particle_emitter(const particle_emitter&) = delete;
-     
+        ~particle_emitter() = default;
+
         template<typename bufferType>
         particle_buffer<bufferType>& getBuffer();
+
+        template<typename... policies>
+        void add_policy();
+
+        void swap(size_type idx);
+        void setAlive(size_type idx, bool alive);
+        bool isAlive(size_type idx);
     };
 }
 
