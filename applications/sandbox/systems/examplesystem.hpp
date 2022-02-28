@@ -15,6 +15,123 @@ struct example_comp
 struct tonemap_action : public lgn::app::input_action<tonemap_action> {};
 struct reload_shaders_action : public lgn::app::input_action<reload_shaders_action> {};
 struct switch_skybox_action : public lgn::app::input_action<switch_skybox_action> {};
+namespace legion::core
+{
+    struct example_policy : public particle_policy<example_policy>
+    {
+        NO_DTOR_RULE5_NOEXCEPT(example_policy);
+        ~example_policy() = default;
+
+        virtual void OnSetup(particle_emitter& emitter) override
+        {
+
+        }
+
+        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override
+        {
+            //log::debug("OnSetup");
+            emitter.setUniform<std::string>("message", "goodbye world");
+
+            for (size_type idx = start; idx <= end; idx++)
+            {
+                auto color = math::color(math::linearRand(0.f, 1.f), math::linearRand(0.f, 1.f), math::linearRand(0.f, 1.f), 1);
+                emitter.getBuffer<math::color>()[idx] = color;
+                emitter.getBuffer<scale>()[idx] = scale(1.f);
+            }
+        }
+
+        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override
+        {
+            auto& ageBuffer = emitter.getBuffer<life_time>();
+            auto& scaleBuffer = emitter.getBuffer<scale>();
+            auto& colorBuffer = emitter.getBuffer<math::color>();
+
+            for (size_type idx = 0; idx < count; idx++)
+            {
+                float scaleFactor = math::clamp(ageBuffer[idx].max-ageBuffer[idx].age, 0.f, 1.f);
+                scaleBuffer[idx] = scale(scaleFactor);
+            }
+        }
+
+        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override
+        {
+            log::debug(emitter.getUniform<std::string>("message").get());
+        }
+    };
+
+    struct orbital_policy : public particle_policy<orbital_policy>
+    {
+        NO_DTOR_RULE5_NOEXCEPT(orbital_policy);
+        ~orbital_policy() = default;
+
+        const double C_MASS = 100.f;
+        const double P_MASS = 50.f;
+        const double G_FORCE = .1f;
+
+        virtual void OnSetup(particle_emitter& emitter) override
+        {
+
+        }
+
+        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override
+        {
+            for (size_type idx = start; idx <= end; idx++)
+            {
+                emitter.getBuffer<position>()[idx] = math::normalize(math::sphericalRand(1.f)) * 3.f;
+                emitter.getBuffer<velocity>()[idx] = math::normalize(math::cross(emitter.getBuffer<position>()[idx], math::vec3::up)) * 2.f;
+            }
+        }
+
+        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override
+        {
+            auto& posBuffer = emitter.getBuffer<position>();
+            auto& velBuffer = emitter.getBuffer<velocity>();
+
+            for (size_type idx = 0; idx < count; idx++)
+            {
+                auto r2 = math::pow(posBuffer[idx].x, 2) + math::pow(posBuffer[idx].y, 2) + math::pow(posBuffer[idx].z, 2);
+                auto force = G_FORCE * ((P_MASS * C_MASS) / r2);
+                velBuffer[idx] += math::normalize(-posBuffer[idx]) * (force / P_MASS) * deltaTime;
+                posBuffer[idx] += velBuffer[idx] * deltaTime;
+            }
+        }
+
+        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override
+        {
+
+        }
+    };
+
+    struct rendering_policy : particle_policy<rendering_policy>
+    {
+        NO_DTOR_RULE5_NOEXCEPT(rendering_policy);
+        ~rendering_policy() = default;
+
+        virtual void OnSetup(particle_emitter& emitter) override
+        {
+
+        }
+
+        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override
+        {
+            auto model = gfx::ModelCache::create_model("Sphere", fs::view("assets://models/sphere.obj"));
+            auto material = gfx::MaterialCache::create_material("Test", fs::view("assets://shaders/uv.shs"));
+
+            emitter.setUniform<mesh_filter>("mesh_filter", mesh_filter(model.get_mesh()));
+            emitter.setUniform<gfx::mesh_renderer>("renderer", gfx::mesh_renderer(material, model));
+        }
+
+        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type idx) override
+        {
+
+        }
+
+        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override
+        {
+
+        }
+    };
+}
 
 class ExampleSystem final : public legion::System<ExampleSystem>
 {

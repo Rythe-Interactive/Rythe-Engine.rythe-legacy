@@ -49,7 +49,6 @@
     <ClCompile Include="pipeline\default\stages\meshbatchingstage.cpp" />
     <ClCompile Include="pipeline\default\stages\meshrenderstage.cpp" />
     <ClCompile Include="pipeline\default\stages\particlebatchingstage.cpp" />
-    <ClCompile Include="pipeline\default\stages\particlerenderingstage.cpp" />
     <ClCompile Include="pipeline\default\stages\submitstage.cpp" />
     <ClCompile Include="pipeline\default\stages\transparencyrenderstage.cpp" />
     <ClCompile Include="pipeline\gui\stages\imguirenderstage.cpp" />
@@ -72,7 +71,6 @@
     <ClInclude Include="pipeline\default\postfx\tonemapping.hpp" />
     <ClInclude Include="pipeline\default\stages\debugrenderstage.hpp" />
     <ClInclude Include="pipeline\default\stages\particlebatchingstage.hpp" />
-    <ClInclude Include="pipeline\default\stages\particlerenderingstage.hpp" />
     <ClInclude Include="pipeline\default\stages\postprocessingstage.hpp" />
     <ClInclude Include="pipeline\default\stages\transparencyrenderstage.hpp" />
     <ClInclude Include="pipeline\gui\stages\imguirenderstage.hpp" />

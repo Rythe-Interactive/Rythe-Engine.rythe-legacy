@@ -145,7 +145,6 @@ namespace legion::core
             auto [position, rotation, scale] = values();
             return math::compose(scale, rotation, position);
         }
-
     };
 
     struct velocity : public math::vec3
