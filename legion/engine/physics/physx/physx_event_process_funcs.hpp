@@ -9,5 +9,5 @@ namespace physx
 
 namespace legion::physics
 {
-    void processAddBoxEvent(events::event_base* addBoxEvent, physx::PxScene* scene, PhysxInternalWrapper& wrapper, ecs::entity entity);
+    void processAddBoxEvent(events::event_base* addBoxEvent, PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity);
 }

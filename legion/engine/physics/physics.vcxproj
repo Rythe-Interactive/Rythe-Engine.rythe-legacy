@@ -23,6 +23,7 @@
     <ClCompile Include="diviner\physics_statics.cpp" />
     <ClCompile Include="diviner\systems\physicssystem.cpp" />
     <ClCompile Include="physx\data\physx_wrapper_container.cpp" />
+    <ClCompile Include="physx\physx_event_process_funcs.cpp" />
     <ClCompile Include="physx\systems\physx_physics_system.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -74,6 +75,7 @@
     <ClInclude Include="components\physics_component.hpp" />
     <ClInclude Include="physx\data\physx_wrapper.hpp" />
     <ClInclude Include="physx\data\physx_wrapper_container.hpp" />
+    <ClInclude Include="physx\physx_event_process_funcs.hpp" />
     <ClInclude Include="physx\systems\physx_physics_system.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

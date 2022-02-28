@@ -5,10 +5,18 @@
 namespace physx
 {
     class PxScene;
+    class PxPhysics;
+    class PxMaterial;
 };
 
 namespace legion::physics
 {
+    struct PhysxEnviromentInfo
+    {
+        physx::PxScene* scene = nullptr;
+        physx::PxMaterial* defaultMaterial = nullptr;
+    };
+
     class PhysXPhysicsSystem final : public System<PhysXPhysicsSystem>
     {
     public:
@@ -18,6 +26,8 @@ namespace legion::physics
         virtual void shutdown();
 
         void fixedUpdate(time::time_span<fast_time> deltaTime);
+
+        static physx::PxPhysics* getSDK();
 
     private:
 
@@ -38,11 +48,13 @@ namespace legion::physics
         static constexpr float m_timeStep = 0.02f;
 
         physx::PxScene* m_physxScene;
+        physx::PxMaterial* m_defaultMaterial = nullptr;
+
         PhysxWrapperContainer m_physxWrapperContainer;
 
         std::mutex m_setupShutdownMutex;
 
-        using physicsEventProcessFunc = delegate<void(core::events::event_base*, physx::PxScene*, PhysxInternalWrapper& wrapper, ecs::entity)>;
+        using physicsEventProcessFunc = delegate<void(core::events::event_base*, PhysxEnviromentInfo&, PhysxInternalWrapper&, ecs::entity)>;
 
         std::unordered_map<size_t, physicsEventProcessFunc> m_eventHashToPCEventProcess;
     };

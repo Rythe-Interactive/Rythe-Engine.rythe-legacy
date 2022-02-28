@@ -28,6 +28,11 @@ namespace legion::physics
     constexpr size_type defaultPVDListeningPort = 5425;
     constexpr size_type defaultPVDHostTimeout = 10;
 
+    physx::PxPhysics* PhysXPhysicsSystem::getSDK()
+    {
+        return PS::phyxSDK;
+    }
+
     void PhysXPhysicsSystem::setup()
     {
         {
@@ -47,6 +52,7 @@ namespace legion::physics
         const async::lock_guard guard(PS::setupShutdownLock);
 
         m_physxScene->release();
+        m_defaultMaterial->release();
         
         PS::selfInstanceCounter--;
 
@@ -82,6 +88,7 @@ namespace legion::physics
         sceneDesc.flags |= PxSceneFlag::eENABLE_STABILIZATION;
 
         m_physxScene = PS::phyxSDK->createScene(sceneDesc);
+        m_defaultMaterial = PS::phyxSDK->createMaterial(0.5f, 0.5f, 0.1f);
     }
 
     void PhysXPhysicsSystem::releasePhysXVariables()
