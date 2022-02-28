@@ -461,6 +461,7 @@
     <ClInclude Include="particles\particlesystem.hpp" />
     <ClInclude Include="particles\particlepolicy.hpp" />
     <ClInclude Include="common\debugrendering.hpp" />
+    <ClInclude Include="particles\particleuniform.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="platform\cpp.hint" />
@@ -628,5 +629,6 @@
     <None Include="engine\module.inl" />
     <None Include="particles\particleemitter.inl" />
     <None Include="particles\particlebuffer.inl" />
+    <None Include="particles\particleuniform.inl" />
   </ItemGroup>
 </Project>
