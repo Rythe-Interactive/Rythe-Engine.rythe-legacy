@@ -23,30 +23,6 @@ namespace legion::core
         ~life_time() = default;
     };
 
-    struct example_policy : public particle_policy<example_policy>
-    {
-        NO_DTOR_RULE5_NOEXCEPT(example_policy);
-        ~example_policy() = default;
-
-        virtual void OnInit(particle_emitter& emitter, size_type idx) override;
-        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
-        virtual void OnDestroy(particle_emitter& emitter) override;
-    };
-
-    struct orbital_policy : public particle_policy<orbital_policy>
-    {
-        NO_DTOR_RULE5_NOEXCEPT(orbital_policy);
-        ~orbital_policy() = default;
-
-        const double C_MASS = 100.f;
-        const double P_MASS = 10.f;
-        const double G_FORCE = .1f;
-
-        virtual void OnInit(particle_emitter& emitter, size_type idx) override;
-        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
-        virtual void OnDestroy(particle_emitter& emitter) override;
-    };
-
     class ParticleSystem final : public System<ParticleSystem>
     {
     public:
