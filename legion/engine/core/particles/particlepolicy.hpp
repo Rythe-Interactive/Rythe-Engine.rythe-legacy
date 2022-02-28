@@ -16,9 +16,10 @@ namespace legion::core
         NO_DTOR_RULE5_NOEXCEPT(particle_policy_base);
         virtual ~particle_policy_base() = default;
 
-        virtual void OnInit(particle_emitter& emitter, size_type idx) LEGION_PURE;
+        virtual void OnSetup(particle_emitter& emitter) LEGION_PURE;
+        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) LEGION_PURE;
         virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) LEGION_PURE;
-        virtual void OnDestroy(particle_emitter& emitter) LEGION_PURE;
+        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) LEGION_PURE;
     };
 
     template<typename policy>
@@ -27,8 +28,9 @@ namespace legion::core
         NO_DTOR_RULE5_NOEXCEPT(particle_policy);
         virtual ~particle_policy() = default;
 
-        virtual void OnInit(particle_emitter& emitter, size_type idx) LEGION_PURE;
+        virtual void OnSetup(particle_emitter& emitter) LEGION_PURE;
+        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) LEGION_PURE;
         virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) LEGION_PURE;
-        virtual void OnDestroy(particle_emitter& emitter) LEGION_PURE;
+        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) LEGION_PURE;
     };
 }

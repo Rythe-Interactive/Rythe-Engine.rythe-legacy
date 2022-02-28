@@ -200,6 +200,7 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="particles\particlepolicy.hpp" />
     <ClInclude Include="particles\particles.hpp" />
     <ClInclude Include="particles\particlesystem.hpp" />
+    <ClInclude Include="particles\particleuniform.hpp" />
     <ClInclude Include="scheduling\clock.hpp" />
     <ClInclude Include="scheduling\process.hpp" />
     <ClInclude Include="scheduling\processchain.hpp" />
@@ -749,6 +750,7 @@ del /q ".\xcopyexclude"</Command>
     <None Include="math\glm\gtx\wrap.inl" />
     <None Include="particles\particlebuffer.inl" />
     <None Include="particles\particleemitter.inl" />
+    <None Include="particles\particleuniform.inl" />
     <None Include="platform\cpp.hint" />
     <None Include="scheduling\process.inl" />
     <None Include="scheduling\processchain.inl" />
