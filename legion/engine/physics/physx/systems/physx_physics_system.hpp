@@ -14,6 +14,12 @@ namespace physx
 
 namespace legion::physics
 {
+    struct PhysxEnviromentInfo
+    {
+        physx::PxScene* scene = nullptr;
+        physx::PxMaterial* defaultMaterial = nullptr;
+    };
+
     class PhysXPhysicsSystem final : public System<PhysXPhysicsSystem>
     {
     public:

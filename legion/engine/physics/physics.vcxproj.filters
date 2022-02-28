@@ -72,6 +72,9 @@
     <ClCompile Include="diviner\components\physics_component.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="physx\physx_event_process_funcs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="physx\data\physx_wrapper_container.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -222,6 +225,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="physx\data\physx_wrapper_container.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="physx\physx_event_process_funcs.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
