@@ -2,6 +2,7 @@
 #include <rendering/pipeline/default/stages/clearstage.hpp>
 #include <rendering/pipeline/default/stages/framebufferresizestage.hpp>
 #include <rendering/pipeline/default/stages/lightbufferstage.hpp>
+#include <rendering/pipeline/default/stages/particlebatchingstage.hpp>
 #include <rendering/pipeline/default/stages/meshbatchingstage.hpp>
 #include <rendering/pipeline/default/stages/meshrenderstage.hpp>
 #include <rendering/pipeline/default/stages/debugrenderstage.hpp>
@@ -23,6 +24,7 @@ namespace legion::rendering
         attachStage<FramebufferResizeStage>();
         attachStage<LightBufferStage>();
         attachStage<MeshBatchingStage>();
+        attachStage<ParticleBatchingStage>();
         attachStage<MeshRenderStage>();
         attachStage<DebugRenderStage>();
         attachStage<PostProcessingStage>();

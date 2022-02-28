@@ -18,29 +18,32 @@ namespace legion::core
 
         virtual void OnSetup(particle_emitter& emitter) override
         {
-            emitter.setUniform<std::string>("message", "hello world");
+
         }
 
         virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override
         {
+            //log::debug("OnSetup");
+            emitter.setUniform<std::string>("message", "goodbye world");
+
             for (size_type idx = start; idx <= end; idx++)
             {
                 auto color = math::color(math::linearRand(0.f, 1.f), math::linearRand(0.f, 1.f), math::linearRand(0.f, 1.f), 1);
                 emitter.getBuffer<math::color>()[idx] = color;
+                emitter.getBuffer<scale>()[idx] = scale(1.f);
             }
         }
 
         virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override
         {
-            auto& posBuffer = emitter.getBuffer<position>();
-            auto& velBuffer = emitter.getBuffer<velocity>();
+            auto& ageBuffer = emitter.getBuffer<life_time>();
+            auto& scaleBuffer = emitter.getBuffer<scale>();
             auto& colorBuffer = emitter.getBuffer<math::color>();
 
             for (size_type idx = 0; idx < count; idx++)
             {
-                auto& pos = posBuffer[idx];
-                auto& vel = velBuffer[idx];
-                debug::drawLine(pos, pos + vel * deltaTime * 8.f, colorBuffer[idx], 1.f);
+                float scaleFactor = math::clamp(ageBuffer[idx].max-ageBuffer[idx].age, 0.f, 1.f);
+                scaleBuffer[idx] = scale(scaleFactor);
             }
         }
 
@@ -106,13 +109,10 @@ namespace legion::core
         virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override
         {
             auto model = gfx::ModelCache::create_model("Sphere", fs::view("assets://models/sphere.obj"));
-            auto material = gfx::MaterialCache::create_material("Default", fs::view("assets://shaders/uv.shs"));
+            auto material = gfx::MaterialCache::create_material("Test", fs::view("assets://shaders/uv.shs"));
 
-            for (size_type idx = start; idx <= end; idx++)
-            {
-                emitter.getBuffer<mesh_filter>()[idx] = mesh_filter(model.get_mesh());
-                emitter.getBuffer<gfx::mesh_renderer>()[idx] = gfx::mesh_renderer(material, model);
-            }
+            emitter.setUniform<mesh_filter>("mesh_filter", mesh_filter(model.get_mesh()));
+            emitter.setUniform<gfx::mesh_renderer>("renderer", gfx::mesh_renderer(material, model));
         }
 
         virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type idx) override

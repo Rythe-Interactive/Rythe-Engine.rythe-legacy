@@ -11,10 +11,9 @@ namespace legion::core
         ecs::filter<particle_emitter> filter;
         for (auto& ent : filter)
         {
-            auto& emitter = ent.get_component<particle_emitter>();
+            auto emitter = ent.get_component<particle_emitter>();
             for (size_type i = 0; i < emitter->maxSpawnCount; i++)
                 emitter->setAlive(i, false);
-
             for (auto& policy : emitter->particlePolicies)
                 policy->OnSetup(emitter);
         }

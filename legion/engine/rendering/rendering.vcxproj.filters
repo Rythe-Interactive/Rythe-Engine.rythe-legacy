@@ -45,7 +45,6 @@
     <ClCompile Include="pipeline\default\postfx\depthoffield.cpp" />
     <ClCompile Include="util\matini.cpp" />
     <ClCompile Include="pipeline\default\stages\particlebatchingstage.cpp" />
-    <ClCompile Include="pipeline\default\stages\particlerenderingstage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="components\camera.hpp" />
@@ -94,7 +93,6 @@
     <ClInclude Include="pipeline\default\postfx\bloom.hpp" />
     <ClInclude Include="pipeline\default\postfx\depthoffield.hpp" />
     <ClInclude Include="pipeline\default\stages\particlebatchingstage.hpp" />
-    <ClInclude Include="pipeline\default\stages\particlerenderingstage.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\buffer.inl" />
