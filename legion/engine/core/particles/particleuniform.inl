@@ -4,8 +4,14 @@
 namespace legion::core
 {
     template<typename uniformType>
-    uniformType& particle_uniform<uniformType>::get()
+    void particle_uniform<uniformType>::set(uniformType val)
     {
-        return uniform;
+        uniform = val;
+    }
+
+    template<typename uniformType>
+    uniformType particle_uniform<uniformType>::get()
+    {
+        return std::any_cast<uniformType>(uniform);
     }
 }
