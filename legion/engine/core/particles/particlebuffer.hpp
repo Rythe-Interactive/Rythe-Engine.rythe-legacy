@@ -1,6 +1,6 @@
 #pragma once
-#include <core/math/math.hpp>
-#include <core/defaults/defaultcomponents.hpp>
+#include <core/platform/platform.hpp>
+#include <core/types/types.hpp>
 
 /**
  * @file particlebuffer.hpp
@@ -18,7 +18,6 @@ namespace legion::core
         virtual ~particle_buffer_base() = default;
 
         void swap(size_type idx1, size_type idx2);
-
         size_type size();
     };
 
