@@ -81,6 +81,12 @@ namespace legion::core
     template<typename... policies>
     void particle_emitter::add_policy()
     {
+        size_type start = particlePolicies.size();
         particlePolicies.push_back((std::make_unique<policies>(), ...));
+        size_type end = particlePolicies.size();
+        for (size_type idx = start; idx < end; idx++)
+        {
+            particlePolicies[idx]->OnSetup(*this);
+        }
     }
 }
