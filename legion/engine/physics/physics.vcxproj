@@ -22,6 +22,7 @@
     <ClCompile Include="diviner\components\physics_component.cpp" />
     <ClCompile Include="diviner\physics_statics.cpp" />
     <ClCompile Include="diviner\systems\physicssystem.cpp" />
+    <ClCompile Include="physx\systems\physx_physics_system.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\core\core.vcxproj">
@@ -65,13 +66,14 @@
     <ClInclude Include="diviner\components\physics_component.hpp" />
     <ClInclude Include="module\physicsmodule.hpp" />
     <ClInclude Include="diviner\components\rigidbody.hpp" />
+    <ClInclude Include="physx\systems\physx_physics_system.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{07b99c45-60d0-4605-9a33-4bfee86d588a}</ProjectGuid>
     <RootNamespace>physics</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -124,6 +126,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>-Werror=return-type %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
