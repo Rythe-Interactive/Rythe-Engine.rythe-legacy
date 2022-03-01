@@ -81,6 +81,8 @@ namespace legion::physics
 
     void processAddFirstSphere(physics_component& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
     {
+        //cast event into actual derived event
+        add_box_collider* boxColliderAddEvent = static_cast<add_box_collider*>(addBoxEvent);
         PhysicsComponentData& data = physicsComponent.physicsCompData;
 
         for (SphereColliderData& sphereCollider : data.getSphereData())
@@ -89,13 +91,20 @@ namespace legion::physics
 
             sphereCollider.setRegistered(true);
 
+        const math::vec3& pos = *entity.get_component<position>();
+        const math::quat& rot = *entity.get_component<rotation>();
             PxTransform transform;
             PxTransform localTransform;
 
+        PxTransform transform(
+            PxVec3(pos.x, pos.y, pos.z),
+            PxQuat(rot.x, rot.y, rot.z,rot.w));
             calculateGlobalAndLocalTransforms(localTransform, transform, sphereCollider, entity);
 
+        const math::vec3& extents = boxColliderAddEvent->newExtents;
             float radius = sphereCollider.getRadius();
 
+        if (wrapper.bodyType == physics_body_type::rigidbody)
             if (wrapper.bodyType == physics_body_type::rigidbody)
             {
                 instantiateDynamicActorWith<PxSphereGeometry,float&>(getSDK(), wrapper, transform, localTransform, sceneInfo, entity, radius);
@@ -126,5 +135,7 @@ namespace legion::physics
 
             instantiateNextCollider<PxSphereGeometry, float&>(getSDK(), wrapper, localTransform, sceneInfo, radius);
         }
+
+
     }
 }
