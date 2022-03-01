@@ -1,6 +1,7 @@
 #include <core/particles/particles.hpp>
 #include <core/common/debugrendering.hpp>
 
+
 namespace legion::core
 {
     void ParticleSystem::setup()
@@ -8,15 +9,7 @@ namespace legion::core
         log::filter(log::severity_debug);
         log::debug("ParticleSystem setup");
 
-        ecs::filter<particle_emitter> filter;
-        for (auto& ent : filter)
-        {
-            auto emitter = ent.get_component<particle_emitter>();
-            for (size_type i = 0; i < emitter->maxSpawnCount; i++)
-                emitter->setAlive(i, false);
-            for (auto& policy : emitter->particlePolicies)
-                policy->OnSetup(emitter);
-        }
+        bindToEvent<events::component_creation<particle_emitter>, &ParticleSystem::emitter_setup>();
     }
 
     void ParticleSystem::shutdown()
@@ -35,33 +28,47 @@ namespace legion::core
                 emitter.elapsedTime += deltaTime;
                 if (emitter.elapsedTime >= emitter.spawnInterval)
                 {
-                    emitter.elapsedTime = 0;
-                    emit(emitter);
+                    size_type count = math::trunc(emitter.elapsedTime / emitter.spawnInterval);
+                    emit(emitter, count);
                 }
             }
             maintanence(emitter, deltaTime);
         }
     }
 
-    void ParticleSystem::emit(particle_emitter& emitter)
+    void ParticleSystem::emitter_setup(L_MAYBEUNUSED events::component_creation<particle_emitter>& event)
+    {
+        ecs::filter<particle_emitter> filter;
+        for (auto& ent : filter)
+        {
+            auto emitter = ent.get_component<particle_emitter>();
+            for (size_type i = 0; i < emitter->maxSpawnCount; i++)
+                emitter->setAlive(i, false);
+        }
+    }
+
+    void ParticleSystem::emit(particle_emitter& emitter, size_type count)
     {
         auto& ageBuffer = emitter.getBuffer<life_time>();
-
-        size_type targetIdx = emitter.currentParticleCount;
-
-        emitter.setAlive(targetIdx, true);
-        ageBuffer.get(targetIdx).age = 0;
-        ageBuffer.get(targetIdx).max = math::linearRand(emitter.minLifeTime, emitter.maxLifeTime);
-        for (auto& policy : emitter.particlePolicies)
-            policy->OnInit(emitter, emitter.currentParticleCount, emitter.currentParticleCount);
-
-        emitter.currentParticleCount++;
-        if (emitter.currentParticleCount >= emitter.maxSpawnCount)
+        if (emitter.currentParticleCount + count > emitter.maxSpawnCount)
         {
+            count = emitter.maxSpawnCount - emitter.currentParticleCount;
             if (!emitter.infinite)
                 emitter.spawn = false;
-            emitter.currentParticleCount = emitter.maxSpawnCount;
         }
+
+        for (size_type i = 0; i < count; i++)
+        {
+            size_type targetIdx = emitter.currentParticleCount + i;
+            emitter.setAlive(targetIdx, true);
+            ageBuffer.get(targetIdx).age = 0;
+            ageBuffer.get(targetIdx).max = math::linearRand(emitter.minLifeTime, emitter.maxLifeTime);
+        }
+
+        for (auto& policy : emitter.particlePolicies)
+            policy->OnInit(emitter, emitter.currentParticleCount, emitter.currentParticleCount + count);
+
+        emitter.currentParticleCount += count;
     }
 
     void ParticleSystem::maintanence(particle_emitter& emitter, float deltaTime)
