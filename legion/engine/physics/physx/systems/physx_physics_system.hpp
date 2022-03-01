@@ -1,6 +1,8 @@
 #pragma once
 #include <core/core.hpp>
 #include <physics/physx/data/physx_wrapper_container.hpp>
+#include <physics/physx/physx_integration_helpers.hpp>
+#include <core/containers/delegate.hpp>
 
 namespace physx
 {
@@ -11,12 +13,6 @@ namespace physx
 
 namespace legion::physics
 {
-    struct PhysxEnviromentInfo
-    {
-        physx::PxScene* scene = nullptr;
-        physx::PxMaterial* defaultMaterial = nullptr;
-    };
-
     class PhysXPhysicsSystem final : public System<PhysXPhysicsSystem>
     {
     public:
@@ -39,11 +35,13 @@ namespace legion::physics
 
         void setupDefaultScene();
 
+        void bindEventsToEventProcessors();
+
         void executePreSimulationActions();
 
         void executePostSimulationActions();
 
-        void processPhysicsComponentEvents( physicsComponent& physicsComponentToProcess );
+        void processPhysicsComponentEvents(ecs::entity ent, physicsComponent& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo);
 
         static constexpr float m_timeStep = 0.02f;
 
@@ -54,8 +52,8 @@ namespace legion::physics
 
         std::mutex m_setupShutdownMutex;
 
-        using physicsEventProcessFunc = delegate<void(core::events::event_base*, PhysxEnviromentInfo&, PhysxInternalWrapper&, ecs::entity)>;
+        using physicsEventProcessFunc = delegate<void(core::events::event_base*, const PhysxEnviromentInfo&, PhysxInternalWrapper&, ecs::entity)>;
 
-        std::unordered_map<size_t, physicsEventProcessFunc> m_eventHashToPCEventProcess;
+        std::unordered_map<id_type, physicsEventProcessFunc> m_eventHashToPCEventProcess;
     };
 };

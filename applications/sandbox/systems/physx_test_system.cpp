@@ -61,17 +61,47 @@ namespace legion::physics
 
             unrotatedBlock.add_component<rigidbody>();
         }
-
-        //add rotated default cube on top
+ 
+        //add default cube on top
         auto shiftedBlock = createDefaultMeshEntity(math::vec3(0, 10, 0), cubeH, concreteMat);
         {
             auto shiftedBlockPC = shiftedBlock.add_component<physicsComponent>();
             shiftedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1, 1, 1));
 
-            unrotatedBlock.add_component<rigidbody>();
+            shiftedBlock.add_component<rigidbody>();
         }
 
         //enable player to shoot blocks
+        app::InputSystem::createBinding<ShootPhysXBox>(app::inputmap::method::F);
+        bindToEvent<ShootPhysXBox, &PhysXTestSystem::shootPhysXCubes>();
+    }
+
+    void PhysXTestSystem::shootPhysXCubes(ShootPhysXBox& action)
+    {
+        if (!action.value) { return; }
+
+        //get camera position and set transform to camera postiion 
+        ecs::filter<rendering::camera> cameraQuery;
+
+        math::vec3 cameraDirection; math::vec3 cameraPosition;
+
+        //assume the first camera is the player controlled camera
+        for (auto ent : cameraQuery)
+        {
+            auto [positionCamH, rotationCamH, scaleCamH] = ent.get_component<transform>();
+            cameraDirection = rotationCamH.get() * math::vec3(0, 0, 1);
+            cameraPosition = positionCamH.get() + cameraDirection * 2.5f;
+        }
+
+        auto shiftedBlock = createDefaultMeshEntity(cameraPosition, cubeH, concreteMat);
+
+        {
+            auto shiftedBlockPC = shiftedBlock.add_component<physicsComponent>();
+            shiftedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1, 1, 1));
+
+            rigidbody& rb = *shiftedBlock.add_component<rigidbody>();
+            rb.rigidbodyData.setVelocity(cameraDirection);
+        }
     }
 
     void PhysXTestSystem::initializeLitMaterial(rendering::material_handle& materialToInitialize,

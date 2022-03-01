@@ -4,6 +4,8 @@
 
 namespace legion::physics
 {
+    constexpr float boxExtentSizeMultiplier = 0.5f;
+
     class physicsComponentData
     {
     public:
@@ -11,7 +13,7 @@ namespace legion::physics
         inline void AddBoxCollider(const math::vec3& extents)
         {
             m_convexColliderData.push_back(convexColliderData());
-            m_modifyPhysicsComponentEvents.push_back(std::make_unique<add_box_collider>(extents));
+            m_modifyPhysicsComponentEvents.push_back(std::make_unique<add_box_collider>(extents * boxExtentSizeMultiplier));
         }
 
         std::vector<std::unique_ptr<core::events::event_base>>& GetGeneratedPhysicsComponentEvents()

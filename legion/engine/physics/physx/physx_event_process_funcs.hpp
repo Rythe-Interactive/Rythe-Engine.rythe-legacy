@@ -1,6 +1,7 @@
 #pragma once
 #include <core/core.hpp>
 #include <physics/physx/data/physx_wrapper.hpp>
+#include <physics/physx/physx_integration_helpers.hpp>
 
 namespace physx
 {
@@ -9,5 +10,5 @@ namespace physx
 
 namespace legion::physics
 {
-    void processAddBoxEvent(events::event_base* addBoxEvent, PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity);
+    void processAddBoxEvent(events::event_base* addBoxEvent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity);
 }

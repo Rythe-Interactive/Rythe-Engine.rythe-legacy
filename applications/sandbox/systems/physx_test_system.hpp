@@ -4,6 +4,8 @@
 
 namespace lgn = legion;
 
+struct ShootPhysXBox : public lgn::app::input_action<ShootPhysXBox> {};
+
 namespace legion::physics
 {
     class PhysXTestSystem : public System<PhysXTestSystem>
@@ -16,6 +18,7 @@ namespace legion::physics
 
         //wide block, 1 normal cube on the center, 1 rotated default cube on top of it
         void setupCubeWorldTestScene();
+        void shootPhysXCubes(ShootPhysXBox& action);
 
         //-------------------------- Scene Setup Helpers ---------------------------------------//
 

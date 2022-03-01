@@ -1,5 +1,5 @@
 #include "physx_event_process_funcs.hpp"
-#include <physics/physx/systems/physx_physics_system.hpp>
+#include <physics/physx/physx_integration_helpers.hpp>
 #include <physx/PxPhysicsAPI.h>
 #include <physics/events/events.hpp>
 
@@ -7,7 +7,7 @@ using namespace physx;
 
 namespace legion::physics
 {
-    void processAddBoxEvent(events::event_base* addBoxEvent, PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
+    void processAddBoxEvent(events::event_base* addBoxEvent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
     {
         //cast event into actual derived event
         add_box_collider* boxColliderAddEvent = static_cast<add_box_collider*>(addBoxEvent);
@@ -23,12 +23,23 @@ namespace legion::physics
 
         if (wrapper.bodyType == physics_body_type::rigidbody)
         {
-            PxRigidDynamic* box = PxCreateDynamic(*PhysXPhysicsSystem::getSDK(), transform,
+            PxRigidDynamic* rb = PxCreateDynamic(*getSDK(), transform,
                 PxBoxGeometry(extents.x, extents.y, extents.z), *sceneInfo.defaultMaterial, 1.0f);
+
+            rb->userData = entity.data;
+
+            wrapper.physicsActors.push_back(rb);
+            sceneInfo.scene->addActor(*rb);
         }
         else if (wrapper.bodyType == physics_body_type::static_collider)
         {
+            PxRigidStatic* staticCollider = PxCreateStatic(*getSDK(), transform,
+                PxBoxGeometry(extents.x, extents.y, extents.z), *sceneInfo.defaultMaterial);
 
+            wrapper.physicsActors.push_back(staticCollider);
+            sceneInfo.scene->addActor(*staticCollider);
         }
+
+
     }
 }
