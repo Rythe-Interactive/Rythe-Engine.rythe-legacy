@@ -5,7 +5,7 @@
 
 namespace legion::physics::diviner
 {
-    struct dvrInternalRigidbody
+    struct DvrInternalRigidbody
     {
 
         //linear motion component

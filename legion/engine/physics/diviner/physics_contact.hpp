@@ -340,9 +340,9 @@ namespace legion::physics
 
 
 
-        void logdvrInternalRigidbodyState()
+        void logDvrInternalRigidbodyState()
         {
-            log::debug("//--------logdvrInternalRigidbodyState----------//");
+            log::debug("//--------logDvrInternalRigidbodyState----------//");
             log::debug("rbInc->velocity {} ", math::to_string(rbInc->velocity));
             log::debug("rbInc->angularVelocity {} ", math::to_string(rbInc->angularVelocity));
 
