@@ -110,6 +110,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="source.cpp" />
+    <ClCompile Include="systems\examplesystem.cpp" />
     <ClCompile Include="systems\gui_test.cpp" />
   </ItemGroup>
   <ItemGroup>
