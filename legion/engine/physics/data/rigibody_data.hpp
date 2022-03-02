@@ -5,7 +5,7 @@
 
 namespace legion::physics
 {
-    class rigidbodyData
+    class RigidbodyData
     {
     public:
 
@@ -49,7 +49,7 @@ namespace legion::physics
 
         inline float getAngularDrag() { return m_angularDrag; }
 
-        inline std::vector<std::unique_ptr<core::events::event_base>>& getModifyEvents() 
+        inline std::vector<std::unique_ptr<core::events::event_base>>& getGeneratedModifyEvents() 
         {
             return m_modifyRigidbodyEvents;
         }

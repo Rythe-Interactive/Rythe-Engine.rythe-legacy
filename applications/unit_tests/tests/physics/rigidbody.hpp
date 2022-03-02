@@ -6,11 +6,11 @@ static void TestRigidbody()
 {
     using namespace legion;
 
-    physics::rigidbody genericRigidbody;
+    physics::rigidbody rigidbody;
 
     LEGION_SUBTEST("Rigidbody Read and Write")
     {
-        physics::rigidbodyData& rbData = genericRigidbody.rigidbodyData;
+        physics::RigidbodyData& rbData = rigidbody.rigidbodyData;
 
         rbData.setMass(3.0f);
         L_CHECK(rbData.getMass() == 3.0f);
@@ -29,7 +29,7 @@ static void TestRigidbody()
 
         LEGION_SUBTEST("Rigidbody Event Generation")
         {
-            auto& modifyEvents = rbData.getModifyEvents();
+            auto& modifyEvents = rbData.getGeneratedModifyEvents();
             L_CHECK(modifyEvents.size() == 5);
 
             L_CHECK(modifyEvents[0].get()->get_id() == physics::rb_modify_mass::id);
