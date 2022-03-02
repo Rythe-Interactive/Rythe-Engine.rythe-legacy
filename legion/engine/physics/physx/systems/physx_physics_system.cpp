@@ -157,7 +157,6 @@ namespace legion::physics
             if (physComp.physicsComponentID == invalid_physics_component)
             {
                 m_physxWrapperContainer.createPhysxWrapper(physComp);
-                log::debug("[1] physics wrapper created");
             }
         }
 
@@ -295,7 +294,7 @@ namespace legion::physics
         m_physxScene->fetchResults(true);
     }
     
-    void PhysXPhysicsSystem::processPhysicsComponentEvents(physicsComponent& physicsComponentToProcess)
+    void PhysXPhysicsSystem::processPhysicsComponentEvents(ecs::entity ent, physicsComponent& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo)
     {
         auto& eventsGenerated = physicsComponentToProcess.physicsCompData.GetGeneratedPhysicsComponentEvents();
 
@@ -318,7 +317,7 @@ namespace legion::physics
 
     void PhysXPhysicsSystem::processRigidbodyComponentEvents(ecs::entity ent, size_type wrapperID, rigidbody& rigidbody,  const PhysxEnviromentInfo& physicsEnviromentInfo)
     {
-        auto& eventsGenerated = rigidbody.rigidbodyData.getModifyEvents();
+        auto& eventsGenerated = rigidbody.rigidbodyData.getGeneratedModifyEvents();
         PhysxInternalWrapper& wrapper = m_physxWrapperContainer.findWrapperWithID(wrapperID).value();
 
         for (std::unique_ptr<events::event_base>& eventPtr : eventsGenerated)
