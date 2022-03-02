@@ -1,6 +1,6 @@
 #pragma once
 #include "unit_test.hpp"
-#include <physics/components/rigidbody.h>
+#include <physics/components/rigidbody.hpp>
 
 static void TestRigidbody()
 {
