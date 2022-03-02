@@ -132,8 +132,6 @@ namespace legion::physics
 
     void PhysXPhysicsSystem::executePreSimulationActions()
     {
-        log::debug("executePreSimulationActions");
-
         //[1] Identify new physics components
         //TODO this should be done on component creation
         ecs::filter<physicsComponent> physicsComponentFilter;
@@ -145,7 +143,6 @@ namespace legion::physics
             if (physComp.physicsComponentID == invalid_physics_component)
             {
                 m_physxWrapperContainer.createPhysxWrapper(physComp);
-                log::debug("[1] physics wrapper created");
             }
         }
 
@@ -162,7 +159,6 @@ namespace legion::physics
             {
                 //the user has switched this body from static to dynamic, reallocate this object to a dynamic object
                 optionalPhysxWrapper->get().bodyType = physics::physics_body_type::rigidbody;
-                log::debug("[2] rigidbody found");
             }
         }
 
@@ -187,8 +183,6 @@ namespace legion::physics
         }
 
         //[4] Physics Objects transformation may get directly modified by other systems. Go through all physics objects and move them
-
-        log::debug("end executePreSimulationActions");
     }
 
     void PhysXPhysicsSystem::executePostSimulationActions()
@@ -230,30 +224,8 @@ namespace legion::physics
             *entity.get_component<rotation>() = math::quat(pxRotation.w, pxRotation.x, pxRotation.y, pxRotation.z);
         }
     }
-
-    void PhysXPhysicsSystem::releasePhysXVariables()
-    {
-        PS::dispatcher->release();
-        PS::phyxSDK->release();
-
-        if (PS::pvd)
-        {
-            PxPvdTransport* transport = PS::pvd->getTransport();
-            PS::pvd->release();
-            PS::pvd = nullptr;
-            transport->release();
-        }
-
-        PS::foundation->release();
-    }
-
-    void PhysXPhysicsSystem::fixedUpdate(time::time_span<fast_time> deltaTime)
-    {
-        m_physxScene->simulate(m_timeStep);
-        m_physxScene->fetchResults(true);
-    }
     
-    void PhysXPhysicsSystem::processPhysicsComponentEvents(physicsComponent& physicsComponentToProcess)
+    void PhysXPhysicsSystem::processPhysicsComponentEvents(ecs::entity ent, physicsComponent& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo)
     {
         auto& eventsGenerated = physicsComponentToProcess.physicsCompData.GetGeneratedPhysicsComponentEvents();
 
@@ -276,7 +248,7 @@ namespace legion::physics
 
     void PhysXPhysicsSystem::processRigidbodyComponentEvents(ecs::entity ent, size_type wrapperID, rigidbody& rigidbody,  const PhysxEnviromentInfo& physicsEnviromentInfo)
     {
-        auto& eventsGenerated = rigidbody.rigidbodyData.getModifyEvents();
+        auto& eventsGenerated = rigidbody.rigidbodyData.getGeneratedModifyEvents();
         PhysxInternalWrapper& wrapper = m_physxWrapperContainer.findWrapperWithID(wrapperID).value();
 
         for (std::unique_ptr<events::event_base>& eventPtr : eventsGenerated)
