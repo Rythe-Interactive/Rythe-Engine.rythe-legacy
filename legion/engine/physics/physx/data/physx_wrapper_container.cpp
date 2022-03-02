@@ -13,6 +13,12 @@ namespace legion::physics
         return m_physxWrappers[m_physxWrappers.size() - 1];
     }
 
+    void PhysxWrapperContainer::PopAndSwapRemoveWrapper(size_type id)
+    {
+
+        
+    }
+
     std::optional<std::reference_wrapper< PhysxInternalWrapper>> PhysxWrapperContainer::findWrapperWithID(size_type id)
     {
         if (m_wrapperIDSet.contains(id))

@@ -3,6 +3,7 @@
 #include <physics/physx/data/physx_wrapper_container.hpp>
 #include <physics/physx/physx_integration_helpers.hpp>
 #include <core/containers/delegate.hpp>
+#include <physics/components/rigidbody.hpp>
 
 namespace physx
 {
@@ -37,11 +38,18 @@ namespace legion::physics
 
         void bindEventsToEventProcessors();
 
+        inline void markPhysicsWrapperPendingRemove(events::component_destruction<physicsComponent>& event)
+        {
+            m_wrapperPendingRemovalID.push_back(event.entity.get_component<physicsComponent>()->physicsComponentID);
+        }
+
         void executePreSimulationActions();
 
         void executePostSimulationActions();
 
         void processPhysicsComponentEvents(ecs::entity ent, physicsComponent& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo);
+
+        void processRigidbodyComponentEvents(ecs::entity ent, size_type wrapperID, rigidbody& rigidbody, const PhysxEnviromentInfo& physicsEnviromentInfo);
 
         static constexpr float m_timeStep = 0.02f;
 
@@ -52,8 +60,12 @@ namespace legion::physics
 
         std::mutex m_setupShutdownMutex;
 
-        using physicsEventProcessFunc = delegate<void(core::events::event_base*, const PhysxEnviromentInfo&, PhysxInternalWrapper&, ecs::entity)>;
+        using pcEventProcessFunc = delegate<void(core::events::event_base*, const PhysxEnviromentInfo&, PhysxInternalWrapper&, ecs::entity)>;
+        std::unordered_map<id_type, pcEventProcessFunc> m_eventHashToPCEventProcess;
 
-        std::unordered_map<id_type, physicsEventProcessFunc> m_eventHashToPCEventProcess;
+        using rbEventProcessFunc = delegate<void(const core::events::event_base&, const PhysxEnviromentInfo&, PhysxInternalWrapper&, ecs::entity)>;
+        std::unordered_map<id_type, rbEventProcessFunc > m_eventHashToRBEventProcess;
+
+        std::vector<size_type> m_wrapperPendingRemovalID;
     };
 };

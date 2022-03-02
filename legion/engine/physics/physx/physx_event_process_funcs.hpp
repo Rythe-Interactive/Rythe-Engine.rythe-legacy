@@ -10,5 +10,7 @@ namespace physx
 
 namespace legion::physics
 {
+    void processVelocityChange(const core::events::event_base& velocityChangeEvent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity);
+
     void processAddBoxEvent(events::event_base* addBoxEvent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity);
 }

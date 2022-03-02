@@ -44,6 +44,14 @@ namespace legion::physics
 
     void PhysXTestSystem::setupCubeWorldTestScene()
     {
+        sparse_set<size_type> test;
+        test.insert(3); test.insert(1); test.insert(2); test.insert(4);
+
+        int three = test.index_of(3).value();
+        int one = test.index_of(1).value();
+        int two = test.index_of(2).value();
+        int four = test.index_of(7).value();
+
         //add wide block
         auto wideBlock = createDefaultMeshEntity(math::vec3(0, 0, 0), cubeH, legionLogoMat);
         wideBlock.get_component<scale>() = math::vec3(10, 1, 10);
@@ -90,7 +98,7 @@ namespace legion::physics
         {
             auto [positionCamH, rotationCamH, scaleCamH] = ent.get_component<transform>();
             cameraDirection = rotationCamH.get() * math::vec3(0, 0, 1);
-            cameraPosition = positionCamH.get() + cameraDirection * 2.5f;
+            cameraPosition = positionCamH.get() + cameraDirection;
         }
 
         auto shiftedBlock = createDefaultMeshEntity(cameraPosition, cubeH, concreteMat);
@@ -100,7 +108,7 @@ namespace legion::physics
             shiftedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1, 1, 1));
 
             rigidbody& rb = *shiftedBlock.add_component<rigidbody>();
-            rb.rigidbodyData.setVelocity(cameraDirection);
+            rb.rigidbodyData.setVelocity(cameraDirection * 20.0f);
         }
     }
 

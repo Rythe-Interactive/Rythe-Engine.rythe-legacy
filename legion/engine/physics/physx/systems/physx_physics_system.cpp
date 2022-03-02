@@ -49,6 +49,8 @@ namespace legion::physics
 
         bindEventsToEventProcessors();
         createProcess<&PhysXPhysicsSystem::fixedUpdate>("Physics", m_timeStep);
+
+        bindToEvent<events::component_destruction<physicsComponent>, &PhysXPhysicsSystem::markPhysicsWrapperPendingRemove>();
     }
 
     void PhysXPhysicsSystem::shutdown()
@@ -99,6 +101,7 @@ namespace legion::physics
     void PhysXPhysicsSystem::bindEventsToEventProcessors()
     {
         m_eventHashToPCEventProcess.insert( { physics::add_box_collider::id, &processAddBoxEvent });
+        m_eventHashToRBEventProcess.insert( { physics::rb_modify_velocity::id, &processVelocityChange });
     }
 
     void PhysXPhysicsSystem::releasePhysXVariables()
@@ -132,7 +135,7 @@ namespace legion::physics
         log::debug("executePreSimulationActions");
 
         //[1] Identify new physics components
-
+        //TODO this should be done on component creation
         ecs::filter<physicsComponent> physicsComponentFilter;
 
         for (auto entity : physicsComponentFilter)
@@ -178,7 +181,9 @@ namespace legion::physics
         for (auto entity : physicsAndRigidbodyComponentFilter)
         {
             auto& rbComp = *entity.get_component<rigidbody>();
-            
+            auto& physComp = *entity.get_component<physicsComponent>();
+
+            processRigidbodyComponentEvents(entity, physComp.physicsComponentID, rbComp, enviromentInfo);
         }
 
         //[4] Physics Objects transformation may get directly modified by other systems. Go through all physics objects and move them
@@ -190,6 +195,12 @@ namespace legion::physics
     {
         //[1] Identify invalid entities and remove them from pxScene
 
+        for (size_type idToRemove : m_wrapperPendingRemovalID)
+        {
+            m_physxWrapperContainer.PopAndSwapRemoveWrapper(idToRemove);
+        }
+
+        m_wrapperPendingRemovalID.clear();
         //get all actors
 
             //get user data
@@ -261,5 +272,24 @@ namespace legion::physics
         }
 
         eventsGenerated.clear();
+    }
+
+    void PhysXPhysicsSystem::processRigidbodyComponentEvents(ecs::entity ent, size_type wrapperID, rigidbody& rigidbody,  const PhysxEnviromentInfo& physicsEnviromentInfo)
+    {
+        auto& eventsGenerated = rigidbody.rigidbodyData.getModifyEvents();
+        PhysxInternalWrapper& wrapper = m_physxWrapperContainer.findWrapperWithID(wrapperID).value();
+
+        for (std::unique_ptr<events::event_base>& eventPtr : eventsGenerated)
+        {
+            auto findResult = m_eventHashToRBEventProcess.find(eventPtr.get()->get_id());
+
+            if (findResult != m_eventHashToRBEventProcess.end())
+            {
+                findResult->second.invoke(*eventPtr.get(), physicsEnviromentInfo, wrapper,ent);
+            }
+        }
+
+        eventsGenerated.clear();
+        
     }
 }
