@@ -7,6 +7,7 @@
 #include "../renderstages/mousehover.hpp"
 #include "gui_test.hpp"
 
+
 struct example_comp
 {
 
@@ -22,36 +23,10 @@ namespace legion::core
         NO_DTOR_RULE5_NOEXCEPT(example_policy);
         ~example_policy() = default;
 
-        virtual void OnSetup(particle_emitter& emitter) override
-        {
-            emitter.setUniform<float>("scaleFactor", .2f);
-        }
-
-        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override
-        {
-            auto scaleFactor = emitter.getUniform<float>("scaleFactor").get();
-            for (size_type idx = start; idx <= end; idx++)
-            {
-                emitter.getBuffer<scale>()[idx] = scale(scaleFactor);
-            }
-        }
-
-        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override
-        {
-            auto& ageBuffer = emitter.getBuffer<life_time>();
-            auto& scaleBuffer = emitter.getBuffer<scale>();
-
-            auto scaleFactor = emitter.getUniform<float>("scaleFactor").get();
-
-            for (size_type idx = 0; idx < count; idx++)
-            {
-                scaleBuffer[idx] = scale(scaleFactor - ((ageBuffer[idx].age / ageBuffer[idx].max) * scaleFactor));
-            }
-        }
-
-        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override
-        {
-        }
+        virtual void OnSetup(particle_emitter& emitter) override;
+        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override;
+        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
+        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override;
     };
 
     struct orbital_policy : public particle_policy<orbital_policy>
@@ -59,11 +34,14 @@ namespace legion::core
         NO_DTOR_RULE5_NOEXCEPT(orbital_policy);
         ~orbital_policy() = default;
 
-        const double C_MASS = 10.f;
-        const double P_MASS = 1.f;
-        const double G_FORCE = 100.0f;
+        const double C_MASS = 100.f;
+        const double P_MASS = 75.f;
+        const double G_FORCE = 1.0f;
 
-        }
+        virtual void OnSetup(particle_emitter& emitter) override;
+        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override;
+        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
+        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override;
     };
 
     struct fountain_policy : public particle_policy<fountain_policy>
@@ -71,36 +49,10 @@ namespace legion::core
         NO_DTOR_RULE5_NOEXCEPT(fountain_policy);
         ~fountain_policy() = default;
 
-        virtual void OnSetup(particle_emitter& emitter) override
-        {
-
-        }
-
-        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override
-        {
-            for (size_type idx = start; idx <= end; idx++)
-            {
-                emitter.getBuffer<position>()[idx] = math::vec3::zero;
-                auto direction = math::vec3::up + math::normalize(math::vec3(math::linearRand(-5.f, 5.f), math::linearRand(-5.f, 5.f), math::linearRand(-5.f, 5.f)));
-                emitter.getBuffer<velocity>()[idx] = direction * 2;
-            }
-        }
-
-        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override
-        {
-            auto& posBuffer = emitter.getBuffer<position>();
-            auto& velBuffer = emitter.getBuffer<velocity>();
-            for (size_type idx = 0; idx < count; idx++)
-            {
-                posBuffer[idx] += velBuffer[idx] * deltaTime;
-                velBuffer[idx] += math::vec3(0.f, -9.8f, 0.f) * deltaTime;
-            }
-        }
-
-        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override
-        {
-
-        }
+        virtual void OnSetup(particle_emitter& emitter) override;
+        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override;
+        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
+        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override;
     };
 
     struct rendering_policy : particle_policy<rendering_policy>
@@ -108,30 +60,10 @@ namespace legion::core
         NO_DTOR_RULE5_NOEXCEPT(rendering_policy);
         ~rendering_policy() = default;
 
-        virtual void OnSetup(particle_emitter& emitter) override
-        {
-            auto model = gfx::ModelCache::create_model("Sphere", fs::view("assets://models/sphere.obj"));
-            auto material = gfx::MaterialCache::create_material("Particle", fs::view("assets://shaders/color.shs"));
-            material.set_param("color", math::color(.6f, 0, .5f, 1));
-
-            emitter.setUniform<mesh_filter>("mesh_filter", mesh_filter(model.get_mesh()));
-            emitter.setUniform<gfx::mesh_renderer>("renderer", gfx::mesh_renderer(material, model));
-        }
-
-        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override
-        {
-
-        }
-
-        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override
-        {
-
-        }
-
-        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override
-        {
-
-        }
+        virtual void OnSetup(particle_emitter& emitter) override;
+        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override;
+        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
+        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override;
     };
 }
 
@@ -388,14 +320,6 @@ public:
             firstFrame = false;
         }
 
-        {
-            ecs::filter<rotation, example_comp> filter;
-            for (auto& ent : filter)
-            {
-                ent.get_component<rotation>().get() *= math::angleAxis(math::two_pi<float>() * 0.1f * deltaTime, math::vec3::up);
-            }
-        }
-
         ecs::filter<position, velocity, example_comp> filter;
 
         float dt = deltaTime;
@@ -455,7 +379,6 @@ public:
         }
         else
         {
-
             //raiseEvent<events::exit>();
         }
     }
