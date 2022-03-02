@@ -50,7 +50,7 @@ namespace legion::core
             particleUniforms.try_emplace(std::string(name), std::make_unique<particle_uniform<uniformType>>());
 
         auto& unfrm = *dynamic_cast<particle_uniform<uniformType>*>(particleUniforms[std::string(name)].get());
-        unfrm.set(val.uniform);
+        unfrm.get() = val.uniform;
     }
 
     template<typename uniformType>
@@ -60,7 +60,7 @@ namespace legion::core
             particleUniforms.try_emplace(std::string(name), std::make_unique<particle_uniform<uniformType>>());
 
         auto& unfrm = *dynamic_cast<particle_uniform<uniformType>*>(particleUniforms[std::string(name)].get());
-        unfrm.set(val);
+        unfrm.get() = val;
     }
 
     template<typename uniformType>
@@ -74,7 +74,9 @@ namespace legion::core
     particle_uniform<uniformType>& particle_emitter::getUniform(const std::string_view& name)
     {
         if (particleUniforms.count(std::string(name)) < 1)
+        {
             setUniform<uniformType>(std::string(name));
+        }
         return *dynamic_cast<particle_uniform<uniformType>*>(particleUniforms[std::string(name)].get());
     }
 

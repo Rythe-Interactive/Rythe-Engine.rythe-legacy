@@ -4,6 +4,7 @@
 #include <rendering/rendering.hpp>
 #include <audio/audio.hpp>
 
+
 struct example_comp
 {
 
@@ -16,41 +17,10 @@ namespace legion::core
         NO_DTOR_RULE5_NOEXCEPT(example_policy);
         ~example_policy() = default;
 
-        virtual void OnSetup(particle_emitter& emitter) override
-        {
-
-        }
-
-        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override
-        {
-            //log::debug("OnSetup");
-            emitter.setUniform<std::string>("message", "goodbye world");
-
-            for (size_type idx = start; idx <= end; idx++)
-            {
-                auto color = math::color(math::linearRand(0.f, 1.f), math::linearRand(0.f, 1.f), math::linearRand(0.f, 1.f), 1);
-                emitter.getBuffer<math::color>()[idx] = color;
-                emitter.getBuffer<scale>()[idx] = scale(1.f);
-            }
-        }
-
-        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override
-        {
-            auto& ageBuffer = emitter.getBuffer<life_time>();
-            auto& scaleBuffer = emitter.getBuffer<scale>();
-            auto& colorBuffer = emitter.getBuffer<math::color>();
-
-            for (size_type idx = 0; idx < count; idx++)
-            {
-                float scaleFactor = math::clamp(ageBuffer[idx].max-ageBuffer[idx].age, 0.f, 1.f);
-                scaleBuffer[idx] = scale(scaleFactor);
-            }
-        }
-
-        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override
-        {
-            log::debug(emitter.getUniform<std::string>("message").get());
-        }
+        virtual void OnSetup(particle_emitter& emitter) override;
+        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override;
+        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
+        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override;
     };
 
     struct orbital_policy : public particle_policy<orbital_policy>
@@ -59,41 +29,24 @@ namespace legion::core
         ~orbital_policy() = default;
 
         const double C_MASS = 100.f;
-        const double P_MASS = 50.f;
-        const double G_FORCE = .1f;
+        const double P_MASS = 75.f;
+        const double G_FORCE = 1.0f;
 
-        virtual void OnSetup(particle_emitter& emitter) override
-        {
+        virtual void OnSetup(particle_emitter& emitter) override;
+        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override;
+        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
+        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override;
+    };
 
-        }
+    struct fountain_policy : public particle_policy<fountain_policy>
+    {
+        NO_DTOR_RULE5_NOEXCEPT(fountain_policy);
+        ~fountain_policy() = default;
 
-        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override
-        {
-            for (size_type idx = start; idx <= end; idx++)
-            {
-                emitter.getBuffer<position>()[idx] = math::normalize(math::sphericalRand(1.f)) * 3.f;
-                emitter.getBuffer<velocity>()[idx] = math::normalize(math::cross(emitter.getBuffer<position>()[idx], math::vec3::up)) * 2.f;
-            }
-        }
-
-        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override
-        {
-            auto& posBuffer = emitter.getBuffer<position>();
-            auto& velBuffer = emitter.getBuffer<velocity>();
-
-            for (size_type idx = 0; idx < count; idx++)
-            {
-                auto r2 = math::pow(posBuffer[idx].x, 2) + math::pow(posBuffer[idx].y, 2) + math::pow(posBuffer[idx].z, 2);
-                auto force = G_FORCE * ((P_MASS * C_MASS) / r2);
-                velBuffer[idx] += math::normalize(-posBuffer[idx]) * (force / P_MASS) * deltaTime;
-                posBuffer[idx] += velBuffer[idx] * deltaTime;
-            }
-        }
-
-        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override
-        {
-
-        }
+        virtual void OnSetup(particle_emitter& emitter) override;
+        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override;
+        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
+        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override;
     };
 
     struct rendering_policy : particle_policy<rendering_policy>
@@ -101,29 +54,10 @@ namespace legion::core
         NO_DTOR_RULE5_NOEXCEPT(rendering_policy);
         ~rendering_policy() = default;
 
-        virtual void OnSetup(particle_emitter& emitter) override
-        {
-
-        }
-
-        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override
-        {
-            auto model = gfx::ModelCache::create_model("Sphere", fs::view("assets://models/sphere.obj"));
-            auto material = gfx::MaterialCache::create_material("Test", fs::view("assets://shaders/uv.shs"));
-
-            emitter.setUniform<mesh_filter>("mesh_filter", mesh_filter(model.get_mesh()));
-            emitter.setUniform<gfx::mesh_renderer>("renderer", gfx::mesh_renderer(material, model));
-        }
-
-        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type idx) override
-        {
-
-        }
-
-        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override
-        {
-
-        }
+        virtual void OnSetup(particle_emitter& emitter) override;
+        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override;
+        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
+        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override;
     };
 }
 
@@ -135,7 +69,62 @@ class ExampleSystem final : public legion::System<ExampleSystem>
     std::array<lgn::time64, 18000> times;
 
 public:
-    void setup();
+    void setup()
+    {
+        using namespace legion;
+        log::filter(log::severity_debug);
+        log::debug("ExampleSystem setup");
+
+        app::window& win = ecs::world.get_component<app::window>();
+        app::context_guard guard(win);
+
+        auto model = gfx::ModelCache::create_model("Sphere", fs::view("assets://models/sphere.obj"));
+        auto material = gfx::MaterialCache::create_material("Texture", fs::view("assets://shaders/texture.shs"));
+        material.set_param("_texture", gfx::TextureCache::create_texture(fs::view("engine://resources/default/albedo")));
+        {
+            auto ent = createEntity("Sun");
+            ent.add_component(gfx::light::directional(math::color(1, 1, 0.8f), 10.f));
+            auto [pos, rot, scal] = ent.add_component<transform>();
+            rot = rotation::lookat(math::vec3::zero, math::vec3(-1, -1, -1));
+        }
+
+        //material = gfx::MaterialCache::create_material("Default", fs::view("assets://shaders/pbr.shs"));
+        //material.set_param(SV_ALBEDO, gfx::TextureCache::create_texture(fs::view("engine://resources/default/albedo")));
+        //material.set_param(SV_NORMALHEIGHT, gfx::TextureCache::create_texture(fs::view("engine://resources/default/normalHeight")));
+        //material.set_param(SV_MRDAO, gfx::TextureCache::create_texture(fs::view("engine://resources/default/MRDAo")));
+        //material.set_param(SV_EMISSIVE, gfx::TextureCache::create_texture(fs::view("engine://resources/default/emissive")));
+        //material.set_param(SV_HEIGHTSCALE, 1.f);
+        //material.set_param("discardExcess", false);
+        //material.set_param("skycolor", math::color(0.1f, 0.3f, 1.0f));
+
+        {
+            auto ent = createEntity("Particle Emitter");
+            auto [pos, rot, scal] = ent.add_component<transform>();
+            //ent.add_component<gfx::mesh_renderer>(gfx::mesh_renderer(material, model));
+            auto emitter = ent.add_component<particle_emitter>();
+            //allow for passing a particle settings struct or an ini file
+            emitter->infinite = true;
+            emitter->spawnRate = 10000;
+            emitter->spawnInterval = 0.05f;
+            emitter->maxSpawnCount = 100000;
+            emitter->minLifeTime = 10;
+            emitter->maxLifeTime = 15;
+            //emitter->add_policy<fountain_policy>();
+            emitter->add_policy<example_policy>();
+            emitter->add_policy<orbital_policy>();
+            emitter->add_policy<rendering_policy>();
+        }
+
+        //model = gfx::ModelCache::create_model("Cube", fs::view("assets://models/cube.obj"));
+        //material = gfx::MaterialCache::create_material("WorldPos", fs::view("assets://shaders/worldposition.shs"));
+        //material.set_param("_texture", gfx::TextureCache::create_texture(fs::view("engine://resources/default/albedo")));
+
+        //auto test = createEntity();
+        //test.add_component<transform>();
+        //test.add_component<gfx::mesh_renderer>(gfx::mesh_renderer(material, model));
+
+        bindToEvent<events::exit, &ExampleSystem::onExit>();
+    }
 
     void shutdown()
     {
@@ -189,14 +178,6 @@ public:
         {
             timer.start();
             firstFrame = false;
-        }
-
-        {
-            ecs::filter<rotation, example_comp> filter;
-            for (auto& ent : filter)
-            {
-                ent.get_component<rotation>().get() *= math::angleAxis(math::two_pi<float>() * 0.1f * deltaTime, math::vec3::up);
-            }
         }
 
         ecs::filter<position, velocity, example_comp> filter;
@@ -258,7 +239,6 @@ public:
         }
         else
         {
-
             //raiseEvent<events::exit>();
         }
     }
