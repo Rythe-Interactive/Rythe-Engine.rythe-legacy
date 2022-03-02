@@ -173,7 +173,7 @@
     <ClInclude Include="physx\systems\physx_physics_system.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="components\rigidbody.h">
+    <ClInclude Include="components\rigidbody.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="data\rigibody_data.hpp">

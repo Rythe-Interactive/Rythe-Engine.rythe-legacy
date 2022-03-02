@@ -58,7 +58,7 @@
     <ClInclude Include="diviner\halfedgeface.hpp" />
     <ClInclude Include="diviner\colliders\physicscollider.hpp" />
     <ClInclude Include="diviner\data\penetrationquery.hpp" />
-    <ClInclude Include="components\rigidbody.h" />
+    <ClInclude Include="components\rigidbody.hpp" />
     <ClInclude Include="physics.hpp" />
     <ClInclude Include="diviner\physicsconstants.hpp" />
     <ClInclude Include="diviner\physics_contact.hpp" />
