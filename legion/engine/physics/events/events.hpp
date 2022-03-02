@@ -55,8 +55,8 @@ namespace legion::physics {
             return std::apply([](ecs::entity a,ecs::entity b)
             {
                 return std::make_pair(
-                    transform(a.get_component_handles<transform>()),
-                    transform(b.get_component_handles<transform>())
+                    transform(*a.get_component<transform>()),
+                    transform(*b.get_component<transform>())
                 );
             }, participants());
         }
