@@ -15,8 +15,8 @@ namespace legion::physics
         {
             createProcessChain("Physics");
             reportSystem<PhysicsSystem>();
-            registerComponentType<dvrInternalPhysicsComponent>();
-            registerComponentType<dvrInternalRigidbody>();
+            registerComponentType<DvrInternalPhysicsComponent>();
+            registerComponentType<DvrInternalRigidbody>();
             registerComponentType<identifier>();
 
             reportSystem<PhysXPhysicsSystem>();

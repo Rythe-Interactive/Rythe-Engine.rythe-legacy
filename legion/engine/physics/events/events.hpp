@@ -52,7 +52,7 @@ namespace legion::physics {
          */
         L_NODISCARD std::pair<transform,transform> transforms() const
         {
-            return std::apply([](ecs::entity_handle a,ecs::entity_handle b)
+            return std::apply([](ecs::entity a,ecs::entity b)
             {
                 return std::make_pair(
                     transform(a.get_component_handles<transform>()),

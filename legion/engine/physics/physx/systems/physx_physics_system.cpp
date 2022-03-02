@@ -103,26 +103,4 @@ namespace legion::physics
         m_physxScene->simulate(m_timeStep);
         m_physxScene->fetchResults(true);
     }
-
-    void PhysXPhysicsSystem::releasePhysXVariables()
-    {
-        PS::dispatcher->release();
-        PS::phyxSDK->release();
-
-        if (PS::pvd)
-        {
-            PxPvdTransport* transport = PS::pvd->getTransport();
-            PS::pvd->release();
-            PS::pvd = nullptr;
-            transport->release();
-        }
-
-        PS::foundation->release();
-    }
-
-    void PhysXPhysicsSystem::fixedUpdate(time::time_span<fast_time> deltaTime)
-    {
-        m_physxScene->simulate(m_timeStep);
-        m_physxScene->fetchResults(true);
-    }
 }

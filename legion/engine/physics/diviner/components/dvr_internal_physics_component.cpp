@@ -5,7 +5,7 @@
 
 namespace legion::physics
 {
-    void dvrInternalPhysicsComponent::calculateNewLocalCenterOfMass()
+    void DvrInternalPhysicsComponent::calculateNewLocalCenterOfMass()
     {
         localCenterOfMass = math::vec3::zero;
 
@@ -17,7 +17,7 @@ namespace legion::physics
         localCenterOfMass /= static_cast<float>(colliders.size());
     }
 
-    std::shared_ptr<ConvexCollider> dvrInternalPhysicsComponent::constructConvexHullFromVertices(const std::vector<math::vec3>& vertices)
+    std::shared_ptr<ConvexCollider> DvrInternalPhysicsComponent::constructConvexHullFromVertices(const std::vector<math::vec3>& vertices)
     {
         auto collider = PhysicsStatics::generateConvexHull(vertices);
 
@@ -30,13 +30,13 @@ namespace legion::physics
         return collider;
     }
 
-    void dvrInternalPhysicsComponent::ConstructBox()
+    void DvrInternalPhysicsComponent::ConstructBox()
     {
 
         calculateNewLocalCenterOfMass();
     }
 
-    void dvrInternalPhysicsComponent::AddBox(const cube_collider_params& cubeParams)
+    void DvrInternalPhysicsComponent::AddBox(const cube_collider_params& cubeParams)
     {
         auto cuboidCollider = std::make_shared<ConvexCollider>();
 
@@ -47,7 +47,7 @@ namespace legion::physics
         calculateNewLocalCenterOfMass();
     }
 
-    void dvrInternalPhysicsComponent::AddSphere()
+    void DvrInternalPhysicsComponent::AddSphere()
     {
         calculateNewLocalCenterOfMass();
     }
