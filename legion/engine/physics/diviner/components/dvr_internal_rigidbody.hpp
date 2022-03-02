@@ -6,7 +6,7 @@
 
 namespace legion::physics
 {
-    struct DvrInternalRigidbody
+    struct dvr_internal_rigidbody
     {
 
         //linear motion component
@@ -37,7 +37,7 @@ namespace legion::physics
         void serialize(Archive& archive)
         {
             //We won't need to manually name all the components in the future
-            archive(cereal::make_nvp("Name", std::string("DvrInternalRigidbody")), cereal::make_nvp("Inverse Mass",inverseMass),
+            archive(cereal::make_nvp("Name", std::string("dvr_internal_rigidbody")), cereal::make_nvp("Inverse Mass",inverseMass),
                         cereal::make_nvp("Velocity",velocity),cereal::make_nvp("Acceleration",acc), cereal::make_nvp("Linear Drag",linearDrag),
                         cereal::make_nvp("Inverse Intertia Tensor",localInverseInertiaTensor),cereal::make_nvp("Angular Acceleration",angularAcc),
                         cereal::make_nvp("Angular Velocity",angularVelocity),cereal::make_nvp("Angular Drag",angularDrag),cereal::make_nvp("Global Centre of Mass",globalCentreOfMass),
@@ -55,7 +55,7 @@ namespace legion::physics
             return math::max(frictionA,frictionB);
         }
 
-        /** @brief Pushes the DvrInternalRigidbody in the direction parallel to 'force' and equal to the
+        /** @brief Pushes the dvr_internal_rigidbody in the direction parallel to 'force' and equal to the
         * length of 'force'.
         * @note This does NOT cause torque
         */

@@ -26,8 +26,8 @@ namespace legion::physics
 
     void PhysicsSystem::runPhysicsPipeline(
         std::vector<byte>& hasRigidBodies,
-        ecs::component_container<DvrInternalRigidbody>& rigidbodies,
-        ecs::component_container<DvrInternalPhysicsComponent>& physComps,
+        ecs::component_container<dvr_internal_rigidbody>& rigidbodies,
+        ecs::component_container<dvr_internal_physics_component>& physComps,
         ecs::component_container<position>& positions,
         ecs::component_container<rotation>& rotations,
         ecs::component_container<scale>& scales,
@@ -85,24 +85,24 @@ namespace legion::physics
                         auto& precursorPhyCompA = *precursorA.physicsComp;
                         auto& precursorPhyCompB = *precursorB.physicsComp;
 
-                        auto& precursorDvrInternalRigidbodyA = rigidbodies[precursorA.id];
-                        auto& precursorDvrInternalRigidbodyB = rigidbodies[precursorB.id];
+                        auto& precursordvr_internal_rigidbodyA = rigidbodies[precursorA.id];
+                        auto& precursordvr_internal_rigidbodyB = rigidbodies[precursorB.id];
 
                         //only construct a manifold if at least one of these requirement are fulfilled
-                        //1. One of the DvrInternalPhysicsComponents is a trigger and the other one is not
-                        //2. One of the DvrInternalPhysicsComponent's entity has a DvrInternalRigidbody and the other one is not a trigger
-                        //3. Both have a DvrInternalRigidbody
+                        //1. One of the dvr_internal_physics_components is a trigger and the other one is not
+                        //2. One of the dvr_internal_physics_component's entity has a dvr_internal_rigidbody and the other one is not a trigger
+                        //3. Both have a dvr_internal_rigidbody
 
                         bool isBetweenTriggerAndNonTrigger =
                             (precursorPhyCompA.isTrigger && !precursorPhyCompB.isTrigger) || (!precursorPhyCompA.isTrigger && precursorPhyCompB.isTrigger);
 
-                        bool isBetweenDvrInternalRigidbodyAndNonTrigger =
+                        bool isBetweendvr_internal_rigidbodyAndNonTrigger =
                             (hasRigidBodies[precursorA.id] && !precursorPhyCompB.isTrigger) || (hasRigidBodies[precursorB.id] && !precursorPhyCompA.isTrigger);
 
                         bool isBetween2Rigidbodies = (hasRigidBodies[precursorA.id] && hasRigidBodies[precursorB.id]);
 
 
-                        if (isBetweenTriggerAndNonTrigger || isBetweenDvrInternalRigidbodyAndNonTrigger || isBetween2Rigidbodies)
+                        if (isBetweenTriggerAndNonTrigger || isBetweendvr_internal_rigidbodyAndNonTrigger || isBetween2Rigidbodies)
                         {
                             constructManifoldsWithPrecursors(rigidbodies, hasRigidBodies, precursorA, precursorB,
                                 manifoldsToSolve,
@@ -182,19 +182,19 @@ namespace legion::physics
 
     }
 
-    void PhysicsSystem::constructManifoldsWithPrecursors(ecs::component_container<DvrInternalRigidbody>& rigidbodies, std::vector<byte>& hasRigidBodies, physics_manifold_precursor& precursorA, physics_manifold_precursor& precursorB,
-        std::vector<physics_manifold>& manifoldsToSolve, bool isDvrInternalRigidbodyInvolved, bool isTriggerInvolved)
+    void PhysicsSystem::constructManifoldsWithPrecursors(ecs::component_container<dvr_internal_rigidbody>& rigidbodies, std::vector<byte>& hasRigidBodies, physics_manifold_precursor& precursorA, physics_manifold_precursor& precursorB,
+        std::vector<physics_manifold>& manifoldsToSolve, bool isdvr_internal_rigidbodyInvolved, bool isTriggerInvolved)
     {
         OPTICK_EVENT();
         if (!precursorA.physicsComp || !precursorB.physicsComp) return;
-        auto& DvrInternalPhysicsComponentA = *precursorA.physicsComp;
-        auto& DvrInternalPhysicsComponentB = *precursorB.physicsComp;
+        auto& dvr_internal_physics_componentA = *precursorA.physicsComp;
+        auto& dvr_internal_physics_componentB = *precursorB.physicsComp;
 
-        //if (DvrInternalPhysicsComponentA.colliders.empty() || DvrInternalPhysicsComponentB.colliders.empty()) return;
+        //if (dvr_internal_physics_componentA.colliders.empty() || dvr_internal_physics_componentB.colliders.empty()) return;
 
-        for (auto colliderA : DvrInternalPhysicsComponentA.colliders)
+        for (auto colliderA : dvr_internal_physics_componentA.colliders)
         {
-            for (auto colliderB : DvrInternalPhysicsComponentB.colliders)
+            for (auto colliderB : dvr_internal_physics_componentB.colliders)
             {
                 physics::physics_manifold m;
                 constructManifoldWithCollider(rigidbodies, hasRigidBodies, colliderA.get(), colliderB.get(), precursorA, precursorB, m);
@@ -216,7 +216,7 @@ namespace legion::physics
                     //TODO:(cont.) uniquely identify involved objects and then redirect only required messages
                 }
 
-                if (isDvrInternalRigidbodyInvolved && !isTriggerInvolved)
+                if (isdvr_internal_rigidbodyInvolved && !isTriggerInvolved)
                 {
                     raiseEvent<collision_event>(&m, m_timeStep);
                     manifoldsToSolve.emplace_back(std::move(m));
