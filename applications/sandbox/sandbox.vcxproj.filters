@@ -21,7 +21,7 @@
     <ClCompile Include="systems\gui_test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="systems\physics_test_system.cpp">
+    <ClCompile Include="systems\examplesystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="renderstages\mousehover.cpp">

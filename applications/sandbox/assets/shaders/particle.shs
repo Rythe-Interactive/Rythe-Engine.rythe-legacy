@@ -33,7 +33,6 @@ shader(fragment)
     void main(void)
     {
         vec4 color = vec4(vec3(1.5), clamp01(1.0 - (length(stdio(uv) - vec2(0.5)) * 3.0)));
-        fragment_depth = gl_FragCoord.z;
 
         // If we want lit billboards use this instead:
         SubmitOutput(vec4(color.rgb, color.a * SoftParticleAlpha(10.0)));

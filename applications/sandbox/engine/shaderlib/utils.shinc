@@ -72,13 +72,13 @@ vec4 FixedSizeBillboardModelToScreenSpacePosition(vec3 pos)
 float SoftParticleAlpha(float sensitivity)
 {
     float frustumDepth = FrustumDepth();
-    return clamp((((gl_FragCoord.z*frustumDepth) - (SceneDepth().r*frustumDepth))/(gl_FragCoord.z*frustumDepth))*sensitivity, 0, 1);
+    return clamp((((gl_FragCoord.z*frustumDepth) - (SceneDepth().b*frustumDepth))/(gl_FragCoord.z*frustumDepth))*sensitivity, 0, 1);
 }
 
 float SoftParticleAlpha(float depth, float sensitivity)
 {
     float frustumDepth = FrustumDepth();
-    return clamp((((depth*frustumDepth) - (SceneDepth().r*frustumDepth))/(depth*frustumDepth))*sensitivity, 0, 1);
+    return clamp((((depth*frustumDepth) - (SceneDepth().b*frustumDepth))/(depth*frustumDepth))*sensitivity, 0, 1);
 }
 #endif
 
