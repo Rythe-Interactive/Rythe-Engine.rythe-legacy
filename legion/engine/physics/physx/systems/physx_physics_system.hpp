@@ -51,6 +51,8 @@ namespace legion::physics
 
         void processRigidbodyComponentEvents(ecs::entity ent, rigidbody& rigidbody, physics_component& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo);
 
+        void processRigidbodyComponentEvents(ecs::entity ent, size_type wrapperID, rigidbody& rigidbody, const PhysxEnviromentInfo& physicsEnviromentInfo);
+
         static constexpr float m_timeStep = 0.02f;
 
         physx::PxScene* m_physxScene;

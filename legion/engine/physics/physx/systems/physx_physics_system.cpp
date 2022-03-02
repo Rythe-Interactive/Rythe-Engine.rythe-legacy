@@ -315,4 +315,23 @@ namespace legion::physics
 
         eventsGenerated.clear();
     }
+
+    void PhysXPhysicsSystem::processRigidbodyComponentEvents(ecs::entity ent, size_type wrapperID, rigidbody& rigidbody,  const PhysxEnviromentInfo& physicsEnviromentInfo)
+    {
+        auto& eventsGenerated = rigidbody.rigidbodyData.getModifyEvents();
+        PhysxInternalWrapper& wrapper = m_physxWrapperContainer.findWrapperWithID(wrapperID).value();
+
+        for (std::unique_ptr<events::event_base>& eventPtr : eventsGenerated)
+        {
+            auto findResult = m_eventHashToRBEventProcess.find(eventPtr.get()->get_id());
+
+            if (findResult != m_eventHashToRBEventProcess.end())
+            {
+                findResult->second.invoke(*eventPtr.get(), physicsEnviromentInfo, wrapper,ent);
+            }
+        }
+
+        eventsGenerated.clear();
+        
+    }
 }

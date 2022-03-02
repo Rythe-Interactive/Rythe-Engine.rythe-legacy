@@ -16,6 +16,8 @@ namespace legion::physics
 
         inline void ReleasePhysicsWrappers() { m_physxWrappers.clear(); }
 
+        void PopAndSwapRemoveWrapper(size_type id);
+
         std::optional<std::reference_wrapper< PhysxInternalWrapper>> findWrapperWithID(size_type id);
 
     private:
