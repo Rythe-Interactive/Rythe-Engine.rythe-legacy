@@ -63,7 +63,7 @@ namespace legion::physics
             {
                 integrateRigidbodies(hasRigidBodies, rigidbodies, m_timeStep);
                 runPhysicsPipeline(hasRigidBodies, rigidbodies, physComps, positions, rotations, scales, m_timeStep);
-                integratedvrInternalRigidbodyQueryPositionAndRotation(hasRigidBodies, positions, rotations, rigidbodies, m_timeStep);
+                integrateRigidbodyQueryPositionAndRotation(hasRigidBodies, positions, rotations, rigidbodies, m_timeStep);
             }
 
             if (oneTimeRunActive)
@@ -72,7 +72,7 @@ namespace legion::physics
 
                 integrateRigidbodies(hasRigidBodies, rigidbodies, m_timeStep);
                 runPhysicsPipeline(hasRigidBodies, rigidbodies, physComps, positions, rotations, scales, m_timeStep);
-                integratedvrInternalRigidbodyQueryPositionAndRotation(hasRigidBodies, positions, rotations, rigidbodies, m_timeStep);
+                integrateRigidbodyQueryPositionAndRotation(hasRigidBodies, positions, rotations, rigidbodies, m_timeStep);
             }
         }
 
@@ -92,10 +92,10 @@ namespace legion::physics
                 
                 diviner::physics_component& individualPhysicsComponent = physComps[index].get();
 
-                for (auto& collider : individualdvrInternalPhysicsComponent.colliders)
+                for (auto& collider : individualDvrInternalPhysicsComponent.colliders)
                     collider->UpdateTransformedTightBoundingVolume(transf);
 
-                manifoldPrecursors[index] = { transf, &individualdvrInternalPhysicsComponent, index, manifoldPrecursorQuery[index] };
+                manifoldPrecursors[index] = { transf, &individualDvrInternalPhysicsComponent, index, manifoldPrecursorQuery[index] };
                 }).wait();
         }
 
@@ -155,10 +155,10 @@ namespace legion::physics
             manifold.entityB = precursorB.entity;
 
             if (hasRigidBodies[precursorA.id])
-                manifold.dvrInternalRigidbodyA = &rigidbodies[precursorA.id].get();
+                manifold.DvrInternalRigidbodyA = &rigidbodies[precursorA.id].get();
 
             if (hasRigidBodies[precursorB.id])
-                manifold.dvrInternalRigidbodyB = &rigidbodies[precursorB.id].get();
+                manifold.DvrInternalRigidbodyB = &rigidbodies[precursorB.id].get();
 
             manifold.physicsCompA = precursorA.physicsComp;
             manifold.physicsCompB = precursorB.physicsComp;
@@ -192,7 +192,7 @@ namespace legion::physics
                 }).wait();
         }
 
-        void integratedvrInternalRigidbodyQueryPositionAndRotation(
+        void integrateRigidbodyQueryPositionAndRotation(
             std::vector<byte>& hasRigidBodies,
             ecs::component_container<position>& positions,
             ecs::component_container<rotation>& rotations,
