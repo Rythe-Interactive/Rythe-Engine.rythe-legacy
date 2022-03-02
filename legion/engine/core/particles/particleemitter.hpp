@@ -23,11 +23,12 @@ namespace legion::core
     struct particle_emitter
     {
         size_type maxSpawnCount = 1000;
-        float spawnInterval = 1.f;
+        size_type spawnRate = 1.f;
         float minLifeTime = 1.f;
         float maxLifeTime = 2.f;
 
         size_type currentParticleCount = 0;
+        float spawnInterval = .1f;
         float elapsedTime = 0.f;
         bool spawn = true;
         bool infinite = false;

@@ -23,13 +23,13 @@ namespace legion::core
         for (auto& ent : filter)
         {
             auto& emitter = ent.get_component<particle_emitter>().get();
-            if (emitter.spawn && emitter.currentParticleCount < emitter.maxSpawnCount)
+            if (emitter.currentParticleCount < emitter.maxSpawnCount)
             {
                 emitter.elapsedTime += deltaTime;
                 if (emitter.elapsedTime >= emitter.spawnInterval)
                 {
-                    size_type count = math::trunc(emitter.elapsedTime / emitter.spawnInterval);
-                    emit(emitter, count);
+                    emit(emitter, emitter.spawnRate);
+                    emitter.elapsedTime = 0;
                 }
             }
             maintanence(emitter, deltaTime);
@@ -51,11 +51,7 @@ namespace legion::core
     {
         auto& ageBuffer = emitter.getBuffer<life_time>();
         if (emitter.currentParticleCount + count > emitter.maxSpawnCount)
-        {
             count = emitter.maxSpawnCount - emitter.currentParticleCount;
-            if (!emitter.infinite)
-                emitter.spawn = false;
-        }
 
         for (size_type i = 0; i < count; i++)
         {
@@ -71,24 +67,28 @@ namespace legion::core
         emitter.currentParticleCount += count;
     }
 
+
     void ParticleSystem::maintanence(particle_emitter& emitter, float deltaTime)
     {
-        auto& ageBuffer = emitter.getBuffer<life_time>();
-        for (size_type idx = 0; idx < emitter.currentParticleCount; idx++)
+        if (!emitter.infinite)
         {
-            if (!emitter.isAlive(idx))
-                continue;
-
-            auto& lifeTime = ageBuffer[idx];
-            lifeTime.age += deltaTime;
-
-            if (lifeTime.age > lifeTime.max)
+            auto& ageBuffer = emitter.getBuffer<life_time>();
+            for (size_type idx = 0; idx < emitter.currentParticleCount; idx++)
             {
-                emitter.setAlive(idx, false);
-                emitter.swap(idx);
-                emitter.currentParticleCount--;
-                for (auto& policy : emitter.particlePolicies)
-                    policy->OnDestroy(emitter, idx, idx);
+                if (!emitter.isAlive(idx))
+                    continue;
+
+                auto& lifeTime = ageBuffer[idx];
+                lifeTime.age += deltaTime;
+
+                if (lifeTime.age > lifeTime.max)
+                {
+                    emitter.setAlive(idx, false);
+                    emitter.swap(idx);
+                    emitter.currentParticleCount--;
+                    for (auto& policy : emitter.particlePolicies)
+                        policy->OnDestroy(emitter, idx, idx);
+                }
             }
         }
 
