@@ -22,6 +22,7 @@
     <ClCompile Include="diviner\components\dvr_internal_physics_component.cpp" />
     <ClCompile Include="diviner\physics_statics.cpp" />
     <ClCompile Include="diviner\systems\physicssystem.cpp" />
+    <ClCompile Include="physx\data\physx_wrapper.cpp" />
     <ClCompile Include="physx\data\physx_wrapper_container.cpp" />
     <ClCompile Include="physx\physx_event_process_funcs.cpp" />
     <ClCompile Include="physx\physx_integration_helpers.cpp" />

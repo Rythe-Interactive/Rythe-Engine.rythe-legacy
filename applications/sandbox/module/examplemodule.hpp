@@ -28,5 +28,7 @@ public:
         reportSystem<SimpleCameraController>();
         reportSystem<physics::PhysXTestSystem>();
         reportSystem<GuiTestSystem>();
+
+        registerComponentType<self_destruct_component>();
     }
 };

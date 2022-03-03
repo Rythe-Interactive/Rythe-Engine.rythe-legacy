@@ -42,6 +42,23 @@ namespace legion::physics
         setupCubeWorldTestScene();
     }
 
+    void PhysXTestSystem::update(legion::time::span deltaTime)
+    {
+        ecs::filter<self_destruct_component> destructFilter;
+
+        for (auto entity : destructFilter)
+        {
+            self_destruct_component& sdComp = *entity.get_component<self_destruct_component>();
+            sdComp.selfDestructTimer -= deltaTime;
+
+            if (sdComp.selfDestructTimer < 0.0f)
+            {
+                entity.destroy();
+            }
+        }
+
+    }
+
     void PhysXTestSystem::setupCubeWorldTestScene()
     {
         //add wide block
@@ -102,6 +119,10 @@ namespace legion::physics
             rigidbody& rb = *shiftedBlock.add_component<rigidbody>();
             rb.rigidbodyData.setVelocity(cameraDirection * 20.0f);
         }
+
+        self_destruct_component& block = *shiftedBlock.add_component<self_destruct_component>();
+
+        block.selfDestructTimer = 5.0f;
     }
 
     void PhysXTestSystem::initializeLitMaterial(rendering::material_handle& materialToInitialize,

@@ -6,6 +6,11 @@ namespace lgn = legion;
 
 struct ShootPhysXBox : public lgn::app::input_action<ShootPhysXBox> {};
 
+struct self_destruct_component
+{
+    float selfDestructTimer = 0.0f;
+};
+
 namespace legion::physics
 {
     class PhysXTestSystem : public System<PhysXTestSystem>
@@ -13,6 +18,8 @@ namespace legion::physics
     public:
 
         virtual void setup();
+
+        void update(legion::time::span deltaTime);
 
     private:
 

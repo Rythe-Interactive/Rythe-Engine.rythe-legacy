@@ -8,20 +8,29 @@ namespace physx
 
 namespace legion::physics
 {
-    constexpr size_type invalidPhysXWrapperID = std::numeric_limits<size_type>::max();
-
     enum class physics_body_type
     {
+        none,
         static_collider,
         rigidbody
     };
 
     struct PhysxInternalWrapper
     {
-        size_type id = invalidPhysXWrapperID;
-       
         std::vector<physx::PxActor*> physicsActors;
 
         physics_body_type bodyType = physics_body_type::static_collider;
+
+        PhysxInternalWrapper() = default;
+
+        ~PhysxInternalWrapper();
+
+        PhysxInternalWrapper(PhysxInternalWrapper&& other) noexcept;
+
+        PhysxInternalWrapper& operator= (PhysxInternalWrapper&& other) noexcept;
+
+        PhysxInternalWrapper& operator= (const PhysxInternalWrapper&& other) = delete;
+
+        PhysxInternalWrapper(const PhysxInternalWrapper& other) = delete;
     };
 }

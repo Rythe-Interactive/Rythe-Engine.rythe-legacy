@@ -57,6 +57,8 @@ namespace legion::physics
     {
         const async::lock_guard guard(PS::setupShutdownLock);
 
+        m_physxWrapperContainer.ReleasePhysicsWrappers();
+
         m_physxScene->release();
         m_defaultMaterial->release();
         
@@ -132,6 +134,14 @@ namespace legion::physics
 
     void PhysXPhysicsSystem::executePreSimulationActions()
     {
+        //[1] Identify invalid entities and remove them from pxScene
+        for (size_type idToRemove : m_wrapperPendingRemovalID)
+        {
+            m_physxWrapperContainer.PopAndSwapRemoveWrapper(idToRemove);
+        }
+
+        m_wrapperPendingRemovalID.clear();
+
         //[1] Identify new physics components
         //TODO this should be done on component creation
         ecs::filter<physicsComponent> physicsComponentFilter;
@@ -187,21 +197,6 @@ namespace legion::physics
 
     void PhysXPhysicsSystem::executePostSimulationActions()
     {
-        //[1] Identify invalid entities and remove them from pxScene
-
-        for (size_type idToRemove : m_wrapperPendingRemovalID)
-        {
-            m_physxWrapperContainer.PopAndSwapRemoveWrapper(idToRemove);
-        }
-
-        m_wrapperPendingRemovalID.clear();
-        //get all actors
-
-            //get user data
-
-            //does entity still exist?
-                //remove if not
-
         //[2] Transfer position changes from PxActor to actual entity position and rotation components
 
         PxU32 nbActiveActors;
@@ -212,6 +207,8 @@ namespace legion::physics
         {
             PxActor* actor = activeActors[i];
             ecs::entity entity = { static_cast<ecs::entity_data*>(actor->userData) };
+
+            if (!entity.valid()) { continue; }
 
             PxRigidActor* actorAsRigid = static_cast<PxRigidActor*>(actor);
 
@@ -235,10 +232,12 @@ namespace legion::physics
 
             if (findResult != m_eventHashToPCEventProcess.end())
             {
+                auto& wrapper = m_physxWrapperContainer.findWrapperWithID(physicsComponentToProcess.physicsComponentID).value().get();
+
                 findResult->second.invoke(
                     eventPtr.get(),
                     physicsEnviromentInfo,
-                    m_physxWrapperContainer.findWrapperWithID(physicsComponentToProcess.physicsComponentID).value(),
+                    wrapper,
                     ent );
             }
         }
