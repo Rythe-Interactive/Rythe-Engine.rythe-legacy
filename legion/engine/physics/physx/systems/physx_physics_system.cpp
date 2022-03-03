@@ -304,10 +304,12 @@ namespace legion::physics
 
             if (findResult != m_eventHashToPCEventProcess.end())
             {
+                auto& wrapper = m_physxWrapperContainer.findWrapperWithID(physicsComponentToProcess.physicsComponentID).value().get();
+
                 findResult->second.invoke(
                     eventPtr.get(),
                     physicsEnviromentInfo,
-                    m_physxWrapperContainer.findWrapperWithID(physicsComponentToProcess.physicsComponentID).value(),
+                    wrapper,
                     ent );
             }
         }

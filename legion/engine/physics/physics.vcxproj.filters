@@ -78,6 +78,9 @@
     <ClCompile Include="physx\data\physx_wrapper_container.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="physx\data\physx_wrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="diviner\cube_collider_params.hpp">

@@ -20,6 +20,8 @@ namespace legion::physics
 
         std::optional<std::reference_wrapper< PhysxInternalWrapper>> findWrapperWithID(size_type id);
 
+        inline void ReleasePhysicsWrappers() { m_physxWrappers.clear(); }
+
     private:
 
         sparse_set<size_type> m_wrapperIDSet;

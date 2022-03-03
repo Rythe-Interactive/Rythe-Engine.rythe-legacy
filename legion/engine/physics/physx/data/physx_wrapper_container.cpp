@@ -5,7 +5,6 @@ namespace legion::physics
     PhysxInternalWrapper& PhysxWrapperContainer::createPhysxWrapper(physics_component& unregisteredPhysXWrapper)
     {
         unregisteredPhysXWrapper.physicsComponentID = nextID;
-
         m_wrapperIDSet.insert(nextID);
 
         m_physxWrappers.emplace_back();

@@ -10,6 +10,7 @@ namespace legion::physics
 {
     enum class physics_body_type
     {
+        none,
         static_collider,
         rigidbody
     };
