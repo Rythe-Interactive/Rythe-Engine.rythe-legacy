@@ -5,18 +5,18 @@
 
 namespace legion::core::math
 {
-   template<typename Scalar, size_type SizeH, size_type SizeV, size_type ColIdx>
+   template<typename Scalar, size_type RowCount, size_type ColCount, size_type ColIdx>
    struct column
    {
        using scalar = Scalar;
-       static constexpr size_type size = SizeV;
-       static constexpr size_type size_h = SizeH;
-       static constexpr size_type size_v = SizeV;
+       static constexpr size_type size = RowCount;
+       static constexpr size_type row_count = RowCount;
+       static constexpr size_type col_count = ColCount;
        static constexpr size_type col_idx = ColIdx;
-       using type = column<Scalar, SizeH, SizeV, ColIdx>;
+       using type = column<Scalar, RowCount, ColCount, ColIdx>;
        using conv_type = vector<scalar, size>;
 
-       scalar mx[size_h][size_v];
+       scalar mx[col_count][row_count];
 
        RULE_OF_5_CONSTEXPR_NOEXCEPT(column);
 
@@ -25,18 +25,18 @@ namespace legion::core::math
        constexpr column& operator=(const conv_type& other) noexcept;
    };
 
-   template<size_type SizeH, size_type SizeV, size_type ColIdx>
-   struct column<bool, SizeH, SizeV, ColIdx>
+   template<size_type RowCount, size_type ColCount, size_type ColIdx>
+   struct column<bool, RowCount, ColCount, ColIdx>
    {
        using scalar = bool;
-       static constexpr size_type size = SizeV;
-       static constexpr size_type size_h = SizeH;
-       static constexpr size_type size_v = SizeV;
+       static constexpr size_type size = RowCount;
+       static constexpr size_type row_count = RowCount;
+       static constexpr size_type col_count = ColCount;
        static constexpr size_type col_idx = ColIdx;
-       using type = column<bool, SizeH, SizeV, ColIdx>;
+       using type = column<bool, RowCount, ColCount, ColIdx>;
        using conv_type = vector<scalar, size>;
 
-       scalar mx[size_h][size_v];
+       scalar mx[col_count][row_count];
 
        RULE_OF_5_CONSTEXPR_NOEXCEPT(column);
 
@@ -48,18 +48,18 @@ namespace legion::core::math
        constexpr column& operator=(const conv_type& other) noexcept;
    };
 
-   template<typename Scalar, size_type SizeH, size_type ColIdx>
-   struct column<Scalar, SizeH, 1, ColIdx>
+   template<typename Scalar, size_type ColCount, size_type ColIdx>
+   struct column<Scalar, 1, ColCount, ColIdx>
    {
        using scalar = Scalar;
        static constexpr size_type size = 1;
-       static constexpr size_type size_h = SizeH;
-       static constexpr size_type size_v = 1;
+       static constexpr size_type row_count = 1;
+       static constexpr size_type col_count = ColCount;
        static constexpr size_type col_idx = ColIdx;
-       using type = column<Scalar, SizeH, 1, ColIdx>;
+       using type = column<Scalar, 1, ColCount, ColIdx>;
        using conv_type = vector<scalar, size>;
 
-       scalar mx[size_h][size_v];
+       scalar mx[col_count][row_count];
 
        RULE_OF_5_CONSTEXPR_NOEXCEPT(column);
 
@@ -72,18 +72,18 @@ namespace legion::core::math
        constexpr column& operator=(scalar value) noexcept;
    };
 
-   template<size_type SizeH, size_type ColIdx>
-   struct column<bool, SizeH, 1, ColIdx>
+   template<size_type ColCount, size_type ColIdx>
+   struct column<bool, 1, ColCount, ColIdx>
    {
        using scalar = bool;
        static constexpr size_type size = 1;
-       static constexpr size_type size_h = SizeH;
-       static constexpr size_type size_v = 1;
+       static constexpr size_type row_count = 1;
+       static constexpr size_type col_count = ColCount;
        static constexpr size_type col_idx = ColIdx;
-       using type = column<bool, SizeH, 1, ColIdx>;
+       using type = column<bool, 1, ColCount, ColIdx>;
        using conv_type = vector<scalar, size>;
 
-       scalar mx[size_h][size_v];
+       scalar mx[col_count][row_count];
 
        RULE_OF_5_CONSTEXPR_NOEXCEPT(column);
 

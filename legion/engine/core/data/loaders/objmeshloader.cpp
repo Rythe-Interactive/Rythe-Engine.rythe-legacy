@@ -314,9 +314,9 @@ namespace legion::core
                     vertices.push_back(hash);
 
                     // Append vertex data.
-                    data.vertices.push_back((transform * math::float4(vertex.x, vertex.y, vertex.z, 1.f)).xyz());
+                    data.vertices.push_back((math::float4(vertex.x, vertex.y, vertex.z, 1.f) * transform).xyz);
                     data.colors.push_back(color);
-                    data.normals.push_back((transform * math::float4(normal.x, normal.y, normal.z, 0.f)).xyz());
+                    data.normals.push_back((math::float4(normal.x, normal.y, normal.z, 0.f) * transform).xyz);
 
                     if (!settings.flipVerticalTexcoords)
                         uv.y = 1.f - uv.y;

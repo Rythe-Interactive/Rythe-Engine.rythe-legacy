@@ -4,26 +4,27 @@
 
 namespace legion::core::math
 {
-    template<typename Scalar, size_type SizeH, size_type SizeV>
+    template<typename Scalar, size_type RowCount, size_type ColCount>
     struct matrix
     {
         static_assert(std::is_arithmetic_v<Scalar>, "Scalar must be a numeric type.");
 
         using scalar = Scalar;
-        static constexpr size_type size = SizeH * SizeV;
-        static constexpr size_type size_h = SizeH;
-        static constexpr size_type size_v = SizeV;
-        using type = matrix<Scalar, SizeH, SizeV>;
+        static constexpr size_type size = RowCount * ColCount;
+        static constexpr size_type row_count = RowCount;
+        static constexpr size_type col_count = ColCount;
+        using type = matrix<Scalar, RowCount, ColCount>;
 
-        using row_type = vector<scalar, size_h>;
+        using row_type = vector<scalar, col_count>;
 
         union
         {
-            row_type rows[size_v];
-            scalar data[size_h * size_v];
+            row_type rows[row_count];
+            scalar data[row_count * col_count];
         };
 
         static const matrix identity;
+        static const matrix zero;
 
         constexpr matrix() noexcept;
 
@@ -31,9 +32,9 @@ namespace legion::core::math
         explicit constexpr matrix(scalar s) noexcept;
 
         template<typename Scal, ::std::enable_if_t<!::std::is_same_v<scalar, Scal>, bool> = true>
-        constexpr explicit matrix(const matrix<Scal, size_h, size_v>&other) noexcept;
+        constexpr explicit matrix(const matrix<Scal, row_count, col_count>&other) noexcept;
 
-        template<typename mat_type, ::std::enable_if_t<SizeH != mat_type::size_h || SizeV != mat_type::size_v, bool> = true>
+        template<typename mat_type, ::std::enable_if_t<RowCount != mat_type::row_count || ColCount != mat_type::col_count, bool> = true>
         constexpr matrix(const mat_type& other) noexcept;
 
         constexpr matrix& operator=(const matrix&) noexcept = default;

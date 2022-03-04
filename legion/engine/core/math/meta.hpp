@@ -41,8 +41,8 @@ namespace legion::core::math
         constexpr static bool value = false;
     };
 
-    template<typename Scalar, size_type SizeH, size_type SizeV>
-    struct is_matrix<matrix<Scalar, SizeH, SizeV>>
+    template<typename Scalar, size_type RowCount, size_type ColCount>
+    struct is_matrix<matrix<Scalar, RowCount, ColCount>>
     {
         constexpr static bool value = true;
     };
@@ -89,7 +89,7 @@ namespace legion::core::math
     template<typename TypeA, typename TypeB>
     using lowest_precision_t = typename lowest_precision<TypeA, TypeB>::type;
 
-    template<typename TypeA, typename TypeB, bool LHS = std::is_floating_point_v<TypeA>>
+    template<typename TypeA, typename TypeB, bool RHS = std::is_floating_point_v<TypeA>>
     struct floating_type;
 
     template<typename TypeA, typename TypeB>
@@ -98,9 +98,10 @@ namespace legion::core::math
         using type = TypeA;
     };
 
-    template<typename TypeA, typename TypeB, bool LHS>
-    struct floating_type
+    template<typename TypeA, typename TypeB>
+    struct floating_type<TypeA, TypeB, false>
     {
+        static_assert(std::is_floating_point_v<TypeB>, "Neither types in floating_type was a floating point type.");
         using type = TypeB;
     };
 
