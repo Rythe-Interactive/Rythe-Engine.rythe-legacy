@@ -7,6 +7,7 @@ static void TestRigidbody()
     using namespace legion;
 
     physics::rigidbody rigidbody;
+    #define NOT !
 
     LEGION_SUBTEST("Rigidbody Read and Write")
     {
@@ -18,8 +19,30 @@ static void TestRigidbody()
         rbData.setInertiaTensor(math::mat3(5.0f));
         L_CHECK(rbData.getInertiaTensor() == math::mat3(5.0f));
 
+        LEGION_SUBTEST("Rigidbody Event Generation: Flagged and Unflagged")
+        {
+            auto& modifyEvents = rbData.getGeneratedModifyEvents();
+
+            L_CHECK(modifyEvents.test(physics::rigidbody_flag::rb_mass));
+
+            L_CHECK(modifyEvents.test(physics::rigidbody_flag::rb_inertia_tensor));
+            
+            L_CHECK( NOT modifyEvents.test(physics::rigidbody_flag::rb_velocity));
+
+            L_CHECK( NOT modifyEvents.test(physics::rigidbody_flag::rb_angular_velocity));
+
+            L_CHECK( NOT modifyEvents.test(physics::rigidbody_flag::rb_linear_drag));
+
+            L_CHECK( NOT modifyEvents.test(physics::rigidbody_flag::rb_angular_drag));
+        }
+
+        rbData.resetModifications();
+
         rbData.setVelocity(math::vec3(5.0f));
         L_CHECK(rbData.getVelocity() == math::vec3(5.0f));
+
+        rbData.setAngularVelocity(math::vec3(5.0f));
+        L_CHECK(rbData.getAngularVelocity() == math::vec3(5.0f));
 
         rbData.setLinearDrag(0.02f);
         L_CHECK(rbData.getLinearDrag() == 0.02f);
@@ -27,20 +50,21 @@ static void TestRigidbody()
         rbData.setAngularDrag(0.05f);
         L_CHECK(rbData.getAngularDrag() == 0.05f);
 
-        LEGION_SUBTEST("Rigidbody Event Generation")
+        LEGION_SUBTEST("Rigidbody Event Generation: Modification Reset")
         {
             auto& modifyEvents = rbData.getGeneratedModifyEvents();
-            L_CHECK(modifyEvents.size() == 5);
 
-            L_CHECK(modifyEvents[0].get()->get_id() == physics::rb_modify_mass::id);
+            L_CHECK( NOT modifyEvents.test(physics::rigidbody_flag::rb_mass));
 
-            L_CHECK(modifyEvents[1].get()->get_id() == physics::rb_modify_inertia_tensor::id);
+            L_CHECK( NOT modifyEvents.test(physics::rigidbody_flag::rb_inertia_tensor));
 
-            L_CHECK(modifyEvents[2].get()->get_id() == physics::rb_modify_velocity::id);
+            L_CHECK(modifyEvents.test(physics::rigidbody_flag::rb_velocity));
 
-            L_CHECK(modifyEvents[3].get()->get_id() == physics::rb_modify_linear_drag::id);
+            L_CHECK(modifyEvents.test(physics::rigidbody_flag::rb_angular_velocity));
 
-            L_CHECK(modifyEvents[4].get()->get_id() == physics::rb_modify_angular_drag::id);
+            L_CHECK(modifyEvents.test(physics::rigidbody_flag::rb_linear_drag));
+
+            L_CHECK(modifyEvents.test(physics::rigidbody_flag::rb_angular_drag));
         }
     }
 }

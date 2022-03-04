@@ -2,9 +2,21 @@
 #include <core/core.hpp>
 #include <core/events/event.hpp>
 #include <physics/events/events.hpp>
+#include <bitset>
 
 namespace legion::physics
 {
+    enum rigidbody_flag : size_type
+    {
+        rb_velocity,
+        rb_angular_velocity,
+        rb_inertia_tensor,
+        rb_mass,
+        rb_linear_drag,
+        rb_angular_drag,
+        rb_max //must always be the last enum
+    };
+
     class RigidbodyData
     {
     public:
@@ -12,31 +24,37 @@ namespace legion::physics
         inline void setMass(float mass)
         {
             m_mass = mass;
-            m_modifyRigidbodyEvents.push_back(std::make_unique<rb_modify_mass>(mass));
+            m_modificationFlags.set(rigidbody_flag::rb_mass);
         }
 
         inline void setInertiaTensor(const math::mat3& inertiaTensor)
         {
             m_inertiaTensor = inertiaTensor;
-            m_modifyRigidbodyEvents.push_back(std::make_unique<rb_modify_inertia_tensor>(inertiaTensor));
+            m_modificationFlags.set(rigidbody_flag::rb_inertia_tensor);
         }
         
         inline void setVelocity(const math::vec3& velocity)
         {
             m_velocity = velocity;
-            m_modifyRigidbodyEvents.push_back(std::make_unique<rb_modify_velocity>(velocity));
+            m_modificationFlags.set(rigidbody_flag::rb_velocity);
+        }
+
+        inline void setAngularVelocity(const math::vec3& velocity)
+        {
+            m_angularVelocity = velocity;
+            m_modificationFlags.set(rigidbody_flag::rb_angular_velocity);
         }
         
         inline void setLinearDrag(float linearDrag)
         {
             m_linearDrag = linearDrag;
-            m_modifyRigidbodyEvents.push_back(std::make_unique<rb_modify_linear_drag>(linearDrag));
+            m_modificationFlags.set(rigidbody_flag::rb_linear_drag);
         }
-       
+
         inline void setAngularDrag(float angularDrag)
         {
             m_angularDrag = angularDrag;
-            m_modifyRigidbodyEvents.push_back(std::make_unique<rb_modify_angular_drag>(angularDrag));
+            m_modificationFlags.set(rigidbody_flag::rb_angular_drag);
         }
         
         inline float getMass() { return m_mass; }
@@ -45,14 +63,18 @@ namespace legion::physics
 
         inline math::vec3 getVelocity() { return m_velocity; }
 
+        inline math::vec3 getAngularVelocity() { return m_angularVelocity; }
+
         inline float getLinearDrag() { return m_linearDrag; }
 
         inline float getAngularDrag() { return m_angularDrag; }
 
-        inline std::vector<std::unique_ptr<core::events::event_base>>& getGeneratedModifyEvents() 
+        inline const std::bitset<rigidbody_flag::rb_max>& getGeneratedModifyEvents() const
         {
-            return m_modifyRigidbodyEvents;
+            return m_modificationFlags;
         }
+
+        inline void resetModifications() { m_modificationFlags.reset(); }
 
     private:
 
@@ -65,6 +87,6 @@ namespace legion::physics
         float m_linearDrag;
         float m_angularDrag = 0.01f;
 
-        std::vector<std::unique_ptr<core::events::event_base>> m_modifyRigidbodyEvents;
+        std::bitset<rigidbody_flag::rb_max> m_modificationFlags;
     };
 }
