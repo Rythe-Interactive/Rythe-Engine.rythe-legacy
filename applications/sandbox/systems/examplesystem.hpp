@@ -60,42 +60,9 @@ namespace legion::core
         NO_DTOR_RULE5_NOEXCEPT(orbital_policy);
         ~orbital_policy() = default;
 
-        const double C_MASS = 100.f;
-        const double P_MASS = 50.f;
-        const double G_FORCE = .1f;
-
-        virtual void OnSetup(particle_emitter& emitter) override
-        {
-
-        }
-
-        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override
-        {
-            for (size_type idx = start; idx <= end; idx++)
-            {
-                auto minBound = math::sphericalRand(1.f);
-                auto maxBound = minBound * 5.f;
-                emitter.getBuffer<position>()[idx] = minBound + maxBound;
-                emitter.getBuffer<velocity>()[idx] = math::normalize(math::cross(emitter.getBuffer<position>()[idx], math::vec3::up)) * 2.f;
-            }
-        }
-
-        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override
-        {
-            auto& posBuffer = emitter.getBuffer<position>();
-            auto& velBuffer = emitter.getBuffer<velocity>();
-
-            for (size_type idx = 0; idx < count; idx++)
-            {
-                auto r2 = math::pow(posBuffer[idx].x, 2) + math::pow(posBuffer[idx].y, 2) + math::pow(posBuffer[idx].z, 2);
-                auto force = G_FORCE * ((P_MASS * C_MASS) / r2);
-                velBuffer[idx] += math::normalize(-posBuffer[idx]) * (force / P_MASS) * deltaTime;
-                posBuffer[idx] += velBuffer[idx] * deltaTime;
-            }
-        }
-
-        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override
-        {
+        const double C_MASS = 10.f;
+        const double P_MASS = 1.f;
+        const double G_FORCE = 100.0f;
 
         }
     };

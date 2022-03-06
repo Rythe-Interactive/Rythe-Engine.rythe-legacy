@@ -7,77 +7,74 @@
 namespace legion::core
 {
     template<typename bufferType>
-    void particle_emitter::setBuffer(particle_buffer<bufferType> buffer)
+    particle_buffer<bufferType>& particle_emitter::create_buffer(const std::string_view& name, particle_buffer<bufferType> buffer)
     {
-        id_type id = type_hash<bufferType>().value;
-        if (particleBuffers.count(id) > 0)
-            return;
-        particleBuffers.try_emplace(id, std::make_unique<particle_buffer<bufferType>>(buffer));
+        id_type idName = nameHash(name);
+        particleBuffers.try_emplace(idName, std::make_unique<particle_buffer<bufferType>>(buffer));
+        return *dynamic_cast<particle_buffer<bufferType>*>(particleBuffers[idName].get());
     }
 
     template<typename bufferType>
-    void particle_emitter::setBuffer(std::vector<bufferType> buffer)
+    particle_buffer<bufferType>& particle_emitter::create_buffer(const std::string_view& name, std::vector<bufferType> buffer)
     {
-        id_type id = type_hash<bufferType>().value;
-        if (particleBuffers.count(id) > 0)
-            return;
-        particleBuffers.try_emplace(id, std::make_unique<particle_buffer<bufferType>>(buffer));
+        id_type idName = nameHash(name);
+        particleBuffers.try_emplace(idName, std::make_unique<particle_buffer<bufferType>>(buffer));
+        return *dynamic_cast<particle_buffer<bufferType>*>(particleBuffers[idName].get());
     }
 
     template<typename bufferType>
-    void particle_emitter::setBuffer()
+    particle_buffer<bufferType>& particle_emitter::create_buffer(const std::string_view& name)
     {
-        id_type id = type_hash<bufferType>().value;
-        if (particleBuffers.count(id) > 0)
-            return;
-        particleBuffers.try_emplace(id, std::make_unique<particle_buffer<bufferType>>());
+        id_type idName = nameHash(name);
+        particleBuffers.try_emplace(idName, std::make_unique<particle_buffer<bufferType>>());
+        return *dynamic_cast<particle_buffer<bufferType>*>(particleBuffers[idName].get());
     }
 
     template<typename bufferType>
-    particle_buffer<bufferType>& particle_emitter::getBuffer()
+    particle_buffer<bufferType>& particle_emitter::get_buffer(const std::string_view& name)
     {
-        id_type id = type_hash<bufferType>().value;
-        if (particleBuffers.count(id) < 1)
-            setBuffer<bufferType>();
-        return *dynamic_cast<particle_buffer<bufferType>*>(particleBuffers[id].get());
-    }
-
-
-    template<typename uniformType>
-    void particle_emitter::setUniform(std::string_view name, particle_uniform<uniformType> val)
-    {
-        if (particleUniforms.count(std::string(name)) < 1)
-            particleUniforms.try_emplace(std::string(name), std::make_unique<particle_uniform<uniformType>>());
-
-        auto& unfrm = *dynamic_cast<particle_uniform<uniformType>*>(particleUniforms[std::string(name)].get());
-        unfrm.get() = val.uniform;
-    }
-
-    template<typename uniformType>
-    void particle_emitter::setUniform(std::string_view name, uniformType val)
-    {
-        if (particleUniforms.count(std::string(name)) < 1)
-            particleUniforms.try_emplace(std::string(name), std::make_unique<particle_uniform<uniformType>>());
-
-        auto& unfrm = *dynamic_cast<particle_uniform<uniformType>*>(particleUniforms[std::string(name)].get());
-        unfrm.get() = val;
-    }
-
-    template<typename uniformType>
-    void particle_emitter::setUniform(std::string_view name)
-    {
-        if (particleUniforms.count(std::string(name)) < 1)
-            particleUniforms.try_emplace(std::string(name), std::make_unique<particle_uniform<uniformType>>());
-    }
-
-    template<typename uniformType>
-    particle_uniform<uniformType>& particle_emitter::getUniform(const std::string_view& name)
-    {
-        if (particleUniforms.count(std::string(name)) < 1)
+        id_type idName = nameHash(name);
+        if (particleBuffers.count(idName) < 1)
         {
-            setUniform<uniformType>(std::string(name));
+            log::warn("Buffer \"{}\" of type {} does not exist, one will be created for you", name, typeid(bufferType).name());
+            create_buffer<bufferType>(name);
         }
-        return *dynamic_cast<particle_uniform<uniformType>*>(particleUniforms[std::string(name)].get());
+        return *dynamic_cast<particle_buffer<bufferType>*>(particleBuffers[idName].get());
+    }
+
+
+    template<typename uniformType>
+    uniformType& particle_emitter::create_uniform(const std::string_view& name, particle_uniform<uniformType> val)
+    {
+        return create_uniform<uniformType>(name, val.uniform);
+    }
+
+    template<typename uniformType>
+    uniformType& particle_emitter::create_uniform(const std::string_view& name, uniformType val)
+    {
+        auto& value = create_uniform<uniformType>(name);
+        value = val;
+        return value;
+    }
+
+    template<typename uniformType>
+    uniformType& particle_emitter::create_uniform(const std::string_view& name)
+    {
+        id_type idName = nameHash(name);
+        if (particleUniforms.count(idName) < 1)
+            particleUniforms.try_emplace(idName, std::make_unique<particle_uniform<uniformType>>());
+
+        return get_uniform<uniformType>(name);
+    }
+
+    template<typename uniformType>
+    uniformType& particle_emitter::get_uniform(const std::string_view& name)
+    {
+        id_type idName = nameHash(name);
+        if (particleUniforms.count(idName) < 1)
+            create_uniform<uniformType>(name);
+        auto& uniform = *dynamic_cast<particle_uniform<uniformType>*>(particleUniforms[idName].get());
+        return uniform.get();
     }
 
     template<typename... policies>
