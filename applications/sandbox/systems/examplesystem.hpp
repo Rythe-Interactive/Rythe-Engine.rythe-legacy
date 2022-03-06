@@ -28,9 +28,9 @@ namespace legion::core
         NO_DTOR_RULE5_NOEXCEPT(orbital_policy);
         ~orbital_policy() = default;
 
-        const double C_MASS = 100.f;
-        const double P_MASS = 75.f;
-        const double G_FORCE = 1.0f;
+        const double C_MASS = 10.f;
+        const double P_MASS = 1.f;
+        const double G_FORCE = 100.0f;
 
         virtual void OnSetup(particle_emitter& emitter) override;
         virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override;
@@ -69,62 +69,7 @@ class ExampleSystem final : public legion::System<ExampleSystem>
     std::array<lgn::time64, 18000> times;
 
 public:
-    void setup()
-    {
-        using namespace legion;
-        log::filter(log::severity_debug);
-        log::debug("ExampleSystem setup");
-
-        app::window& win = ecs::world.get_component<app::window>();
-        app::context_guard guard(win);
-
-        auto model = gfx::ModelCache::create_model("Sphere", fs::view("assets://models/sphere.obj"));
-        auto material = gfx::MaterialCache::create_material("Texture", fs::view("assets://shaders/texture.shs"));
-        material.set_param("_texture", gfx::TextureCache::create_texture(fs::view("engine://resources/default/albedo")));
-        {
-            auto ent = createEntity("Sun");
-            ent.add_component(gfx::light::directional(math::color(1, 1, 0.8f), 10.f));
-            auto [pos, rot, scal] = ent.add_component<transform>();
-            rot = rotation::lookat(math::vec3::zero, math::vec3(-1, -1, -1));
-        }
-
-        //material = gfx::MaterialCache::create_material("Default", fs::view("assets://shaders/pbr.shs"));
-        //material.set_param(SV_ALBEDO, gfx::TextureCache::create_texture(fs::view("engine://resources/default/albedo")));
-        //material.set_param(SV_NORMALHEIGHT, gfx::TextureCache::create_texture(fs::view("engine://resources/default/normalHeight")));
-        //material.set_param(SV_MRDAO, gfx::TextureCache::create_texture(fs::view("engine://resources/default/MRDAo")));
-        //material.set_param(SV_EMISSIVE, gfx::TextureCache::create_texture(fs::view("engine://resources/default/emissive")));
-        //material.set_param(SV_HEIGHTSCALE, 1.f);
-        //material.set_param("discardExcess", false);
-        //material.set_param("skycolor", math::color(0.1f, 0.3f, 1.0f));
-
-        {
-            auto ent = createEntity("Particle Emitter");
-            auto [pos, rot, scal] = ent.add_component<transform>();
-            //ent.add_component<gfx::mesh_renderer>(gfx::mesh_renderer(material, model));
-            auto emitter = ent.add_component<particle_emitter>();
-            //allow for passing a particle settings struct or an ini file
-            emitter->infinite = true;
-            emitter->spawnRate = 10000;
-            emitter->spawnInterval = 0.05f;
-            emitter->maxSpawnCount = 100000;
-            emitter->minLifeTime = 10;
-            emitter->maxLifeTime = 15;
-            //emitter->add_policy<fountain_policy>();
-            emitter->add_policy<example_policy>();
-            emitter->add_policy<orbital_policy>();
-            emitter->add_policy<rendering_policy>();
-        }
-
-        //model = gfx::ModelCache::create_model("Cube", fs::view("assets://models/cube.obj"));
-        //material = gfx::MaterialCache::create_material("WorldPos", fs::view("assets://shaders/worldposition.shs"));
-        //material.set_param("_texture", gfx::TextureCache::create_texture(fs::view("engine://resources/default/albedo")));
-
-        //auto test = createEntity();
-        //test.add_component<transform>();
-        //test.add_component<gfx::mesh_renderer>(gfx::mesh_renderer(material, model));
-
-        bindToEvent<events::exit, &ExampleSystem::onExit>();
-    }
+    void setup();
 
     void shutdown()
     {

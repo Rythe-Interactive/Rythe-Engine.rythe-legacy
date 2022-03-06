@@ -19,11 +19,11 @@ namespace legion::rendering
         {
             auto& emitter = ent.get_component<particle_emitter>().get();
 
-            auto filter = emitter.getUniform<mesh_filter>("mesh_filter").get();
-            auto renderer = emitter.getUniform<mesh_renderer>("renderer").get();
+            auto filter = emitter.get_uniform<mesh_filter>("mesh_filter");
+            auto renderer = emitter.get_uniform<mesh_renderer>("renderer");
 
-            auto& posBuffer = emitter.getBuffer<position>();
-            auto& scaleBuffer = emitter.getBuffer<scale>();
+            auto& posBuffer = emitter.get_buffer<position>("posBuffer");
+            auto& scaleBuffer = emitter.get_buffer<scale>("scaleBuffer");
 
             auto& batch = (*batches)[renderer.material][model_handle{ filter.shared_mesh.id() }];
             if (batch.second.empty())

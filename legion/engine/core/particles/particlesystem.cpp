@@ -49,7 +49,7 @@ namespace legion::core
 
     void ParticleSystem::emit(particle_emitter& emitter, size_type count)
     {
-        auto& ageBuffer = emitter.getBuffer<life_time>();
+        auto& ageBuffer = emitter.get_buffer<life_time>("lifetimeBuffer");
         if (emitter.currentParticleCount + count > emitter.maxSpawnCount)
             count = emitter.maxSpawnCount - emitter.currentParticleCount;
 
@@ -72,7 +72,7 @@ namespace legion::core
     {
         if (!emitter.infinite)
         {
-            auto& ageBuffer = emitter.getBuffer<life_time>();
+            auto& ageBuffer = emitter.get_buffer<life_time>("lifetimeBuffer");
             for (size_type idx = 0; idx < emitter.currentParticleCount; idx++)
             {
                 if (!emitter.isAlive(idx))
