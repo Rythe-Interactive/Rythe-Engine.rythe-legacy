@@ -5,6 +5,7 @@
 #include <core/types/primitives.hpp>
 #include <core/types/meta.hpp>
 
+#include <core/math/vector/vector.hpp>
 #include <core/math/meta.hpp>
 
 namespace legion::core::math
@@ -17,9 +18,15 @@ namespace legion::core::math
         using scalar = Scalar;
         static constexpr size_type size = 4;
         using type = quaternion<Scalar>;
+        using vec_type = vector<scalar, 3>;
 
         union
         {
+            struct
+            {
+                scalar scal;
+                vec_type vec;
+            };
             struct
             {
                 scalar w, i, j, k;
@@ -37,12 +44,12 @@ namespace legion::core::math
         constexpr quaternion(scalar _w, scalar _i, scalar _j, scalar _k) noexcept
             : w(static_cast<scalar>(_w)), i(static_cast<scalar>(_i)), j(static_cast<scalar>(_j)), k(static_cast<scalar>(_k)) {}
 
-        template<typename vec_type, ::std::enable_if_t<is_vector_v<vec_type>&& vec_type::size == 3, bool> = true>
-        constexpr quaternion(typename vec_type::scalar s, const vec_type& v) noexcept
+        template<typename VecType, ::std::enable_if_t<is_vector_v<VecType>&& VecType::size == 3, bool> = true>
+        constexpr quaternion(typename VecType::scalar s, const VecType& v) noexcept
             : w(static_cast<scalar>(s)), i(static_cast<scalar>(v.x)), j(static_cast<scalar>(v.y)), k(static_cast<scalar>(v.z)) {}
 
-        template<typename vec_type, ::std::enable_if_t<is_vector_v<vec_type>&& vec_type::size == 4, bool> = true>
-        explicit constexpr quaternion(const vec_type& other) noexcept
+        template<typename VecType, ::std::enable_if_t<is_vector_v<VecType>&& VecType::size == 4, bool> = true>
+        explicit constexpr quaternion(const VecType& other) noexcept
             : w(static_cast<scalar>(other.w)), i(static_cast<scalar>(other.x)), j(static_cast<scalar>(other.y)), k(static_cast<scalar>(other.z)) {}
 
         static const quaternion identity;

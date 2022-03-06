@@ -58,39 +58,7 @@ namespace legion::core
             w = src.w;
             return *this;
         }
-
-        L_NODISCARD math::float3 right() const
-        {
-            OPTICK_EVENT();
-            return math::toMat3(*this) * math::float3::right;
-        }
-
-        L_NODISCARD math::float3 up() const
-        {
-            OPTICK_EVENT();
-            return math::toMat3(*this) * math::float3::up;
-        }
-
-        L_NODISCARD math::float3 forward() const
-        {
-            OPTICK_EVENT();
-            return math::toMat3(*this) * math::float3::forward;
-        }
-
-        L_NODISCARD math::mat3 matrix() const
-        {
-            OPTICK_EVENT();
-            return math::toMat3(*this);
-        }
-
-        L_NODISCARD static rotation lookat(math::float3 position, math::float3 center, math::float3 up = math::float3::up);
     };
-
-    L_NODISCARD inline rotation rotation::lookat(math::float3 position, math::float3 center, math::float3 up)
-    {
-        OPTICK_EVENT();
-        return math::conjugate(math::normalize(math::toQuat(math::lookAt(position, center, up))));
-    }
 
     struct scale : public math::float3
     {

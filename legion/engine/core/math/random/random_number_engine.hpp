@@ -12,7 +12,7 @@ namespace legion::core::math
         virtual ~random_number_engine_base() = default;
         virtual void seed(size_type seed) noexcept LEGION_PURE;
         virtual void seed(const std::seed_seq& seeds) noexcept LEGION_PURE;
-        virtual size_type generate() noexcept LEGION_PURE;
+        L_NODISCARD virtual size_type generate() noexcept LEGION_PURE;
         virtual void discard(size_type n) noexcept LEGION_PURE;
     };
 
@@ -24,7 +24,7 @@ namespace legion::core::math
     public:
         virtual void seed(size_type seed) noexcept override { engine.seed(seed); };
         virtual void seed(const std::seed_seq& seeds) noexcept override { engine.seed(seeds); };
-        virtual size_type generate() noexcept override { return engine(); };
+        L_NODISCARD virtual size_type generate() noexcept override { return engine(); };
         virtual void discard(size_type n) noexcept override { engine.discard(n); }
     };
 
@@ -38,7 +38,7 @@ namespace legion::core::math
     public:
         virtual void seed(size_type seed) noexcept override;
         virtual void seed(const std::seed_seq& seeds) noexcept override;
-        virtual size_type generate() noexcept override;
+        L_NODISCARD virtual size_type generate() noexcept override;
         virtual void discard(size_type n) noexcept override;
     };
 }

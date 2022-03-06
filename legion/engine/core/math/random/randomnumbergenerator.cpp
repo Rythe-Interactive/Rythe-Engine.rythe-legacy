@@ -25,7 +25,7 @@ namespace legion::core::math
         engine->discard(n);
     }
 
-    size_type RandomNumberGenerator::generate()
+    L_NODISCARD size_type RandomNumberGenerator::generate()
     {
         return engine->generate();
     }

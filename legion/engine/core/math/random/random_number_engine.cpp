@@ -14,7 +14,7 @@ namespace legion::core::math
         engine.seed(seeds);
     };
 
-    size_type rythe_default_engine::generate() noexcept
+    L_NODISCARD size_type rythe_default_engine::generate() noexcept
     {
         return engine();
     };

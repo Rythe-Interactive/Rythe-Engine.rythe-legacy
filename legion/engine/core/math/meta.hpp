@@ -50,6 +50,24 @@ namespace legion::core::math
     template<typename T>
     constexpr static bool is_matrix_v = is_matrix<T>::value;
 
+    template<typename Scalar>
+    struct quaternion;
+
+    template<typename T>
+    struct is_quat
+    {
+        constexpr static bool value = false;
+    };
+
+    template<typename Scalar>
+    struct is_quat<quaternion<Scalar>>
+    {
+        constexpr static bool value = true;
+    };
+
+    template<typename T>
+    constexpr static bool is_quat_v = is_quat<T>::value;
+
     template<typename FPType>
     struct epsilon
     {

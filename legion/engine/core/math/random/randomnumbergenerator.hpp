@@ -25,12 +25,12 @@ namespace legion::core::math
         static void discard(size_type n);
 
         template<typename Integer = int32>
-        static Integer generateRandomInteger();
+        L_NODISCARD static Integer generateRandomInteger();
 
         template<typename Float = float32>
-        static Float generateRandomFloat();
+        L_NODISCARD static Float generateRandomFloat();
 
-        static size_type generate();
+        L_NODISCARD static size_type generate();
     };
 }
 

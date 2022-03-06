@@ -9,6 +9,7 @@
 #include <core/math/exponential/exponential.hpp>
 #include <core/math/geometric/geometric.hpp>
 #include <core/math/logic/logic.hpp>
+#include <core/math/random/random.hpp>
 #include <core/math/util/util.hpp>
 
 #include <core/math/constants.hpp>

@@ -225,6 +225,9 @@
     <ClInclude Include="math\random\random_number_engine.hpp" />
     <ClInclude Include="math\random\randomnumbergenerator.hpp" />
     <ClInclude Include="math\random\linear_rand.hpp" />
+    <ClInclude Include="math\random\random.hpp" />
+    <ClInclude Include="math\geometric\inverse.hpp" />
+    <ClInclude Include="math\matrix\adjoint.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="platform\cpp.hint" />
@@ -264,5 +267,18 @@
     <None Include="math\quaternion\matrix_quat_conv.inl" />
     <None Include="math\random\randomnumbergenerator.inl" />
     <None Include="math\random\linear_rand.inl" />
+    <None Include="math\arithmetic\multiplication_vector.inl" />
+    <None Include="math\arithmetic\multiplication_matrix.inl" />
+    <None Include="math\arithmetic\multiplication_quaternion.inl" />
+    <None Include="math\geometric\normalize.inl" />
+    <None Include="math\geometric\normalize_vector.inl" />
+    <None Include="math\geometric\length.inl" />
+    <None Include="math\geometric\length_vector.inl" />
+    <None Include="math\geometric\length_quat.inl" />
+    <None Include="math\geometric\inverse.inl" />
+    <None Include="math\geometric\inverse_vector.inl" />
+    <None Include="math\geometric\inverse_quat.inl" />
+    <None Include="math\geometric\inverse_matrix.inl" />
+    <None Include="math\matrix\adjoint.inl" />
   </ItemGroup>
 </Project>
