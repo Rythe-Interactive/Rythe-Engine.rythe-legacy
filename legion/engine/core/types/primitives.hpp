@@ -18,11 +18,21 @@ namespace legion::core
     using uint64 = ::std::uint64_t;
     using uint_max = ::std::uintmax_t;
 
+    using uint_least8 = ::std::uint_least8_t;
+    using uint_least16 = ::std::uint_least16_t;
+    using uint_least32 = ::std::uint_least32_t;
+    using uint_least64 = ::std::uint_least64_t;
+
     using int8 = ::std::int8_t;
     using int16 = ::std::int16_t;
     using int32 = ::std::int32_t;
     using int64 = ::std::int64_t;
     using int_max = ::std::intmax_t;
+
+    using int_least8 = ::std::int_least8_t;
+    using int_least16 = ::std::int_least16_t;
+    using int_least32 = ::std::int_least32_t;
+    using int_least64 = ::std::int_least64_t;
 
     using size_type = ::std::size_t;
     using index_type = ::std::size_t;
@@ -32,7 +42,7 @@ namespace legion::core
     using float32 = float;
     using float64 = double;
     using float_max = long double;
-    
+
     using time32 = float32;
     using time64 = float64;
     using time_max = float_max;

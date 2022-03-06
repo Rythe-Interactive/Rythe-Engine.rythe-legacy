@@ -41,6 +41,8 @@
     <ClCompile Include="data\loaders\gltfmeshloader.cpp" />
     <ClCompile Include="time\main_clock.cpp" />
     <ClCompile Include="math\vector\vector1.cpp" />
+    <ClCompile Include="math\random\random_number_engine.cpp" />
+    <ClCompile Include="math\random\randomnumbergenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="async\async.hpp" />
@@ -220,6 +222,9 @@
     <ClInclude Include="math\matrix\determinant.hpp" />
     <ClInclude Include="math\matrix\decompose.hpp" />
     <ClInclude Include="math\matrix\matrix3.hpp" />
+    <ClInclude Include="math\random\random_number_engine.hpp" />
+    <ClInclude Include="math\random\randomnumbergenerator.hpp" />
+    <ClInclude Include="math\random\linear_rand.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="platform\cpp.hint" />
@@ -257,5 +262,7 @@
     <None Include="math\matrix\determinant.inl" />
     <None Include="math\matrix\decompose.inl" />
     <None Include="math\quaternion\matrix_quat_conv.inl" />
+    <None Include="math\random\randomnumbergenerator.inl" />
+    <None Include="math\random\linear_rand.inl" />
   </ItemGroup>
 </Project>
