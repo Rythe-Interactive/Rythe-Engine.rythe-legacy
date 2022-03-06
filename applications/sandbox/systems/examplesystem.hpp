@@ -34,9 +34,9 @@ namespace legion::core
         NO_DTOR_RULE5_NOEXCEPT(orbital_policy);
         ~orbital_policy() = default;
 
-        const double C_MASS = 100.f;
-        const double P_MASS = 75.f;
-        const double G_FORCE = 1.0f;
+        const double C_MASS = 10.f;
+        const double P_MASS = 1.f;
+        const double G_FORCE = 100.0f;
 
         virtual void OnSetup(particle_emitter& emitter) override;
         virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override;
