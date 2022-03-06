@@ -10,8 +10,8 @@ shader(vertex)
 {
     void main(void)
     {
-        gl_Position = vec4(position, 1.0);
-        stdout(position) = (inverse(ViewMatrix) * vec4((inverse(ProjectionMatrix) * vec4(stdin(position), 1.0)).xyz, 0.0)).xyz;
+        gl_Position = ProjectionMatrix * ViewMatrix * vec4(GetCamera().position + position, 1.0);
+        PropagateStdIO();
     }
 }
 
