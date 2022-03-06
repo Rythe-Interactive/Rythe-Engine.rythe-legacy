@@ -24,8 +24,9 @@ namespace legion::core::math
             L_NODISCARD constexpr static value_type compute(const value_type& a, Scalar b) noexcept
             {
                 value_type result;
+                Scalar inv = static_cast<Scalar>(1) / b;
                 for (size_type i = 0; i < size; i++)
-                    result[i] = a[i] / b;
+                    result[i] = a[i] * inv;
                 return result;
             }
         };

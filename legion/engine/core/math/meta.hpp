@@ -83,7 +83,7 @@ namespace legion::core::math
     template<typename TypeA, typename TypeB>
     struct lowest_precision
     {
-        using type = decltype(highest_epsilon_v<TypeA, TypeB>);
+        using type = remove_cvr_t<decltype(highest_epsilon_v<TypeA, TypeB>)>;
     };
 
     template<typename TypeA, typename TypeB>

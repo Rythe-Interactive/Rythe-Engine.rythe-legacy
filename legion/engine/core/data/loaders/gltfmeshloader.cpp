@@ -102,7 +102,7 @@ namespace legion::core
                     const float* x = reinterpret_cast<const float*>(&buffer.data[i]);
                     const float* y = reinterpret_cast<const float*>(&buffer.data[i + sizeof(float)]);
                     const float* z = reinterpret_cast<const float*>(&buffer.data[i + 2 * sizeof(float)]);
-                    data.push_back(math::normalize((transform * math::float4(*x, *y, *z, 0.f)).xyz()));
+                    data.push_back(math::normalize((math::float4(*x, *y, *z, 0.f) * transform).xyz));
                 }
             }
             else
@@ -112,7 +112,7 @@ namespace legion::core
                     const float* x = reinterpret_cast<const float*>(&buffer.data[i]);
                     const float* y = reinterpret_cast<const float*>(&buffer.data[i + sizeof(float)]);
                     const float* z = reinterpret_cast<const float*>(&buffer.data[i + 2 * sizeof(float)]);
-                    data.push_back((transform * math::float4(*x, *y, *z, 1.f)).xyz());
+                    data.push_back((math::float4(*x, *y, *z, 1.f) * transform).xyz);
                 }
             }
 
@@ -142,7 +142,7 @@ namespace legion::core
                         const float* x = reinterpret_cast<const float*>(&valueBuffer.data[valuePos]);
                         const float* y = reinterpret_cast<const float*>(&valueBuffer.data[valuePos + sizeof(float)]);
                         const float* z = reinterpret_cast<const float*>(&valueBuffer.data[valuePos + 2 * sizeof(float)]);
-                        data.at(dataStart + *idx) = math::normalize((transform * math::float4(*x, *y, *z, 0.f)).xyz());
+                        data.at(dataStart + *idx) = math::normalize((math::float4(*x, *y, *z, 0.f) * transform).xyz);
 
                         indexPos += indexStride;
                         valuePos += valueStride;
@@ -156,7 +156,7 @@ namespace legion::core
                         const float* x = reinterpret_cast<const float*>(&valueBuffer.data[valuePos]);
                         const float* y = reinterpret_cast<const float*>(&valueBuffer.data[valuePos + sizeof(float)]);
                         const float* z = reinterpret_cast<const float*>(&valueBuffer.data[valuePos + 2 * sizeof(float)]);
-                        data.at(dataStart + *idx) = (transform * math::float4(*x, *y, *z, 1)).xyz();
+                        data.at(dataStart + *idx) = (math::float4(*x, *y, *z, 1) * transform).xyz;
 
                         indexPos += indexStride;
                         valuePos += valueStride;
@@ -200,7 +200,7 @@ namespace legion::core
                         const float r = static_cast<float>(buffer.data[i]) / 255.f;
                         const float g = static_cast<float>(buffer.data[i + sizeof(byte)]) / 255.f;
                         const float b = static_cast<float>(buffer.data[i + 2 * sizeof(byte)]) / 255.f;
-                        data.emplace_back(r, g, b);
+                        data.emplace_back(r, g, b, 1.f);
                     }
                     break;
                     case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
@@ -217,7 +217,7 @@ namespace legion::core
                         const float* r = reinterpret_cast<const float*>(&buffer.data[i]);
                         const float* g = reinterpret_cast<const float*>(&buffer.data[i + sizeof(float)]);
                         const float* b = reinterpret_cast<const float*>(&buffer.data[i + 2 * sizeof(float)]);
-                        data.emplace_back(*r, *g, *b);
+                        data.emplace_back(*r, *g, *b, 1.f);
                     }
                     break;
                     default:
@@ -766,7 +766,8 @@ namespace legion::core
             material.emissiveValue = math::color(
                 static_cast<float>(srcMat.emissiveFactor[0]),
                 static_cast<float>(srcMat.emissiveFactor[1]),
-                static_cast<float>(srcMat.emissiveFactor[2]));
+                static_cast<float>(srcMat.emissiveFactor[2]),
+                1.f);
 
             if (srcMat.emissiveTexture.index >= 0)
                 material.emissiveMap = detail::loadGLTFImage(

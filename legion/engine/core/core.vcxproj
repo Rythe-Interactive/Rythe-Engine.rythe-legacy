@@ -222,7 +222,10 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="math\geometric\length.hpp" />
     <ClInclude Include="math\geometric\normalize.hpp" />
     <ClInclude Include="math\logic\not.hpp" />
+    <ClInclude Include="math\matrix\decompose.hpp" />
+    <ClInclude Include="math\matrix\determinant.hpp" />
     <ClInclude Include="math\matrix\matrix.hpp" />
+    <ClInclude Include="math\matrix\matrix3.hpp" />
     <ClInclude Include="math\matrix\matrix4.hpp" />
     <ClInclude Include="math\matrix\matrix_base.hpp" />
     <ClInclude Include="math\matrix\column\column_base.hpp" />
@@ -368,7 +371,10 @@ del /q ".\xcopyexclude"</Command>
     <None Include="engine\system.inl" />
     <None Include="events\eventbus.inl" />
     <None Include="math\arithmetic\multiplication.inl" />
+    <None Include="math\matrix\decompose.inl" />
+    <None Include="math\matrix\determinant.inl" />
     <None Include="math\matrix\matrix_base.inl" />
+    <None Include="math\quaternion\matrix_quat_conv.inl" />
     <None Include="math\vector\swizzle\swizzle.inl" />
     <None Include="math\vector\vector1.inl" />
     <None Include="math\vector\vector_base.inl" />

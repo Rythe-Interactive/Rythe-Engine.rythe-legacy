@@ -54,7 +54,7 @@ namespace legion::core::math
         L_NODISCARD constexpr auto compute_multiplication<matrix<Scalar, RowCount, ColCount>>::compute(const vec_type& a, const mat_type& b) noexcept
         {
             static_assert(ColCount == vec_type::size, "Matrix/vector multiplication requires vector to have the same size as the number of columns");
-            using scalar = lowest_precision_t<Scalar, typename vec_type::scalar>;
+            using scalar = lowest_precision_t<remove_cvr_t<Scalar>, remove_cvr_t<typename vec_type::scalar>>;
             using result_type = vector<scalar, RowCount>;
 
             result_type result = result_type::zero;

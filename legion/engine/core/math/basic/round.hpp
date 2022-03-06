@@ -94,4 +94,18 @@ namespace legion::core::math
             return detail::compute_round<value_type, 1u>::template icompute<Integer>(val);
         }
     }
+
+    template<typename T = float>
+    L_NODISCARD constexpr static auto uround(T val)
+    {
+        using value_type = remove_cvr_t<T>;
+        if constexpr (is_vector_v<value_type>)
+        {
+            return detail::compute_round<typename value_type::scalar, value_type::size>::template icompute<uint>(val);
+        }
+        else
+        {
+            return detail::compute_round<value_type, 1u>::template icompute<uint>(val);
+        }
+    }
 }

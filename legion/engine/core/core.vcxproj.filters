@@ -217,6 +217,9 @@
     <ClInclude Include="math\matrix\column\column_base.hpp" />
     <ClInclude Include="math\matrix\matrix4.hpp" />
     <ClInclude Include="math\matrix\matrix.hpp" />
+    <ClInclude Include="math\matrix\determinant.hpp" />
+    <ClInclude Include="math\matrix\decompose.hpp" />
+    <ClInclude Include="math\matrix\matrix3.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="platform\cpp.hint" />
@@ -251,5 +254,8 @@
     <None Include="math\vector\vector_base.inl" />
     <None Include="math\matrix\matrix_base.inl" />
     <None Include="math\arithmetic\multiplication.inl" />
+    <None Include="math\matrix\determinant.inl" />
+    <None Include="math\matrix\decompose.inl" />
+    <None Include="math\quaternion\matrix_quat_conv.inl" />
   </ItemGroup>
 </Project>

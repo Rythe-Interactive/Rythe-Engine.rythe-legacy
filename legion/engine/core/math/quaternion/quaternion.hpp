@@ -90,3 +90,5 @@ namespace legion::core::math
     using quat64 = quaternion<float64>;
     using quat_max = quaternion<float_max>;
 }
+
+#include <core/math/quaternion/matrix_quat_conv.inl>
