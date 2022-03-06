@@ -96,7 +96,7 @@ public:
     {
         auto skybox = createEntity("Skybox");
         auto skyboxMat = rendering::MaterialCache::create_material("skybox", "assets://shaders/skybox.shs"_view);
-        skyboxMat.set_param("skycolor", math::color(0.1f, 0.3f, 1.0f));
+        skyboxMat.set_param("skybox", gfx::TextureCache::create_texture("skyBox","assets://textures/4k_star.jpg"_view));
         skybox.add_component(gfx::mesh_renderer{ skyboxMat, rendering::ModelCache::create_model("Cube", "assets://models/cube.glb"_view) });
         skybox.add_component<transform>();
 
@@ -107,7 +107,7 @@ public:
         groundplane.add_component<transform>();
 
         camera = createEntity("Camera");
-        camera.add_component<transform>(position(0.f, 3.f, -30.f), rotation::lookat(math::vec3::zero, math::vec3::forward), scale());
+        camera.add_component<transform>(position(0.f, 5.f, -30.f), rotation::lookat(math::vec3::zero, math::vec3::forward), scale());
         camera.add_component<audio::audio_listener>();
 
         rendering::camera cam;
