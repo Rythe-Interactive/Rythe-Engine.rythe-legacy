@@ -7,8 +7,10 @@ namespace legion::physics
     {
         pc_add_first_box = 0ull,
         pc_add_first_sphere,
+        pc_add_first_convex,
         pc_add_next_box,
         pc_add_next_sphere,
+        pc_add_next_convex,
         pc_max //must always be the last enum
     };
 

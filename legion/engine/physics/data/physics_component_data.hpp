@@ -25,8 +25,6 @@ namespace legion::physics
 
         L_ALWAYS_INLINE void AddBoxCollider(const math::vec3& extents)
         {
-            m_convexColliderData.push_back(convexColliderData());
-            m_modifyPhysicsComponentEvents.push_back(std::make_unique<add_box_collider>(extents));
             AddBoxCollider(extents, math::vec3(0.0f), math::identity<math::quat>());
         }
 

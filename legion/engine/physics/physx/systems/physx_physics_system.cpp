@@ -296,25 +296,19 @@ namespace legion::physics
     
     void PhysXPhysicsSystem::processPhysicsComponentEvents(ecs::entity ent, physicsComponent& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo)
     {
-        auto& eventsGenerated = physicsComponentToProcess.physicsCompData.GetGeneratedPhysicsComponentEvents();
+        const std::bitset<physics_component_flag::pc_max>& eventsGenerated = physicsComponentToProcess.physicsCompData.GetGeneratedPhysicsComponentEvents();
 
-        for (std::unique_ptr<events::event_base>& eventPtr : eventsGenerated)
+        for(size_type bitPos = 0; bitPos < eventsGenerated.size(); ++bitPos)
         {
-            auto findResult = m_eventHashToPCEventProcess.find(eventPtr.get()->get_id());
-
-            if (findResult != m_eventHashToPCEventProcess.end())
+            if (eventsGenerated.test(bitPos))
             {
                 auto& wrapper = m_physxWrapperContainer.findWrapperWithID(physicsComponentToProcess.physicsComponentID).value().get();
 
-                findResult->second.invoke(
-                    eventPtr.get(),
-                    physicsEnviromentInfo,
-                    wrapper,
-                    ent );
+                m_physicsComponentActionFuncs[bitPos].invoke(physicsComponentToProcess, physicsEnviromentInfo, wrapper, ent);
             }
         }
 
-        eventsGenerated.clear();
+        physicsComponentToProcess.physicsCompData.resetModificationFlags();
     }
 
     void PhysXPhysicsSystem::processRigidbodyComponentEvents(ecs::entity ent, size_type wrapperID, rigidbody& rigidbody,  const PhysxEnviromentInfo& physicsEnviromentInfo)

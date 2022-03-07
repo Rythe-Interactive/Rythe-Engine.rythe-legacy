@@ -89,6 +89,8 @@ namespace legion::physics
         {
             if (sphereCollider.isRegisteredOfType(collider_type::sphere)) { continue; }
 
+                PxVec3 pxVelocity(vel.x, vel.y, vel.z);
+                rigid->setLinearVelocity(pxVelocity);
             sphereCollider.setRegistered(true);
 
         const math::vec3& pos = *entity.get_component<position>();

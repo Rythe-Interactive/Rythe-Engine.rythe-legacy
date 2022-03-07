@@ -160,12 +160,6 @@ namespace legion::core::ecs
         // Remove entity from filters to stop it from updating.
         FilterRegistry::markEntityDestruction(target);
 
-        // Destroy every component in the composition and clear the composition.
-        auto& composition = instance.m_entityCompositions.at(target->id);
-        for (auto& componentId : composition)
-            getFamily(componentId)->destroy_component(target);
-        composition.clear();
-
         // If the entity had a valid parent then we need to orphan this entity.
         if (target->parent)
             target->parent->children.erase(target);
