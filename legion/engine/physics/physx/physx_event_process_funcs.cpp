@@ -2,6 +2,7 @@
 #include <physics/physx/physx_integration_helpers.hpp>
 #include <physx/PxPhysicsAPI.h>
 #include <physics/events/events.hpp>
+#include <physics/components/physics_component.hpp>
 
 using namespace physx;
 
@@ -24,39 +25,45 @@ namespace legion::physics
         }
     }
 
-    void processAddBoxEvent(events::event_base* addBoxEvent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
+    void processAddBoxEvent(physicsComponent& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
     {
-        //cast event into actual derived event
-        add_box_collider* boxColliderAddEvent = static_cast<add_box_collider*>(addBoxEvent);
+        physicsComponentData& data = physicsComponent.physicsCompData;
 
-        const math::vec3& pos = *entity.get_component<position>();
-        const math::quat& rot = *entity.get_component<rotation>();
-
-        PxTransform transform(
-            PxVec3(pos.x, pos.y, pos.z),
-            PxQuat(rot.x, rot.y, rot.z,rot.w));
-
-        const math::vec3& extents = boxColliderAddEvent->newExtents;
-
-        if (wrapper.bodyType == physics_body_type::rigidbody)
+        for (ConvexColliderData& convexCollider : data.GetConvexData())
         {
-            PxRigidDynamic* rb = PxCreateDynamic(*getSDK(), transform,
-                PxBoxGeometry(extents.x, extents.y, extents.z), *sceneInfo.defaultMaterial, 1.0f);
+            bool isUnRegisteredBox = !convexCollider.isDataRead() && convexCollider.getConvexType() == convex_type::box;
+            convexCollider.setDataRead(true);
 
-            rb->userData = entity.data;
+            if (isUnRegisteredBox)
+            {
+                const math::vec3& pos = *entity.get_component<position>();
+                const math::quat& rot = *entity.get_component<rotation>();
 
-            wrapper.physicsActors.push_back(rb);
-            sceneInfo.scene->addActor(*rb);
+                PxTransform transform(
+                    PxVec3(pos.x, pos.y, pos.z),
+                    PxQuat(rot.x, rot.y, rot.z, rot.w));
+
+                const math::vec3& extents = convexCollider.getBoxExtents();
+
+                if (wrapper.bodyType == physics_body_type::rigidbody)
+                {
+                    PxRigidDynamic* rb = PxCreateDynamic(*getSDK(), transform,
+                        PxBoxGeometry(extents.x, extents.y, extents.z), *sceneInfo.defaultMaterial, 1.0f);
+
+                    rb->userData = entity.data;
+
+                    wrapper.physicsActors.push_back(rb);
+                    sceneInfo.scene->addActor(*rb);
+                }
+                else if (wrapper.bodyType == physics_body_type::static_collider)
+                {
+                    PxRigidStatic* staticCollider = PxCreateStatic(*getSDK(), transform,
+                        PxBoxGeometry(extents.x, extents.y, extents.z), *sceneInfo.defaultMaterial);
+
+                    wrapper.physicsActors.push_back(staticCollider);
+                    sceneInfo.scene->addActor(*staticCollider);
+                }
+            }
         }
-        else if (wrapper.bodyType == physics_body_type::static_collider)
-        {
-            PxRigidStatic* staticCollider = PxCreateStatic(*getSDK(), transform,
-                PxBoxGeometry(extents.x, extents.y, extents.z), *sceneInfo.defaultMaterial);
-
-            wrapper.physicsActors.push_back(staticCollider);
-            sceneInfo.scene->addActor(*staticCollider);
-        }
-
-
     }
 }

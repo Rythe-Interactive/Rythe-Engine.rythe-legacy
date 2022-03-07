@@ -60,8 +60,8 @@ namespace legion::physics
 
         std::mutex m_setupShutdownMutex;
 
-        using pcEventProcessFunc = delegate<void(core::events::event_base*, const PhysxEnviromentInfo&, PhysxInternalWrapper&, ecs::entity)>;
-        std::unordered_map<id_type, pcEventProcessFunc> m_eventHashToPCEventProcess;
+        using pcEventProcessFunc = delegate<void(physicsComponent&,const PhysxEnviromentInfo&, PhysxInternalWrapper&, ecs::entity)>;
+        std::array< pcEventProcessFunc, physics_component_flag::pc_max> m_physicsComponentActionFuncs;
 
         using rbEventProcessFunc = delegate<void(const core::events::event_base&, const PhysxEnviromentInfo&, PhysxInternalWrapper&, ecs::entity)>;
         std::unordered_map<id_type, rbEventProcessFunc > m_eventHashToRBEventProcess;
