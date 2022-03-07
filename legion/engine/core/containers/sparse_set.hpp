@@ -3,6 +3,7 @@
 #include <type_traits>
 #include <algorithm>
 #include <stdexcept>
+#include <optional>
 #include <core/platform/platform.hpp>
 #include <core/types/primitives.hpp>
 
@@ -196,6 +197,17 @@ namespace legion::core
             }
 
             return false;
+        }
+
+        /**@brief Finds the index of a value in the dense array
+         * @param val Value to find.
+         * @returns std::optional to the index, otherwise nullopt.
+         */
+        L_NODISCARD std::optional<size_type> index_of(const_reference val)
+        {
+            if (contains(val))
+                return m_sparse[val];
+            return std::nullopt;
         }
 
 #pragma region find
