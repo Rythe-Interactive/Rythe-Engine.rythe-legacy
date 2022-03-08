@@ -85,6 +85,7 @@ namespace legion::core
         void setAlive(size_type idx, bool alive);
         bool isAlive(size_type idx);
         void swap(size_type idx1, size_type idx2);
+        void resize(size_type size);
     };
 }
 

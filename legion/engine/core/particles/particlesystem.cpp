@@ -95,9 +95,10 @@ namespace legion::core
                     destroyed++;
                 }
             }
-
             for (auto& policy : emitter.particlePolicies)
                 policy->OnDestroy(emitter, emitter.currentParticleCount, emitter.currentParticleCount + destroyed);
+
+            emitter.resize(emitter.currentParticleCount);
         }
 
         for (auto& policy : emitter.particlePolicies)
