@@ -1,4 +1,6 @@
 #pragma once
+#include <algorithm>
+
 #include <core/platform/platform.hpp>
 #include <core/types/types.hpp>
 

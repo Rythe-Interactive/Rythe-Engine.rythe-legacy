@@ -30,22 +30,41 @@ void ExampleSystem::setup()
     //material.set_param("skycolor", math::color(0.1f, 0.3f, 1.0f));
 
     {
-        auto ent = createEntity("Particle Emitter");
+        auto ent = createEntity("Saturn");
         auto [pos, rot, scal] = ent.add_component<transform>();
-        scal = scale(5.f, 5.f, 5.f);
+        scal = scale(3.f, 3.f, 3.f);
         ent.add_component<gfx::mesh_renderer>(gfx::mesh_renderer(material, model));
         auto emitter = ent.add_component<particle_emitter>();
         emitter->infinite = true;
-        emitter->spawnRate = 100;
+        emitter->spawnRate = 1000;
         emitter->spawnInterval = 0.05f;
-        emitter->maxSpawnCount = 100;
+        emitter->maxSpawnCount = 1000;
         emitter->minLifeTime = 5;
         emitter->maxLifeTime = 15;
-        //emitter->localScale = false;
+        emitter->localScale = false;
 
         //emitter->add_policy<fountain_policy>();
         emitter->add_policy<example_policy>();
         emitter->add_policy<orbital_policy>();
+        emitter->add_policy<rendering_policy>();
+    }
+
+    {
+        auto ent = createEntity("Fountain");
+        auto [pos, rot, scal] = ent.add_component<transform>();
+        pos = position(0, 10, 0);
+        auto emitter = ent.add_component<particle_emitter>();
+        emitter->infinite = false;
+        emitter->spawnRate = 10;
+        emitter->spawnInterval = 0.05f;
+        emitter->maxSpawnCount = 5000;
+        emitter->minLifeTime = 1;
+        emitter->maxLifeTime = 2;
+        emitter->localScale = false;
+
+        emitter->add_policy<fountain_policy>();
+        //emitter->add_policy<example_policy>();
+        //emitter->add_policy<orbital_policy>();
         emitter->add_policy<rendering_policy>();
     }
 

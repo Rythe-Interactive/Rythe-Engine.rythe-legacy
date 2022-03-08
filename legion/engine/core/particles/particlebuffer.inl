@@ -21,7 +21,10 @@ namespace legion::core
     template<typename bufferType>
     void particle_buffer<bufferType>::swap(size_type idx1, size_type idx2)
     {
-        std::iter_swap(buffer.begin() + idx1, buffer.begin() + idx2);
+        while (idx2 >= buffer.size())
+            buffer.emplace_back();
+
+        std::swap(buffer[idx1], buffer[idx2]);
     }
 
     template<typename bufferType>
