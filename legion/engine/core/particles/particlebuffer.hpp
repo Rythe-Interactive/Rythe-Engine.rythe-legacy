@@ -18,6 +18,7 @@ namespace legion::core
 
         virtual void swap(size_type idx1, size_type idx2) LEGION_PURE;
         virtual size_type size() LEGION_PURE;
+        virtual void resize(size_type size) LEGION_PURE;
     };
 
     template<typename bufferType>
@@ -36,6 +37,7 @@ namespace legion::core
 
         virtual void swap(size_type idx1, size_type idx2) override;
         virtual size_type size() override;
+        virtual void resize(size_type size) override;
 
         bufferType& get(size_type idx);
         bufferType& operator[](size_type idx);
