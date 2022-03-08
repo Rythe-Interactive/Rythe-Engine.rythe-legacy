@@ -31,8 +31,8 @@ namespace legion::physics
         physics::dvr_internal_physics_component* physicsCompA = nullptr;
         physics::dvr_internal_physics_component* physicsCompB = nullptr;
 
-        physics::dvr_internal_rigidbody* dvr_internal_rigidbodyA = nullptr;
-        physics::dvr_internal_rigidbody* dvr_internal_rigidbodyB = nullptr;
+        physics::dvr_internal_rigidbody* rigidbodyA = nullptr;
+        physics::dvr_internal_rigidbody* rigidbodyB = nullptr;
 
         std::unique_ptr<PenetrationQuery> penetrationInformation;
 

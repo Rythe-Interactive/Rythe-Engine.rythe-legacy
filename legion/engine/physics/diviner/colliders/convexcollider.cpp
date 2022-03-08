@@ -133,8 +133,8 @@ namespace legion::physics
 
         manifold.penetrationInformation->populateContactList(manifold, refTransform, incTransform, refCollider);
 
-        dvr_internal_rigidbody* refRB = manifold.penetrationInformation->isARef ? manifold.dvr_internal_rigidbodyA : manifold.dvr_internal_rigidbodyB;
-        dvr_internal_rigidbody* incRB = manifold.penetrationInformation->isARef ? manifold.dvr_internal_rigidbodyB : manifold.dvr_internal_rigidbodyA;
+        dvr_internal_rigidbody* refRB = manifold.penetrationInformation->isARef ? manifold.rigidbodyA : manifold.rigidbodyB;
+        dvr_internal_rigidbody* incRB = manifold.penetrationInformation->isARef ? manifold.rigidbodyB : manifold.rigidbodyA;
 
         math::vec3 refWorldCentroid = refTransform * math::vec4(refPhysicsComp->localCenterOfMass,1);
         math::vec3 incWorldCentroid = incTransform * math::vec4(incPhysicsComp->localCenterOfMass,1);

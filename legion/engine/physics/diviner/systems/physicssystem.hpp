@@ -140,7 +140,7 @@ namespace legion::physics
         * @param isTriggerInvolved A bool that indicates whether a dvr_internal_physics_component with a dvr_internal_physics_component::isTrigger set to true is involved in this manifold
         */
         void constructManifoldsWithPrecursors(ecs::component_container<dvr_internal_rigidbody>& rigidbodies, std::vector<byte>& hasRigidBodies, physics_manifold_precursor& precursorA, physics_manifold_precursor& precursorB,
-            std::vector<physics_manifold>& manifoldsToSolve, bool isdvr_internal_rigidbodyInvolved, bool isTriggerInvolved);
+            std::vector<physics_manifold>& manifoldsToSolve, bool isRigidbodyInvolved, bool isTriggerInvolved);
        
         void constructManifoldWithCollider(
             ecs::component_container<dvr_internal_rigidbody>& rigidbodies, std::vector<byte>& hasRigidBodies,
@@ -155,10 +155,10 @@ namespace legion::physics
             manifold.entityB = precursorB.entity;
 
             if (hasRigidBodies[precursorA.id])
-                manifold.dvr_internal_rigidbodyA = &rigidbodies[precursorA.id].get();
+                manifold.rigidbodyA = &rigidbodies[precursorA.id].get();
 
             if (hasRigidBodies[precursorB.id])
-                manifold.dvr_internal_rigidbodyB = &rigidbodies[precursorB.id].get();
+                manifold.rigidbodyB = &rigidbodies[precursorB.id].get();
 
             manifold.physicsCompA = precursorA.physicsComp;
             manifold.physicsCompB = precursorB.physicsComp;
