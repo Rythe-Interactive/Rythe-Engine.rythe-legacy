@@ -37,7 +37,7 @@ namespace legion::core
         if (particleBuffers.count(idName) < 1)
         {
             log::warn("Buffer \"{}\" of type {} does not exist, one will be created for you", name, typeid(bufferType).name());
-            create_buffer<bufferType>(name);
+            return create_buffer<bufferType>(name);
         }
         return *dynamic_cast<particle_buffer<bufferType>*>(particleBuffers[idName].get());
     }
