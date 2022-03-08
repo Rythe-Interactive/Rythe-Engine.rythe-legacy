@@ -2,12 +2,12 @@
 
 namespace legion::core
 {
-    void particle_emitter::swap(size_type idx)
+    void particle_emitter::swap(size_type idx1, size_type idx2)
     {
-        std::iter_swap(livingBuffer.begin() + idx, livingBuffer.begin() + currentParticleCount - 1);
+        std::iter_swap(livingBuffer.begin() + idx1, livingBuffer.begin() + idx2);
 
         for (auto& [id, buffer] : particleBuffers)
-            particleBuffers[id]->swap(idx, currentParticleCount - 1);
+            particleBuffers[id]->swap(idx1, idx2);
     }
 
     void particle_emitter::setAlive(size_type idx, bool alive)
@@ -26,6 +26,8 @@ namespace legion::core
 
     bool particle_emitter::isAlive(size_type idx)
     {
-        return livingBuffer[idx];
+        if (idx < livingBuffer.size())
+            return livingBuffer[idx];
+        return false;
     }
 }

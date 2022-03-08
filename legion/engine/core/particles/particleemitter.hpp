@@ -22,19 +22,30 @@ namespace legion::core
 
     struct particle_emitter
     {
+        //default: 1000
         size_type maxSpawnCount = 1000;
         size_type currentParticleCount = 0;
+        //default: 1
         size_type spawnRate = 1;
 
+        //default: 1.f
         float minLifeTime = 1.f;
+        //default: 2.f
         float maxLifeTime = 2.f;
+        //default: .1f
         float spawnInterval = .1f;
+        //default: 0.f
         float elapsedTime = 0.f;
 
+        //default: true
         bool spawn = true;
+        //default: false
         bool infinite = false;
+        //default: true
         bool localPosition = true;
+        //default: true
         bool localRotation = true;
+        //default: true
         bool localScale = true;
 
         std::vector<bool> livingBuffer{};
@@ -73,7 +84,7 @@ namespace legion::core
 
         void setAlive(size_type idx, bool alive);
         bool isAlive(size_type idx);
-        void swap(size_type idx);
+        void swap(size_type idx1, size_type idx2);
     };
 }
 
