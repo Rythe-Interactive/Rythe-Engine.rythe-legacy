@@ -33,6 +33,9 @@ namespace legion::core
 
         bool spawn = true;
         bool infinite = false;
+        bool localPosition = true;
+        bool localRotation = true;
+        bool localScale = true;
 
         std::vector<bool> livingBuffer{};
         std::vector<std::unique_ptr<particle_policy_base>> particlePolicies;
