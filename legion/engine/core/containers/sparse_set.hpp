@@ -202,7 +202,7 @@ namespace legion::core
 
         /**@brief Finds the index of a value in the dense array
          * @param val Value to find.
-         * @returns std::optional to the index, otherwise nullopt.
+         * @returns size_type equal to the index of val in the dense array, otherwise npos
          */
         L_NODISCARD size_type index_of(const_reference val)
         {
