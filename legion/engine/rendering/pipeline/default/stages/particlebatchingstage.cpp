@@ -46,9 +46,12 @@ namespace legion::rendering
 
             queueJobs(posBuffer.size(), [&](id_type jobId)
                 {
-                    auto transScale = scal * scaleBuffer[jobId];
-                    auto transPos = origin + math::rotate(rot, posBuffer[jobId]) * transScale;
-                    batch.second[jobId + start] = math::compose(transScale, rot, transPos);
+                    if (emitter.isAlive(jobId))
+                    {
+                        auto transScale = scal * scaleBuffer[jobId];
+                        auto transPos = origin + math::rotate(rot, posBuffer[jobId]) * transScale;
+                        batch.second[jobId + start] = math::compose(transScale, rot, transPos);
+                    }
                 }).wait();
         }
     }
