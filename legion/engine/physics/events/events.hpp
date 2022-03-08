@@ -48,6 +48,19 @@ namespace legion::physics {
             return std::make_pair(manifold->colliderA, manifold->colliderB);
         }
 
+        /** @brief gets the transform of the colliding bodys themselves
+         */
+        L_NODISCARD std::pair<transform, transform> transforms() const
+        {
+            return std::apply([](ecs::entity_handle a, ecs::entity_handle b)
+            {
+                return std::make_pair(
+                    transform(a.get_component_handles<transform>()),
+                    transform(b.get_component_handles<transform>())
+                );
+            }, participants());
+        }
+
         float physics_delta;
 
     };
@@ -71,41 +84,4 @@ namespace legion::physics {
     {
         using collision_event_base<collision_event>::collision_event_base;
     };
-
-    struct rb_modify_mass final : public core::events::event<rb_modify_mass>
-    {
-        float newMass;
-
-        rb_modify_mass(float mass) : newMass{ mass } { }
-    };
-
-    struct rb_modify_inertia_tensor final : public core::events::event<rb_modify_inertia_tensor>
-    {
-        math::mat3 newInertiaTensor;
-
-        rb_modify_inertia_tensor(const math::mat3& inertiaTensor) : newInertiaTensor{ inertiaTensor } { }
-    };
-
-    struct rb_modify_velocity final : public core::events::event<rb_modify_velocity>
-    {
-        math::vec3 newVelocity;
-
-        rb_modify_velocity(const math::vec3& velocity) : newVelocity{ velocity } { }
-    };
-
-    struct rb_modify_linear_drag final : public core::events::event<rb_modify_linear_drag>
-    {
-        float newLinearDrag;
-
-        rb_modify_linear_drag(float linearDrag) : newLinearDrag{ linearDrag } { }
-    };
-
-    struct rb_modify_angular_drag final : public core::events::event<rb_modify_angular_drag>
-    {
-        float newAngularDrag;
-
-        rb_modify_angular_drag(float angularDrag) : newAngularDrag{ angularDrag } { }
-    };
-
-
 }

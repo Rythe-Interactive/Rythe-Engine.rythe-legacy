@@ -190,8 +190,6 @@ namespace legion::physics
         auto& physicsComponentA = *precursorA.physicsComp;
         auto& physicsComponentB = *precursorB.physicsComp;
 
-        //if (dvr_internal_physics_componentA.colliders.empty() || dvr_internal_physics_componentB.colliders.empty()) return;
-
         for (auto colliderA : physicsComponentA.colliders)
         {
             for (auto colliderB : physicsComponentB.colliders)

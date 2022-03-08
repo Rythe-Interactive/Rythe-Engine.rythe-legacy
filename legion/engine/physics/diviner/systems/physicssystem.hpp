@@ -37,8 +37,8 @@ namespace legion::physics
             {
                 OPTICK_EVENT("Fetching data");
 
-                dvr_internal_rigidbody emptydvr_internal_rigidbody;
-                rigidbodies.resize(manifoldPrecursorQuery.size(), std::ref(emptydvr_internal_rigidbody));
+                dvr_internal_rigidbody emptyRigidbody;
+                rigidbodies.resize(manifoldPrecursorQuery.size(), std::ref(emptyRigidbody));
                 hasRigidBodies.resize(manifoldPrecursorQuery.size());
 
                 queueJobs(manifoldPrecursorQuery.size(), [&]() {
@@ -90,12 +90,12 @@ namespace legion::physics
                 id_type index = async::this_job::get_id();
                 math::mat4 transf = math::compose( scales[index].get(), rotations[index].get(), positions[index].get());
                 
-                dvr_internal_physics_component& individualdvr_internal_physics_component = physComps[index].get();
+                dvr_internal_physics_component& individualPhysicsComponent = physComps[index].get();
 
-                for (auto& collider : individualdvr_internal_physics_component.colliders)
+                for (auto& collider : individualPhysicsComponent.colliders)
                     collider->UpdateTransformedTightBoundingVolume(transf);
 
-                manifoldPrecursors[index] = { transf, &individualdvr_internal_physics_component, index, manifoldPrecursorQuery[index] };
+                manifoldPrecursors[index] = { transf, &individualPhysicsComponent, index, manifoldPrecursorQuery[index] };
                 }).wait();
         }
 
@@ -136,7 +136,7 @@ namespace legion::physics
         /**@brief given 2 physics_manifold_precursors precursorA and precursorB, create a manifold for each collider in precursorA
         * with every other collider in precursorB. The manifolds that involve rigidbodies are then pushed into the given manifold list
         * @param manifoldsToSolve [out] a std::vector of physics_manifold that will store the manifolds created
-        * @param isdvr_internal_rigidbodyInvolved A bool that indicates whether a dvr_internal_rigidbody is involved in this manifold
+        * @param isRigidbodyInvolved A bool that indicates whether a dvr_internal_rigidbody is involved in this manifold
         * @param isTriggerInvolved A bool that indicates whether a dvr_internal_physics_component with a dvr_internal_physics_component::isTrigger set to true is involved in this manifold
         */
         void constructManifoldsWithPrecursors(ecs::component_container<dvr_internal_rigidbody>& rigidbodies, std::vector<byte>& hasRigidBodies, physics_manifold_precursor& precursorA, physics_manifold_precursor& precursorB,
@@ -166,9 +166,6 @@ namespace legion::physics
             manifold.transformA = precursorA.worldTransform;
             manifold.transformB = precursorB.worldTransform;
 
-            //manifold.DEBUG_checkID("floor", "problem");
-
-            // log::debug("colliderA->CheckCollision(colliderB, manifold)");
             colliderA->CheckCollision(colliderB, manifold);
         }
 
