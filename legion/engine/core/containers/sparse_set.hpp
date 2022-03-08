@@ -38,6 +38,8 @@ namespace legion::core
         using iterator = typename dense_container::iterator;
         using const_iterator = typename dense_container::const_iterator;
 
+        static constexpr size_type npos{ static_cast<size_type>(-1) };
+
     private:
         dense_container m_dense;
         sparse_container m_sparse;
@@ -196,6 +198,17 @@ namespace legion::core
             }
 
             return false;
+        }
+
+        /**@brief Finds the index of a value in the dense array
+         * @param val Value to find.
+         * @returns size_type equal to the index of val in the dense array, otherwise npos
+         */
+        L_NODISCARD size_type index_of(const_reference val)
+        {
+            if (contains(val))
+                return m_sparse[val];
+            return npos;
         }
 
 #pragma region find
