@@ -36,11 +36,12 @@ void ExampleSystem::setup()
         ent.add_component<gfx::mesh_renderer>(gfx::mesh_renderer(material, model));
         auto emitter = ent.add_component<particle_emitter>();
         emitter->infinite = true;
-        emitter->spawnRate = 30000;
+        emitter->spawnRate = 100;
         emitter->spawnInterval = 0.05f;
-        emitter->maxSpawnCount = 30000;
+        emitter->maxSpawnCount = 100;
         emitter->minLifeTime = 5;
         emitter->maxLifeTime = 15;
+        //emitter->localScale = false;
 
         //emitter->add_policy<fountain_policy>();
         emitter->add_policy<example_policy>();
