@@ -3,7 +3,6 @@
 #include <type_traits>
 #include <algorithm>
 #include <stdexcept>
-#include <optional>
 #include <core/platform/platform.hpp>
 #include <core/types/primitives.hpp>
 
