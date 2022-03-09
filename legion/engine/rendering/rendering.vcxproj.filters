@@ -46,6 +46,7 @@
     <ClCompile Include="pipeline\default\stages\particlerenderingstage.cpp" />
     <ClCompile Include="pipeline\default\postfx\skybox.cpp" />
     <ClCompile Include="pipeline\default\stages\transparencyrenderstage.cpp" />
+    <ClCompile Include="data\particlepolicies\renderpolicy.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="components\camera.hpp" />
@@ -95,6 +96,7 @@
     <ClInclude Include="pipeline\default\stages\particlerenderingstage.hpp" />
     <ClInclude Include="pipeline\default\postfx\skybox.hpp" />
     <ClInclude Include="pipeline\default\stages\transparencyrenderstage.hpp" />
+    <ClInclude Include="data\particlepolicies\renderpolicy.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\buffer.inl" />

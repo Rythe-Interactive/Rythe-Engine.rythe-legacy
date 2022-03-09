@@ -43,7 +43,7 @@ namespace legion::core
         {
             auto emitter = ent.get_component<particle_emitter>();
             for (size_type i = 0; i < emitter->maxSpawnCount; i++)
-                emitter->setAlive(i, false);
+                emitter->set_alive(i, false);
         }
     }
 
@@ -56,7 +56,7 @@ namespace legion::core
         for (size_type i = 0; i < count; i++)
         {
             size_type targetIdx = emitter.currentParticleCount + i;
-            emitter.setAlive(targetIdx, true);
+            emitter.set_alive(targetIdx, true);
             ageBuffer.get(targetIdx).age = 0;
             ageBuffer.get(targetIdx).max = math::linearRand(emitter.minLifeTime, emitter.maxLifeTime);
         }
@@ -77,7 +77,7 @@ namespace legion::core
             size_type activeCount = 0;
             for (activeCount = 0; activeCount < emitter.currentParticleCount; activeCount++)
             {
-                if (!emitter.isAlive(activeCount))
+                if (!emitter.is_alive(activeCount))
                     break;
 
                 auto& lifeTime = ageBuffer[activeCount];
@@ -89,7 +89,7 @@ namespace legion::core
                 auto& lifeTime = ageBuffer[i];
                 if (lifeTime.age > lifeTime.max)
                 {
-                    emitter.setAlive(i, false);
+                    emitter.set_alive(i, false);
                     emitter.swap(i, emitter.currentParticleCount - 1);
                     emitter.currentParticleCount--;
                     destroyed++;
