@@ -5,26 +5,27 @@ namespace legion::physics
 {
     PhysxInternalWrapper::~PhysxInternalWrapper()
     {
-        for (physx::PxActor* actor : physicsActors)
+        if (physicsActor)
         {
-            actor->release();
+            physicsActor->release();
         }
-
-        physicsActors.clear();
+        
     }
 
     PhysxInternalWrapper::PhysxInternalWrapper(PhysxInternalWrapper&& other) noexcept
-        : bodyType(other.bodyType), physicsActors(std::move(other.physicsActors))
+        : bodyType(other.bodyType), physicsActor(std::move(other.physicsActor))
     {
         other.bodyType = physics_body_type::none;
+        other.physicsActor = nullptr;
     }
 
     PhysxInternalWrapper& PhysxInternalWrapper::operator=(PhysxInternalWrapper&& other) noexcept
     {
         bodyType = other.bodyType;
-        physicsActors = std::move(other.physicsActors);
+        physicsActor = std::move(other.physicsActor);
 
         other.bodyType = physics_body_type::none;
+        other.physicsActor = nullptr;
 
         return *this;
     }

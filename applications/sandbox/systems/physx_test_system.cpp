@@ -69,7 +69,8 @@ namespace legion::physics
 
         {
             auto wideBlockPhysComp = wideBlock.add_component<physicsComponent>();
-            wideBlockPhysComp->physicsCompData.AddBoxCollider(math::vec3(10, 1, 10));
+            wideBlockPhysComp->physicsCompData.AddBoxCollider(math::vec3(10, 1, 10),
+                math::vec3(0,1,0),math::identity<math::quat>() );
         }
 
         //add default cube at center

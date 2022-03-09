@@ -17,7 +17,9 @@ namespace legion::physics
 
     struct PhysxInternalWrapper
     {
-        std::vector<physx::PxActor*> physicsActors;
+        physx::PxActor* physicsActor = nullptr;
+
+        size_type colliderCount = 0;
 
         physics_body_type bodyType = physics_body_type::static_collider;
 
