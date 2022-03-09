@@ -7,7 +7,6 @@
 #include "../renderstages/mousehover.hpp"
 #include "gui_test.hpp"
 
-
 struct example_comp
 {
 

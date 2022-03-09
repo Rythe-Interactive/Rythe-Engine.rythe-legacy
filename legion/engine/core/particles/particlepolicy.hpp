@@ -39,5 +39,3 @@ namespace legion::core
         virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) LEGION_PURE;
     };
 }
-
-#include <core/particles/particlepolicy.inl>
