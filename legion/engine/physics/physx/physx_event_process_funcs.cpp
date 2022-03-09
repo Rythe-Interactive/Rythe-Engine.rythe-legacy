@@ -119,6 +119,10 @@ namespace legion::physics
             break;
         }
     }
+    
+    void processAddNextBox(physicsComponent& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
+    {
+        physicsComponentData& data = physicsComponent.physicsCompData;
 
     void processAddNextSphere(physics_component& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
     {
