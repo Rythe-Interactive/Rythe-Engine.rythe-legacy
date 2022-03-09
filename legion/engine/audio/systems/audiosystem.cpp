@@ -454,7 +454,7 @@ namespace legion::audio
         // Position - invert x for left-right hand coord system conversion
         alListener3f(AL_POSITION, p.x, p.y, p.z);
         //rotation
-        math::mat3 mat3 = math::toMat3(r);
+        math::float3x3 mat3 = math::toMat3(r);
         // Invert z axis here for left-right hand coord system conversion
         math::float3 forward = mat3 * math::float3(0.f, 0.f, -1.f);
         math::float3 up = mat3 * math::float3(0.f, 1.f, 0.f);

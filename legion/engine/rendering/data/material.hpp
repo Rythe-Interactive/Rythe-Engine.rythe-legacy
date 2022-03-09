@@ -607,9 +607,9 @@ namespace legion::rendering
                 bob.value(static_cast<material_parameter<math::int3>*>(value.get())->get_value()).finish_entry();
                 continue;
             }
-            if (value->type() == typeHash<math::ivec4>())
+            if (value->type() == typeHash<math::int4>())
             {
-                bob.value(static_cast<material_parameter<math::ivec4>*>(value.get())->get_value()).finish_entry();
+                bob.value(static_cast<material_parameter<math::int4>*>(value.get())->get_value()).finish_entry();
                 continue;
             }
             if (value->type() == typeHash<texture_handle>())

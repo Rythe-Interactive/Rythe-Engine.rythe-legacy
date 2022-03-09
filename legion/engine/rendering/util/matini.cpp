@@ -63,7 +63,7 @@ namespace legion::rendering {
                         if (auto [success, values] = detail::convert_tuple<int, 4>::convert(value); success)
                         {
                             auto& [v1, v2, v3, v4] = values;
-                            material.set_param(key, math::ivec4(v1, v2, v3, v4));
+                            material.set_param(key, math::int4(v1, v2, v3, v4));
                             return false;
                         }
                         if (auto [success, values] = detail::convert_tuple<int, 3>::convert(value); success)

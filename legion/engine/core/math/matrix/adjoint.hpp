@@ -1,4 +1,6 @@
 #pragma once
+#include <cmath>
+
 #include <core/math/matrix/determinant.hpp>
 
 namespace legion::core::math

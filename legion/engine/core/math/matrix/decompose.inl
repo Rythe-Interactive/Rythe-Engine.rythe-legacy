@@ -142,9 +142,9 @@ namespace legion::core::math
                 root = ::std::sqrt(trace + static_cast<Scalar>(1));
                 orientation.w = static_cast<Scalar>(0.5) * root;
                 root = static_cast<Scalar>(0.5) / root;
-                orientation.x = root * (orientationMat[1].z - orientationMat[2].y);
-                orientation.y = root * (orientationMat[2].x - orientationMat[0].z);
-                orientation.z = root * (orientationMat[0].y - orientationMat[1].x);
+                orientation.i = root * (orientationMat[1].z - orientationMat[2].y);
+                orientation.j = root * (orientationMat[2].x - orientationMat[0].z);
+                orientation.k = root * (orientationMat[0].y - orientationMat[1].x);
             }
             else
             {
@@ -201,9 +201,9 @@ namespace legion::core::math
             root = ::std::sqrt(trace + static_cast<Scalar>(1));
             orientation.w = static_cast<Scalar>(0.5) * root;
             root = static_cast<Scalar>(0.5) / root;
-            orientation.x = root * (orientationMat[1].z - orientationMat[2].y);
-            orientation.y = root * (orientationMat[2].x - orientationMat[0].z);
-            orientation.z = root * (orientationMat[0].y - orientationMat[1].x);
+            orientation.i = root * (orientationMat[1].z - orientationMat[2].y);
+            orientation.j = root * (orientationMat[2].x - orientationMat[0].z);
+            orientation.k = root * (orientationMat[0].y - orientationMat[1].x);
         }
         else
         {

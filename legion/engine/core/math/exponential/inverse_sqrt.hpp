@@ -29,9 +29,9 @@ namespace legion::core::math
             static constexpr size_type size = 1u;
             using value_type = vector<Scalar, size>;
 
-            L_ALWAYS_INLINE static Scalar compute(const value_type& v) noexcept
+            L_ALWAYS_INLINE static Scalar compute(Scalar v) noexcept
             {
-                return static_cast<Scalar>(1) / ::std::sqrt(v[0]);
+                return static_cast<Scalar>(1) / ::std::sqrt(v);
             }
         };
 

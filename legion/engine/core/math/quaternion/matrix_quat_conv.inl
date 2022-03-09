@@ -1,10 +1,28 @@
 #pragma once
-#include <core/math/matrix/matrix4.hpp>
+#include <core/math/matrix/matrix2.hpp>
 #include <core/math/matrix/matrix3.hpp>
+#include <core/math/matrix/matrix4.hpp>
 #include <core/math/quaternion/quaternion.hpp>
 
 namespace legion::core::math
 {
+    template<typename Scalar>
+    template<typename Scal>
+    constexpr matrix<Scalar, 2, 2>::matrix(const quaternion<Scal>& orientation) noexcept
+    {
+        Scalar i2 = static_cast<Scalar>(orientation.i * orientation.i);
+        Scalar j2 = static_cast<Scalar>(orientation.j * orientation.j);
+        Scalar k2 = static_cast<Scalar>(orientation.k * orientation.k);
+        Scalar ij = static_cast<Scalar>(orientation.i * orientation.j);
+        Scalar wk = static_cast<Scalar>(orientation.w * orientation.k);
+
+        rows[0][0] = static_cast<Scalar>(1) - static_cast<Scalar>(2) * (j2 + k2);
+        rows[0][1] = static_cast<Scalar>(2) * (ij + wk);
+
+        rows[1][0] = static_cast<Scalar>(2) * (ij - wk);
+        rows[1][1] = static_cast<Scalar>(1) - static_cast<Scalar>(2) * (i2 + k2);
+    }
+
     template<typename Scalar>
     template<typename Scal>
     constexpr matrix<Scalar, 3, 3>::matrix(const quaternion<Scal>& orientation) noexcept

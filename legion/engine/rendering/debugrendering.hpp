@@ -84,11 +84,11 @@ namespace std
             std::hash<bool> boolHasher;
 
             size_t seed = 0;
-            legion::core::math::detail::hash_combine(seed, vecHasher(line.start));
-            legion::core::math::detail::hash_combine(seed, vecHasher(line.end));
-            legion::core::math::detail::hash_combine(seed, colHasher(line.color));
-            legion::core::math::detail::hash_combine(seed, fltHasher(line.width));
-            legion::core::math::detail::hash_combine(seed, boolHasher(line.ignoreDepth));
+            seed = legion::core::hash_combine(seed, vecHasher(line.start));
+            seed = legion::core::hash_combine(seed, vecHasher(line.end));
+            seed = legion::core::hash_combine(seed, colHasher(line.color));
+            seed = legion::core::hash_combine(seed, fltHasher(line.width));
+            seed = legion::core::hash_combine(seed, boolHasher(line.ignoreDepth));
             return seed;
         }
     };

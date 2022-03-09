@@ -104,7 +104,7 @@ namespace legion::application
     void WindowSystem::onWindowContentRescale(GLFWwindow* window, float xscale, float yscale)
     {
         if (m_windowComponents.contains(window))
-            raiseEvent<window_content_rescale>(m_windowComponents[window], math::fvec2(xscale, xscale));
+            raiseEvent<window_content_rescale>(m_windowComponents[window], math::float2(xscale, xscale));
     }
 
     void WindowSystem::onItemDroppedInWindow(GLFWwindow* window, int count, const char** paths)
@@ -134,7 +134,7 @@ namespace legion::application
     void WindowSystem::onMouseMoved(GLFWwindow* window, double xpos, double ypos)
     {
         if (m_windowComponents.contains(window))
-            raiseEvent<mouse_moved>(m_windowComponents[window], math::dvec2(xpos, ypos) / (math::dvec2)ContextHelper::getFramebufferSize(window));
+            raiseEvent<mouse_moved>(m_windowComponents[window], math::double2(xpos, ypos) / (math::double2)ContextHelper::getFramebufferSize(window));
     }
 
     void WindowSystem::onMouseButton(GLFWwindow* window, int button, int action, int mods)
@@ -146,7 +146,7 @@ namespace legion::application
     void WindowSystem::onMouseScroll(GLFWwindow* window, double xoffset, double yoffset)
     {
         if (m_windowComponents.contains(window))
-            raiseEvent<mouse_scrolled>(m_windowComponents[window], math::dvec2(xoffset, yoffset));
+            raiseEvent<mouse_scrolled>(m_windowComponents[window], math::double2(xoffset, yoffset));
     }
 
     void WindowSystem::onExit(events::exit& event)

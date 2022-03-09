@@ -228,6 +228,7 @@
     <ClInclude Include="math\random\random.hpp" />
     <ClInclude Include="math\geometric\inverse.hpp" />
     <ClInclude Include="math\matrix\adjoint.hpp" />
+    <ClInclude Include="math\matrix\matrix2.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="platform\cpp.hint" />

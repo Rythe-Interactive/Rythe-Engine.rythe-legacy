@@ -1,5 +1,6 @@
 #pragma once
 #include <core/types/primitives.hpp>
+
 #include <core/math/vector/vector_base.hpp>
 
 namespace legion::core::math
@@ -10,9 +11,9 @@ namespace legion::core::math
         static_assert(std::is_arithmetic_v<Scalar>, "Scalar must be a numeric type.");
 
         using scalar = Scalar;
-        static constexpr size_type size = RowCount * ColCount;
         static constexpr size_type row_count = RowCount;
         static constexpr size_type col_count = ColCount;
+        static constexpr size_type size = row_count * col_count;
         using type = matrix<Scalar, RowCount, ColCount>;
 
         using row_type = vector<scalar, col_count>;
@@ -20,7 +21,7 @@ namespace legion::core::math
         union
         {
             row_type rows[row_count];
-            scalar data[row_count * col_count];
+            scalar data[size];
         };
 
         static const matrix identity;

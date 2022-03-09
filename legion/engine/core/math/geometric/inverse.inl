@@ -3,6 +3,7 @@
 
 #include <core/math/geometric/inverse_vector.inl>
 #include <core/math/geometric/inverse_quat.inl>
+#include <core/math/geometric/inverse_matrix.inl>
 
 namespace legion::core::math
 {

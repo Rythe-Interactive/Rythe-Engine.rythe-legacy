@@ -34,7 +34,7 @@ namespace legion::core::ecs
     template<typename component_type0, typename component_type1, typename... component_types>
     inline constexpr id_type FilterRegistry::generateId() noexcept
     {
-        return combine_hash(make_hash<component_type0>(), generateId<component_type1, component_types...>());
+        return hash_combine(make_hash<component_type0>(), generateId<component_type1, component_types...>());
     }
 
     template<typename... component_types>

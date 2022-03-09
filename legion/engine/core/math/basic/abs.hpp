@@ -58,7 +58,7 @@ namespace legion::core::math
             static constexpr size_type size = 1u;
             using value_type = vector<Scalar, size>;
 
-            L_NODISCARD static Scalar compute(const value_type& val) noexcept
+            L_NODISCARD static Scalar compute(Scalar val) noexcept
             {
                 if constexpr (!::std::is_signed_v<Scalar>)
                 {
@@ -66,7 +66,7 @@ namespace legion::core::math
                 }
                 else
                 {
-                    return detail::_abs_impl_(val[0u]);
+                    return detail::_abs_impl_(val);
                 }
             }
         };

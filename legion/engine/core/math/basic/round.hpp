@@ -54,15 +54,15 @@ namespace legion::core::math
             static constexpr size_type size = 1u;
             using value_type = vector<Scalar, size>;
 
-            L_NODISCARD constexpr static Scalar compute(const value_type& val) noexcept
+            L_NODISCARD constexpr static Scalar compute(Scalar val) noexcept
             {
-                return detail::_round_impl_<Scalar>(val[0]);
+                return detail::_round_impl_<Scalar>(val);
             }
 
             template<typename Integer>
-            L_NODISCARD constexpr static Integer icompute(const value_type& val) noexcept
+            L_NODISCARD constexpr static Integer icompute(Scalar val) noexcept
             {
-                return detail::_round_impl_<Integer>(val[0]);
+                return detail::_round_impl_<Integer>(val);
             }
         };
     }

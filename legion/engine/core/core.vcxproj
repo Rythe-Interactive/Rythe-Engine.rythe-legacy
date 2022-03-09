@@ -227,6 +227,7 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="math\matrix\decompose.hpp" />
     <ClInclude Include="math\matrix\determinant.hpp" />
     <ClInclude Include="math\matrix\matrix.hpp" />
+    <ClInclude Include="math\matrix\matrix2.hpp" />
     <ClInclude Include="math\matrix\matrix3.hpp" />
     <ClInclude Include="math\matrix\matrix4.hpp" />
     <ClInclude Include="math\matrix\matrix_base.hpp" />

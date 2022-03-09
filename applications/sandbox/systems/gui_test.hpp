@@ -61,7 +61,7 @@ namespace legion
                 decalMaterial.set_param(SV_MRDAO, TextureCache::create_texture("engine://resources/default/MRDAo"_view));
                 decalMaterial.set_param(SV_EMISSIVE, TextureCache::create_texture("engine://resources/default/emissive"_view));
                 decalMaterial.set_param(SV_HEIGHTSCALE, 0.f);
-                decalMaterial.set_param("skycolor", math::color(0.1f, 0.3f, 1.0f));
+                decalMaterial.set_param("skycolor", math::color(0.1f, 0.3f, 1.f, 1.f));
             }
 
             auto decalEntity = createEntity("Decal");
@@ -282,15 +282,15 @@ namespace legion
         template<typename Vec>
         bool DisplayVec(cstring name, Vec& value)
         {
-            if constexpr (std::is_same_v<typename Vec::value_type, float>)
+            if constexpr (std::is_same_v<typename Vec::scalar, float>)
             {
-                return ImGui::InputScalarN(name, ImGuiDataType_Float, math::value_ptr(value), Vec::length());
+                return ImGui::InputScalarN(name, ImGuiDataType_Float, value.data, Vec::size);
             }
-            else if constexpr (std::is_same_v<typename Vec::value_type, int>)
+            else if constexpr (std::is_same_v<typename Vec::scalar, int>)
             {
-                return ImGui::InputScalarN(name, ImGuiDataType_S32, math::value_ptr(value), Vec::length());
+                return ImGui::InputScalarN(name, ImGuiDataType_S32, value.data, Vec::size);
             }
-            else if constexpr (std::is_same_v<typename Vec::value_type, bool>)
+            else if constexpr (std::is_same_v<typename Vec::scalar, bool>)
             {
                 ImGuiWindow* window = ImGui::GetCurrentWindow();
                 if (window->SkipItems)
@@ -300,9 +300,9 @@ namespace legion
                 bool value_changed = false;
                 ImGui::BeginGroup();
                 ImGui::PushID(name);
-                ImGui::PushMultiItemsWidths(Vec::length(), ImGui::CalcItemWidth());
+                ImGui::PushMultiItemsWidths(Vec::size, ImGui::CalcItemWidth());
 
-                for (int i = 0; i < Vec::length(); i++)
+                for (int i = 0; i < Vec::size; i++)
                 {
                     ImGui::PushID(i);
                     if (i > 0)
@@ -463,7 +463,7 @@ namespace legion
             break;
             case GL_INT_VEC4:
             {
-                math::ivec4 value = material.get_param<math::ivec4>(name);
+                math::int4 value = material.get_param<math::int4>(name);
                 if (DisplayValue(label.c_str(), value))
                 {
                     material.set_param(name, value);
@@ -483,7 +483,7 @@ namespace legion
             break;
             case GL_BOOL_VEC2:
             {
-                math::bvec2 value = material.get_param<math::bvec2>(name);
+                math::bool2 value = material.get_param<math::bool2>(name);
                 if (DisplayValue(label.c_str(), value))
                 {
                     material.set_param(name, value);
@@ -493,7 +493,7 @@ namespace legion
             break;
             case GL_BOOL_VEC3:
             {
-                math::bvec3 value = material.get_param<math::bvec3>(name);
+                math::bool3 value = material.get_param<math::bool3>(name);
                 if (DisplayValue(label.c_str(), value))
                 {
                     material.set_param(name, value);
@@ -503,7 +503,7 @@ namespace legion
             break;
             case GL_BOOL_VEC4:
             {
-                math::bvec4 value = material.get_param<math::bvec4>(name);
+                math::bool4 value = material.get_param<math::bool4>(name);
                 if (DisplayValue(label.c_str(), value))
                 {
                     material.set_param(name, value);
@@ -513,7 +513,7 @@ namespace legion
             break;
             case GL_FLOAT_MAT2:
             {
-                math::mat2 value = material.get_param<math::mat2>(name);
+                math::float2x2 value = material.get_param<math::float2x2>(name);
                 bool changed = false;
                 std::string label0 = label + '0';
                 changed |= DisplayValue(label0.c_str(), value[0]);
@@ -528,7 +528,7 @@ namespace legion
             break;
             case GL_FLOAT_MAT3:
             {
-                math::mat3 value = material.get_param<math::mat3>(name);
+                math::float3x3 value = material.get_param<math::float3x3>(name);
                 bool changed = false;
                 std::string label0 = label + '0';
                 changed |= DisplayValue(label0.c_str(), value[0]);
@@ -641,7 +641,7 @@ namespace legion
                         rotation& rot = selected.get_component<rotation>();
                         scale& scal = selected.get_component<scale>();
                         model = compose(scal, rot, pos);
-                        gizmo::EditTransform(value_ptr(view), value_ptr(projection), value_ptr(model), true);
+                        gizmo::EditTransform(view.data, projection.data, model.data, true);
                         decompose(model, scal, rot, pos);
                     }
                 }

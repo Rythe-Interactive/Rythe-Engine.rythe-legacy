@@ -232,8 +232,8 @@ namespace legion::rendering
             ignoreDepthAttrib.set_attribute_pointer(1, GL_UNSIGNED_INT, GL_FALSE, 0, 0);
 
             ///------------ camera ------------///
-            glUniformMatrix4fv(SV_VIEW, 1, false, math::value_ptr(camInput.view));
-            glUniformMatrix4fv(SV_PROJECT, 1, false, math::value_ptr(camInput.proj));
+            glUniformMatrix4fv(SV_VIEW, 1, false, camInput.view.data);
+            glUniformMatrix4fv(SV_PROJECT, 1, false, camInput.proj.data);
 
             glLineWidth(width + 1);
 

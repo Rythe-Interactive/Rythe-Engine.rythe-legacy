@@ -22,7 +22,7 @@ namespace legion::core::math::detail
     {
         using vec_type = vector<Scalar, 1u>;
 
-        L_NODISCARD L_ALWAYS_INLINE static Scalar compute(const vec_type& v) noexcept
+        L_NODISCARD L_ALWAYS_INLINE static Scalar compute(L_MAYBEUNUSED Scalar v) noexcept
         {
             return static_cast<Scalar>(1);
         }

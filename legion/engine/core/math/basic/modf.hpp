@@ -30,12 +30,12 @@ namespace legion::core::math
             using value_type = vector<Scalar, size>;
 
             template<typename RET>
-            inline L_ALWAYS_INLINE static value_type compute(const value_type& val, RET& integer) noexcept
+            inline L_ALWAYS_INLINE static value_type compute(Scalar val, RET& integer) noexcept
             {
                 if constexpr (is_vector_v<RET>)
-                    return ::std::modf(val[0], &integer[0]);
+                    return ::std::modf(val, &integer[0]);
                 else
-                    return ::std::modf(val[0], &integer);
+                    return ::std::modf(val, &integer);
             }
         };
     }

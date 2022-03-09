@@ -27,14 +27,14 @@ namespace legion::core::math::detail
     {
         using vec_type = vector<Scalar, 1u>;
 
-        L_NODISCARD L_ALWAYS_INLINE static Scalar compute(const vec_type& v) noexcept
+        L_NODISCARD L_ALWAYS_INLINE static Scalar compute(Scalar v) noexcept
         {
-            return v[0];
+            return v;
         }
 
-        L_NODISCARD L_ALWAYS_INLINE constexpr static Scalar compute2(const vec_type& v) noexcept
+        L_NODISCARD L_ALWAYS_INLINE constexpr static Scalar compute2(Scalar v) noexcept
         {
-            return v[0] * v[0];
+            return v * v;
         }
     };
 

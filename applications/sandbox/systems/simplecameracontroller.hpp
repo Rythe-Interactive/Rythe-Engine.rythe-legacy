@@ -96,7 +96,7 @@ public:
     {
         auto skybox = createEntity("Skybox");
         auto skyboxMat = rendering::MaterialCache::create_material("skybox", "assets://shaders/skybox.shs"_view);
-        skyboxMat.set_param("skycolor", math::color(0.1f, 0.3f, 1.0f));
+        skyboxMat.set_param("skycolor", math::color(0.1f, 0.3f, 1.f, 1.f));
         skybox.add_component(gfx::mesh_renderer{ skyboxMat, rendering::ModelCache::create_model("Cube", "assets://models/cube.glb"_view) });
         skybox.add_component<transform>();
 
@@ -247,7 +247,7 @@ public:
             return;
 
         rotation& rot = camera.get_component<rotation>();
-        math::mat3 rotMat = math::toMat3(rot);
+        math::float3x3 rotMat = math::toMat3(rot);
         math::float3 right = rotMat * math::float3::right;
         math::float3 fwd = math::normalize(math::cross(right, math::float3::up));
         math::float3 up = rotMat * math::float3::up;
@@ -260,7 +260,7 @@ public:
         if (angle < -(math::pi<float>() - 0.001f))
             angle = -(math::pi<float>() - 0.001f);
 
-        up = math::mat3(math::axisAngleMatrix(right, angle)) * fwd;
+        up = math::float3x3(math::axisAngleMatrix(right, angle)) * fwd;
         fwd = math::cross(right, up);
         rot = (rotation)math::conjugate(math::toQuat(math::lookAt(math::float3::zero, fwd, up)));
     }

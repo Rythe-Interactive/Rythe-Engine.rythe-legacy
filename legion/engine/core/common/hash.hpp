@@ -8,8 +8,6 @@
 
 namespace legion::core
 {
-    constexpr id_type combine_hash(id_type seed, id_type value);
-
     struct name_hash
     {
         id_type value = invalid_id;

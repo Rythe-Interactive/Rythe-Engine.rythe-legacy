@@ -33,9 +33,9 @@ namespace legion::core::math::detail
     {
         using vec_type = vector<Scalar, 1u>;
 
-        L_NODISCARD constexpr static Scalar compute(const vec_type& a, Scalar b) noexcept
+        L_NODISCARD constexpr static Scalar compute(Scalar a, Scalar b) noexcept
         {
-            return a[0] * b;
+            return a * b;
         }
     };
 

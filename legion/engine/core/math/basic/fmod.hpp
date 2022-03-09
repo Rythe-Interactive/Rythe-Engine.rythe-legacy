@@ -53,24 +53,14 @@ namespace legion::core::math
             static constexpr size_type size = 1u;
             using value_type = vector<Scalar, size>;
 
-            L_NODISCARD inline L_ALWAYS_INLINE static Scalar computef(const value_type& val, Scalar m) noexcept
+            L_NODISCARD inline L_ALWAYS_INLINE static Scalar computef(Scalar val, Scalar m) noexcept
             {
-                return ::std::fmod(val[0], m);
+                return ::std::fmod(val, m);
             }
 
-            L_NODISCARD inline L_ALWAYS_INLINE static Scalar computef(const value_type& val, const value_type& m) noexcept
+            L_NODISCARD constexpr static Scalar compute(Scalar val, Scalar m) noexcept
             {
-                return ::std::fmod(val[0], m[0]);
-            }
-
-            L_NODISCARD constexpr static Scalar compute(const value_type& val, Scalar m) noexcept
-            {
-                return val[0] % m;
-            }
-
-            L_NODISCARD constexpr static Scalar compute(const value_type& val, const value_type& m) noexcept
-            {
-                return val[0] % m[0];
+                return val % m;
             }
         };
     }

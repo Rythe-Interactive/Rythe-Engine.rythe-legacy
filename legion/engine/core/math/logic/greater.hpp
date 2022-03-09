@@ -35,14 +35,9 @@ namespace legion::core::math
             static constexpr size_type size = 1u;
             using value_type = vector<Scalar, size>;
 
-            L_NODISCARD constexpr static bool compute(const value_type& a, const value_type& b) noexcept
+            L_NODISCARD constexpr static bool compute(Scalar a, Scalar b) noexcept
             {
-                return a[0] > b[0];
-            }
-
-            L_NODISCARD constexpr static bool compute(const value_type& a, Scalar b) noexcept
-            {
-                return a[0] > b;
+                return a > b;
             }
         };
     }

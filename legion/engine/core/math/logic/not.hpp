@@ -27,9 +27,9 @@ namespace legion::core::math
             static constexpr size_type size = 1u;
             using value_type = vector<Scalar, size>;
 
-            L_NODISCARD constexpr static bool compute(const value_type& value) noexcept
+            L_NODISCARD constexpr static bool compute(Scalar value) noexcept
             {
-                return !value[0];
+                return !value;
             }
         };
     }

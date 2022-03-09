@@ -285,10 +285,10 @@ namespace legion::physics
             float mbUnit = rbInc ? rbInc->inverseMass : 0.0f;
 
             //calculate M-1
-            math::mat3 ma = math::mat3(maUnit);
-            math::mat3 Ia = rbRef ? rbRef->globalInverseInertiaTensor : math::mat3(0.0f);
-            math::mat3 mb = math::mat3(mbUnit);                                
-            math::mat3 Ib = rbInc ? rbInc->globalInverseInertiaTensor : math::mat3(0.0f);
+            math::float3x3 ma = math::float3x3(maUnit);
+            math::float3x3 Ia = rbRef ? rbRef->globalInverseInertiaTensor : math::float3x3(0.0f);
+            math::float3x3 mb = math::float3x3(mbUnit);                                
+            math::float3x3 Ib = rbInc ? rbInc->globalInverseInertiaTensor : math::float3x3(0.0f);
 
             //calculate M^-1 J^T
             math::float3 jx = ma * -normal;

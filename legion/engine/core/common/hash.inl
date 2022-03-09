@@ -14,12 +14,6 @@ namespace legion::core
         return value;
     }
 
-    constexpr id_type combine_hash(id_type seed, id_type value)
-    {
-        value += 0x9e3779b9 + (seed << 6) + (seed >> 2);
-        return seed ^ value;
-    }
-
     constexpr name_hash::name_hash() noexcept {}
 
     constexpr name_hash::name_hash(id_type val) noexcept

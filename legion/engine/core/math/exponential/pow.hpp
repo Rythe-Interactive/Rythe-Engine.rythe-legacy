@@ -37,14 +37,9 @@ namespace legion::core::math
             static constexpr size_type size = 1u;
             using value_type = vector<Scalar, size>;
 
-            L_ALWAYS_INLINE static value_type compute(const value_type& v, const value_type& s) noexcept
+            L_ALWAYS_INLINE static Scalar compute(Scalar v, Scalar s) noexcept
             {
-                return ::std::pow(v[0], s[0]);
-            }
-
-            L_ALWAYS_INLINE static Scalar compute(const value_type& v, Scalar s) noexcept
-            {
-                return ::std::pow(v[0], s);
+                return ::std::pow(v, s);
             }
         };
 
