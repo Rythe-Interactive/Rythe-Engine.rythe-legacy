@@ -195,6 +195,7 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="ecs\prototypes\component_prototype.hpp" />
     <ClInclude Include="ecs\prototypes\entity_prototype.hpp" />
     <ClInclude Include="engine\enginesubsystem.hpp" />
+    <ClInclude Include="particles\defaults\defaultpolicies.hpp" />
     <ClInclude Include="particles\particlebuffer.hpp" />
     <ClInclude Include="particles\particleemitter.hpp" />
     <ClInclude Include="particles\particlepolicy.hpp" />
@@ -578,6 +579,7 @@ del /q ".\xcopyexclude"</Command>
     <ClCompile Include="compute\program.cpp" />
     <ClCompile Include="logging\logging.cpp" />
     <ClCompile Include="math\glm\detail\glm.cpp" />
+    <ClCompile Include="particles\defaults\defaultpolicies.cpp" />
     <ClCompile Include="particles\particleemitter.cpp" />
     <ClCompile Include="particles\particlesystem.cpp" />
     <ClCompile Include="scenemanagement\scenemanager.cpp" />
