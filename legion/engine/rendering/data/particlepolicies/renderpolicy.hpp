@@ -18,6 +18,9 @@ namespace legion::rendering
         rendering_policy(model_handle _model, material_handle _material) : model(_model), material(_material) {}
         ~rendering_policy() = default;
 
-        virtual void setup(particle_emitter& emitter) override;
+        virtual void OnSetup(particle_emitter& emitter) override;
+        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override;
+        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
+        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override;
     };
 }

@@ -43,7 +43,7 @@ namespace legion::core
         {
             auto emitter = ent.get_component<particle_emitter>();
             for (size_type i = 0; i < emitter->maxSpawnCount; i++)
-                emitter->setAlive(i, false);
+                emitter->set_alive(i, false);
         }
     }
 
@@ -56,7 +56,7 @@ namespace legion::core
         for (size_type i = 0; i < count; i++)
         {
             size_type targetIdx = emitter.currentParticleCount + i;
-            emitter.setAlive(targetIdx, true);
+            emitter.set_alive(targetIdx, true);
             ageBuffer.get(targetIdx).age = 0;
             ageBuffer.get(targetIdx).max = math::linearRand(emitter.minLifeTime, emitter.maxLifeTime);
         }
@@ -73,23 +73,32 @@ namespace legion::core
         if (!emitter.infinite)
         {
             auto& ageBuffer = emitter.get_buffer<life_time>("lifetimeBuffer");
-            for (size_type idx = 0; idx < emitter.currentParticleCount; idx++)
+            size_type destroyed = 0;
+            size_type activeCount = 0;
+            for (activeCount = 0; activeCount < emitter.currentParticleCount; activeCount++)
             {
-                if (!emitter.isAlive(idx))
-                    continue;
+                if (!emitter.is_alive(activeCount))
+                    break;
 
-                auto& lifeTime = ageBuffer[idx];
+                auto& lifeTime = ageBuffer[activeCount];
                 lifeTime.age += deltaTime;
+            }
 
+            for (size_type i = 0; i < activeCount; i++)
+            {
+                auto& lifeTime = ageBuffer[i];
                 if (lifeTime.age > lifeTime.max)
                 {
-                    emitter.setAlive(idx, false);
-                    emitter.swap(idx);
+                    emitter.set_alive(i, false);
+                    emitter.swap(i, emitter.currentParticleCount - 1);
                     emitter.currentParticleCount--;
-                    for (auto& policy : emitter.particlePolicies)
-                        policy->OnDestroy(emitter, idx, idx);
+                    destroyed++;
                 }
             }
+            for (auto& policy : emitter.particlePolicies)
+                policy->OnDestroy(emitter, emitter.currentParticleCount, emitter.currentParticleCount + destroyed);
+
+            emitter.resize(emitter.currentParticleCount);
         }
 
         for (auto& policy : emitter.particlePolicies)

@@ -43,6 +43,7 @@
     <ClCompile Include="pipeline\default\postfx\bloom.cpp" />
     <ClCompile Include="pipeline\default\postfx\depthoffield.cpp" />
     <ClCompile Include="pipeline\default\stages\particlebatchingstage.cpp" />
+    <ClCompile Include="data\particlepolicies\renderpolicy.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="components\camera.hpp" />
@@ -89,6 +90,7 @@
     <ClInclude Include="pipeline\default\postfx\bloom.hpp" />
     <ClInclude Include="pipeline\default\postfx\depthoffield.hpp" />
     <ClInclude Include="pipeline\default\stages\particlebatchingstage.hpp" />
+    <ClInclude Include="data\particlepolicies\renderpolicy.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\buffer.inl" />
