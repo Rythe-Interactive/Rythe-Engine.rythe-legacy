@@ -5,7 +5,6 @@
 #include <physics/components/physics_component.hpp>
 #include <physics/physx/physx_event_process_funcs.hpp>
 
-
 using namespace physx;
 
 namespace legion::physics
@@ -55,7 +54,8 @@ namespace legion::physics
                     PxBoxGeometry(PxVec3(extents.x, extents.y, extents.z)), *sceneInfo.defaultMaterial, true);
 
                 PxRigidActor* rigid = static_cast<PxRigidActor*>(wrapper.physicsActor);
-
+                
+                shape->setLocalPose(localTransform);
                 rigid->attachShape(*shape);
                 shape->release();
             }

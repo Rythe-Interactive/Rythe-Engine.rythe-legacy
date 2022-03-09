@@ -63,21 +63,39 @@ namespace legion::physics
 
     void PhysXTestSystem::setupCubeWorldTestScene()
     {
+        auto addRobotPartLambda = [this](const math::vec3& scaleValue, const math::vec3& offset,ecs::entity parent,const math::quat& localRot)
+        {
+            auto nextBlock = createDefaultMeshEntity(offset, cubeH, legionLogoMat);
+            nextBlock.get_component<scale>() = scaleValue;
+            nextBlock.get_component<rotation>() = localRot;
+
+            parent.add_child(nextBlock);
+        };
+
         //add wide block
         auto wideBlock = createDefaultMeshEntity(math::vec3(0, 0, 0), cubeH, legionLogoMat);
         wideBlock.get_component<scale>() = math::vec3(10, 1, 10);
 
         {
             auto wideBlockPhysComp = wideBlock.add_component<physicsComponent>();
-            wideBlockPhysComp->physicsCompData.AddBoxCollider(math::vec3(10, 1, 10),
-                math::vec3(0,1,0),math::identity<math::quat>() );
+            wideBlockPhysComp->physicsCompData.AddBoxCollider(math::vec3(10, 1, 10));
         }
 
         //add default cube at center
         auto unrotatedBlock = createDefaultMeshEntity(math::vec3(0, 1, 0), cubeH, tileMat);
         {
             auto unrotatedBlockPC = unrotatedBlock.add_component<physicsComponent>();
-            unrotatedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1, 1, 1));
+            unrotatedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1));
+            
+            float headOffset = 0.5f;
+            addRobotPartLambda(math::vec3(headOffset), math::vec3(0, 0.75f,0), unrotatedBlock,  math::identity<math::quat>());
+            unrotatedBlockPC->physicsCompData.AddBoxCollider(math::vec3(headOffset), math::vec3(0, 0.75f, 0), math::identity<math::quat>());
+
+            addRobotPartLambda(math::vec3(1.0, 0.5, 0.5), math::vec3(1, 0.0f, 0), unrotatedBlock,  math::identity<math::quat>());
+            unrotatedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1.0, 0.5f, 0.5f),math::vec3(1,0,0), math::identity<math::quat>());
+
+            addRobotPartLambda(math::vec3(1.0, 0.5, 0.5), math::vec3(-1, 0.0f, 0), unrotatedBlock,  math::identity<math::quat>());
+            unrotatedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1.0, 0.5f, 0.5f), math::vec3(-1, 0, 0), math::identity<math::quat>());
 
             unrotatedBlock.add_component<rigidbody>();
         }

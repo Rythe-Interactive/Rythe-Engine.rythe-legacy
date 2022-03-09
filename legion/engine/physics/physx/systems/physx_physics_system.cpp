@@ -103,6 +103,8 @@ namespace legion::physics
     void PhysXPhysicsSystem::bindEventsToEventProcessors()
     {
         m_physicsComponentActionFuncs[physics_component_flag::pc_add_first_box] = &processAddFirstBox;
+        m_physicsComponentActionFuncs[physics_component_flag::pc_add_next_box] = &processAddNextBox;
+
         m_eventHashToRBEventProcess.insert( { physics::rb_modify_velocity::id, &processVelocityModification });
     }
 
