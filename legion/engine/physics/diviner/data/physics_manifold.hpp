@@ -4,7 +4,7 @@
 #include <core/core.hpp>
 #include <physics/diviner/physics_contact.hpp>
 #include <core/core.hpp>
-#include <physics/diviner/components/dvr_internal_physics_component.hpp>
+#include <physics/diviner/components/physics_component.hpp>
 #include <physics/diviner/data/penetrationquery.hpp>
 
 namespace legion::physics
@@ -28,11 +28,11 @@ namespace legion::physics
         ecs::entity entityA;
         ecs::entity entityB;
 
-        physics::dvr_internal_physics_component* physicsCompA = nullptr;
-        physics::dvr_internal_physics_component* physicsCompB = nullptr;
+        physics::diviner::physics_component* physicsCompA = nullptr;
+        physics::diviner::physics_component* physicsCompB = nullptr;
 
-        physics::dvr_internal_rigidbody* rigidbodyA = nullptr;
-        physics::dvr_internal_rigidbody* rigidbodyB = nullptr;
+        physics::diviner::rigidbody* rigidbodyA = nullptr;
+        physics::diviner::rigidbody* rigidbodyB = nullptr;
 
         std::unique_ptr<PenetrationQuery> penetrationInformation;
 

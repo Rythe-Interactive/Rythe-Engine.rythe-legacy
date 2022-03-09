@@ -24,9 +24,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="diviner\components\dvr_internal_physics_component.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="diviner\colliders\convexcollider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -60,6 +57,9 @@
     <ClCompile Include="physx\systems\physx_physics_system.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="diviner\components\physics_component.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="diviner\cube_collider_params.hpp">
@@ -68,9 +68,6 @@
     <ClInclude Include="module\physicsmodule.hpp">
       <Filter>module</Filter>
     </ClInclude>
-    <ClInclude Include="diviner\components\dvr_internal_physics_component.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="diviner\colliders\physicscollider.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -78,9 +75,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="diviner\data\physics_manifold.hpp">
-      <Filter>components</Filter>
-    </ClInclude>
-    <ClInclude Include="diviner\components\dvr_internal_rigidbody.hpp">
       <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="diviner\halfedgeface.hpp">
@@ -177,6 +171,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="data\rigibody_data.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="diviner\components\physics_component.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="diviner\components\rigidbody.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

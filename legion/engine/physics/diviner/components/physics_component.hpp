@@ -4,9 +4,9 @@
 #include <vector>
 #include <physics/diviner/colliders/physicscollider.hpp>
 
-namespace legion::physics
+namespace legion::physics::diviner
 {
-    struct dvr_internal_physics_component
+    struct physics_component
     {
         //physics material
 
@@ -18,8 +18,8 @@ namespace legion::physics
 
         //physics bitmask
 
-        /** @brief given the colliders this dvr_internal_physics_component, calculates the new local center of mass.
-        * @note This is called internally by the dvr_internal_physics_component every time a collider is added.
+        /** @brief given the colliders this diviner::physics_component, calculates the new local center of mass.
+        * @note This is called internally by the diviner::physics_component every time a collider is added.
         */
         void calculateNewLocalCenterOfMass();
 
