@@ -124,7 +124,43 @@ namespace legion::physics
     {
         physicsComponentData& data = physicsComponent.physicsCompData;
 
-    void processAddNextSphere(physics_component& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
+        for (ConvexColliderData& convexCollider : data.GetConvexData())
+        {
+            bool isUnRegisteredBox = !convexCollider.isDataRead() && convexCollider.getConvexType() == convex_type::box;
+            convexCollider.setDataRead(true);
+
+            const math::vec3& pos = *entity.get_component<position>();
+            const math::quat& rot = *entity.get_component<rotation>();
+
+            const math::vec3& localOffset = convexCollider.getOffset();
+            const math::quat& localRot = convexCollider.getRotationOffset();
+
+            PxTransform transform(
+                PxVec3(pos.x, pos.y, pos.z),
+                PxQuat(rot.x, rot.y, rot.z, rot.w));
+
+            PxTransform localTransform(
+                PxVec3(localOffset.x, localOffset.y, localOffset.z),
+                PxQuat(localRot.x, localRot.y, localRot.z, localRot.w));
+
+            const math::vec3& extents = convexCollider.getBoxExtents();
+
+            if (isUnRegisteredBox)
+            {
+                PxShape* shape = getSDK()->createShape(
+                    PxBoxGeometry(PxVec3(extents.x, extents.y, extents.z)), *sceneInfo.defaultMaterial, true);
+
+                PxRigidActor* rigid = static_cast<PxRigidActor*>(wrapper.physicsActor);
+                
+                shape->setLocalPose(localTransform);
+                rigid->attachShape(*shape);
+                shape->release();
+            }
+        }
+
+    }
+
+    void processAddFirstBox(physicsComponent& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
     {
         PhysicsComponentData& data = physicsComponent.physicsCompData;
 
