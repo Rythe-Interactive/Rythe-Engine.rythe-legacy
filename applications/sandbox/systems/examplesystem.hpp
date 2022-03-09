@@ -10,57 +10,6 @@ struct example_comp
 
 };
 
-namespace legion::core
-{
-    struct example_policy : public particle_policy<example_policy>
-    {
-        NO_DTOR_RULE5_NOEXCEPT(example_policy);
-        ~example_policy() = default;
-
-        virtual void OnSetup(particle_emitter& emitter) override;
-        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override;
-        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
-        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override;
-    };
-
-    struct orbital_policy : public particle_policy<orbital_policy>
-    {
-        NO_DTOR_RULE5_NOEXCEPT(orbital_policy);
-        ~orbital_policy() = default;
-
-        const double C_MASS = 10.f;
-        const double P_MASS = 1.f;
-        const double G_FORCE = 100.0f;
-
-        virtual void OnSetup(particle_emitter& emitter) override;
-        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override;
-        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
-        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override;
-    };
-
-    struct fountain_policy : public particle_policy<fountain_policy>
-    {
-        NO_DTOR_RULE5_NOEXCEPT(fountain_policy);
-        ~fountain_policy() = default;
-
-        virtual void OnSetup(particle_emitter& emitter) override;
-        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override;
-        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
-        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override;
-    };
-
-    struct rendering_policy : particle_policy<rendering_policy>
-    {
-        NO_DTOR_RULE5_NOEXCEPT(rendering_policy);
-        ~rendering_policy() = default;
-
-        virtual void OnSetup(particle_emitter& emitter) override;
-        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override;
-        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
-        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override;
-    };
-}
-
 class ExampleSystem final : public legion::System<ExampleSystem>
 {
     lgn::size_type frames = 0;

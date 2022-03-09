@@ -17,6 +17,7 @@
     <ClCompile Include="data\importers\texture_importers.cpp" />
     <ClCompile Include="data\material.cpp" />
     <ClCompile Include="data\model.cpp" />
+    <ClCompile Include="data\particlepolicies\renderpolicy.cpp" />
     <ClCompile Include="data\postprocessingeffect.cpp" />
     <ClCompile Include="data\renderbuffer.cpp" />
     <ClCompile Include="data\shader.cpp" />
@@ -62,6 +63,7 @@
     <ClInclude Include="components\point.hpp" />
     <ClInclude Include="components\pointcloud_renderable.hpp" />
     <ClInclude Include="data\Octree.hpp" />
+    <ClInclude Include="data\particlepolicies\renderpolicy.hpp" />
     <ClInclude Include="data\postprocessingeffect.hpp" />
     <ClInclude Include="data\screen_quad.hpp" />
     <ClInclude Include="pipeline\default\postfx\depthoffield.hpp" />
