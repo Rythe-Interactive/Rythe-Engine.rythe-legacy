@@ -34,5 +34,3 @@ namespace legion::core
         virtual ~particle_policy() = default;
     };
 }
-
-#include <core/particles/particlepolicy.inl>
