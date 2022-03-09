@@ -4,7 +4,6 @@
 #include <rendering/rendering.hpp>
 #include <audio/audio.hpp>
 
-
 struct example_comp
 {
 
