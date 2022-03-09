@@ -631,6 +631,5 @@
     <None Include="particles\particleemitter.inl" />
     <None Include="particles\particlebuffer.inl" />
     <None Include="particles\particleuniform.inl" />
-    <None Include="particles\particlepolicy.inl" />
   </ItemGroup>
 </Project>
