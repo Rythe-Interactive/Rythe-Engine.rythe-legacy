@@ -11,6 +11,11 @@ namespace legion::core
 {
     struct particle_emitter;
 
+    template<typename bufferType>
+    struct particle_buffer;
+    template<typename uniformType>
+    struct particle_uniform;
+
     struct particle_policy_base
     {
         NO_DTOR_RULE5_NOEXCEPT(particle_policy_base);
@@ -34,3 +39,5 @@ namespace legion::core
         virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) LEGION_PURE;
     };
 }
+
+#include <core/particles/particlepolicy.inl>
