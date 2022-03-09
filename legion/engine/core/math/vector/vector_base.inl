@@ -50,13 +50,13 @@ namespace legion::core::math
     }
 
     template<typename Scalar, size_type Size>
-    L_NODISCARD constexpr Scalar& vector<Scalar, Size>::operator[](size_type i) noexcept(!LEGION_VALIDATION_LEVEL)
+    L_NODISCARD constexpr Scalar& vector<Scalar, Size>::operator[](size_type i) noexcept
     {
         assert_msg("vector subscript out of range", (i >= 0) && (i < size)); return data[i];
     }
 
     template<typename Scalar, size_type Size>
-    L_NODISCARD constexpr const Scalar& vector<Scalar, Size>::operator[](size_type i) const noexcept(!LEGION_VALIDATION_LEVEL)
+    L_NODISCARD constexpr const Scalar& vector<Scalar, Size>::operator[](size_type i) const noexcept
     {
         assert_msg("vector subscript out of range", (i >= 0) && (i < size)); return data[i];
     }

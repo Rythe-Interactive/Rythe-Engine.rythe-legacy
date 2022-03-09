@@ -33,8 +33,8 @@ namespace legion::core::math
 
         constexpr vector& operator=(const vector&) noexcept = default;
 
-        L_NODISCARD constexpr scalar& operator[](size_type i) noexcept(!LEGION_VALIDATION_LEVEL);
-        L_NODISCARD constexpr const scalar& operator[](size_type i) const noexcept(!LEGION_VALIDATION_LEVEL);
+        L_NODISCARD constexpr scalar& operator[](size_type i) noexcept;
+        L_NODISCARD constexpr const scalar& operator[](size_type i) const noexcept;
 
         L_NODISCARD L_ALWAYS_INLINE scalar length() const noexcept;
         L_NODISCARD constexpr scalar length2() const noexcept;

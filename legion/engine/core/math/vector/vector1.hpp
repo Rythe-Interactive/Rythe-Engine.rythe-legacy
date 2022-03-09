@@ -33,8 +33,8 @@ namespace legion::core::math
         constexpr vector& operator=(const vector&) noexcept = default;
         constexpr operator scalar() const noexcept;
 
-        constexpr scalar& operator[](size_type i) noexcept(!LEGION_VALIDATION_LEVEL);
-        constexpr const scalar& operator[](size_type i) const noexcept(!LEGION_VALIDATION_LEVEL);
+        constexpr scalar& operator[](size_type i) noexcept;
+        constexpr const scalar& operator[](size_type i) const noexcept;
 
         constexpr scalar length() const noexcept;
         constexpr scalar length2() const noexcept;
@@ -70,11 +70,11 @@ namespace legion::core::math
         constexpr vector& operator=(const vector&) noexcept = default;
         constexpr operator scalar() const noexcept { return x; }
 
-        constexpr scalar& operator[](size_type i) noexcept(!LEGION_VALIDATION_LEVEL)
+        constexpr scalar& operator[](size_type i) noexcept
         {
             assert_msg("vector subscript out of range", (i >= 0) && (i < size)); return data[i];
         }
-        constexpr const scalar& operator[](size_type i) const noexcept(!LEGION_VALIDATION_LEVEL)
+        constexpr const scalar& operator[](size_type i) const noexcept
         {
             assert_msg("vector subscript out of range", (i >= 0) && (i < size)); return data[i];
         }

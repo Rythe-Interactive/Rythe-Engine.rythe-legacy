@@ -17,13 +17,13 @@ namespace legion::core::math
     constexpr vector<scalar, 1>::operator scalar() const noexcept { return x; }
 
     template<typename scalar>
-    constexpr scalar& vector<scalar, 1>::operator[](size_type i) noexcept(!LEGION_VALIDATION_LEVEL)
+    constexpr scalar& vector<scalar, 1>::operator[](size_type i) noexcept
     {
         assert_msg("vector subscript out of range", (i >= 0) && (i < size)); return data[i];
     }
 
     template<typename scalar>
-    constexpr const scalar& vector<scalar, 1>::operator[](size_type i) const noexcept(!LEGION_VALIDATION_LEVEL)
+    constexpr const scalar& vector<scalar, 1>::operator[](size_type i) const noexcept
     {
         assert_msg("vector subscript out of range", (i >= 0) && (i < size)); return data[i];
     }

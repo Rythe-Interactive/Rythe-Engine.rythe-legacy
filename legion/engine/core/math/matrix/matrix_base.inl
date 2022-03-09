@@ -46,13 +46,13 @@ namespace legion::core::math
     }
 
     template<typename Scalar, size_type RowCount, size_type ColCount>
-    L_NODISCARD constexpr typename matrix<Scalar, RowCount, ColCount>::row_type& matrix<Scalar, RowCount, ColCount>::operator[](size_type i) noexcept(!LEGION_VALIDATION_LEVEL)
+    L_NODISCARD constexpr typename matrix<Scalar, RowCount, ColCount>::row_type& matrix<Scalar, RowCount, ColCount>::operator[](size_type i) noexcept
     {
         assert_msg("matrix subscript out of range", (i >= 0) && (i < row_count)); return rows[i];
     }
 
     template<typename Scalar, size_type RowCount, size_type ColCount>
-    L_NODISCARD constexpr const typename matrix<Scalar, RowCount, ColCount>::row_type& matrix<Scalar, RowCount, ColCount>::operator[](size_type i) const noexcept(!LEGION_VALIDATION_LEVEL)
+    L_NODISCARD constexpr const typename matrix<Scalar, RowCount, ColCount>::row_type& matrix<Scalar, RowCount, ColCount>::operator[](size_type i) const noexcept
     {
         assert_msg("matrix subscript out of range", (i >= 0) && (i < row_count)); return rows[i];
     }

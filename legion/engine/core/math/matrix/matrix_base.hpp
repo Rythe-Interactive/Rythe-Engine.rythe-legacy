@@ -39,7 +39,7 @@ namespace legion::core::math
 
         constexpr matrix& operator=(const matrix&) noexcept = default;
 
-        L_NODISCARD constexpr row_type& operator[](size_type i) noexcept(!LEGION_VALIDATION_LEVEL);
-        L_NODISCARD constexpr const row_type& operator[](size_type i) const noexcept(!LEGION_VALIDATION_LEVEL);
+        L_NODISCARD constexpr row_type& operator[](size_type i) noexcept;
+        L_NODISCARD constexpr const row_type& operator[](size_type i) const noexcept;
     };
 }
