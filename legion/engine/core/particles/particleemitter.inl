@@ -77,15 +77,19 @@ namespace legion::core
         return uniform.get();
     }
 
-    template<typename... policies>
-    void particle_emitter::add_policy()
+    template<typename Policy>
+    particle_policy<Policy>& particle_emitter::add_policy()
     {
-        size_type start = particlePolicies.size();
-        particlePolicies.push_back((std::make_unique<policies>(), ...));
-        size_type end = particlePolicies.size();
-        for (size_type idx = start; idx < end; idx++)
-        {
-            particlePolicies[idx]->OnSetup(*this);
-        }
+        particlePolicies.push_back(std::make_unique<Policy>());
+        particlePolicies[particlePolicies.size() - 1]->OnSetup(*this);
+        return *dynamic_cast<particle_policy<Policy>*>(particlePolicies[particlePolicies.size() - 1].get());
+    }
+
+    template<typename Policy>
+    particle_policy<Policy>& particle_emitter::add_policy(Policy policy)
+    {
+        particlePolicies.push_back(std::make_unique<Policy>(policy));
+        particlePolicies[particlePolicies.size() - 1]->OnSetup(*this);
+        return *dynamic_cast<particle_policy<Policy>*>(particlePolicies[particlePolicies.size() - 1].get());
     }
 }

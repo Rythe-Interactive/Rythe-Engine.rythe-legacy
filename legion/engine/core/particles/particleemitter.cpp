@@ -2,21 +2,22 @@
 
 namespace legion::core
 {
-    void particle_emitter::setAlive(size_type idx, bool alive)
+    void particle_emitter::set_alive(size_type idx, bool alive)
     {
-        if (idx < livingBuffer.size())
-            livingBuffer[idx] = alive;
-        else
+        if (livingBuffer.size() < 1)
         {
-            while (idx >= livingBuffer.size())
-            {
-                livingBuffer.push_back(true);
-            }
-            livingBuffer[idx] = alive;
+            livingBuffer.push_back(alive);
+            return;
         }
+
+        assert_msg("index is greater than maximum particle count", idx < maxSpawnCount);
+        if (idx > livingBuffer.size()-1)
+            livingBuffer.insert(livingBuffer.end(), idx - (livingBuffer.size()-1), true);
+
+        livingBuffer[idx] = alive;
     }
 
-    bool particle_emitter::isAlive(size_type idx)
+    bool particle_emitter::is_alive(size_type idx)
     {
         if (idx < livingBuffer.size())
             return livingBuffer[idx];

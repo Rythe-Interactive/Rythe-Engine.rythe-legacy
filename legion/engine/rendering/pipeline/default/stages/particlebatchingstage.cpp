@@ -1,4 +1,5 @@
 #include <rendering/pipeline/default/stages/particlebatchingstage.hpp>
+#include <core/particles/particleemitter.hpp>
 
 namespace legion::rendering
 {
@@ -46,7 +47,7 @@ namespace legion::rendering
 
             queueJobs(posBuffer.size(), [&](id_type jobId)
                 {
-                    if (emitter.isAlive(jobId))
+                    if (emitter.is_alive(jobId))
                     {
                         auto transScale = scal * scaleBuffer[jobId];
                         auto transPos = origin + math::rotate(rot, posBuffer[jobId]) * transScale;
