@@ -129,7 +129,7 @@ namespace legion::core::math
 
         RULE_OF_5_CONSTEXPR_NOEXCEPT(swizzle);
 
-        constexpr swizzle(scalar x, scalar y, scalar z) noexcept;
+        constexpr swizzle(bool x, bool y, bool z) noexcept;
 
         constexpr void set_mask(bitfield8 mask) noexcept;
         constexpr bitfield8 mask() const noexcept;
