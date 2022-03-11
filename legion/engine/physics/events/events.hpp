@@ -48,22 +48,7 @@ namespace legion::physics {
             return std::make_pair(manifold->colliderA, manifold->colliderB);
         }
 
-        /** @brief gets the transform of the colliding bodys themselves
-         */
-        L_NODISCARD std::pair<transform,transform> transforms() const
-        {
-            return std::apply([](ecs::entity_handle a,ecs::entity_handle b)
-            {
-                return std::make_pair(
-                    transform(a.get_component_handles<transform>()),
-                    transform(b.get_component_handles<transform>())
-                );
-            }, participants());
-        }
-
-
         float physics_delta;
-
     };
 
     /** @class trigger_event

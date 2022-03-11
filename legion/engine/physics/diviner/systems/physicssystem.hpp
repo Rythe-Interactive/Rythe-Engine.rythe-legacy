@@ -9,7 +9,7 @@
 #include <physics/diviner/physics_contact.hpp>
 #include <physics/diviner/components/physics_component.hpp>
 #include <physics/diviner/data/identifier.hpp>
-#include <physics/diviner/events/events.hpp>
+#include <physics/events/events.hpp>
 #include <memory>
 #include <rendering/debugrendering.hpp>
 
@@ -21,7 +21,7 @@ namespace legion::physics
         static bool IsPaused;
         static bool oneTimeRunActive;
 
-        ecs::filter<position, rotation, scale, physicsComponent> manifoldPrecursorQuery;
+        ecs::filter<position, rotation, scale, diviner::physics_component> manifoldPrecursorQuery;
 
         //TODO move implementation to a seperate cpp file
 
@@ -31,30 +31,30 @@ namespace legion::physics
         {
             OPTICK_EVENT();
 
-            ecs::component_container<rigidbody> rigidbodies;
+            ecs::component_container<diviner::rigidbody> rigidbodies;
             std::vector<byte> hasRigidBodies;
 
             {
                 OPTICK_EVENT("Fetching data");
 
-                rigidbody emptyRigidbody;
+                diviner::rigidbody emptyRigidbody;
                 rigidbodies.resize(manifoldPrecursorQuery.size(), std::ref(emptyRigidbody));
                 hasRigidBodies.resize(manifoldPrecursorQuery.size());
 
                 queueJobs(manifoldPrecursorQuery.size(), [&]() {
                     id_type index = async::this_job::get_id();
                     auto entity = manifoldPrecursorQuery[index];
-                    if (entity.has_component<rigidbody>())
+                    if (entity.has_component<diviner::rigidbody>())
                     {
                         hasRigidBodies[index] = true;
-                        rigidbodies[index] = entity.get_component<rigidbody>();
+                        rigidbodies[index] = entity.get_component<diviner::rigidbody>();
                     }
                     else
                         hasRigidBodies[index] = false;
                     }).wait();
             }
 
-            auto& physComps = manifoldPrecursorQuery.get<physicsComponent>();
+            auto& physComps = manifoldPrecursorQuery.get<diviner::physics_component>();
             auto& positions = manifoldPrecursorQuery.get<position>();
             auto& rotations = manifoldPrecursorQuery.get<rotation>();
             auto& scales = manifoldPrecursorQuery.get<scale>();
@@ -77,7 +77,7 @@ namespace legion::physics
         }
 
         void bulkRetrievePreManifoldData(
-            ecs::component_container<physicsComponent>& physComps,
+            ecs::component_container<diviner::physics_component>& physComps,
             ecs::component_container<position>& positions,
             ecs::component_container<rotation>& rotations,
             ecs::component_container<scale>& scales,
@@ -90,7 +90,7 @@ namespace legion::physics
                 id_type index = async::this_job::get_id();
                 math::mat4 transf = math::compose( scales[index].get(), rotations[index].get(), positions[index].get());
                 
-                physicsComponent& individualPhysicsComponent = physComps[index].get();
+                diviner::physics_component& individualPhysicsComponent = physComps[index].get();
 
                 for (auto& collider : individualPhysicsComponent.colliders)
                     collider->UpdateTransformedTightBoundingVolume(transf);
@@ -126,8 +126,8 @@ namespace legion::physics
         */
         void runPhysicsPipeline(
             std::vector<byte>& hasRigidBodies,
-            ecs::component_container<rigidbody>& rigidbodies,
-            ecs::component_container<physicsComponent>& physComps,
+            ecs::component_container<diviner::rigidbody>& rigidbodies,
+            ecs::component_container<diviner::physics_component>& physComps,
             ecs::component_container<position>& positions,
             ecs::component_container<rotation>& rotations,
             ecs::component_container<scale>& scales,
@@ -136,14 +136,14 @@ namespace legion::physics
         /**@brief given 2 physics_manifold_precursors precursorA and precursorB, create a manifold for each collider in precursorA
         * with every other collider in precursorB. The manifolds that involve rigidbodies are then pushed into the given manifold list
         * @param manifoldsToSolve [out] a std::vector of physics_manifold that will store the manifolds created
-        * @param isRigidbodyInvolved A bool that indicates whether a rigidbody is involved in this manifold
-        * @param isTriggerInvolved A bool that indicates whether a physicsComponent with a physicsComponent::isTrigger set to true is involved in this manifold
+        * @param isRigidbodyInvolved A bool that indicates whether a diviner::rigidbody is involved in this manifold
+        * @param isTriggerInvolved A bool that indicates whether a diviner::physics_component with a diviner::physics_component::isTrigger set to true is involved in this manifold
         */
-        void constructManifoldsWithPrecursors(ecs::component_container<rigidbody>& rigidbodies, std::vector<byte>& hasRigidBodies, physics_manifold_precursor& precursorA, physics_manifold_precursor& precursorB,
+        void constructManifoldsWithPrecursors(ecs::component_container<diviner::rigidbody>& rigidbodies, std::vector<byte>& hasRigidBodies, physics_manifold_precursor& precursorA, physics_manifold_precursor& precursorB,
             std::vector<physics_manifold>& manifoldsToSolve, bool isRigidbodyInvolved, bool isTriggerInvolved);
        
         void constructManifoldWithCollider(
-            ecs::component_container<rigidbody>& rigidbodies, std::vector<byte>& hasRigidBodies,
+            ecs::component_container<diviner::rigidbody>& rigidbodies, std::vector<byte>& hasRigidBodies,
             PhysicsCollider* colliderA, PhysicsCollider* colliderB
             , physics_manifold_precursor& precursorA, physics_manifold_precursor& precursorB, physics_manifold& manifold)
         {
@@ -166,22 +166,19 @@ namespace legion::physics
             manifold.transformA = precursorA.worldTransform;
             manifold.transformB = precursorB.worldTransform;
 
-            //manifold.DEBUG_checkID("floor", "problem");
-
-            // log::debug("colliderA->CheckCollision(colliderB, manifold)");
             colliderA->CheckCollision(colliderB, manifold);
         }
 
-        /** @brief gets all the entities with a rigidbody component and calls the integrate function on them
+        /** @brief gets all the entities with a diviner::rigidbody component and calls the integrate function on them
         */
-        void integrateRigidbodies(std::vector<byte>& hasRigidBodies, ecs::component_container<rigidbody>& rigidbodies, float deltaTime)
+        void integrateRigidbodies(std::vector<byte>& hasRigidBodies, ecs::component_container<diviner::rigidbody>& rigidbodies, float deltaTime)
         {
             OPTICK_EVENT();
             queueJobs(manifoldPrecursorQuery.size(), [&]() {
                 if (!hasRigidBodies[async::this_job::get_id()])
                     return;
 
-                rigidbody& rb = rigidbodies[async::this_job::get_id()];
+                diviner::rigidbody& rb = rigidbodies[async::this_job::get_id()];
 
                 ////-------------------- update velocity ------------------//
                 math::vec3 acc = rb.forceAccumulator * rb.inverseMass;
@@ -199,7 +196,7 @@ namespace legion::physics
             std::vector<byte>& hasRigidBodies,
             ecs::component_container<position>& positions,
             ecs::component_container<rotation>& rotations,
-            ecs::component_container<rigidbody>& rigidbodies,
+            ecs::component_container<diviner::rigidbody>& rigidbodies,
             float deltaTime)
         {
             OPTICK_EVENT();
@@ -208,7 +205,7 @@ namespace legion::physics
                 if (!hasRigidBodies[index])
                     return;
 
-                rigidbody& rb = rigidbodies[index].get();
+                diviner::rigidbody& rb = rigidbodies[index].get();
                 position& pos = positions[index].get();
                 rotation& rot = rotations[index].get();
 

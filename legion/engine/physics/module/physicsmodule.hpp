@@ -15,8 +15,8 @@ namespace legion::physics
         {
             createProcessChain("Physics");
             reportSystem<PhysicsSystem>();
-            registerComponentType<physicsComponent>();
-            registerComponentType<rigidbody>();
+            registerComponentType<diviner::physics_component>();
+            registerComponentType<diviner::rigidbody>();
             registerComponentType<identifier>();
 
             reportSystem<PhysXPhysicsSystem>();

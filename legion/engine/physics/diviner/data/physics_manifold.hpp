@@ -28,11 +28,11 @@ namespace legion::physics
         ecs::entity entityA;
         ecs::entity entityB;
 
-        physics::physicsComponent* physicsCompA = nullptr;
-        physics::physicsComponent* physicsCompB = nullptr;
+        physics::diviner::physics_component* physicsCompA = nullptr;
+        physics::diviner::physics_component* physicsCompB = nullptr;
 
-        physics::rigidbody* rigidbodyA = nullptr;
-        physics::rigidbody* rigidbodyB = nullptr;
+        physics::diviner::rigidbody* rigidbodyA = nullptr;
+        physics::diviner::rigidbody* rigidbodyB = nullptr;
 
         std::unique_ptr<PenetrationQuery> penetrationInformation;
 
