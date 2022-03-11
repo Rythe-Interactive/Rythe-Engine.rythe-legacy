@@ -183,14 +183,14 @@ namespace legion::physics
         }
       
         //add a rigidbody
-        rigidbody& rb = ent.add_component<physics::rigidbody>().get();
+        diviner::rigidbody& rb = ent.add_component<physics::diviner::rigidbody>().get();
 
         rb.setMass(2.5f);
         rb.localInverseInertiaTensor = math::mat3(3.0f);
         rb.velocity = cameraDirection * 14.0f;
 
         //add a physics component and run quickhull
-        auto& newPhysicsComponent = ent.add_component<physics::physicsComponent>().get();
+        auto& newPhysicsComponent = ent.add_component<physics::diviner::physics_component>().get();
         newPhysicsComponent.constructConvexHullFromVertices(quickhullVertices);
 
         //using vertices of convex hull, create a rendering mesh out of it
@@ -412,7 +412,7 @@ namespace legion::physics
         auto [positionH, rotationH, scaleH] = ent.add_component<transform>();
         positionH = position;
 
-        auto& entPhysicsComponent = ent.add_component<physics::physicsComponent>().get();
+        auto& entPhysicsComponent = ent.add_component<physics::diviner::physics_component>().get();
         entPhysicsComponent.AddBox(cubeParams);
 
         auto ent2 = createEntity();
@@ -437,11 +437,11 @@ namespace legion::physics
         positionH = position;
 
         ent.add_component(rendering::mesh_renderer(tileH,cubeH));
-
-        auto& entPhysicsComp = ent.add_component<physics::physicsComponent>().get();
+        
+        auto& entPhysicsComp = ent.add_component<physics::diviner::physics_component>().get();
         entPhysicsComp.constructConvexHullFromVertices(cubeH.get_mesh()->vertices);
 
-        auto& rb = ent.add_component<rigidbody>().get();
+        auto& rb = ent.add_component<diviner::rigidbody>().get();
         rb.localInverseInertiaTensor = inertia;
 
         registeredColliderColorDraw.push_back(ent);
@@ -451,7 +451,7 @@ namespace legion::physics
     {
         app::window& window = ecs::world.get_component<app::window>();
 
-        auto& physicsComp = physicsEnt.get_component<physicsComponent>().get();
+        auto& physicsComp = physicsEnt.get_component<diviner::physics_component>().get();
         auto collider = std::dynamic_pointer_cast<ConvexCollider>(physicsComp.colliders.at(0));
         auto [posH, rotH, scaleH] = physicsEnt.get_component<transform>();
 
@@ -553,14 +553,14 @@ namespace legion::physics
     void PhysicsTestSystem::drawPhysicsColliders()
     {
         static float offset = 0.005f;
-        ecs::filter< physics::physicsComponent,transform> physicsQuery;
+        ecs::filter< physics::diviner::physics_component,transform> physicsQuery;
 
         for (auto entity : physicsQuery)
         {
             auto& rot = entity.get_component<rotation>().get();
             auto& pos = entity.get_component<position>().get();
             auto& scaleComp = entity.get_component<scale>().get();
-            auto& physicsComponent = entity.get_component<physics::physicsComponent>().get();
+            auto& physicsComponent = entity.get_component<physics::diviner::physics_component>().get();
 
             auto rbColor = math::color(0.0, 0.5, 0, 1);
             auto statibBlockColor = math::color(0, 1, 0, 1);
@@ -568,7 +568,7 @@ namespace legion::physics
             auto usedColor = rbColor;
             bool useDepth = false;
 
-            if (entity.get_component<physics::rigidbody>())
+            if (entity.get_component<physics::diviner::rigidbody>())
             {
                 usedColor = rbColor;
                 useDepth = true;
@@ -638,7 +638,7 @@ namespace legion::physics
                 auto meshFilter = ent.get_component<mesh_filter>();
 
                 //[1] clear colliders list
-                auto& physicsComponent = ent.get_component<physics::physicsComponent>().get();
+                auto& physicsComponent = ent.get_component<physics::diviner::physics_component>().get();
 
                 physicsComponent.colliders.clear();
                 physicsComponent.constructConvexHullFromVertices(meshFilter.get().shared_mesh->vertices);
@@ -658,7 +658,7 @@ namespace legion::physics
             log::debug("Add body");
             for (auto ent : registeredColliderColorDraw)
             {
-                ent.add_component<rigidbody>();
+                ent.add_component<diviner::rigidbody>();
             }
         }
     }
@@ -704,14 +704,14 @@ namespace legion::physics
 
         if (rigidbody)
         {
-            auto& rbH = ent.add_component<physics::rigidbody>().get();
+            auto& rbH = ent.add_component<physics::diviner::rigidbody>().get();
             rbH.setMass(mass);
             rbH.localInverseInertiaTensor = inverseInertia;
         }
 
         ent.add_component(rendering::mesh_renderer(materials,cubeH));
 
-        auto& entPhysicsComponent = ent.add_component<physics::physicsComponent>().get();
+        auto& entPhysicsComponent = ent.add_component<physics::diviner::physics_component>().get();
 
         if (useQuickhull)
         {

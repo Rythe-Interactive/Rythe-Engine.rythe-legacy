@@ -26,8 +26,8 @@ namespace legion::physics
 
     void PhysicsSystem::runPhysicsPipeline(
         std::vector<byte>& hasRigidBodies,
-        ecs::component_container<rigidbody>& rigidbodies,
-        ecs::component_container<physicsComponent>& physComps,
+        ecs::component_container<diviner::rigidbody>& rigidbodies,
+        ecs::component_container<diviner::physics_component>& physComps,
         ecs::component_container<position>& positions,
         ecs::component_container<rotation>& rotations,
         ecs::component_container<scale>& scales,
@@ -85,9 +85,9 @@ namespace legion::physics
                         auto& precursorRigidbodyB = rigidbodies[precursorB.id];
 
                         //only construct a manifold if at least one of these requirement are fulfilled
-                        //1. One of the physicsComponents is a trigger and the other one is not
-                        //2. One of the physicsComponent's entity has a rigidbody and the other one is not a trigger
-                        //3. Both have a rigidbody
+                        //1. One of the diviner::physics_components is a trigger and the other one is not
+                        //2. One of the diviner::physics_component's entity has a diviner::rigidbody and the other one is not a trigger
+                        //3. Both have a diviner::rigidbody
 
                         bool isBetweenTriggerAndNonTrigger =
                             (precursorPhyCompA.isTrigger && !precursorPhyCompB.isTrigger) || (!precursorPhyCompA.isTrigger && precursorPhyCompB.isTrigger);
@@ -170,14 +170,12 @@ namespace legion::physics
 
     }
 
-    void PhysicsSystem::constructManifoldsWithPrecursors(ecs::component_container<rigidbody>& rigidbodies, std::vector<byte>& hasRigidBodies, physics_manifold_precursor& precursorA, physics_manifold_precursor& precursorB,
+    void PhysicsSystem::constructManifoldsWithPrecursors(ecs::component_container<diviner::rigidbody>& rigidbodies, std::vector<byte>& hasRigidBodies, physics_manifold_precursor& precursorA, physics_manifold_precursor& precursorB,
         std::vector<physics_manifold>& manifoldsToSolve, bool isRigidbodyInvolved, bool isTriggerInvolved)
     {
         if (!precursorA.physicsComp || !precursorB.physicsComp) return;
         auto& physicsComponentA = *precursorA.physicsComp;
         auto& physicsComponentB = *precursorB.physicsComp;
-
-        //if (physicsComponentA.colliders.empty() || physicsComponentB.colliders.empty()) return;
 
         for (auto colliderA : physicsComponentA.colliders)
         {

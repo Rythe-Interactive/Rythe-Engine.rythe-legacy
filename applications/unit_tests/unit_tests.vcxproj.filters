@@ -44,6 +44,7 @@
     <ClInclude Include="tests\core\containers\delegate.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="tests\physics\rigidbody.hpp">
     <ClInclude Include="tests\core\containers\sparse_set.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

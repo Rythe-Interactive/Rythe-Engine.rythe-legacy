@@ -11,13 +11,13 @@ namespace legion::physics
     struct physics_manifold_precursor
     {
         math::mat4 worldTransform;
-        physicsComponent* physicsComp = nullptr;
+        diviner::physics_component* physicsComp = nullptr;
         id_type id;
         ecs::entity entity;
 
         physics_manifold_precursor() = default;
 
-        physics_manifold_precursor(math::mat4 pWorldTransform, physicsComponent* pPhysicsComp, id_type precursorID, ecs::entity entity) :
+        physics_manifold_precursor(math::mat4 pWorldTransform, diviner::physics_component* pPhysicsComp, id_type precursorID, ecs::entity entity) :
             worldTransform(pWorldTransform), physicsComp(pPhysicsComp), id(precursorID), entity(entity)
         {
 
