@@ -1,4 +1,5 @@
 #include "../systems/examplesystem.hpp"
+#include "../defaults/defaultpolicies.hpp"
 #include <chrono>
 
 void ExampleSystem::setup()
@@ -19,40 +20,36 @@ void ExampleSystem::setup()
 
     {
         auto model = gfx::ModelCache::create_model("Sphere", fs::view("assets://models/sphere.obj"));
-        auto material = gfx::MaterialCache::create_material("Light", fs::view("assets://shaders/light.shs"));
-        material.set_param("color", math::color(1.f, 0.f, 0.f, 1.f));
-        material.set_param("intensity", 1.f);
+        auto material = gfx::MaterialCache::create_material("Pbr", fs::view("assets://shaders/pbr.shs"));
+        material.set_param(SV_ALBEDO, gfx::TextureCache::create_texture(fs::view("engine://resources/default/albedo")));
+        material.set_param(SV_NORMALHEIGHT, gfx::TextureCache::create_texture(fs::view("engine://resources/default/normalHeight")));
+        material.set_param(SV_MRDAO, gfx::TextureCache::create_texture(fs::view("engine://resources/default/MRDAo")));
+        material.set_param(SV_EMISSIVE, gfx::TextureCache::create_texture(fs::view("assets://textures/copper/copper-emissive-2048.png")));
+        material.set_param(SV_HEIGHTSCALE, 1.f);
+        material.set_param("discardExcess", false);
+        material.set_param("skybox", gfx::TextureCache::create_texture("skyBox", fs::view("assets://textures/HDRI/earth.png")));
 
         auto ent = createEntity("Saturn");
         auto [pos, rot, scal] = ent.add_component<transform>();
-        scal = scale(3.f, 3.f, 3.f);
+        scal = scale(5.f, 5.f,5.f);
         ent.add_component<gfx::mesh_renderer>(gfx::mesh_renderer(material, model));
         auto emitter = ent.add_component<particle_emitter>();
         emitter->infinite = true;
-        emitter->spawnRate = 1000;
+        emitter->spawnRate = 100;
         emitter->spawnInterval = 0.05f;
-        emitter->maxSpawnCount = 1000;
+        emitter->maxSpawnCount = 100;
         emitter->minLifeTime = 5;
         emitter->maxLifeTime = 15;
         emitter->localScale = false;
-
-        model = gfx::ModelCache::create_model("Sphere", fs::view("assets://models/sphere.obj"));
-        material = gfx::MaterialCache::create_material("Pbr", fs::view("assets://shaders/pbr.shs"));
-        //material.set_param("color", math::color(1.f, 1.f, 1.f, 1.f));
-        material.set_param(SV_ALBEDO, gfx::TextureCache::create_texture(fs::view("assets://textures/aluminum-albedo.png")));
-        material.set_param(SV_NORMALHEIGHT, gfx::TextureCache::create_texture(fs::view("assets://textures/aluminum-normalHeight.png")));
-        material.set_param(SV_MRDAO, gfx::TextureCache::create_texture(fs::view("assets://textures/aluminum-MRDAo.png")));
-        material.set_param(SV_EMISSIVE, gfx::TextureCache::create_texture(fs::view("assets://textures/aluminum-emissive.png")));
-        material.set_param(SV_HEIGHTSCALE, 1.f);
-        material.set_param("discardExcess", false);
-        material.set_param("skycolor", math::color(0.1f, 0.3f, 1.0f));
+        emitter->localPosition = false;
 
         emitter->add_policy<example_policy>();
         orbital_policy orbital;
         orbital.C_MASS = 100.f;
         orbital.G_FORCE = .1f;
-        emitter->add_policy<orbital_policy>(orbital);
-        emitter->add_policy<gfx::rendering_policy>({ model, material });
+        //emitter->add_policy<orbital_policy>(orbital);
+        emitter->add_policy<gfx::rendering_policy>({ gfx::ModelCache::create_model("Quad", fs::view("assets://models/billboard.obj")), gfx::MaterialCache::create_material("Particle", fs::view("assets://shaders/particle.shs")) });
+        gfx::MaterialCache::get_material("Particle").set_param("fixedSize", false);
     }
 
     {
@@ -67,15 +64,16 @@ void ExampleSystem::setup()
         auto emitter = ent.add_component<particle_emitter>();
         emitter->infinite = false;
         emitter->spawnRate = 10;
-        emitter->spawnInterval = 0.05f;
+        emitter->spawnInterval = .05f;
         emitter->maxSpawnCount = 5000;
         emitter->minLifeTime = 1;
         emitter->maxLifeTime = 2;
         emitter->localScale = false;
 
         fountain_policy fountain;
-        fountain.initForce = 50.f;
+        fountain.initForce = 20.f;
         emitter->add_policy<fountain_policy>(fountain);
+        emitter->add_policy<scale_lifetime_policy>();
         emitter->add_policy<gfx::rendering_policy>({ model, material });
     }
 

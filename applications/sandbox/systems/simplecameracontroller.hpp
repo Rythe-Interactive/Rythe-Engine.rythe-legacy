@@ -96,7 +96,7 @@ public:
     {
         auto skybox = createEntity("Skybox");
         auto skyboxMat = rendering::MaterialCache::create_material("skybox", "assets://shaders/skybox.shs"_view);
-        skyboxMat.set_param("skybox", gfx::TextureCache::create_texture("skyBox","assets://textures/4k_star.jpg"_view));
+        skyboxMat.set_param("skybox", gfx::TextureCache::create_texture("skyBox","assets://textures/HDRI/earth.png"_view));
         skybox.add_component(gfx::mesh_renderer{ skyboxMat, rendering::ModelCache::create_model("Cube", "assets://models/cube.glb"_view) });
         skybox.add_component<transform>();
 
@@ -235,7 +235,7 @@ public:
             return;
 
         rotation& rot = camera.get_component<rotation>();
-        rot = math::angleAxis(action.value * 100 * action.input_delta, math::vec3::up) * rot;
+        rot = math::angleAxis(action.value * 100.f * action.input_delta, math::vec3::up) * rot;
     }
 
     void onPlayerLookY(player_look_y& action)
@@ -253,7 +253,7 @@ public:
         math::vec3 up = rotMat * math::vec3::up;
         float angle = math::orientedAngle(fwd, up, right);
 
-        angle += action.value * 100 * action.input_delta;
+        angle += action.value * 100.f * action.input_delta;
 
         if (angle > -0.001f)
             angle = -0.001f;

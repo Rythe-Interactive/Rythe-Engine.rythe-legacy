@@ -30,6 +30,7 @@ namespace legion::core
         size_type currentParticleCount = 0;
         //How many particles can spawn every interval     default: 1
         size_type spawnRate = 1;
+        float spawnBuffer = 0.0f;
 
         //Minimum life time for a particle      default: 1.f
         float minLifeTime = 1.f;
@@ -91,9 +92,9 @@ namespace legion::core
         particle_policy<Policy>& add_policy(Policy policy);
 
         void set_alive(size_type idx, bool alive);
+        void set_alive(size_type start, size_type end, bool alive);
         bool is_alive(size_type idx);
 
-    private:
         void swap(size_type idx1, size_type idx2);
         void resize(size_type size);
 
