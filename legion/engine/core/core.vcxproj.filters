@@ -45,7 +45,6 @@
     <ClCompile Include="particles\particlebuffer.cpp" />
     <ClCompile Include="particles\particlesystem.cpp" />
     <ClCompile Include="particles\particleemitter.cpp" />
-    <ClCompile Include="particles\defaults\defaultpolicies.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="async\async.hpp" />
@@ -463,7 +462,6 @@
     <ClInclude Include="particles\particlepolicy.hpp" />
     <ClInclude Include="common\debugrendering.hpp" />
     <ClInclude Include="particles\particleuniform.hpp" />
-    <ClInclude Include="particles\defaults\defaultpolicies.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="platform\cpp.hint" />
