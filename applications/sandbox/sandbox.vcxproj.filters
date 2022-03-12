@@ -63,6 +63,7 @@
     <ClInclude Include="systems\mysystem.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="defaults\defaultpolicies.hpp">
     <ClInclude Include="systems\physics_test_system.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

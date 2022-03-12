@@ -9,25 +9,30 @@ namespace legion::core
     template<typename bufferType>
     particle_buffer<bufferType>& particle_emitter::create_buffer(const std::string_view& name, particle_buffer<bufferType> buffer)
     {
-        id_type idName = nameHash(name);
-        particleBuffers.try_emplace(idName, std::make_unique<particle_buffer<bufferType>>(buffer));
-        return *dynamic_cast<particle_buffer<bufferType>*>(particleBuffers[idName].get());
+        return create_buffer<bufferType>(name, buffer.data());
     }
 
     template<typename bufferType>
     particle_buffer<bufferType>& particle_emitter::create_buffer(const std::string_view& name, std::vector<bufferType> buffer)
     {
-        id_type idName = nameHash(name);
-        particleBuffers.try_emplace(idName, std::make_unique<particle_buffer<bufferType>>(buffer));
-        return *dynamic_cast<particle_buffer<bufferType>*>(particleBuffers[idName].get());
+        auto& bffer = create_buffer<bufferType>(name);
+        bffer.insert(bffr.begin(), buffer.begin(), buffer.end());
+        return bffr;
     }
 
     template<typename bufferType>
     particle_buffer<bufferType>& particle_emitter::create_buffer(const std::string_view& name)
     {
         id_type idName = nameHash(name);
+        if (particleBuffers.count(idName) > 0)
+        {
+            log::warn("Buffer \"{}\" of type {} already exists", name, typeid(bufferType).name());
+            return *dynamic_cast<particle_buffer<bufferType>*>(particleBuffers.at(idName).get());
+        }
         particleBuffers.try_emplace(idName, std::make_unique<particle_buffer<bufferType>>());
-        return *dynamic_cast<particle_buffer<bufferType>*>(particleBuffers[idName].get());
+        auto& bffr = *dynamic_cast<particle_buffer<bufferType>*>(particleBuffers.at(idName).get());
+        bffr.resize(currentParticleCount);
+        return bffr;
     }
 
     template<typename bufferType>
@@ -39,7 +44,7 @@ namespace legion::core
             log::warn("Buffer \"{}\" of type {} does not exist, one will be created for you", name, typeid(bufferType).name());
             create_buffer<bufferType>(name);
         }
-        return *dynamic_cast<particle_buffer<bufferType>*>(particleBuffers[idName].get());
+        return *dynamic_cast<particle_buffer<bufferType>*>(particleBuffers.at(idName).get());
     }
 
 
@@ -73,7 +78,7 @@ namespace legion::core
         id_type idName = nameHash(name);
         if (particleUniforms.count(idName) < 1)
             create_uniform<uniformType>(name);
-        auto& uniform = *dynamic_cast<particle_uniform<uniformType>*>(particleUniforms[idName].get());
+        auto& uniform = *dynamic_cast<particle_uniform<uniformType>*>(particleUniforms.at(idName).get());
         return uniform.get();
     }
 
@@ -82,7 +87,7 @@ namespace legion::core
     {
         particlePolicies.push_back(std::make_unique<Policy>());
         particlePolicies[particlePolicies.size() - 1]->OnSetup(*this);
-        return *dynamic_cast<particle_policy<Policy>*>(particlePolicies[particlePolicies.size() - 1].get());
+        return *dynamic_cast<particle_policy<Policy>*>(particlePolicies.at(particlePolicies.size() - 1).get());
     }
 
     template<typename Policy>
@@ -90,6 +95,6 @@ namespace legion::core
     {
         particlePolicies.push_back(std::make_unique<Policy>(policy));
         particlePolicies[particlePolicies.size() - 1]->OnSetup(*this);
-        return *dynamic_cast<particle_policy<Policy>*>(particlePolicies[particlePolicies.size() - 1].get());
+        return *dynamic_cast<particle_policy<Policy>*>(particlePolicies.at(particlePolicies.size() - 1).get());
     }
 }
