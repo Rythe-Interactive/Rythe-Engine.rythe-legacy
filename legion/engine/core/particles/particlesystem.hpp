@@ -21,8 +21,6 @@ namespace legion::core
     {
         float age = 0.f;
         float max = 1.f;
-        NO_DTOR_RULE5_NOEXCEPT(life_time);
-        ~life_time() = default;
     };
 
     class ParticleSystem final : public System<ParticleSystem>
@@ -33,7 +31,6 @@ namespace legion::core
         void update(time::span deltaTime);
         void emitter_setup(L_MAYBEUNUSED events::component_creation<particle_emitter>& event);
         void emit(particle_emitter& emitter, size_type count);
-        void maintanence(particle_emitter& emitter, float deltaTime);
-        void printParticles(particle_emitter& emitter);
+        void maintenance(particle_emitter& emitter, float deltaTime);
     };
 }
