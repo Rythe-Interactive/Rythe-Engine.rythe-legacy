@@ -45,4 +45,15 @@ namespace legion::core
         virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
         virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override;
     };
+
+    struct scale_lifetime_policy : public particle_policy<scale_lifetime_policy>
+    {
+        NO_DTOR_RULE5_NOEXCEPT(scale_lifetime_policy);
+        ~scale_lifetime_policy() = default;
+
+        virtual void OnSetup(particle_emitter & emitter) override;
+        virtual void OnInit(particle_emitter & emitter, size_type start, size_type end) override;
+        virtual void OnUpdate(particle_emitter & emitter, float deltaTime, size_type count) override;
+        virtual void OnDestroy(particle_emitter & emitter, size_type start, size_type end) override;
+    };
 }

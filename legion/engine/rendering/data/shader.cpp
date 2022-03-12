@@ -423,6 +423,11 @@ namespace legion::rendering
                     glDepthFunc(param);
                 }
                 break;
+                case GL_DEPTH_WRITEMASK:
+                {
+                    glDepthMask(param);
+                }
+                break;
                 case GL_CULL_FACE:
                 {
                     if (param == GL_FALSE)
@@ -712,6 +717,11 @@ namespace legion::rendering
 
                     glEnable(func);
                     glDepthFunc(param);
+                }
+                break;
+                case GL_DEPTH_WRITEMASK:
+                {
+                    glDepthMask(param);
                 }
                 break;
                 case GL_CULL_FACE:
@@ -1113,6 +1123,11 @@ namespace legion::rendering
 
                 glEnable(func);
                 glDepthFunc(param);
+            }
+            break;
+            case GL_DEPTH_WRITEMASK:
+            {
+                glDepthMask(param);
             }
             break;
             case GL_CULL_FACE:

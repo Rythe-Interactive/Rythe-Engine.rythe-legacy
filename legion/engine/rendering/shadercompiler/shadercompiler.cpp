@@ -118,6 +118,7 @@ namespace legion::rendering
         {
             funcTypesInitialized = true;
             funcTypes["DEPTH"] = GL_DEPTH_TEST;
+            funcTypes["DEPTH_WRITE"] = GL_DEPTH_WRITEMASK;
             funcTypes["CULL"] = GL_CULL_FACE;
             funcTypes["ALPHA_SOURCE"] = GL_BLEND_SRC;
             funcTypes["ALPHA_DEST"] = GL_BLEND_DST;
@@ -154,6 +155,23 @@ namespace legion::rendering
                     params["NOTEQUAL"] = GL_NOTEQUAL;
                     params["GEQUAL"] = GL_GEQUAL;
                     params["ALWAYS"] = GL_ALWAYS;
+                }
+
+                if (!params.count(par))
+                    continue;
+
+                param = params.at(par);
+            }
+            break;
+            case GL_DEPTH_WRITEMASK:
+            {
+                static std::unordered_map<std::string, GLenum> params; // Initialize parameter lookup table.
+                static bool initialized = false;
+                if (!initialized)
+                {
+                    initialized = true;
+                    params["OFF"] = GL_FALSE;
+                    params["ON"] = GL_TRUE;
                 }
 
                 if (!params.count(par))
@@ -453,6 +471,7 @@ namespace legion::rendering
                 // Default shader state in case nothing was specified by the shader.
                 shader_state& currentVariantState = state[variant];
                 currentVariantState[GL_DEPTH_TEST] = GL_LEQUAL;
+                currentVariantState[GL_DEPTH_WRITEMASK] = GL_TRUE;
                 currentVariantState[GL_CULL_FACE] = GL_BACK;
                 currentVariantState[GL_BLEND] = GL_FALSE;
                 currentVariantState[GL_DITHER] = GL_FALSE;
