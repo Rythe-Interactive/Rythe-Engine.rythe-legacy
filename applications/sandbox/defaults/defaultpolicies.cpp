@@ -1,23 +1,21 @@
-#include <core/particles/defaults/defaultpolicies.hpp>
+#include "defaultpolicies.hpp"
 #include <core/particles/particleemitter.hpp>
+#include <core/particles/particlesystem.hpp>
 
 namespace legion::core
 {
 #pragma region Example Policy
     void example_policy::OnSetup(particle_emitter& emitter)
     {
-        emitter.create_uniform<float>("scaleFactor", .5f);
+
     }
 
     void example_policy::OnInit(particle_emitter& emitter,size_type start, size_type end)
     {
-        auto scaleFactor = emitter.get_uniform<float>("scaleFactor");
-        auto& scaleBuffer = emitter.get_buffer<scale>("scaleBuffer");
         auto& posBuffer = emitter.get_buffer<position>("posBuffer");
 
-        for (size_type idx = start; idx <= end; idx++)
+        for (size_type idx = start; idx < end; idx++)
         {
-            scaleBuffer[idx] = scale(scaleFactor);
             auto baseDir = math::sphericalRand(1.f);
             baseDir.y = 0;
             int minBound = 6;
@@ -31,15 +29,7 @@ namespace legion::core
 
     void example_policy::OnUpdate(particle_emitter& emitter,float deltaTime, size_type count)
     {
-        //auto& ageBuffer = emitter.getBuffer<life_time>("lifetimeBuffer");
-        //auto& scaleBuffer = emitter.getBuffer<scale>("scaleBuffer");
 
-        //auto scaleFactor = emitter.getUniform<float>("scaleFactor");
-
-        //for (size_type idx = 0; idx < count; idx++)
-        //{
-        //    scaleBuffer[idx] = scale(scaleFactor - ((ageBuffer[idx].age / ageBuffer[idx].max) * scaleFactor));
-        //}
     }
     void example_policy::OnDestroy(particle_emitter& emitter, size_type start, size_type end)
     {
@@ -55,9 +45,9 @@ namespace legion::core
 
     void orbital_policy::OnInit(particle_emitter& emitter,size_type start, size_type end)
     {
-        auto& velBuffer = emitter.create_buffer<velocity>("velBuffer");
-        auto& posBuffer = emitter.create_buffer<position>("posBuffer");
-        for (size_type idx = start; idx <= end; idx++)
+        auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
+        auto& posBuffer = emitter.get_buffer<position>("posBuffer");
+        for (size_type idx = start; idx < end; idx++)
         {
             auto r2 = math::length2((math::vec3)posBuffer[idx]);
             auto force = G_FORCE * C_MASS / r2;
@@ -71,7 +61,7 @@ namespace legion::core
     {
         auto& posBuffer = emitter.get_buffer<position>("posBuffer");
         auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
-        auto& timeBuffer = emitter.create_uniform<float>("timeBuffer");
+        auto& timeBuffer = emitter.get_uniform<float>("timeBuffer");
         timeBuffer += deltaTime;
         size_type iter = 0;
         while (timeBuffer > 0.02f)
@@ -106,9 +96,9 @@ namespace legion::core
 
     void fountain_policy::OnInit(particle_emitter& emitter,size_type start, size_type end)
     {
-        auto& posBuffer = emitter.create_buffer<position>("posBuffer");
-        auto& velBuffer = emitter.create_buffer<velocity>("velBuffer");
-        for (size_type idx = start; idx <= end; idx++)
+        auto& posBuffer = emitter.get_buffer<position>("posBuffer");
+        auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
+        for (size_type idx = start; idx < end; idx++)
         {
             posBuffer[idx] = math::vec3::zero;
             auto direction = math::vec3::up + math::normalize(math::vec3(math::linearRand(-5.f, 5.f), math::linearRand(-5.f, 5.f), math::linearRand(-5.f, 5.f)));
@@ -128,6 +118,41 @@ namespace legion::core
     }
 
     void fountain_policy::OnDestroy(particle_emitter& emitter,size_type start, size_type end)
+    {
+
+    }
+#pragma endregion
+
+#pragma region Scale over Lifetime
+    void scale_lifetime_policy::OnSetup(particle_emitter& emitter)
+    {
+        emitter.create_uniform<float>("scaleFactor", .5f);
+    }
+
+    void scale_lifetime_policy::OnInit(particle_emitter& emitter, size_type start, size_type end)
+    {
+        auto scaleFactor = emitter.get_uniform<float>("scaleFactor");
+        auto& scaleBuffer = emitter.get_buffer<scale>("scaleBuffer");
+
+        for (size_type idx = start; idx < end; idx++)
+        {
+            scaleBuffer[idx] = scale(scaleFactor);
+        }
+    }
+
+    void scale_lifetime_policy::OnUpdate(particle_emitter& emitter, float deltaTime, size_type count)
+    {
+        auto& ageBuffer = emitter.get_buffer<life_time>("lifetimeBuffer");
+        auto& scaleBuffer = emitter.get_buffer<scale>("scaleBuffer");
+
+        auto scaleFactor = emitter.get_uniform<float>("scaleFactor");
+
+        for (size_type idx = 0; idx < count; idx++)
+        {
+            scaleBuffer[idx] = scale(scaleFactor - ((ageBuffer[idx].age / ageBuffer[idx].max) * scaleFactor));
+        }
+    }
+    void scale_lifetime_policy::OnDestroy(particle_emitter& emitter, size_type start, size_type end)
     {
 
     }

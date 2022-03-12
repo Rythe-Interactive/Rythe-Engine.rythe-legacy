@@ -25,6 +25,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="renderstages\mousehover.cpp">
+    <ClCompile Include="defaults\defaultpolicies.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

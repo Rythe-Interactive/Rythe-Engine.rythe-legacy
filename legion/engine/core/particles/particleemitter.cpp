@@ -10,11 +10,16 @@ namespace legion::core
             return;
         }
 
-        assert_msg("index is greater than maximum particle count", idx < maxSpawnCount);
+        assert_msg("index is greater than maximum particle count", idx <= maxSpawnCount);
         if (idx > livingBuffer.size()-1)
             livingBuffer.insert(livingBuffer.end(), idx - (livingBuffer.size()-1), true);
 
         livingBuffer[idx] = alive;
+    }
+
+    void particle_emitter::set_alive(size_type start, size_type end, bool alive)
+    {
+        livingBuffer.insert(livingBuffer.begin()+start, end-start, alive);
     }
 
     bool particle_emitter::is_alive(size_type idx)

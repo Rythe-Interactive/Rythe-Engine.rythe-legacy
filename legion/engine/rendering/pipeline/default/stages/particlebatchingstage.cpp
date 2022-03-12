@@ -20,11 +20,26 @@ namespace legion::rendering
         {
             auto& emitter = ent.get_component<particle_emitter>().get();
 
-            auto filter = emitter.get_uniform<mesh_filter>("mesh_filter");
-            auto renderer = emitter.get_uniform<mesh_renderer>("renderer");
-
             auto& posBuffer = emitter.get_buffer<position>("posBuffer");
             auto& scaleBuffer = emitter.get_buffer<scale>("scaleBuffer");
+
+            auto compare = [&](position& a, position& b)
+            {
+                return math::distance2(a, camInput.pos) < math::distance2(b, camInput.pos);
+            };
+
+            for (size_type i = 1; i < emitter.currentParticleCount; i++)
+            {
+                auto j = i;
+                while (j > 0 && compare(posBuffer[j - 1], posBuffer[j]))
+                {
+                    emitter.swap(j, j - 1);
+                    j--;
+                }
+            }
+
+            auto filter = emitter.get_uniform<mesh_filter>("mesh_filter");
+            auto renderer = emitter.get_uniform<mesh_renderer>("renderer");
 
             auto& batch = (*batches)[renderer.material][model_handle{ filter.shared_mesh.id() }];
             if (batch.second.empty())
@@ -49,9 +64,8 @@ namespace legion::rendering
                 {
                     if (emitter.is_alive(jobId))
                     {
-                        auto transScale = scal * scaleBuffer[jobId];
-                        auto transPos = origin + math::rotate(rot, posBuffer[jobId]) * transScale;
-                        batch.second[jobId + start] = math::compose(transScale, rot, transPos);
+                        auto transPos = origin + math::rotate(rot, posBuffer[jobId]) * scal;
+                        batch.second[jobId + start] = math::compose(scaleBuffer[jobId] * scal, rot, transPos);
                     }
                 }).wait();
         }

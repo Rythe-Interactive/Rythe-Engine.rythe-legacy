@@ -110,6 +110,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="renderstages\mousehover.cpp" />
+    <ClCompile Include="defaults\defaultpolicies.cpp" />
     <ClCompile Include="source.cpp" />
     <ClCompile Include="systems\examplesystem.cpp" />
     <ClCompile Include="systems\gui_test.cpp" />
@@ -118,6 +119,7 @@
   <ItemGroup>
     <ClInclude Include="data\pp_bloom.hpp" />
     <ClInclude Include="data\pp_edgedetect.hpp" />
+    <ClInclude Include="defaults\defaultpolicies.hpp" />
     <ClInclude Include="module\examplemodule.hpp" />
     <ClInclude Include="renderstages\mousehover.hpp" />
     <ClInclude Include="resource.h" />
