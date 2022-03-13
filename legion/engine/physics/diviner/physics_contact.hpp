@@ -242,7 +242,7 @@ namespace legion::physics
 
             tangentNormal1 = math::cross(collisionNormal, math::float3(1, 0, 0));
 
-            if (math::epsilonEqual(math::length(tangentNormal1), 0.0f, 0.01f))
+            if (math::close_enough(math::length(tangentNormal1), 0.0f))
             {
                 tangentNormal1 = math::cross(collisionNormal, math::float3(0, 1, 0));
             }
@@ -291,10 +291,10 @@ namespace legion::physics
             math::float3x3 Ib = rbInc ? rbInc->globalInverseInertiaTensor : math::float3x3(0.0f);
 
             //calculate M^-1 J^T
-            math::float3 jx = ma * -normal;
-            math::float3 jy = Ia * minRaCrossN;
-            math::float3 jz = mb * normal;
-            math::float3 jw = Ib * RbCrossN;
+            math::float3 jx = -normal * ma;
+            math::float3 jy = minRaCrossN * Ia;
+            math::float3 jz = normal * mb;
+            math::float3 jw = RbCrossN * Ib;
 
             //calculate effective mass
             float efMx = math::dot(-normal, jx);
@@ -324,13 +324,13 @@ namespace legion::physics
             if (rbRef)
             {
                 rbRef->velocity += -linearImpulse * rbRef->inverseMass;
-                rbRef->angularVelocity += rbRef->globalInverseInertiaTensor * angularImpulseA;
+                rbRef->angularVelocity += angularImpulseA * rbRef->globalInverseInertiaTensor;
             }
 
             if (rbInc)
             {
                 rbInc->velocity += linearImpulse * rbInc->inverseMass;
-                auto addedAngular = rbInc->globalInverseInertiaTensor * angularImpulseB;
+                auto addedAngular = angularImpulseB * rbInc->globalInverseInertiaTensor;
                 rbInc->angularVelocity += addedAngular;
             }
         }
@@ -350,10 +350,10 @@ namespace legion::physics
         void logRigidbodyState()
         {
             log::debug("//--------logRigidbodyState----------//");
-            log::debug("rbInc->velocity {} ", math::to_string(rbInc->velocity));
-            log::debug("rbInc->angularVelocity {} ", math::to_string(rbInc->angularVelocity));
+            log::debug("rbInc->velocity {} ", rbInc->velocity);
+            log::debug("rbInc->angularVelocity {} ", rbInc->angularVelocity);
 
-            log::debug("collisionNormal {} ", math::to_string(collisionNormal));
+            log::debug("collisionNormal {} ", collisionNormal);
             log::debug("lambda {} ", totalLambda);
             log::debug("////////////////////////////");
         }

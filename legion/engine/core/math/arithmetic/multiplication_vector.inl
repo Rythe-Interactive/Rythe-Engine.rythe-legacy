@@ -11,19 +11,24 @@ namespace legion::core::math::detail
     {
         using vec_type = vector<Scalar, Size>;
 
-        L_NODISCARD constexpr static auto compute(const vec_type& a, const vec_type& b) noexcept
+        template<typename AType, typename BType>
+        L_NODISCARD constexpr static auto compute(AType&& a, BType&& b) noexcept
         {
             vec_type result;
             for (size_type i = 0; i < Size; i++)
-                result[i] = a[i] * b[i];
-            return result;
-        }
+                if constexpr (is_vector_v<AType> && make_vector_t<AType>::size >= Size)
+                {
+                    if constexpr (is_vector_v<BType> && make_vector_t<BType>::size >= Size)
+                        result[i] = a[i] * b[i];
+                    else
+                        result[i] = a[i] * b;
+                }
+                else
+                {
+                    static_assert(is_vector_v<BType> && make_vector_t<BType>::size >= Size);                
+                    result[i] = a * b[i];
+                }
 
-        L_NODISCARD constexpr static auto compute(const vec_type& a, Scalar b) noexcept
-        {
-            vec_type result;
-            for (size_type i = 0; i < Size; i++)
-                result[i] = a[i] * b;
             return result;
         }
     };
@@ -33,38 +38,22 @@ namespace legion::core::math::detail
     {
         using vec_type = vector<Scalar, 1u>;
 
-        L_NODISCARD constexpr static Scalar compute(Scalar a, Scalar b) noexcept
+        template<typename AType, typename BType>
+        L_NODISCARD constexpr static Scalar compute(AType&& a, BType&& b) noexcept
         {
-            return a * b;
-        }
-    };
-
-    template<typename Scalar, size_type Size, size_type... args>
-    struct compute_multiplication<swizzle<Scalar, Size, args...>>
-    {
-        using swizzle_type = swizzle<Scalar, Size, args...>;
-        using vec_type = typename swizzle_type::conv_type;
-
-        L_NODISCARD constexpr static auto compute(const vec_type& a, const vec_type& b) noexcept
-        {
-            return compute_multiplication<vec_type>::compute(a, b);
-        }
-
-        L_NODISCARD constexpr static auto compute(const vec_type& a, Scalar b) noexcept
-        {
-            return compute_multiplication<vec_type>::compute(a, b);
-        }
-    };
-
-    template<typename Scalar, size_type Size, size_type arg>
-    struct compute_multiplication<swizzle<Scalar, Size, arg>>
-    {
-        using swizzle_type = swizzle<Scalar, Size, arg>;
-        using vec_type = typename swizzle_type::conv_type;
-
-        L_NODISCARD constexpr static auto compute(const vec_type& a, Scalar b) noexcept
-        {
-            return compute_multiplication<vec_type>::compute(a, b);
+            if constexpr (is_vector_v<AType>)
+            {
+                if constexpr (is_vector_v<BType>)
+                    return a[0] * b[0];
+                else
+                    return a[0] * b;
+            }
+            else if constexpr (is_vector_v<BType>)
+            {
+                return a * b[0];
+            }
+            else
+                return a * b;
         }
     };
 }

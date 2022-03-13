@@ -1,12 +1,12 @@
 #pragma once
 #include <core/math/vector/vector_base.hpp>
 #include <core/math/vector/swizzle/swizzle3.hpp>
-#include <core/math/meta.hpp>
+#include <core/math/util/meta.hpp>
 
 namespace legion::core::math
 {
     template<typename Scalar>
-    struct alignas(sizeof(Scalar) * 4) aligned_vector3
+    struct alignas(sizeof(Scalar) * 4) aligned_vector3 : vector_base
     {
         static_assert(std::is_arithmetic<Scalar>::value, "Scalar must be a numeric type.");
 

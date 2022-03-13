@@ -1,7 +1,7 @@
 #include <core/math/vector/vector_base.hpp>
 #pragma once
 
-#include <core/math/meta.hpp>
+#include <core/math/util/meta.hpp>
 
 namespace legion::core::math
 {

@@ -1,5 +1,5 @@
 #pragma once
-#include <core/math/meta.hpp>
+#include <core/math/util/meta.hpp>
 #include <core/math/basic/abs.hpp>
 
 namespace legion::core::math
@@ -17,12 +17,12 @@ namespace legion::core::math
         else if constexpr (lhsIsInt || rhsIsInt)
         {
             using fp_t = floating_type_t<TypeA, TypeB>;
-            return abs(static_cast<fp_t>(lhs) - static_cast<fp_t>(rhs)) <= std::numeric_limits<fp_t>::epsilon();
+            return abs(static_cast<fp_t>(lhs) - static_cast<fp_t>(rhs)) <= epsilon_v<fp_t>;
         }
         else
         {
             using lowest_t = lowest_precision_t<TypeA, TypeB>;
-            return abs(static_cast<lowest_t>(lhs) - static_cast<lowest_t>(rhs)) <= highest_epsilon_v<TypeA, TypeB>;
+            return abs(static_cast<lowest_t>(lhs) - static_cast<lowest_t>(rhs)) <= epsilon_v<lowest_t>;
         }
     }
 }

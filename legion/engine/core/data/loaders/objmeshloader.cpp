@@ -146,7 +146,7 @@ namespace legion::core
             material.alphaCutoff = 0.5f;
             material.doubleSided = false;
 
-            material.albedoValue = math::color(srcMat.diffuse[0], srcMat.diffuse[1], srcMat.diffuse[2], 1.f);
+            material.albedoValue = math::color(srcMat.diffuse[0], srcMat.diffuse[1], srcMat.diffuse[2]);
             if (!srcMat.diffuse_texname.empty())
             {
                 auto imgResult = assets::load<image>(fs::view(contextPath + srcMat.diffuse_texname));
@@ -196,7 +196,7 @@ namespace legion::core
 
             material.metallicRoughnessMap = assets::invalid_asset<image>;
 
-            material.emissiveValue = math::color(srcMat.emission[0], srcMat.emission[1], srcMat.emission[2], 1.f);
+            material.emissiveValue = math::color(srcMat.emission[0], srcMat.emission[1], srcMat.emission[2]);
             if (!srcMat.emissive_texname.empty())
             {
                 auto imgResult = assets::load<image>(fs::view(contextPath + srcMat.emissive_texname));
@@ -293,7 +293,7 @@ namespace legion::core
 
                 math::color color = math::colors::white;
                 if (vertexIndex + 2 < attributes.colors.size())
-                    color = math::color(attributes.colors[vertexIndex + 0], attributes.colors[vertexIndex + 1], attributes.colors[vertexIndex + 2], 1.f);
+                    color = math::color(attributes.colors[vertexIndex + 0], attributes.colors[vertexIndex + 1], attributes.colors[vertexIndex + 2]);
 
                 math::float3 normal = math::float3::up;
                 if (normalIndex + 2 < attributes.normals.size())

@@ -18,13 +18,13 @@ namespace legion::physics
 
         EdgeLabel label;
 
-        math::vec3 edgePosition;
-        math::vec3 robustEdgeDirection;
+        math::float3 edgePosition;
+        math::float3 robustEdgeDirection;
         std::string id;
 
         HalfEdgeEdge() = default;
 
-        HalfEdgeEdge(math::vec3 newEdgePositionPtr);
+        HalfEdgeEdge(math::float3 newEdgePositionPtr);
 
         /**@brief sets 'nextEdge' and 'prevEdge' with the given HalfEdgeEdges
          */
@@ -45,33 +45,33 @@ namespace legion::physics
 
         /**@brief Gets the normal of the face of this edge
          */
-        math::vec3 getLocalNormal() const;
+        math::float3 getLocalNormal() const;
 
         /**@brief Gets the precalculated direction of this edge */
-        math::vec3 getRobustEdgeDirection() const { return robustEdgeDirection; }
+        math::float3 getRobustEdgeDirection() const { return robustEdgeDirection; }
 
         /**@brief Calculates the direction of this edge based on its the 2 adjacent faces of this edge */
         void calculateRobustEdgeDirection();
 
         /**@brief Checks if the face of this edge is below 'vert' with a distance given by 'epsilon'
         */
-        bool isVertexVisible(const math::vec3& vert, float epsilon = math::sqrt(math::epsilon<float>()));
+        bool isVertexVisible(const math::float3& vert, float epsilon = math::epsilon_v<float>);
 
         /**@brief Checks if the face of this edge is below 'vert' with a distance given by 'epsilon'
          * while this edges neighboring face is above it
          */
-        bool isEdgeHorizonFromVertex(const math::vec3& vert,float epsilon = math::sqrt(math::epsilon<float>()));
+        bool isEdgeHorizonFromVertex(const math::float3& vert,float epsilon = math::epsilon_v<float>);
 
         /**@brief Merges this edges face with the face of this edge's pairing. The latter face, this edge, and its pairing edge
          * is destroyed in the process. 
          */
-        void suicidalMergeWithPairing(std::vector<math::vec3>& unmergedVertices, math::vec3& normal, float scalingEpsilon);
+        void suicidalMergeWithPairing(std::vector<math::float3>& unmergedVertices, math::float3& normal, float scalingEpsilon);
        
-        void DEBUG_drawEdge(const math::mat4& transform, const math::color& debugColor, float time = 20.0f, float width = 5.0f);
+        void DEBUG_drawEdge(const math::float4x4& transform, const math::color& debugColor, float time = 20.0f, float width = 5.0f);
         
-        void DEBUG_drawInsetEdge(const math::vec3 spacing, const math::color& debugColor, float time = 20.0f, float width = 5.0f);
+        void DEBUG_drawInsetEdge(const math::float3 spacing, const math::color& debugColor, float time = 20.0f, float width = 5.0f);
 
-        void DEBUG_directionDrawEdge(const math::mat4& transform, const math::color& debugColor, float time, float width);
+        void DEBUG_directionDrawEdge(const math::float4x4& transform, const math::color& debugColor, float time, float width);
     };
 }
 

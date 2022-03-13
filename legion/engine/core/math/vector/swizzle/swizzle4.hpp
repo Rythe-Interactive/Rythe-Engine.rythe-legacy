@@ -3,21 +3,21 @@
 #include <core/math/vector/swizzle/swizzle_base.hpp>
 
 #define _MATH_SWIZZLE_4_1_(type)\
-    struct{::legion::core::math::swizzle<type, 1, 0> x;};\
-    struct{::legion::core::math::swizzle<type, 1, 0> r;};\
-    struct{::legion::core::math::swizzle<type, 1, 0> s;};\
+    struct{::legion::core::math::swizzle<type, 4, 0> x;};\
+    struct{::legion::core::math::swizzle<type, 4, 0> r;};\
+    struct{::legion::core::math::swizzle<type, 4, 0> s;};\
 \
-    struct{::legion::core::math::swizzle<type, 1, 1> y;};\
-    struct{::legion::core::math::swizzle<type, 1, 1> g;};\
-    struct{::legion::core::math::swizzle<type, 1, 1> t;};\
+    struct{::legion::core::math::swizzle<type, 4, 1> y;};\
+    struct{::legion::core::math::swizzle<type, 4, 1> g;};\
+    struct{::legion::core::math::swizzle<type, 4, 1> t;};\
 \
-    struct{::legion::core::math::swizzle<type, 1, 2> z;};\
-    struct{::legion::core::math::swizzle<type, 1, 2> b;};\
-    struct{::legion::core::math::swizzle<type, 1, 2> p;};\
+    struct{::legion::core::math::swizzle<type, 4, 2> z;};\
+    struct{::legion::core::math::swizzle<type, 4, 2> b;};\
+    struct{::legion::core::math::swizzle<type, 4, 2> p;};\
 \
-    struct{::legion::core::math::swizzle<type, 1, 2> w;};\
-    struct{::legion::core::math::swizzle<type, 1, 2> a;};\
-    struct{::legion::core::math::swizzle<type, 1, 2> q;};\
+    struct{::legion::core::math::swizzle<type, 4, 2> w;};\
+    struct{::legion::core::math::swizzle<type, 4, 2> a;};\
+    struct{::legion::core::math::swizzle<type, 4, 2> q;};\
 
 #define _MATH_SWIZZLE_4_2_(type)\
     struct{::legion::core::math::swizzle<type, 4, 0, 0> xx;};\

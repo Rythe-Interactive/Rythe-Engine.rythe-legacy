@@ -2,12 +2,12 @@
 #include <core/math/vector/vector_base.hpp>
 #include <core/math/vector/vector_base.inl>
 #include <core/math/vector/swizzle/swizzle2.hpp>
-#include <core/math/meta.hpp>
+#include <core/math/util/meta.hpp>
 
 namespace legion::core::math
 {
     template<typename Scalar>
-    struct alignas(sizeof(Scalar) * 2) vector<Scalar, 2>
+    struct vector<Scalar, 2> : vector_base
     {
         static_assert(::std::is_arithmetic_v<Scalar>, "Scalar must be a numeric type.");
 
@@ -75,7 +75,7 @@ namespace legion::core::math
     };
 
     template<>
-    struct alignas(sizeof(bool) * 2) vector<bool, 2>
+    struct vector<bool, 2> : vector_base
     {
         using scalar = bool;
         static constexpr size_type size = 2;

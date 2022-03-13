@@ -1,6 +1,6 @@
 #pragma once
 #include <core/math/vector/vector.hpp>
-#include <core/math/meta.hpp>
+#include <core/math/util/meta.hpp>
 
 #include <core/math/random/randomnumbergenerator.hpp>
 

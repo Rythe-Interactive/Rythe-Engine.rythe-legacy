@@ -88,7 +88,7 @@ namespace legion::physics
 
             queueJobs(physComps.size(), [&]() {
                 id_type index = async::this_job::get_id();
-                math::mat4 transf = math::compose( scales[index].get(), rotations[index].get(), positions[index].get());
+                math::float4x4 transf = math::compose( scales[index].get(), rotations[index].get(), positions[index].get());
                 
                 physicsComponent& individualPhysicsComponent = physComps[index].get();
 
@@ -119,7 +119,7 @@ namespace legion::physics
         static std::unique_ptr<BroadPhaseCollisionAlgorithm> m_broadPhase;
         const float m_timeStep = 0.02f;
      
-        math::ivec3 uniformGridCellSize = math::ivec3(1, 1, 1);
+        math::int3 uniformGridCellSize = math::int3(1, 1, 1);
 
         /** @brief Performs the entire physics pipeline (
          * Broadphase Collision Detection, Narrowphase Collision Detection, and the Collision Resolution)
@@ -184,11 +184,11 @@ namespace legion::physics
                 rigidbody& rb = rigidbodies[async::this_job::get_id()];
 
                 ////-------------------- update velocity ------------------//
-                math::vec3 acc = rb.forceAccumulator * rb.inverseMass;
+                math::float3 acc = rb.forceAccumulator * rb.inverseMass;
                 rb.velocity += (acc + constants::gravity) * deltaTime;
 
                 ////-------------------- update angular velocity ------------------//
-                math::vec3 angularAcc = rb.torqueAccumulator * rb.globalInverseInertiaTensor;
+                math::float3 angularAcc = rb.torqueAccumulator * rb.globalInverseInertiaTensor;
                 rb.angularVelocity += (angularAcc)*deltaTime;
 
                 rb.resetAccumulators();
@@ -219,11 +219,11 @@ namespace legion::physics
                 float angle = math::clamp(math::length(rb.angularVelocity), 0.0f, 32.0f);
                 float dtAngle = angle * deltaTime;
 
-                if (!math::epsilonEqual(dtAngle, 0.0f, math::epsilon<float>()))
+                if (!math::close_enough(dtAngle, 0.0f))
                 {
-                    math::vec3 axis = math::normalize(rb.angularVelocity);
+                    math::float3 axis = math::normalize(rb.angularVelocity);
 
-                    math::quat glmQuat = math::angleAxis(dtAngle, axis);
+                    math::quat glmQuat = math::angle_axis(dtAngle, axis);
                     rot = glmQuat * rot;
                     rot = math::normalize(rot);
                 }

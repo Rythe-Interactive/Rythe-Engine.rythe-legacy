@@ -6,12 +6,14 @@
 #include <core/types/meta.hpp>
 
 #include <core/math/vector/vector.hpp>
-#include <core/math/meta.hpp>
+#include <core/math/util/meta.hpp>
 
 namespace legion::core::math
 {
+    struct quaternion_base {};
+
     template<typename Scalar>
-    struct quaternion
+    struct quaternion : quaternion_base
     {
         static_assert(::std::is_arithmetic_v<Scalar>, "Scalar must be a numeric type.");
 

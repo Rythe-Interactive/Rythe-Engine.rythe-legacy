@@ -6,7 +6,7 @@
 namespace legion::core::math
 {
    template<typename Scalar, size_type RowCount, size_type ColCount, size_type ColIdx>
-   struct column
+   struct column : vector_base
    {
        using scalar = Scalar;
        static constexpr size_type size = RowCount;
@@ -26,7 +26,7 @@ namespace legion::core::math
    };
 
    template<size_type RowCount, size_type ColCount, size_type ColIdx>
-   struct column<bool, RowCount, ColCount, ColIdx>
+   struct column<bool, RowCount, ColCount, ColIdx> : vector_base
    {
        using scalar = bool;
        static constexpr size_type size = RowCount;
@@ -49,7 +49,7 @@ namespace legion::core::math
    };
 
    template<typename Scalar, size_type ColCount, size_type ColIdx>
-   struct column<Scalar, 1, ColCount, ColIdx>
+   struct column<Scalar, 1, ColCount, ColIdx> : vector_base
    {
        using scalar = Scalar;
        static constexpr size_type size = 1;
@@ -73,7 +73,7 @@ namespace legion::core::math
    };
 
    template<size_type ColCount, size_type ColIdx>
-   struct column<bool, 1, ColCount, ColIdx>
+   struct column<bool, 1, ColCount, ColIdx> : vector_base
    {
        using scalar = bool;
        static constexpr size_type size = 1;

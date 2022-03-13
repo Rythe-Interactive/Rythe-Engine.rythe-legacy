@@ -296,7 +296,7 @@ namespace legion::core
                             const float r = static_cast<float>(valueBuffer.data[valuePos]) / 255.f;
                             const float g = static_cast<float>(valueBuffer.data[valuePos + sizeof(byte)]) / 255.f;
                             const float b = static_cast<float>(valueBuffer.data[valuePos + 2 * sizeof(byte)]) / 255.f;
-                            data.at(dataStart + *idx) = math::color(r, g, b, 1.f);
+                            data.at(dataStart + *idx) = math::color(r, g, b);
                         }
                         break;
                         case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
@@ -309,7 +309,7 @@ namespace legion::core
                             const float* r = reinterpret_cast<const float*>(&valueBuffer.data[valuePos]);
                             const float* g = reinterpret_cast<const float*>(&valueBuffer.data[valuePos + sizeof(float)]);
                             const float* b = reinterpret_cast<const float*>(&valueBuffer.data[valuePos + 2 * sizeof(float)]);
-                            data.at(dataStart + *idx) = math::color(*r, *g, *b, 1.f);
+                            data.at(dataStart + *idx) = math::color(*r, *g, *b);
                         }
                         break;
                         }

@@ -5,7 +5,7 @@
 namespace legion::core::math
 {
     template<typename Scalar>
-    struct alignas(sizeof(Scalar) * 1) vector<Scalar, 1>
+    struct vector<Scalar, 1> : vector_base
     {
         static_assert(::std::is_arithmetic_v<Scalar>, "Scalar must be a numeric type.");
 
@@ -41,7 +41,7 @@ namespace legion::core::math
     };
 
     template<>
-    struct alignas(sizeof(bool) * 1) vector<bool, 1>
+    struct vector<bool, 1> : vector_base
     {
         using scalar = bool;
         static constexpr size_type size = 1;

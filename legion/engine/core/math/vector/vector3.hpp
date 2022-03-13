@@ -2,12 +2,12 @@
 #include <core/math/vector/vector_base.hpp>
 #include <core/math/vector/vector_base.inl>
 #include <core/math/vector/swizzle/swizzle3.hpp>
-#include <core/math/meta.hpp>
+#include <core/math/util/meta.hpp>
 
 namespace legion::core::math
 {
     template<typename Scalar>
-    struct vector<Scalar, 3>
+    struct vector<Scalar, 3> : vector_base
     {
         static_assert(::std::is_arithmetic_v<Scalar>, "Scalar must be a numeric type.");
 
@@ -31,25 +31,12 @@ namespace legion::core::math
 
         explicit constexpr vector(scalar s) noexcept : xyz(static_cast<scalar>(s), static_cast<scalar>(s), static_cast<scalar>(s)) {}
 
-        constexpr vector(scalar _x, scalar _y, scalar _z) noexcept : xyz(_x, _y, _z) {}
+        explicit constexpr vector(const vector<scalar, 2>& v, scalar s = static_cast<scalar>(0)) noexcept;
+        constexpr vector(scalar s, const vector<scalar, 2>& v) noexcept;
+        constexpr vector(scalar _x, scalar _y, scalar _z = static_cast<scalar>(0)) noexcept;
 
-        template<typename vec_type, ::std::enable_if_t<is_vector_v<vec_type> && (size != vec_type::size || !std::is_same_v<scalar, typename vec_type::scalar>), bool> = true>
-        constexpr vector(const vec_type& other) noexcept
-        {
-            if constexpr (size > vec_type::size)
-            {
-                for (size_type i = 0; i < vec_type::size; i++)
-                    data[i] = static_cast<scalar>(other.data[i]);
-
-                for (size_type i = vec_type::size; i < size; i++)
-                    data[i] = static_cast<scalar>(0);
-            }
-            else
-            {
-                for (size_type i = 0; i < size; i++)
-                    data[i] = static_cast<scalar>(other.data[i]);
-            }
-        }
+        template<typename vec_type, ::std::enable_if_t<is_vector_v<vec_type> && (vec_type::size != 3 || !std::is_same_v<Scalar, typename vec_type::scalar>), bool> = true>
+        constexpr vector(const vec_type& other) noexcept;
 
         static const vector up;
         static const vector down;
@@ -76,7 +63,7 @@ namespace legion::core::math
     };
 
     template<>
-    struct vector<bool, 3>
+    struct vector<bool, 3> : vector_base
     {
         using scalar = bool;
         static constexpr size_type size = 3;
@@ -98,29 +85,16 @@ namespace legion::core::math
 
         explicit constexpr vector(scalar s) noexcept : xyz(static_cast<scalar>(s), static_cast<scalar>(s), static_cast<scalar>(s)) {}
 
-        constexpr vector(scalar _x, scalar _y, scalar _z) noexcept : xyz(_x, _y, _z) {}
+        explicit constexpr vector(const vector<scalar, 2>& v, scalar s = static_cast<scalar>(0)) noexcept;
+        constexpr vector(scalar s, const vector<scalar, 2>& v) noexcept;
+        constexpr vector(scalar _x, scalar _y, scalar _z = static_cast<scalar>(0)) noexcept;
 
         template<typename _Scal, ::std::enable_if_t<!::std::is_same_v<scalar, _Scal>, bool> = true>
         constexpr vector(const vector<_Scal, size>& other) noexcept
             : xyz(static_cast<scalar>(other.x), static_cast<scalar>(other.y), static_cast<scalar>(other.z)) {}
 
         template<typename vec_type, ::std::enable_if_t<is_vector_v<vec_type> && (size != vec_type::size), bool> = true>
-        constexpr vector(const vec_type& other) noexcept
-        {
-            if constexpr (size > vec_type::size)
-            {
-                for (size_type i = 0; i < vec_type::size; i++)
-                    data[i] = static_cast<scalar>(other.data[i]);
-
-                for (size_type i = vec_type::size; i < size; i++)
-                    data[i] = static_cast<scalar>(0);
-            }
-            else
-            {
-                for (size_type i = 0; i < size; i++)
-                    data[i] = static_cast<scalar>(other.data[i]);
-            }
-        }
+        constexpr vector(const vec_type& other) noexcept;
 
         static const vector up;
         static const vector down;

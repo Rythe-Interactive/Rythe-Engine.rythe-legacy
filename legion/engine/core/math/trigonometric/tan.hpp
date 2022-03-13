@@ -3,7 +3,7 @@
 
 #include <core/platform/platform.hpp>
 #include <core/types/primitives.hpp>
-#include <core/math/meta.hpp>
+#include <core/math/util/meta.hpp>
 
 namespace legion::core::math
 {

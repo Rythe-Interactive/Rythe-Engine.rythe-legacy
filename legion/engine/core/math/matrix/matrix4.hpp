@@ -9,7 +9,7 @@ namespace legion::core::math
     struct quaternion;
 
     template<typename Scalar>
-    struct matrix<Scalar, 4, 4>
+    struct matrix<Scalar, 4, 4> : matrix_base
     {
         static_assert(std::is_arithmetic_v<Scalar>, "Scalar must be a numeric type.");
 
@@ -69,6 +69,8 @@ namespace legion::core::math
             row2(s20, s21, s22, s23),
             row3(s30, s31, s32, s33)
         {}
+
+        explicit constexpr matrix(row_type r0, row_type r1, row_type r2, row_type r3) noexcept : row0(r0), row1(r1), row2(r2), row3(r3) {}
 
         template<typename Scal>
         explicit constexpr matrix(const quaternion<Scal>& orientation) noexcept;

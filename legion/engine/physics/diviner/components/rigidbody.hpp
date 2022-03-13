@@ -96,7 +96,7 @@ namespace legion::physics
 
         void UpdateInertiaTensor(math::quat orientation)
         {
-            math::float3x3 mat3Rot = math::toMat3(orientation);
+            math::float3x3 mat3Rot(orientation);
             globalInverseInertiaTensor = math::inverse(mat3Rot) * localInverseInertiaTensor *  mat3Rot;
         }
 

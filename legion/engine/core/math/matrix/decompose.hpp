@@ -8,7 +8,7 @@
 #include <core/math/geometric/length.hpp>
 #include <core/math/geometric/normalize.hpp>
 
-#include <core/math/meta.hpp>
+#include <core/math/util/meta.hpp>
 #include <core/math/util/close_enough.hpp>
 
 namespace legion::core::math
@@ -35,10 +35,10 @@ namespace legion::core::math
     void decompose(const matrix<Scalar, 3, 3>& mat, vector<Scalar, 3>& scale, quaternion<Scalar>& orientation) noexcept;
 
     template<typename Scalar>
-    matrix<Scalar, 4, 4> compose(vector<Scalar, 3>& scale, quaternion<Scalar>& orientation, vector<Scalar, 3>& translation) noexcept;
+    matrix<Scalar, 4, 4> compose(const vector<Scalar, 3>& scale, const quaternion<Scalar>& orientation, const vector<Scalar, 3>& translation) noexcept;
 
     template<typename Scalar>
-    matrix<Scalar, 3, 3> compose(vector<Scalar, 3>& scale, quaternion<Scalar>& orientation) noexcept;
+    matrix<Scalar, 3, 3> compose(const vector<Scalar, 3>& scale, const quaternion<Scalar>& orientation) noexcept;
 }
 
 #include <core/math/matrix/decompose.inl>

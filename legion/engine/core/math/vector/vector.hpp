@@ -8,4 +8,6 @@
 #include <core/math/vector/vector4.hpp>
 
 #include <core/math/vector/vector_base.inl>
+#include <core/math/vector/vector3.inl>
+#include <core/math/vector/vector4.inl>
 #include <core/math/vector/swizzle/swizzle.inl>

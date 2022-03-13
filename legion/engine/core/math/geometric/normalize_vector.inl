@@ -27,16 +27,4 @@ namespace legion::core::math::detail
             return static_cast<Scalar>(1);
         }
     };
-
-    template<typename Scalar, size_type Size, size_type... args>
-    struct compute_normalize<swizzle<Scalar, Size, args...>>
-    {
-        using swizzle_type = swizzle<Scalar, Size, args...>;
-        using vec_type = typename swizzle_type::conv_type;
-
-        L_NODISCARD L_ALWAYS_INLINE static auto compute(const vec_type& v) noexcept
-        {
-            return compute_normalize<vec_type>::compute(v);
-        }
-    };
 }

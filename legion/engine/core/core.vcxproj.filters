@@ -190,7 +190,7 @@
     <ClInclude Include="math\arithmetic\multiplication.hpp" />
     <ClInclude Include="math\arithmetic\negate.hpp" />
     <ClInclude Include="math\basic\basic_funcs.hpp" />
-    <ClInclude Include="math\meta.hpp" />
+    <ClInclude Include="math\util\meta.hpp" />
     <ClInclude Include="math\vector\vector.hpp" />
     <ClInclude Include="math\basic\abs.hpp" />
     <ClInclude Include="math\util\hash.hpp" />
@@ -233,6 +233,7 @@
     <ClInclude Include="math\trigonometric\tan.hpp" />
     <ClInclude Include="math\quaternion\utils.hpp" />
     <ClInclude Include="math\quaternion\quaternion.hpp" />
+    <ClInclude Include="math\basic\constraint.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="platform\cpp.hint" />
@@ -285,5 +286,10 @@
     <None Include="math\geometric\inverse_quat.inl" />
     <None Include="math\geometric\inverse_matrix.inl" />
     <None Include="math\matrix\adjoint.inl" />
+    <None Include="math\basic\constraint.inl" />
+    <None Include="math\basic\constraint_vector.inl" />
+    <None Include="math\vector\vector4.inl" />
+    <None Include="math\vector\vector3.inl" />
+    <None Include="math\geometric\normalize_quaternion.inl" />
   </ItemGroup>
 </Project>

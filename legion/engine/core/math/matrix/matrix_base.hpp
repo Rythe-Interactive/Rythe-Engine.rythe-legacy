@@ -5,8 +5,10 @@
 
 namespace legion::core::math
 {
+    struct matrix_base {};
+
     template<typename Scalar, size_type RowCount, size_type ColCount>
-    struct matrix
+    struct matrix : matrix_base
     {
         static_assert(std::is_arithmetic_v<Scalar>, "Scalar must be a numeric type.");
 

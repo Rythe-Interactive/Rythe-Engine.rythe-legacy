@@ -4,12 +4,12 @@
 #include <core/math/vector/vector_base.hpp>
 #include <core/math/vector/vector_base.inl>
 #include <core/math/vector/swizzle/swizzle4.hpp>
-#include <core/math/meta.hpp>
+#include <core/math/util/meta.hpp>
 
 namespace legion::core::math
 {
     template<typename Scalar>
-    struct alignas(sizeof(Scalar) * 4) vector<Scalar, 4>
+    struct vector<Scalar, 4> : vector_base
     {
         static_assert(::std::is_arithmetic_v<Scalar>, "Scalar must be a numeric type.");
 
@@ -36,25 +36,16 @@ namespace legion::core::math
         explicit constexpr vector(scalar s) noexcept
             : xyzw(static_cast<scalar>(s), static_cast<scalar>(s), static_cast<scalar>(s), static_cast<scalar>(s)) {}
 
-        constexpr vector(scalar _x, scalar _y, scalar _z, scalar _w) noexcept : xyzw(_x, _y, _z, _w) {}
+        explicit constexpr vector(const vector<scalar, 3>& v, scalar s = static_cast<scalar>(0)) noexcept;
+        constexpr vector(scalar s, const vector<scalar, 3>& v) noexcept;
+        constexpr vector(scalar s0, const vector<scalar, 2>& v, scalar s1 = static_cast<scalar>(0)) noexcept;
+        constexpr vector(scalar s0, scalar s1, const vector<scalar, 2>& v) noexcept;
+        explicit constexpr vector(const vector<scalar, 2>& v, scalar s0 = static_cast<scalar>(0), scalar s1 = static_cast<scalar>(0)) noexcept;
+        constexpr vector(const vector<scalar, 2>& v0, const vector<scalar, 2>& v1) noexcept;
+        constexpr vector(scalar _x, scalar _y, scalar _z = static_cast<scalar>(0), scalar _w = static_cast<scalar>(0)) noexcept;
 
-        template<typename vec_type, ::std::enable_if_t<is_vector_v<vec_type> && (size != vec_type::size || !std::is_same_v<scalar, typename vec_type::scalar>), bool> = true>
-        constexpr vector(const vec_type& other) noexcept
-        {
-            if constexpr (size > vec_type::size)
-            {
-                for (size_type i = 0; i < vec_type::size; i++)
-                    data[i] = static_cast<scalar>(other.data[i]);
-
-                for (size_type i = vec_type::size; i < size; i++)
-                    data[i] = static_cast<scalar>(0);
-            }
-            else
-            {
-                for (size_type i = 0; i < size; i++)
-                    data[i] = static_cast<scalar>(other.data[i]);
-            }
-        }
+        template<typename vec_type, ::std::enable_if_t<is_vector_v<vec_type> && (vec_type::size != 4 || !std::is_same_v<Scalar, typename vec_type::scalar>), bool> = true>
+        constexpr vector(const vec_type& other) noexcept;
 
         static const vector up;
         static const vector down;
@@ -83,7 +74,7 @@ namespace legion::core::math
     };
 
     template<>
-    struct alignas(sizeof(bool) * 4) vector<bool, 4>
+    struct vector<bool, 4> : vector_base
     {
         using scalar = bool;
         static constexpr size_type size = 4;
@@ -107,25 +98,17 @@ namespace legion::core::math
         explicit constexpr vector(scalar s) noexcept
             : xyzw(static_cast<scalar>(s), static_cast<scalar>(s), static_cast<scalar>(s), static_cast<scalar>(s)) {}
 
-        constexpr vector(scalar _x, scalar _y, scalar _z, scalar _w) noexcept : xyzw(_x, _y, _z, _w) {}
 
-        template<typename vec_type, ::std::enable_if_t<is_vector_v<vec_type> && (size != vec_type::size || !std::is_same_v<scalar, typename vec_type::scalar>), bool> = true>
-        constexpr vector(const vec_type& other) noexcept
-        {
-            if constexpr (size > vec_type::size)
-            {
-                for (size_type i = 0; i < vec_type::size; i++)
-                    data[i] = static_cast<scalar>(other.data[i]);
+        explicit constexpr vector(const vector<scalar, 3>& v, scalar s = static_cast<scalar>(0)) noexcept;
+        constexpr vector(scalar s, const vector<scalar, 3>& v) noexcept;
+        constexpr vector(scalar s0, const vector<scalar, 2>& v, scalar s1 = static_cast<scalar>(0)) noexcept;
+        constexpr vector(scalar s0, scalar s1, const vector<scalar, 2>& v) noexcept;
+        explicit constexpr vector(const vector<scalar, 2>& v, scalar s0 = static_cast<scalar>(0), scalar s1 = static_cast<scalar>(0)) noexcept;
+        constexpr vector(const vector<scalar, 2>& v0, const vector<scalar, 2>& v1) noexcept;
+        constexpr vector(scalar _x, scalar _y, scalar _z = static_cast<scalar>(0), scalar _w = static_cast<scalar>(0)) noexcept;
 
-                for (size_type i = vec_type::size; i < size; i++)
-                    data[i] = static_cast<scalar>(0);
-            }
-            else
-            {
-                for (size_type i = 0; i < size; i++)
-                    data[i] = static_cast<scalar>(other.data[i]);
-            }
-        }
+        template<typename vec_type, ::std::enable_if_t<is_vector_v<vec_type> && (vec_type::size != 4 || !std::is_same_v<bool, typename vec_type::scalar>), bool> = true>
+        constexpr vector(const vec_type& other) noexcept;
 
         static const vector up;
         static const vector down;

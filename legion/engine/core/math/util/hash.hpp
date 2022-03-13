@@ -11,11 +11,12 @@
 #include <core/types/primitives.hpp>
 #include <core/types/hash.hpp>
 #include <core/math/vector/vector.hpp>
+#include <core/math/color.hpp>
 
 template<typename Scalar, ::std::size_t Size>
 struct ::std::hash<::legion::core::math::vector<Scalar, Size>>
 {
-    constexpr static ::std::hash<Scalar> hasher;
+    constexpr static ::std::hash<Scalar> hasher{};
     inline L_ALWAYS_INLINE::std::size_t operator()(const ::legion::core::math::vector<Scalar, Size>& vec) const noexcept
     {
         using namespace ::legion::core;
@@ -29,7 +30,7 @@ struct ::std::hash<::legion::core::math::vector<Scalar, Size>>
 template<typename Scalar>
 struct ::std::hash<::legion::core::math::vector<Scalar, 1>>
 {
-    constexpr static ::std::hash<Scalar> hasher;
+    constexpr static ::std::hash<Scalar> hasher{};
     inline L_ALWAYS_INLINE::std::size_t operator()(const ::legion::core::math::vector<Scalar, 1>& vec) const noexcept
     {
         return hasher(vec.x);
@@ -39,7 +40,7 @@ struct ::std::hash<::legion::core::math::vector<Scalar, 1>>
 template<typename Scalar>
 struct ::std::hash<::legion::core::math::vector<Scalar, 2>>
 {
-    constexpr static ::std::hash<Scalar> hasher;
+    constexpr static ::std::hash<Scalar> hasher{};
     inline L_ALWAYS_INLINE::std::size_t operator()(const ::legion::core::math::vector<Scalar, 2>& vec) const noexcept
     {
         return ::legion::core::hash_combine(hasher(vec.x), hasher(vec.y));
@@ -49,7 +50,7 @@ struct ::std::hash<::legion::core::math::vector<Scalar, 2>>
 template<typename Scalar>
 struct ::std::hash<::legion::core::math::vector<Scalar, 3>>
 {
-    constexpr static ::std::hash<Scalar> hasher;
+    constexpr static ::std::hash<Scalar> hasher{};
     inline L_ALWAYS_INLINE::std::size_t operator()(const ::legion::core::math::vector<Scalar, 3>& vec) const noexcept
     {
         return ::legion::core::hash_combine_multiple(hasher(vec.x), hasher(vec.y), hasher(vec.z));
@@ -59,10 +60,30 @@ struct ::std::hash<::legion::core::math::vector<Scalar, 3>>
 template<typename Scalar>
 struct ::std::hash<::legion::core::math::vector<Scalar, 4>>
 {
-    constexpr static ::std::hash<Scalar> hasher;
+    constexpr static ::std::hash<Scalar> hasher{};
     inline L_ALWAYS_INLINE::std::size_t operator()(const ::legion::core::math::vector<Scalar, 4>& vec) const noexcept
     {
         return ::legion::core::hash_combine_multiple(hasher(vec.x), hasher(vec.y), hasher(vec.z), hasher(vec.w));
+    }
+};
+
+template<>
+struct ::std::hash<::legion::core::math::color>
+{
+    constexpr static ::std::hash<float> hasher{};
+    inline L_ALWAYS_INLINE::std::size_t operator()(const ::legion::core::math::color& col) const noexcept
+    {
+        return ::legion::core::hash_combine_multiple(hasher(col.r), hasher(col.g), hasher(col.b), hasher(col.a));
+    }
+};
+
+template<>
+struct ::std::hash<::legion::core::math::dcolor>
+{
+    constexpr static ::std::hash<double> hasher{};
+    inline L_ALWAYS_INLINE::std::size_t operator()(const ::legion::core::math::dcolor& col) const noexcept
+    {
+        return ::legion::core::hash_combine_multiple(hasher(col.r), hasher(col.g), hasher(col.b), hasher(col.a));
     }
 };
 

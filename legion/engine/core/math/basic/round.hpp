@@ -4,7 +4,7 @@
 
 #include <core/platform/platform.hpp>
 #include <core/types/primitives.hpp>
-#include <core/math/meta.hpp>
+#include <core/math/util/meta.hpp>
 
 namespace legion::core::math
 {
@@ -14,13 +14,20 @@ namespace legion::core::math
         L_NODISCARD constexpr static Target _round_impl_(T val)
         {
             using value_type = remove_cvr_t<T>;
-            if (val < static_cast<value_type>(0))
+            if constexpr (::std::is_integral_v<value_type>)
             {
-                return static_cast<Target>(static_cast<int_max>(val - static_cast<value_type>(0.5)));
+                return static_cast<Target>(val);
             }
             else
             {
-                return static_cast<Target>(static_cast<int_max>(val + static_cast<value_type>(0.5)));
+                if (val < static_cast<value_type>(0))
+                {
+                    return static_cast<Target>(static_cast<int_max>(val - static_cast<value_type>(0.5)));
+                }
+                else
+                {
+                    return static_cast<Target>(static_cast<int_max>(val + static_cast<value_type>(0.5)));
+                }
             }
         }
 

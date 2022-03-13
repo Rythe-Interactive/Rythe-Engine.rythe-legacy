@@ -1,6 +1,5 @@
 #pragma once
 #include <core/math/vector/vector.hpp>
-#include <core/math/util/hash.hpp>
 
 /**
  * @file color.hpp
@@ -12,32 +11,54 @@ namespace legion::core::math
      * @brief Color oriented wrapper around float4.
      * @ref legion::core::math::float4
      */
-    using color = float4;
+    struct color : public float4
+    {
+        using float4::vector;
 
-    /**@class highp_color
+        constexpr color(const float4& other) : float4(other) {}
+        constexpr color(float _r, float _g, float _b) : float4(_r, _g, _b, 1.f) {}
+
+        using float4::operator=;
+        using float4::operator[];
+        using float4::length;
+        using float4::length2;
+    };
+
+    /**@class dcolor
      * @brief Double precision version of legion::core::math::color.
      * @ref legion::core::math::double4
      */
-    using dcolor = double4;
+    struct dcolor : public double4
+    {
+        using double4::vector;
+
+        constexpr dcolor(const double4& other) : double4(other) {}
+        constexpr dcolor(double _r, double _g, double _b) : double4(_r, _g, _b, 1.0) {}
+
+        using double4::operator=;
+        using double4::operator[];
+        using double4::length;
+        using double4::length2;
+    };
 
     /**
      * @brief Default colors in RGBA.
      */
     namespace colors
     {
-        const color black       { 0.f, 0.f, 0.f, 1.f };
-        const color transparent { 0.f, 0.f, 0.f, 0.f };
-        const color white       { 1.f, 1.f, 1.f, 1.f };
-        const color lightgrey   { 0.75f, 0.75f, 0.75f, 1.f };
-        const color grey        { 0.5f, 0.5f, 0.5f, 1.f };
-        const color darkgrey    { 0.25f, 0.25f, 0.25f, 1.f };
-        const color red         { 1.f, 0.f, 0.f, 1.f };
-        const color green       { 0.f, 1.f, 0.f, 1.f };
-        const color blue        { 0.f, 0.f, 1.f, 1.f };
-        const color yellow      { 1.f, 1.f, 0.f, 1.f };
-        const color cyan        { 0.f, 1.f, 1.f, 1.f };
-        const color magenta     { 1.f, 0.f, 1.f, 1.f };
-        const color orange      { 1.0f, 0.584f, 0.f, 1.f };
-        const color cornflower  { 0.392f, 0.584f, 0.929f, 1.0f };
+        const static color black{ 0.f, 0.f, 0.f };
+        const static color transparent{ 0.f, 0.f, 0.f, 0.f };
+        const static color white{ 1.f, 1.f, 1.f };
+        const static color lightgrey{ 0.75f, 0.75f, 0.75f };
+        const static color grey{ 0.5f, 0.5f, 0.5f };
+        const static color darkgrey{ 0.25f, 0.25f, 0.25f };
+        const static color red{ 1.f, 0.f, 0.f };
+        const static color green{ 0.f, 1.f, 0.f };
+        const static color blue{ 0.f, 0.f, 1.f };
+        const static color yellow{ 1.f, 1.f, 0.f };
+        const static color cyan{ 0.f, 1.f, 1.f };
+        const static color magenta{ 1.f, 0.f, 1.f };
+        const static color orange{ 1.0f, 0.584f, 0.f };
+        const static color cornflower{ 0.392f, 0.584f, 0.929f, 1.0f };
     }
 }

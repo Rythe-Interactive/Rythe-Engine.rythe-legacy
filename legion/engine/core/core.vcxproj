@@ -203,6 +203,7 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="math\basic\abs.hpp" />
     <ClInclude Include="math\basic\basic_funcs.hpp" />
     <ClInclude Include="math\basic\fmod.hpp" />
+    <ClInclude Include="math\basic\constraint.hpp" />
     <ClInclude Include="math\basic\modf.hpp" />
     <ClInclude Include="math\basic\round.hpp" />
     <ClInclude Include="math\exponential\inverse_sqrt.hpp" />
@@ -232,7 +233,7 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="math\matrix\matrix4.hpp" />
     <ClInclude Include="math\matrix\matrix_base.hpp" />
     <ClInclude Include="math\matrix\column\column_base.hpp" />
-    <ClInclude Include="math\meta.hpp" />
+    <ClInclude Include="math\util\meta.hpp" />
     <ClInclude Include="math\quaternion\utils.hpp" />
     <ClInclude Include="math\quaternion\quaternion.hpp" />
     <ClInclude Include="math\quaternion\quaternion_base.hpp" />
@@ -387,6 +388,8 @@ del /q ".\xcopyexclude"</Command>
     <None Include="math\arithmetic\multiplication_matrix.inl" />
     <None Include="math\arithmetic\multiplication_quaternion.inl" />
     <None Include="math\arithmetic\multiplication_vector.inl" />
+    <None Include="math\basic\constraint.inl" />
+    <None Include="math\basic\constraint_vector.inl" />
     <None Include="math\geometric\inverse.inl" />
     <None Include="math\geometric\inverse_matrix.inl" />
     <None Include="math\geometric\inverse_quat.inl" />
@@ -395,6 +398,7 @@ del /q ".\xcopyexclude"</Command>
     <None Include="math\geometric\length_quat.inl" />
     <None Include="math\geometric\length_vector.inl" />
     <None Include="math\geometric\normalize.inl" />
+    <None Include="math\geometric\normalize_quaternion.inl" />
     <None Include="math\geometric\normalize_vector.inl" />
     <None Include="math\matrix\adjoint.inl" />
     <None Include="math\matrix\decompose.inl" />
@@ -405,6 +409,8 @@ del /q ".\xcopyexclude"</Command>
     <None Include="math\random\randomnumbergenerator.inl" />
     <None Include="math\vector\swizzle\swizzle.inl" />
     <None Include="math\vector\vector1.inl" />
+    <None Include="math\vector\vector3.inl" />
+    <None Include="math\vector\vector4.inl" />
     <None Include="math\vector\vector_base.inl" />
     <None Include="platform\cpp.hint" />
     <None Include="scheduling\process.inl" />

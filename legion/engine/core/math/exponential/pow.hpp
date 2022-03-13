@@ -29,6 +29,14 @@ namespace legion::core::math
                     result[i] = ::std::pow(v[i], s);
                 return result;
             }
+
+            L_ALWAYS_INLINE static value_type compute_squared(const value_type& v) noexcept
+            {
+                value_type result;
+                for (size_type i; i < size; i++)
+                    result[i] = v[i] * v[i];
+                return result;
+            }
         };
 
         template<typename Scalar>
@@ -40,6 +48,11 @@ namespace legion::core::math
             L_ALWAYS_INLINE static Scalar compute(Scalar v, Scalar s) noexcept
             {
                 return ::std::pow(v, s);
+            }
+
+            L_ALWAYS_INLINE static Scalar compute_squared(Scalar s) noexcept
+            {
+                return s * s;
             }
         };
 
@@ -58,6 +71,11 @@ namespace legion::core::math
             {
                 return value_type{ ::std::pow(v[0], s), ::std::pow(v[1], s) };
             }
+
+            L_ALWAYS_INLINE static value_type compute_squared(const value_type& v) noexcept
+            {
+                return value_type{ v[0] * v[0], v[1] * v[1] };
+            }
         };
 
         template<typename Scalar>
@@ -75,6 +93,11 @@ namespace legion::core::math
             {
                 return value_type{ ::std::pow(v[0], s), ::std::pow(v[1], s), ::std::pow(v[2], s) };
             }
+
+            L_ALWAYS_INLINE static value_type compute_squared(const value_type& v) noexcept
+            {
+                return value_type{ v[0] * v[0], v[1] * v[1], v[2] * v[2] };
+            }
         };
 
         template<typename Scalar>
@@ -91,6 +114,11 @@ namespace legion::core::math
             L_ALWAYS_INLINE static value_type compute(const value_type& v, Scalar s) noexcept
             {
                 return value_type{ ::std::pow(v[0], s), ::std::pow(v[1], s), ::std::pow(v[2], s), ::std::pow(v[3], s) };
+            }
+
+            L_ALWAYS_INLINE static value_type compute_squared(const value_type& v) noexcept
+            {
+                return value_type{ v[0] * v[0], v[1] * v[1], v[2] * v[2], v[3] * v[3] };
             }
         };
     }
@@ -111,5 +139,17 @@ namespace legion::core::math
     L_ALWAYS_INLINE static auto pow(Scalar v, Scalar s) noexcept
     {
         return detail::compute_pow<Scalar, 1u>::compute(v, s);
+    }
+
+    template<typename vec_type, ::std::enable_if_t<is_vector_v<vec_type>, bool> = true>
+    L_ALWAYS_INLINE static auto squared(const vec_type& v) noexcept
+    {
+        return detail::compute_pow<typename vec_type::scalar, vec_type::size>::compute_squared(v);
+    }
+
+    template<typename Scalar, ::std::enable_if_t<!is_vector_v<remove_cvr_t<Scalar>>, bool> = true>
+    L_ALWAYS_INLINE static auto squared(Scalar s) noexcept
+    {
+        return detail::compute_pow<Scalar, 1u>::compute_squared(s);
     }
 }
