@@ -15,8 +15,8 @@ namespace legion::core
     template<typename bufferType>
     particle_buffer<bufferType>& particle_emitter::create_buffer(const std::string_view& name, std::vector<bufferType> buffer)
     {
-        auto& bffer = create_buffer<bufferType>(name);
-        bffer.insert(bffr.begin(), buffer.begin(), buffer.end());
+        auto& bffr = create_buffer<bufferType>(name);
+        bffr.insert(bffr.begin(), buffer.begin(), buffer.end());
         return bffr;
     }
 
@@ -86,7 +86,7 @@ namespace legion::core
     particle_policy<Policy>& particle_emitter::add_policy()
     {
         particlePolicies.push_back(std::make_unique<Policy>());
-        particlePolicies[particlePolicies.size() - 1]->OnSetup(*this);
+        particlePolicies[particlePolicies.size() - 1]->setup(*this);
         return *dynamic_cast<particle_policy<Policy>*>(particlePolicies.at(particlePolicies.size() - 1).get());
     }
 
@@ -94,7 +94,7 @@ namespace legion::core
     particle_policy<Policy>& particle_emitter::add_policy(Policy policy)
     {
         particlePolicies.push_back(std::make_unique<Policy>(policy));
-        particlePolicies[particlePolicies.size() - 1]->OnSetup(*this);
+        particlePolicies[particlePolicies.size() - 1]->setup(*this);
         return *dynamic_cast<particle_policy<Policy>*>(particlePolicies.at(particlePolicies.size() - 1).get());
     }
 }

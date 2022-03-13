@@ -12,10 +12,7 @@ namespace legion::core
         NO_DTOR_RULE5_NOEXCEPT(example_policy);
         ~example_policy() = default;
 
-        virtual void OnSetup(particle_emitter& emitter) override;
-        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override;
-        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
-        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override;
+        virtual void onInit(particle_emitter& emitter, size_type start, size_type end) override;
     };
 
     struct orbital_policy : public particle_policy<orbital_policy>
@@ -27,10 +24,9 @@ namespace legion::core
        double P_MASS = 1.f;
        double G_FORCE = 100.0f;
 
-        virtual void OnSetup(particle_emitter& emitter) override;
-        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override;
-        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
-        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override;
+        virtual void setup(particle_emitter& emitter) override;
+        virtual void onInit(particle_emitter& emitter, size_type start, size_type end) override;
+        virtual void onUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
     };
 
     struct fountain_policy : public particle_policy<fountain_policy>
@@ -40,10 +36,8 @@ namespace legion::core
 
         float initForce;
 
-        virtual void OnSetup(particle_emitter& emitter) override;
-        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override;
-        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
-        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override;
+        virtual void onInit(particle_emitter& emitter, size_type start, size_type end) override;
+        virtual void onUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
     };
 
     struct scale_lifetime_policy : public particle_policy<scale_lifetime_policy>
@@ -51,9 +45,8 @@ namespace legion::core
         NO_DTOR_RULE5_NOEXCEPT(scale_lifetime_policy);
         ~scale_lifetime_policy() = default;
 
-        virtual void OnSetup(particle_emitter & emitter) override;
-        virtual void OnInit(particle_emitter & emitter, size_type start, size_type end) override;
-        virtual void OnUpdate(particle_emitter & emitter, float deltaTime, size_type count) override;
-        virtual void OnDestroy(particle_emitter & emitter, size_type start, size_type end) override;
+        virtual void setup(particle_emitter & emitter) override;
+        virtual void onInit(particle_emitter & emitter, size_type start, size_type end) override;
+        virtual void onUpdate(particle_emitter & emitter, float deltaTime, size_type count) override;
     };
 }
