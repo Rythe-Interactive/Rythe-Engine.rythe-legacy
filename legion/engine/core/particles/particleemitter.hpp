@@ -80,8 +80,8 @@ namespace legion::core
         uniformType& create_uniform(const std::string_view& name, particle_uniform<uniformType> val);
         template<typename uniformType>
         uniformType& create_uniform(const std::string_view& name, uniformType val);
-        template<typename uniformType>
-        uniformType& create_uniform(const std::string_view& name);
+        template<typename uniformType,typename... Args>
+        uniformType& create_uniform(const std::string_view& name, Args&&... args);
 
         template<typename uniformType>
         uniformType& get_uniform(const std::string_view& name);
