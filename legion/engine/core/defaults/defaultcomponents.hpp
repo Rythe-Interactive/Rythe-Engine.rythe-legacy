@@ -9,82 +9,38 @@ namespace legion::core
 {
     struct position : public math::float3
     {
-        position() : math::float3(0, 0, 0) {}
-        position(const position&) = default;
-        position(position&&) = default;
         position(const math::float3& src) : math::float3(src) {}
-        position(float x, float y, float z) : math::float3(x, y, z) {}
-        position(float v) : math::float3(v) {}
-        position& operator=(const position&) = default;
-        position& operator=(position&&) = default;
-        position& operator=(const math::float3& src)
-        {
-            x = src.x;
-            y = src.y;
-            z = src.z;
-            return *this;
-        }
-        position& operator=(math::float3&& src)
-        {
-            x = src.x;
-            y = src.y;
-            z = src.z;
-            return *this;
-        }
+        position& operator=(const math::float3& src) { math::float3::operator=(src); return *this; }
+        position& operator=(math::float3&& src) { math::float3::operator=(src); return *this; }
+
+        using math::float3::vector;
+        using math::float3::operator=;
+        using math::float3::operator[];
     };
 
     struct rotation : public math::quat
     {
-        rotation() : math::quat(1, 0, 0, 0) {}
-        rotation(float w, float x, float y, float z) : math::quat(w, x, y, z) {}
-        rotation(const rotation&) = default;
-        rotation(rotation&&) = default;
         rotation(const math::quat& src) : math::quat(src) {}
-        rotation& operator=(const rotation&) = default;
-        rotation& operator=(rotation&&) = default;
-        rotation& operator=(const math::quat& src)
-        {
-            i = src.i;
-            j = src.j;
-            k = src.k;
-            w = src.w;
-            return *this;
-        }
-        rotation& operator=(math::quat&& src)
-        {
-            i = src.i;
-            j = src.j;
-            k = src.k;
-            w = src.w;
-            return *this;
-        }
+        rotation& operator=(const math::quat& src) { math::quat::operator=(src); return *this; }
+        rotation& operator=(math::quat&& src) { math::quat::operator=(src); return *this; }
+
+        using math::quat::quaternion;
+        using math::quat::operator=;
+        using math::quat::operator[];
+
+        L_NODISCARD static rotation angle_axis(scalar angle, const vec_type& vec) noexcept { return math::quat::angle_axis(angle, vec); }
+        L_NODISCARD static rotation look_at(const vec_type& pos, const vec_type& center, const vec_type& up = vec_type::up) noexcept { return math::quat::look_at(pos, center, up); }
     };
 
     struct scale : public math::float3
     {
-        scale() : math::float3(1, 1, 1) {}
-        scale(float x, float y, float z) : math::float3(x, y, z) {}
-        scale(float v) : math::float3(v) {}
-        scale(const scale&) = default;
-        scale(scale&&) = default;
         scale(const math::float3& src) : math::float3(src) {}
-        scale& operator=(const scale&) = default;
-        scale& operator=(scale&&) = default;
-        scale& operator=(const math::float3& src)
-        {
-            x = src.x;
-            y = src.y;
-            z = src.z;
-            return *this;
-        }
-        scale& operator=(math::float3&& src)
-        {
-            x = src.x;
-            y = src.y;
-            z = src.z;
-            return *this;
-        }
+        scale& operator=(const math::float3& src) { math::float3::operator=(src); return *this; }
+        scale& operator=(math::float3&& src) { math::float3::operator=(src); return *this; }
 
+        using math::float3::vector;
+        using math::float3::operator=;
+        using math::float3::operator[];
     };
 
     struct transform : public ecs::archetype<position, rotation, scale>
@@ -125,28 +81,13 @@ namespace legion::core
 
     struct velocity : public math::float3
     {
-        velocity() : math::float3(0, 0, 0) {}
-        velocity(const velocity&) = default;
-        velocity(velocity&&) = default;
         velocity(const math::float3& src) : math::float3(src) {}
-        velocity(float x, float y, float z) : math::float3(x, y, z) {}
-        velocity(float v) : math::float3(v) {}
-        velocity& operator=(const velocity&) = default;
-        velocity& operator=(velocity&&) = default;
-        velocity& operator=(const math::float3& src)
-        {
-            x = src.x;
-            y = src.y;
-            z = src.z;
-            return *this;
-        }
-        velocity& operator=(math::float3&& src)
-        {
-            x = src.x;
-            y = src.y;
-            z = src.z;
-            return *this;
-        }
+        velocity& operator=(const math::float3& src) { math::float3::operator=(src); return *this; }
+        velocity& operator=(math::float3&& src) { math::float3::operator=(src); return *this; }
+
+        using math::float3::vector;
+        using math::float3::operator=;
+        using math::float3::operator[];
     };
 
     struct mesh_filter

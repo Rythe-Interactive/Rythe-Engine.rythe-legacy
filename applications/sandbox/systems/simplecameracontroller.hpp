@@ -107,7 +107,7 @@ public:
         groundplane.add_component<transform>();
 
         camera = createEntity("Camera");
-        camera.add_component<transform>(position(0.f, 3.f, -30.f), rotation::lookat(math::float3::zero, math::float3::forward), scale());
+        camera.add_component<transform>(position(0.f, 3.f, -30.f), rotation::look_at(math::float3::zero, math::float3::forward), scale());
         camera.add_component<audio::audio_listener>();
 
         rendering::camera cam;
@@ -196,7 +196,7 @@ public:
 
         position& pos = camera.get_component<position>();
         rotation& rot = camera.get_component<rotation>();
-        math::float3 move = math::toMat3(rot) * math::float3(0.f, 0.f, 1.f);
+        math::float3 move = rot.forward();
         pos += math::normalize(move * math::float3(1, 0, 1)) * action.value * action.input_delta * movementspeed;
     }
 
@@ -210,7 +210,7 @@ public:
 
         position& pos = camera.get_component<position>();
         rotation& rot = camera.get_component<rotation>();
-        math::float3 move = math::toMat3(rot) * math::float3(1.f, 0.f, 0.f);
+        math::float3 move = rot.right();
         pos += math::normalize(move * math::float3(1, 0, 1)) * action.value * action.input_delta * movementspeed;
     }
 
@@ -235,7 +235,7 @@ public:
             return;
 
         rotation& rot = camera.get_component<rotation>();
-        rot = math::angleAxis(action.value * action.input_delta * 500.f, math::float3::up) * rot;
+        rot = rotation::angle_axis(action.value * action.input_delta * 500.f, math::float3::up) * rot;
     }
 
     void onPlayerLookY(player_look_y& action)
@@ -247,11 +247,10 @@ public:
             return;
 
         rotation& rot = camera.get_component<rotation>();
-        math::float3x3 rotMat = math::toMat3(rot);
-        math::float3 right = rotMat * math::float3::right;
+        math::float3 right = rot.right();
         math::float3 fwd = math::normalize(math::cross(right, math::float3::up));
-        math::float3 up = rotMat * math::float3::up;
-        float angle = math::orientedAngle(fwd, up, right);
+        math::float3 up = rot.up();
+        float angle = std::acos(math::dot(fwd, up));
 
         angle += action.value * action.input_delta * 500.f;
 
@@ -260,9 +259,9 @@ public:
         if (angle < -(math::pi<float>() - 0.001f))
             angle = -(math::pi<float>() - 0.001f);
 
-        up = math::float3x3(math::axisAngleMatrix(right, angle)) * fwd;
+        up = fwd * math::quat::angle_axis(angle, right);
         fwd = math::cross(right, up);
-        rot = (rotation)math::conjugate(math::toQuat(math::lookAt(math::float3::zero, fwd, up)));
+        rot = rotation::look_at(math::float3::zero, fwd, up);
     }
 #pragma endregion
 

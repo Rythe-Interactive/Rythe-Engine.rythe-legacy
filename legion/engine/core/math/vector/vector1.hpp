@@ -7,8 +7,6 @@ namespace legion::core::math
     template<typename Scalar>
     struct vector<Scalar, 1> : vector_base
     {
-        static_assert(::std::is_arithmetic_v<Scalar>, "Scalar must be a numeric type.");
-
         using scalar = Scalar;
         static constexpr size_type size = 1;
         using type = vector<Scalar, 1>;

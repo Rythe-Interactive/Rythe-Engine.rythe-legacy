@@ -39,10 +39,13 @@ namespace legion::core::math
             constexpr size_type size = min(A::size, B::size);
             return detail::compute_multiplication<vector<scalar, size>>::compute(std::forward<TypeA>(a), std::forward<TypeB>(b));
         }
+        else if constexpr (is_vector_v<A> || is_vector_v<B>)
+        {            
+            return detail::compute_multiplication<vector_type_t<A, B>>::compute(std::forward<TypeA>(a), std::forward<TypeB>(b));
+        }
         else
         {
-            static_assert(is_vector_v<A> || is_vector_v<B>, "Invalid multiplication arguments");
-            return detail::compute_multiplication<vector_type_t<A, B>>::compute(std::forward<TypeA>(a), std::forward<TypeB>(b));
+            return a * b;
         }
     }
 

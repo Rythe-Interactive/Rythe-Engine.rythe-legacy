@@ -11,8 +11,6 @@ namespace legion::core::math
     template<typename Scalar>
     struct matrix<Scalar, 4, 4> : matrix_base
     {
-        static_assert(std::is_arithmetic_v<Scalar>, "Scalar must be a numeric type.");
-
         using scalar = Scalar;
         static constexpr size_type row_count = 4;
         static constexpr size_type col_count = 4;
@@ -73,7 +71,7 @@ namespace legion::core::math
         explicit constexpr matrix(row_type r0, row_type r1, row_type r2, row_type r3) noexcept : row0(r0), row1(r1), row2(r2), row3(r3) {}
 
         template<typename Scal>
-        explicit constexpr matrix(const quaternion<Scal>& orientation) noexcept;
+        explicit constexpr matrix(const quaternion<Scal>& orientation, const float3& position = float3::zero) noexcept;
 
         template<typename Scal, ::std::enable_if_t<!::std::is_same_v<scalar, Scal>, bool> = true>
         constexpr explicit matrix(const matrix<Scal, row_count, col_count>& other) noexcept;

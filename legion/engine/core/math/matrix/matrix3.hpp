@@ -11,8 +11,6 @@ namespace legion::core::math
     template<typename Scalar>
     struct matrix<Scalar, 3, 3> : matrix_base
     {
-        static_assert(std::is_arithmetic_v<Scalar>, "Scalar must be a numeric type.");
-
         using scalar = Scalar;
         static constexpr size_type row_count = 3;
         static constexpr size_type col_count = 3;

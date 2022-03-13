@@ -2,7 +2,7 @@
 #include <core/types/primitives.hpp>
 #include <core/math/vector/vector.hpp>
 #include <core/math/matrix/matrix.hpp>
-#include <core/math/quaternion/quaternion.hpp>
+#include <core/math/quaternion/quaternion_base.hpp>
 #include <core/math/util/meta.hpp>
 #include <core/math/basic/constraint.hpp>
 

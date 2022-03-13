@@ -234,7 +234,7 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="math\matrix\matrix_base.hpp" />
     <ClInclude Include="math\matrix\column\column_base.hpp" />
     <ClInclude Include="math\util\meta.hpp" />
-    <ClInclude Include="math\quaternion\utils.hpp" />
+    <ClInclude Include="math\quaternion\utils.inl" />
     <ClInclude Include="math\quaternion\quaternion.hpp" />
     <ClInclude Include="math\quaternion\quaternion_base.hpp" />
     <ClInclude Include="math\random\linear_rand.hpp" />

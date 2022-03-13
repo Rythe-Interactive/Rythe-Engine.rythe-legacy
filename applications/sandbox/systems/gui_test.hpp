@@ -69,7 +69,7 @@ namespace legion
 
             position pos(5.f, 0.f, 5.f);
             scale scal(3.f, 2.f, 3.f);
-            rotation rot = math::angle_axis(math::quarter_pi<float>(), math::float3::up);
+            rotation rot = rotation::angle_axis(math::quarter_pi<float>(), math::float3::up);
             model = compose(scal, rot, pos);
 
             decalEntity.add_component<transform>(pos, rot, scal);

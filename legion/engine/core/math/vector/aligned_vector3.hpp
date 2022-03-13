@@ -8,8 +8,6 @@ namespace legion::core::math
     template<typename Scalar>
     struct alignas(sizeof(Scalar) * 4) aligned_vector3 : vector_base
     {
-        static_assert(std::is_arithmetic<Scalar>::value, "Scalar must be a numeric type.");
-
         using scalar = Scalar;
         static constexpr size_type size = 3;
         using type = aligned_vector3<Scalar>;

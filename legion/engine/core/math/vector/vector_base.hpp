@@ -12,8 +12,6 @@ namespace legion::core::math
     template<typename Scalar, size_type Size>
     struct vector : vector_base
     {
-        static_assert(::std::is_arithmetic_v<Scalar>, "Scalar must be a numeric type.");
-
         using scalar = Scalar;
         static constexpr size_type size = Size;
         using type = vector<Scalar, Size>;

@@ -231,7 +231,7 @@
     <ClInclude Include="math\matrix\matrix2.hpp" />
     <ClInclude Include="math\trigonometric\trigonometric.hpp" />
     <ClInclude Include="math\trigonometric\tan.hpp" />
-    <ClInclude Include="math\quaternion\utils.hpp" />
+    <ClInclude Include="math\quaternion\utils.inl" />
     <ClInclude Include="math\quaternion\quaternion.hpp" />
     <ClInclude Include="math\basic\constraint.hpp" />
   </ItemGroup>

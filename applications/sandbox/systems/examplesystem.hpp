@@ -34,7 +34,7 @@ public:
             auto ent = createEntity("Sun");
             ent.add_component(gfx::light::directional(math::color(1, 1, 0.8f), 10.f));
             auto [pos, rot, scal] = ent.add_component<transform>();
-            rot = rotation::lookat(math::float3::zero, math::float3(-1, -1, -1));
+            rot = rotation::look_at(math::float3::zero, math::float3(-1, -1, -1));
         }
 
 #if defined(LEGION_DEBUG)

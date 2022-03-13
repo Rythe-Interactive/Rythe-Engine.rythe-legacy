@@ -223,7 +223,7 @@ namespace legion::physics
                 {
                     math::float3 axis = math::normalize(rb.angularVelocity);
 
-                    math::quat glmQuat = math::angle_axis(dtAngle, axis);
+                    math::quat glmQuat = math::quat::angle_axis(dtAngle, axis);
                     rot = glmQuat * rot;
                     rot = math::normalize(rot);
                 }

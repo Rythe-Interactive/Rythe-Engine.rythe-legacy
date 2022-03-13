@@ -15,6 +15,35 @@ namespace legion::core::math
     template<typename Scalar>
     struct quaternion;
 
+    template<>
+    struct vector<void, 0>
+    {
+        using scalar = void;
+        static constexpr size_type size = 0;
+        using type = vector<void, 0>;
+    };
+
+    template<>
+    struct quaternion<void>
+    {
+        using scalar = void;
+        static constexpr size_type size = 0;
+        using type = quaternion<void>;
+        using vec_type = vector<scalar, 3>;
+    };
+
+    template<>
+    struct matrix<void, 0, 0>
+    {
+        using scalar = void;
+        static constexpr size_type row_count = 0;
+        static constexpr size_type col_count = 0;
+        static constexpr size_type size = 0;
+        using type = matrix<void, 0, 0>;
+
+        using row_type = vector<void, 0>;
+    };
+
     template<typename Scalar, size_type RowCount, size_type ColCount, size_type ColIdx>
     struct column;
 
@@ -51,9 +80,13 @@ namespace legion::core::math
             {
                 return vector<typename T::scalar, T::size>{};
             }
-            else
+            else if constexpr (::std::is_arithmetic_v<T>)
             {
                 return vector<T, 1>{};
+            }
+            else
+            {
+                return vector<void, 0>{};
             }
         }
     }
@@ -91,9 +124,13 @@ namespace legion::core::math
             {
                 return matrix<typename T::scalar, T::row_count, T::col_count>{};
             }
-            else
+            else if constexpr (::std::is_arithmetic_v<T>)
             {
                 return matrix<T, 1, 1>{};
+            }
+            else
+            {
+                return matrix<void, 0, 0>{};
             }
         }
     }
@@ -131,9 +168,13 @@ namespace legion::core::math
             {
                 return quaternion<typename T::scalar>{};
             }
-            else
+            else if constexpr (::std::is_arithmetic_v<T>)
             {
                 return quaternion<T>{};
+            }
+            else
+            {
+                return quaternion<void>{};
             }
         }
     }

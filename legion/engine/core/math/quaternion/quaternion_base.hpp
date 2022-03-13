@@ -10,13 +10,14 @@
 
 namespace legion::core::math
 {
+    template<typename Scalar, size_type RowCount, size_type ColCount>
+    struct matrix;
+
     struct quaternion_base {};
 
     template<typename Scalar>
     struct quaternion : quaternion_base
     {
-        static_assert(::std::is_arithmetic_v<Scalar>, "Scalar must be a numeric type.");
-
         using scalar = Scalar;
         static constexpr size_type size = 4;
         using type = quaternion<Scalar>;
@@ -54,6 +55,9 @@ namespace legion::core::math
         explicit constexpr quaternion(const VecType& other) noexcept
             : w(static_cast<scalar>(other.w)), i(static_cast<scalar>(other.x)), j(static_cast<scalar>(other.y)), k(static_cast<scalar>(other.z)) {}
 
+        explicit constexpr quaternion(const matrix<scalar, 3, 3>& m) noexcept;
+        explicit constexpr quaternion(const matrix<scalar, 4, 4>& m) noexcept;
+
         static const quaternion identity;
         static const quaternion rotate_x_90;
         static const quaternion rotate_y_90;
@@ -64,14 +68,21 @@ namespace legion::core::math
 
         constexpr quaternion& operator=(const quaternion&) noexcept = default;
 
-        constexpr scalar& operator[](size_type i) noexcept
+        L_NODISCARD constexpr scalar& operator[](size_type i) noexcept
         {
             assert_msg("quaternion subscript out of range", (i >= 0) && (i < size)); return data[i];
         }
-        constexpr const scalar& operator[](size_type i) const noexcept
+        L_NODISCARD constexpr const scalar& operator[](size_type i) const noexcept
         {
             assert_msg("quaternion subscript out of range", (i >= 0) && (i < size)); return data[i];
         }
+
+        L_NODISCARD vec_type right() noexcept;
+        L_NODISCARD vec_type forward() noexcept;
+        L_NODISCARD vec_type up() noexcept;
+        L_NODISCARD static quaternion angle_axis(scalar angle, const vec_type& vec) noexcept;
+        L_NODISCARD static quaternion look_at(const vec_type& _pos, const vec_type& _center, const vec_type& _up = vec_type::up) noexcept;
+
     };
 
 #define sin45 0.70710678118654752440084436210485L

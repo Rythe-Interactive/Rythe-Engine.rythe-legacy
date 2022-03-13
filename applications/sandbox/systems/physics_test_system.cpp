@@ -87,7 +87,7 @@ namespace legion::physics
             auto sun = createEntity();
             sun.add_component<rendering::mesh_renderable>(mesh_filter(directionalLightH.get_mesh()), rendering::mesh_renderer(directionalLightMH));
             sun.add_component<rendering::light>(rendering::light::directional(math::color(1, 1, 0.8f), 10.f));
-            sun.add_component<transform>(position(10, 10, 10), rotation::lookat(math::float3(1, 1, -1), math::float3::zero), scale());
+            sun.add_component<transform>(position(10, 10, 10), rotation::look_at(math::float3(1, 1, -1), math::float3::zero), scale());
         }
 
         createProcess<&PhysicsTestSystem::colliderDraw>("Physics", 0.02f);
