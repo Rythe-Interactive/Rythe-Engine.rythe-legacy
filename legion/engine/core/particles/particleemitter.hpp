@@ -64,22 +64,12 @@ namespace legion::core
         particle_emitter(const particle_emitter&) = delete;
         ~particle_emitter() = default;
 
-
-        template<typename bufferType>
-        particle_buffer<bufferType>& create_buffer(const std::string_view& name, particle_buffer<bufferType> buffer);
-        template<typename bufferType>
-        particle_buffer<bufferType>& create_buffer(const std::string_view& name, std::vector<bufferType> buffer);
-        template<typename bufferType>
-        particle_buffer<bufferType>& create_buffer(const std::string_view& name);
+        template<typename bufferType,typename... Args>
+        particle_buffer<bufferType>& create_buffer(const std::string_view& name, Args&&... args);
 
         template<typename bufferType>
         particle_buffer<bufferType>& get_buffer(const std::string_view& name);
 
-
-        template<typename uniformType>
-        uniformType& create_uniform(const std::string_view& name, particle_uniform<uniformType> val);
-        template<typename uniformType>
-        uniformType& create_uniform(const std::string_view& name, uniformType val);
         template<typename uniformType,typename... Args>
         uniformType& create_uniform(const std::string_view& name, Args&&... args);
 
