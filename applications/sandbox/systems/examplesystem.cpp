@@ -31,7 +31,7 @@ void ExampleSystem::setup()
 
         auto ent = createEntity("Saturn");
         auto [pos, rot, scal] = ent.add_component<transform>();
-        scal = scale(5.f, 5.f,5.f);
+        scal = scale(5.f, 5.f, 5.f);
         ent.add_component<gfx::mesh_renderer>(gfx::mesh_renderer(material, model));
         auto emitter = ent.add_component<particle_emitter>();
         emitter->infinite = true;
@@ -48,15 +48,15 @@ void ExampleSystem::setup()
         orbital.C_MASS = 100.f;
         orbital.G_FORCE = .1f;
         //emitter->add_policy<orbital_policy>(orbital);
-        emitter->add_policy<gfx::rendering_policy>({ gfx::ModelCache::create_model("Quad", fs::view("assets://models/billboard.obj")), gfx::MaterialCache::create_material("Particle", fs::view("assets://shaders/particle.shs")) });
+        emitter->add_policy<gfx::rendering_policy>({ gfx::ModelCache::create_model("Quad", fs::view("assets://models/billboard.glb")), gfx::MaterialCache::create_material("Particle", fs::view("assets://shaders/particle.shs")) });
         gfx::MaterialCache::get_material("Particle").set_param("fixedSize", false);
     }
 
     {
-        auto model = gfx::ModelCache::create_model("Sphere", fs::view("assets://models/sphere.obj"));
-        auto material = gfx::MaterialCache::create_material("Water", fs::view("assets://shaders/light.shs"));
-        material.set_param("color", math::color(0.f, 0.f, 1.f, 1.f));
-        material.set_param("intensity", 1.f);
+        /* auto model = gfx::ModelCache::create_model("Sphere", fs::view("assets://models/sphere.obj"));
+         auto material = gfx::MaterialCache::create_material("Water", fs::view("assets://shaders/light.shs"));
+         material.set_param("color", math::color(0.f, 0.f, 1.f, 1.f));
+         material.set_param("intensity", 1.f);*/
 
         auto ent = createEntity("Fountain");
         auto [pos, rot, scal] = ent.add_component<transform>();
@@ -74,7 +74,10 @@ void ExampleSystem::setup()
         fountain.initForce = 20.f;
         emitter->add_policy<fountain_policy>(fountain);
         emitter->add_policy<scale_lifetime_policy>();
-        emitter->add_policy<gfx::rendering_policy>({ model, material });
+        auto mat = gfx::MaterialCache::create_material("Particle", fs::view("assets://shaders/particle.shs"));
+        mat.set_param("particleSize", 1.f);
+        mat.set_param("particleColor", math::color(1.f, 1.f, 1.f, 1.f));
+        emitter->add_policy<gfx::rendering_policy>({ gfx::ModelCache::create_model("Quad", fs::view("assets://models/billboard.obj")), mat });
     }
 
     bindToEvent<events::exit, &ExampleSystem::onExit>();

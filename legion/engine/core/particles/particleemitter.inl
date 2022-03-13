@@ -62,12 +62,12 @@ namespace legion::core
         return value;
     }
 
-    template<typename uniformType>
-    uniformType& particle_emitter::create_uniform(const std::string_view& name)
+    template<typename uniformType,typename... Args>
+    uniformType& particle_emitter::create_uniform(const std::string_view& name, Args&&... args)
     {
         id_type idName = nameHash(name);
         if (particleUniforms.count(idName) < 1)
-            particleUniforms.try_emplace(idName, std::make_unique<particle_uniform<uniformType>>());
+            particleUniforms.try_emplace(idName, std::make_unique<particle_uniform<uniformType>>(std::forward<Args>(args)...));
 
         return get_uniform<uniformType>(name);
     }
