@@ -66,7 +66,7 @@ namespace legion::core
         }
 
         for (auto& policy : emitter.particlePolicies)
-            policy->OnInit(emitter, startCount, targetCount);
+            policy->onInit(emitter, startCount, targetCount);
     }
 
 
@@ -98,12 +98,12 @@ namespace legion::core
             }
             auto targetCount = emitter.currentParticleCount + destroyed;
             for (auto& policy : emitter.particlePolicies)
-                policy->OnDestroy(emitter, emitter.currentParticleCount, targetCount);
+                policy->onDestroy(emitter, emitter.currentParticleCount, targetCount);
 
             emitter.resize(emitter.currentParticleCount);
         }
 
         for (auto& policy : emitter.particlePolicies)
-            policy->OnUpdate(emitter, deltaTime, emitter.currentParticleCount);
+            policy->onUpdate(emitter, deltaTime, emitter.currentParticleCount);
     }
 }
