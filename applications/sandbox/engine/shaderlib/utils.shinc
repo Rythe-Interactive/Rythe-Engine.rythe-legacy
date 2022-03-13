@@ -19,9 +19,9 @@ vec4 BillboardModelToScreenSpacePosition(vec3 pos)
     scale.z = length(stdin(modelMatrix)[2].xyz);
     #endif
 
-    billboardMatrix[0] = vec4(ViewMatrix[0][2], ViewMatrix[1][2], ViewMatrix[2][2], 0) * scale.x;
+    billboardMatrix[0] = -vec4(ViewMatrix[0][0], ViewMatrix[1][0], ViewMatrix[2][0], 0) * scale.x;
     billboardMatrix[1] = vec4(ViewMatrix[0][1], ViewMatrix[1][1], ViewMatrix[2][1], 0) * scale.y;
-    billboardMatrix[2] = vec4(ViewMatrix[0][0], ViewMatrix[1][0], ViewMatrix[2][0], 0) * scale.z;
+    billboardMatrix[2] = -vec4(ViewMatrix[0][2], ViewMatrix[1][2], ViewMatrix[2][2], 0) * scale.z;
 
     return (ViewProjectionMatrix * billboardMatrix) * vec4(pos, 1.0);
 }
@@ -42,9 +42,9 @@ mat4 BillboardModelMatrix()
     scale.z = length(stdin(modelMatrix)[2].xyz);
     #endif
 
-    billboardMatrix[0] = vec4(ViewMatrix[0][2], ViewMatrix[1][2], ViewMatrix[2][2], 0) * scale.x;
+    billboardMatrix[0] = -vec4(ViewMatrix[0][2], ViewMatrix[1][2], ViewMatrix[2][2], 0) * scale.x;
     billboardMatrix[1] = vec4(ViewMatrix[0][1], ViewMatrix[1][1], ViewMatrix[2][1], 0) * scale.y;
-    billboardMatrix[2] = vec4(ViewMatrix[0][0], ViewMatrix[1][0], ViewMatrix[2][0], 0) * scale.z;
+    billboardMatrix[2] = -vec4(ViewMatrix[0][0], ViewMatrix[1][0], ViewMatrix[2][0], 0) * scale.z;
     return billboardMatrix;
 }
 
@@ -54,43 +54,48 @@ vec4 FixedSizeBillboardModelToScreenSpacePosition(vec3 pos)
     vec3 scale;
     #if defined(GEOMETRY_SHADER)
     origin = stdin(0, modelMatrix)[3].xyz;
-    scale.x = length(stdin(0, modelMatrix)[0].xyz);
+    scale.x = -length(stdin(0, modelMatrix)[0].xyz);
     scale.y = length(stdin(0, modelMatrix)[1].xyz);
-    scale.z = length(stdin(0, modelMatrix)[2].xyz);
+    scale.z = -length(stdin(0, modelMatrix)[2].xyz);
     #else
     origin = stdin(modelMatrix)[3].xyz;
-    scale.x = length(stdin(modelMatrix)[0].xyz);
+    scale.x = -length(stdin(modelMatrix)[0].xyz);
     scale.y = length(stdin(modelMatrix)[1].xyz);
-    scale.z = length(stdin(modelMatrix)[2].xyz);
+    scale.z = -length(stdin(modelMatrix)[2].xyz);
     #endif
 
     vec4 ret = ViewProjectionMatrix * vec4(origin, 1.0);
-    return (ret/ret.w) + vec4(pos.zyx * scale * vec3(0.1, (float(lgn_cmr_in.viewportSize.x)/lgn_cmr_in.viewportSize.y) * 0.1, 1.0/FrustumDepth()), 0);
+    return (ret/ret.w) + vec4(pos * scale * vec3(0.1, (float(lgn_cmr_in.viewportSize.x)/lgn_cmr_in.viewportSize.y) * 0.1, 1.0/FrustumDepth()), 0);
 }
 
 #if defined(FRAGMENT_SHADER)
 float SoftParticleAlpha(float sensitivity)
 {
-    float frustumDepth = FrustumDepth();
-    float depth = gl_FragCoord.z/gl_FragCoord.w;
-    return clamp((depth - SceneDepth().r)*frustumDepth*sensitivity, 0, 1);
+    float zScene = LinearDepth(SceneDepth().r);
+    float zParticle = LinearDepth(gl_FragCoord.z);
+    return clamp((zScene-zParticle)/sensitivity, 0.0, 1.0);
 }
 
 float SoftParticleAlpha(float depth, float sensitivity)
 {
-    float frustumDepth = FrustumDepth();
-    return clamp((((depth*frustumDepth) - (SceneDepth().r*frustumDepth))/(depth*frustumDepth))*sensitivity, 0, 1);
+    float zScene = LinearDepth(SceneDepth().r);
+    float zParticle = LinearDepth(depth);
+    return clamp((zScene-zParticle)/sensitivity, 0.0, 1.0);
 }
 #endif
 
 float SoftParticleAlpha(float depth, float sceneDepth, float sensitivity)
 {
-    float frustumDepth = FrustumDepth();
-    return clamp((((depth*frustumDepth) - (sceneDepth*frustumDepth))/(depth*frustumDepth))*sensitivity, 0, 1);
+    float zScene = LinearDepth(sceneDepth);
+    float zParticle = LinearDepth(depth);
+    return clamp((zScene-zParticle)/sensitivity, 0.0, 1.0);
 }
 #endif
 
-float SoftParticleAlpha(float depth, float sceneDepth, float frustumDepth, float sensitivity)
+float SoftParticleAlpha(float depth, float sceneDepth, float nearZ,float farZ, float sensitivity)
 {
-    return clamp((((depth*frustumDepth) - (sceneDepth*frustumDepth))/(depth*frustumDepth))*sensitivity, 0, 1);
+
+    float zScene = (nearZ * farZ) / (farZ + sceneDepth * (nearZ - farZ));
+    float zParticle = (nearZ * farZ) / (farZ + depth * (nearZ - farZ));
+    return clamp((zScene-zParticle)/sensitivity, 0.0, 1.0);
 }
