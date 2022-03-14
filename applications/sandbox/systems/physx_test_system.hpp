@@ -5,6 +5,7 @@
 namespace lgn = legion;
 
 struct ShootPhysXBox : public lgn::app::input_action<ShootPhysXBox> {};
+struct ShootPhysXSphere : public lgn::app::input_action<ShootPhysXSphere> {};
 
 struct self_destruct_component
 {
@@ -32,7 +33,15 @@ namespace legion::physics
 
         //wide block, 1 normal cube on the center, 1 rotated default cube on top of it
         void setupCubeWorldTestScene();
+
+        //------------------------ Rigidbody Shooter -------------------------------------------//
+
         void shootPhysXCubes(ShootPhysXBox& action);
+
+        void shootPhysXSphere(ShootPhysXSphere& action);
+
+        void getCameraPositionAndDirection(math::vec3& cameraDirection, math::vec3& cameraPosition);
+
 
         //-------------------------- Scene Setup Helpers ---------------------------------------//
 
@@ -56,6 +65,7 @@ namespace legion::physics
         
         //models
         rendering::model_handle cubeH;
+        rendering::model_handle sphereH;
         rendering::model_handle directionalLightH; 
     };
 }

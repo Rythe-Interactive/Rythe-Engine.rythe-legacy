@@ -11,6 +11,9 @@ namespace physx
 
 namespace legion::physics
 {
+    class ColliderData;
+    class PhysxInternalWrapper;
+
     struct PhysxEnviromentInfo
     {
         physx::PxScene* scene = nullptr;
@@ -19,5 +22,20 @@ namespace legion::physics
 
     physx::PxPhysics* getSDK();
 
-    inline void toPhysxTransform(physx::PxTransform& pxTransform, math::vec3& pos, math::quat& rot);
+    void calculateGlobalAndLocalTransforms(
+        physx::PxTransform& outLocalTransform, physx::PxTransform& outGlobalTransform, const ColliderData& collider,ecs::entity ent);
+
+    inline void toPhysxTransform(physx::PxTransform& pxTransform, const math::vec3& pos, const math::quat& rot);
+
+    template<class PxGeometry,class... GeometryArgs>
+    void instantiateStaticActorWith(physx::PxPhysics* sdk, PhysxInternalWrapper& wrapper, const physx::PxTransform& globalTransform,
+        const physx::PxTransform& localTransform, const PhysxEnviromentInfo& sceneInfo, ecs::entity ent,  GeometryArgs... geometryArgs);
+
+    template<class PxGeometry, class... GeometryArgs>
+    void instantiateDynamicActorWith(physx::PxPhysics* sdk, PhysxInternalWrapper& wrapper, const physx::PxTransform& globalTransform,
+        const physx::PxTransform& localTransform, const PhysxEnviromentInfo& sceneInfo, ecs::entity ent,  GeometryArgs... geometryArgs);
+
+    template<class PxGeometry, class... GeometryArgs>
+    void instantiateNextCollider(physx::PxPhysics* sdk, PhysxInternalWrapper& wrapper,
+        const physx::PxTransform& globalTransform, const physx::PxTransform& localTransform, const PhysxEnviromentInfo& sceneInfo, GeometryArgs... geometryArgs);
 }

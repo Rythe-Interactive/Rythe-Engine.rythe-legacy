@@ -27,89 +27,103 @@ namespace legion::physics
     {
         physicsComponentData& data = physicsComponent.physicsCompData;
 
-        for (ConvexColliderData& convexCollider : data.GetConvexData())
+        for (ConvexColliderData& convexCollider : data.getConvexData())
         {
-            bool isUnRegisteredBox = !convexCollider.isDataRead() && convexCollider.getConvexType() == convex_type::box;
-            convexCollider.setDataRead(true);
+            if (convexCollider.isRegisteredOfType(collider_type::box)) { continue; }
 
-            const math::vec3& pos = *entity.get_component<position>();
-            const math::quat& rot = *entity.get_component<rotation>();
+            convexCollider.setRegistered(true);
 
-            const math::vec3& localOffset = convexCollider.getOffset();
-            const math::quat& localRot = convexCollider.getRotationOffset();
+            PxTransform transform;
+            PxTransform localTransform;
 
-            PxTransform transform(
-                PxVec3(pos.x, pos.y, pos.z),
-                PxQuat(rot.x, rot.y, rot.z, rot.w));
-
-            PxTransform localTransform(
-                PxVec3(localOffset.x, localOffset.y, localOffset.z),
-                PxQuat(localRot.x, localRot.y, localRot.z, localRot.w));
+            calculateGlobalAndLocalTransforms(localTransform, transform, convexCollider, entity);
 
             const math::vec3& extents = convexCollider.getBoxExtents();
 
-            if (isUnRegisteredBox)
-            {
-                PxShape* shape = getSDK()->createShape(
-                    PxBoxGeometry(PxVec3(extents.x, extents.y, extents.z)), *sceneInfo.defaultMaterial, true);
-
-                PxRigidActor* rigid = static_cast<PxRigidActor*>(wrapper.physicsActor);
-                
-                shape->setLocalPose(localTransform);
-                rigid->attachShape(*shape);
-                shape->release();
-            }
+            instantiateNextCollider<PxBoxGeometry,const PxVec3&>(getSDK(), wrapper, transform, localTransform, sceneInfo, PxVec3(extents.x, extents.y, extents.z));
         }
-
     }
-
+    
     void processAddFirstBox(physicsComponent& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
     {
         physicsComponentData& data = physicsComponent.physicsCompData;
 
-        for (ConvexColliderData& convexCollider : data.GetConvexData())
+        for (ConvexColliderData& convexCollider : data.getConvexData())
         {
-            bool isUnRegisteredBox = !convexCollider.isDataRead() && convexCollider.getConvexType() == convex_type::box;
-            convexCollider.setDataRead(true);
+            if (convexCollider.isRegisteredOfType(collider_type::box)) { continue; }
 
-            if (isUnRegisteredBox)
+            convexCollider.setRegistered(true);
+
+            PxTransform transform;
+            PxTransform localTransform;
+
+            calculateGlobalAndLocalTransforms(localTransform, transform, convexCollider, entity);
+
+            const math::vec3& extents = convexCollider.getBoxExtents();
+
+            if (wrapper.bodyType == physics_body_type::rigidbody)
             {
-                const math::vec3& pos = *entity.get_component<position>();
-                const math::quat& rot = *entity.get_component<rotation>();
+                instantiateDynamicActorWith<PxBoxGeometry, const PxVec3&>(getSDK(), wrapper, transform,
+                    localTransform, sceneInfo, entity, PxVec3(extents.x, extents.y, extents.z));
+            }
+            else if (wrapper.bodyType == physics_body_type::static_collider)
+            {
+                instantiateStaticActorWith<PxBoxGeometry, const PxVec3&>(getSDK(), wrapper, transform,
+                    localTransform, sceneInfo, entity, PxVec3(extents.x, extents.y, extents.z));
+            }
+                
+            break;
+        }
+    }
 
-                const math::vec3& localOffset = convexCollider.getOffset();
-                const math::quat& localRot = convexCollider.getRotationOffset();
+    void processAddFirstSphere(physicsComponent& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
+    {
+        physicsComponentData& data = physicsComponent.physicsCompData;
 
-                PxTransform transform(
-                    PxVec3(pos.x, pos.y, pos.z),
-                    PxQuat(rot.x, rot.y, rot.z, rot.w));
+        for (SphereColliderData& sphereCollider : data.getSphereData())
+        {
+            if (sphereCollider.isRegisteredOfType(collider_type::sphere)) { continue; }
 
-                PxTransform localTransform(
-                    PxVec3(localOffset.x, localOffset.y, localOffset.z),
-                    PxQuat(localRot.x, localRot.y, localRot.z, localRot.w));
+            sphereCollider.setRegistered(true);
 
-                const math::vec3& extents = convexCollider.getBoxExtents();
+            PxTransform transform;
+            PxTransform localTransform;
 
-                if (wrapper.bodyType == physics_body_type::rigidbody)
-                {
-                    PxRigidDynamic* rb = PxCreateDynamic(*getSDK(), transform,
-                        PxBoxGeometry(extents.x, extents.y, extents.z), *sceneInfo.defaultMaterial, 1.0f, localTransform);
-                    rb->userData = entity.data;
+            calculateGlobalAndLocalTransforms(localTransform, transform, sphereCollider, entity);
 
-                    wrapper.physicsActor = rb;
-                    sceneInfo.scene->addActor(*rb);
-                }
-                else if (wrapper.bodyType == physics_body_type::static_collider)
-                {
-                    PxRigidStatic* staticCollider = PxCreateStatic(*getSDK(), transform,
-                        PxBoxGeometry(extents.x, extents.y, extents.z), *sceneInfo.defaultMaterial, localTransform);
+            float radius = sphereCollider.getRadius();
 
-                    wrapper.physicsActor = staticCollider;
-                    sceneInfo.scene->addActor(*staticCollider);
-                }
+            if (wrapper.bodyType == physics_body_type::rigidbody)
+            {
+                instantiateDynamicActorWith<PxSphereGeometry>(getSDK(), wrapper, transform, localTransform, sceneInfo, entity, radius);
+            }
+            else if (wrapper.bodyType == physics_body_type::static_collider)
+            {
+                instantiateStaticActorWith<PxSphereGeometry>(getSDK(), wrapper, transform, localTransform, sceneInfo, entity, radius);
             }
 
             break;
+        }
+    }
+
+    void processAddNextSphere(physicsComponent& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
+    {
+        physicsComponentData& data = physicsComponent.physicsCompData;
+
+        for (SphereColliderData& sphereCollider : data.getSphereData())
+        {
+            if (sphereCollider.isRegisteredOfType(collider_type::sphere)) { continue; }
+
+            sphereCollider.setRegistered(true);
+
+            PxTransform transform;
+            PxTransform localTransform;
+
+            calculateGlobalAndLocalTransforms(localTransform, transform, sphereCollider, entity);
+
+            float radius = sphereCollider.getRadius();
+
+            instantiateNextCollider<PxSphereGeometry>(getSDK(), wrapper, transform, localTransform, sceneInfo, radius);
         }
     }
 }

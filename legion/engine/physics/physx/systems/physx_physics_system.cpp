@@ -104,6 +104,8 @@ namespace legion::physics
     {
         m_physicsComponentActionFuncs[physics_component_flag::pc_add_first_box] = &processAddFirstBox;
         m_physicsComponentActionFuncs[physics_component_flag::pc_add_next_box] = &processAddNextBox;
+        m_physicsComponentActionFuncs[physics_component_flag::pc_add_first_sphere] = &processAddFirstSphere;
+        m_physicsComponentActionFuncs[physics_component_flag::pc_add_next_sphere] = &processAddNextSphere;
 
         m_eventHashToRBEventProcess.insert( { physics::rb_modify_velocity::id, &processVelocityModification });
     }

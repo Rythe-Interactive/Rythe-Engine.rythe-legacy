@@ -25,6 +25,8 @@ namespace legion::physics
             "assets://textures/concrete.png"_view, "assets://textures/tile/tileNormal.png"_view, "assets://textures/tile/tileRoughness.png"_view);
 
         cubeH = rendering::ModelCache::create_model("cube", "assets://models/cube.obj"_view);
+        sphereH = rendering::ModelCache::create_model("sphere", "assets://models/sphere.obj"_view);
+
         directionalLightH = rendering::ModelCache::create_model("directional light", "assets://models/directional-light.obj"_view);
 
         auto lightshader = rendering::ShaderCache::create_shader("light", "assets://shaders/light.shs"_view);
@@ -63,14 +65,26 @@ namespace legion::physics
 
     void PhysXTestSystem::setupCubeWorldTestScene()
     {
-        auto addRobotPartLambda = [this](const math::vec3& scaleValue, const math::vec3& offset,ecs::entity parent,const math::quat& localRot)
+
+        auto addRobotPartLambda = [this](const math::vec3& scaleValue, const math::vec3& offset,ecs::entity parent,const math::quat& localRot,rendering::model_handle handle)
         {
-            auto nextBlock = createDefaultMeshEntity(offset, cubeH, legionLogoMat);
+            auto nextBlock = createDefaultMeshEntity(offset, handle, legionLogoMat);
             nextBlock.get_component<scale>() = scaleValue;
             nextBlock.get_component<rotation>() = localRot;
 
             parent.add_child(nextBlock);
         };
+
+        //wall block
+        auto rotBlock = createDefaultMeshEntity(math::vec3(0, 0, 5), cubeH, tileMat);
+        rotBlock.get_component<scale>() = math::vec3(10, 1, 10);
+        auto rot = math::rotate(math::pi<float>() / 2.0f, math::vec3(1, 0, 0));
+        rotBlock.get_component<rotation>() = math::toQuat(rot);
+
+        {
+            auto wideBlockPhysComp = rotBlock.add_component<physicsComponent>();
+            wideBlockPhysComp->physicsCompData.AddBoxCollider(math::vec3(10, 1, 10));
+        }
 
         //add wide block
         auto wideBlock = createDefaultMeshEntity(math::vec3(0, 0, 0), cubeH, legionLogoMat);
@@ -82,20 +96,23 @@ namespace legion::physics
         }
 
         //add default cube at center
-        auto unrotatedBlock = createDefaultMeshEntity(math::vec3(0, 1, 0), cubeH, tileMat);
+        auto unrotatedBlock = createDefaultMeshEntity(math::vec3(0, 2, 0), cubeH, tileMat);
         {
             auto unrotatedBlockPC = unrotatedBlock.add_component<physicsComponent>();
             unrotatedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1));
             
             float headOffset = 0.5f;
-            addRobotPartLambda(math::vec3(headOffset), math::vec3(0, 0.75f,0), unrotatedBlock,  math::identity<math::quat>());
+            addRobotPartLambda(math::vec3(headOffset), math::vec3(0, 0.75f,0), unrotatedBlock,  math::identity<math::quat>(),cubeH);
             unrotatedBlockPC->physicsCompData.AddBoxCollider(math::vec3(headOffset), math::vec3(0, 0.75f, 0), math::identity<math::quat>());
 
-            addRobotPartLambda(math::vec3(1.0, 0.5, 0.5), math::vec3(1, 0.0f, 0), unrotatedBlock,  math::identity<math::quat>());
+            addRobotPartLambda(math::vec3(1.0, 0.5, 0.5), math::vec3(1, 0.0f, 0), unrotatedBlock,  math::identity<math::quat>(), cubeH);
             unrotatedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1.0, 0.5f, 0.5f),math::vec3(1,0,0), math::identity<math::quat>());
 
-            addRobotPartLambda(math::vec3(1.0, 0.5, 0.5), math::vec3(-1, 0.0f, 0), unrotatedBlock,  math::identity<math::quat>());
+            addRobotPartLambda(math::vec3(1.0, 0.5, 0.5), math::vec3(-1, 0.0f, 0), unrotatedBlock,  math::identity<math::quat>(), cubeH);
             unrotatedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1.0, 0.5f, 0.5f), math::vec3(-1, 0, 0), math::identity<math::quat>());
+
+            addRobotPartLambda(math::vec3(1.0f), math::vec3(0, -1.0f, 0), unrotatedBlock, math::identity<math::quat>(),sphereH);
+            unrotatedBlockPC->physicsCompData.AddSphereCollider(0.5f, math::vec3(0, -1, 0));
 
             unrotatedBlock.add_component<rigidbody>();
         }
@@ -110,26 +127,19 @@ namespace legion::physics
         }
 
         //enable player to shoot blocks
-        app::InputSystem::createBinding<ShootPhysXBox>(app::inputmap::method::F);
+        app::InputSystem::createBinding<ShootPhysXBox>(app::inputmap::method::C);
         bindToEvent<ShootPhysXBox, &PhysXTestSystem::shootPhysXCubes>();
+
+        app::InputSystem::createBinding<ShootPhysXSphere>(app::inputmap::method::V);
+        bindToEvent<ShootPhysXSphere, &PhysXTestSystem::shootPhysXSphere>();
     }
 
     void PhysXTestSystem::shootPhysXCubes(ShootPhysXBox& action)
     {
         if (!action.value) { return; }
 
-        //get camera position and set transform to camera postiion 
-        ecs::filter<rendering::camera> cameraQuery;
-
         math::vec3 cameraDirection; math::vec3 cameraPosition;
-
-        //assume the first camera is the player controlled camera
-        for (auto ent : cameraQuery)
-        {
-            auto [positionCamH, rotationCamH, scaleCamH] = ent.get_component<transform>();
-            cameraDirection = rotationCamH.get() * math::vec3(0, 0, 1);
-            cameraPosition = positionCamH.get() + cameraDirection;
-        }
+        getCameraPositionAndDirection(cameraDirection, cameraPosition);
 
         auto shiftedBlock = createDefaultMeshEntity(cameraPosition, cubeH, concreteMat);
 
@@ -144,6 +154,43 @@ namespace legion::physics
         self_destruct_component& block = *shiftedBlock.add_component<self_destruct_component>();
 
         block.selfDestructTimer = 5.0f;
+    }
+
+    void PhysXTestSystem::shootPhysXSphere(ShootPhysXSphere& action)
+    {
+        if (!action.value) { return; }
+
+        math::vec3 cameraDirection; math::vec3 cameraPosition;
+        getCameraPositionAndDirection(cameraDirection, cameraPosition);
+
+        auto shiftedBlock = createDefaultMeshEntity(cameraPosition, sphereH, concreteMat);
+
+        {
+            auto shiftedBlockPC = shiftedBlock.add_component<physicsComponent>();
+            shiftedBlockPC->physicsCompData.AddSphereCollider(0.5f, math::vec3());
+
+            rigidbody& rb = *shiftedBlock.add_component<rigidbody>();
+            rb.rigidbodyData.setVelocity(cameraDirection * 20.0f);
+        }
+
+        self_destruct_component& block = *shiftedBlock.add_component<self_destruct_component>();
+
+        block.selfDestructTimer = 5.0f;
+
+    }
+
+    void PhysXTestSystem::getCameraPositionAndDirection(math::vec3& cameraDirection, math::vec3& cameraPosition)
+    {
+        //get camera position and set transform to camera postiion 
+        ecs::filter<rendering::camera> cameraQuery;
+
+        //assume the first camera is the player controlled camera
+        for (auto ent : cameraQuery)
+        {
+            auto [positionCamH, rotationCamH, scaleCamH] = ent.get_component<transform>();
+            cameraDirection = rotationCamH.get() * math::vec3(0, 0, 1);
+            cameraPosition = positionCamH.get() + cameraDirection;
+        }
     }
 
     void PhysXTestSystem::initializeLitMaterial(rendering::material_handle& materialToInitialize,
