@@ -3,16 +3,16 @@
 #include <physics/physx/physx_integration_helpers.hpp>
 #include <physics/events/events.hpp>
 #include <physics/components/physics_component.hpp>
+#include <physics/components/rigidbody.hpp>
 #include <physics/physx/physx_event_process_funcs.hpp>
 
 using namespace physx;
 
 namespace legion::physics
 {
-    void processVelocityModification(const core::events::event_base& velocityChangeEvent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
+    void processVelocityModification(rigidbody& rigidbody, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
     {
-        const rb_modify_velocity& modifyVelocity = static_cast<const rb_modify_velocity&>(velocityChangeEvent);
-        const math::vec3& vel = modifyVelocity.newVelocity;
+        const math::vec3& vel = rigidbody.rigidbodyData.getVelocity();
 
         if (wrapper.bodyType == physics_body_type::rigidbody)
         {

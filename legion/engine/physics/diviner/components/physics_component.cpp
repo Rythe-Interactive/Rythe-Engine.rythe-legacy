@@ -1,5 +1,4 @@
-
-#include <physics/diviner/components/dvr_internal_physics_component.hpp>
+#include <physics/diviner/components/physics_component.hpp>
 #include <physics/diviner/colliders/convexcollider.hpp>
 #include <physics/diviner/physics_statics.hpp>
 

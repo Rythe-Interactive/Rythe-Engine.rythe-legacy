@@ -1,6 +1,6 @@
 #pragma once
 
-#include <physics/diviner/components/dvr_internal_rigidbody.hpp>
+#include <physics/diviner/components/rigidbody.hpp>
 #include <core/core.hpp>
 #include <physics/diviner/data/identifier.hpp>
 #include <physics/diviner/data/edge_label.hpp>

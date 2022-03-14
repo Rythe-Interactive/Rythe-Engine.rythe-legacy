@@ -107,7 +107,7 @@ namespace legion::physics
         m_physicsComponentActionFuncs[physics_component_flag::pc_add_first_sphere] = &processAddFirstSphere;
         m_physicsComponentActionFuncs[physics_component_flag::pc_add_next_sphere] = &processAddNextSphere;
 
-        m_eventHashToRBEventProcess.insert( { physics::rb_modify_velocity::id, &processVelocityModification });
+        m_rigidbodyComponentActionFuncs[rigidbody_flag::rb_velocity] = &processVelocityModification;
     }
 
     void PhysXPhysicsSystem::releasePhysXVariables()
@@ -193,7 +193,7 @@ namespace legion::physics
             auto& rbComp = *entity.get_component<rigidbody>();
             auto& physComp = *entity.get_component<physicsComponent>();
 
-            processRigidbodyComponentEvents(entity, physComp.physicsComponentID, rbComp, enviromentInfo);
+            processRigidbodyComponentEvents(entity, physComp.physicsComponentID, rbComp, physComp, enviromentInfo);
         }
 
         //[4] Physics Objects transformation may get directly modified by other systems. Go through all physics objects and move them
@@ -235,7 +235,6 @@ namespace legion::physics
             if (eventsGenerated.test(bitPos))
             {
                 auto& wrapper = m_physxWrapperContainer.findWrapperWithID(physicsComponentToProcess.physicsComponentID).value().get();
-
                 m_physicsComponentActionFuncs[bitPos].invoke(physicsComponentToProcess, physicsEnviromentInfo, wrapper, ent);
             }
         }
@@ -243,22 +242,21 @@ namespace legion::physics
         physicsComponentToProcess.physicsCompData.resetModificationFlags();
     }
 
-    void PhysXPhysicsSystem::processRigidbodyComponentEvents(ecs::entity ent, size_type wrapperID, rigidbody& rigidbody,  const PhysxEnviromentInfo& physicsEnviromentInfo)
+    void PhysXPhysicsSystem::processRigidbodyComponentEvents(ecs::entity ent, size_type wrapperID, rigidbody& rigidbody, physicsComponent& physicsComponentToProcess,
+        const PhysxEnviromentInfo& physicsEnviromentInfo)
     {
         auto& eventsGenerated = rigidbody.rigidbodyData.getGeneratedModifyEvents();
         PhysxInternalWrapper& wrapper = m_physxWrapperContainer.findWrapperWithID(wrapperID).value();
 
-        for (std::unique_ptr<events::event_base>& eventPtr : eventsGenerated)
+        for (size_type bitPos = 0; bitPos < eventsGenerated.size(); ++bitPos)
         {
-            auto findResult = m_eventHashToRBEventProcess.find(eventPtr.get()->get_id());
-
-            if (findResult != m_eventHashToRBEventProcess.end())
+            if (eventsGenerated.test(bitPos))
             {
-                findResult->second.invoke(*eventPtr.get(), physicsEnviromentInfo, wrapper,ent);
+                auto& wrapper = m_physxWrapperContainer.findWrapperWithID(physicsComponentToProcess.physicsComponentID).value().get();
+                m_rigidbodyComponentActionFuncs[bitPos].invoke(rigidbody, physicsEnviromentInfo, wrapper, ent);
             }
         }
 
-        eventsGenerated.clear();
-        
+        rigidbody.rigidbodyData.resetModifications();
     }
 }

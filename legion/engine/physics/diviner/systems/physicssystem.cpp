@@ -182,17 +182,18 @@ namespace legion::physics
 
     }
 
-    void PhysicsSystem::constructManifoldsWithPrecursors(ecs::component_container<diviner::rigidbody>& rigidbodies, std::vector<byte>& hasRigidBodies, physics_manifold_precursor& precursorA, physics_manifold_precursor& precursorB,
+    void PhysicsSystem::constructManifoldsWithPrecursors(ecs::component_container<diviner::rigidbody>& rigidbodies, std::vector<byte>& hasRigidBodies,
+        physics_manifold_precursor& precursorA, physics_manifold_precursor& precursorB,
         std::vector<physics_manifold>& manifoldsToSolve, bool isRigidbodyInvolved, bool isTriggerInvolved)
     {
         OPTICK_EVENT();
         if (!precursorA.physicsComp || !precursorB.physicsComp) return;
-        auto& DvrInternalPhysicsComponentA = *precursorA.physicsComp;
-        auto& DvrInternalPhysicsComponentB = *precursorB.physicsComp;
+        auto& physicsComponentA = *precursorA.physicsComp;
+        auto& physicsComponentB = *precursorB.physicsComp;
 
         for (auto colliderA : physicsComponentA.colliders)
         {
-            for (auto colliderB : DvrInternalPhysicsComponentB.colliders)
+            for (auto colliderB : physicsComponentB.colliders)
             {
                 physics::physics_manifold m;
                 constructManifoldWithCollider(rigidbodies, hasRigidBodies, colliderA.get(), colliderB.get(), precursorA, precursorB, m);
@@ -214,7 +215,7 @@ namespace legion::physics
                     //TODO:(cont.) uniquely identify involved objects and then redirect only required messages
                 }
 
-                if (isDvrInternalRigidbodyInvolved && !isTriggerInvolved)
+                if (isRigidbodyInvolved && !isTriggerInvolved)
                 {
                     raiseEvent<collision_event>(&m, m_timeStep);
                     manifoldsToSolve.emplace_back(std::move(m));

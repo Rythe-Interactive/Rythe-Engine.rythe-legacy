@@ -49,7 +49,7 @@ namespace legion::physics
 
         void processPhysicsComponentEvents(ecs::entity ent, physicsComponent& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo);
 
-        void processRigidbodyComponentEvents(ecs::entity ent, size_type wrapperID, rigidbody& rigidbody, const PhysxEnviromentInfo& physicsEnviromentInfo);
+        void processRigidbodyComponentEvents(ecs::entity ent, size_type wrapperID, rigidbody& rigidbody, physicsComponent& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo);
 
         static constexpr float m_timeStep = 0.02f;
 
@@ -63,8 +63,8 @@ namespace legion::physics
         using pcEventProcessFunc = delegate<void(physicsComponent&,const PhysxEnviromentInfo&, PhysxInternalWrapper&, ecs::entity)>;
         std::array< pcEventProcessFunc, physics_component_flag::pc_max> m_physicsComponentActionFuncs;
 
-        using rbEventProcessFunc = delegate<void(const core::events::event_base&, const PhysxEnviromentInfo&, PhysxInternalWrapper&, ecs::entity)>;
-        std::unordered_map<id_type, rbEventProcessFunc > m_eventHashToRBEventProcess;
+        using rbEventProcessFunc = delegate<void(rigidbody& rigidbody,const PhysxEnviromentInfo&, PhysxInternalWrapper&, ecs::entity)>;
+        std::array< rbEventProcessFunc, rigidbody_flag::rb_max> m_rigidbodyComponentActionFuncs;
 
         std::vector<size_type> m_wrapperPendingRemovalID;
     };
