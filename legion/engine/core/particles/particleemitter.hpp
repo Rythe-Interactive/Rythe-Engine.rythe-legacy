@@ -24,9 +24,10 @@ namespace legion::core
 
     struct particle_emitter
     {
-    public:
+    private:
         //Maxium amount of particles allowed in an emitter      default: 1000
-        size_type maxSpawnCount = 1000;
+        size_type m_capacity = 1000;
+    public: 
         size_type currentParticleCount = 0;
         //How many particles can spawn every interval     default: 1
         size_type spawnRate = 1;
@@ -53,10 +54,10 @@ namespace legion::core
         bool localScale = true;
 
     private:
-        std::vector<bool> livingBuffer{};
-        std::vector<std::unique_ptr<particle_policy_base>> particlePolicies;
-        std::unordered_map<id_type, std::unique_ptr<particle_buffer_base>> particleBuffers;
-        std::unordered_map<id_type, std::unique_ptr<particle_uniform_base>> particleUniforms;
+        std::vector<bool> m_livingBuffer{};
+        std::vector<std::unique_ptr<particle_policy_base>> m_particlePolicies;
+        std::unordered_map<id_type, std::unique_ptr<particle_buffer_base>> m_particleBuffers;
+        std::unordered_map<id_type, std::unique_ptr<particle_uniform_base>> m_particleUniforms;
 
     public:
         particle_emitter() = default;
@@ -76,17 +77,17 @@ namespace legion::core
         template<typename uniformType>
         uniformType& get_uniform(const std::string_view& name);
 
-        template<typename Policy>
-        particle_policy<Policy>& add_policy();
-        template<typename Policy>
-        particle_policy<Policy>& add_policy(Policy policy);
+        template<typename Policy, typename... Args>
+        particle_policy<Policy>& add_policy(Args&&... args);
 
         void set_alive(size_type idx, bool alive);
         void set_alive(size_type start, size_type end, bool alive);
-        bool is_alive(size_type idx);
+        bool is_alive(size_type idx) const;
 
         void swap(size_type idx1, size_type idx2);
+        size_type size() noexcept;
         void resize(size_type size);
+        size_type capacity() const noexcept;
 
         friend class ParticleSystem;
     };

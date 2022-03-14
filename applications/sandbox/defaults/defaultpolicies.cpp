@@ -29,7 +29,7 @@ namespace legion::core
         emitter.create_uniform<float>("timeBuffer", 0.0f);
     }
 
-    void orbital_policy::onInit(particle_emitter& emitter,size_type start, size_type end)
+    void orbital_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
     {
         auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
         auto& posBuffer = emitter.get_buffer<position>("posBuffer");
@@ -43,7 +43,7 @@ namespace legion::core
         }
     }
 
-    void orbital_policy::onUpdate(particle_emitter& emitter,float deltaTime, size_type count)
+    void orbital_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
     {
         auto& posBuffer = emitter.get_buffer<position>("posBuffer");
         auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
@@ -71,7 +71,7 @@ namespace legion::core
 #pragma endregion
 
 #pragma region Fountain Policy
-    void fountain_policy::onInit(particle_emitter& emitter,size_type start, size_type end)
+    void fountain_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
     {
         auto& posBuffer = emitter.get_buffer<position>("posBuffer");
         auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
@@ -83,7 +83,7 @@ namespace legion::core
         }
     }
 
-    void fountain_policy::onUpdate(particle_emitter& emitter,float deltaTime, size_type count)
+    void fountain_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
     {
         auto& posBuffer = emitter.get_buffer<position>("posBuffer");
         auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
@@ -119,9 +119,12 @@ namespace legion::core
 
         auto scaleFactor = emitter.get_uniform<float>("scaleFactor");
 
-        for (size_type idx = 0; idx < count; idx++)
+        if (!emitter.infinite)
         {
-            scaleBuffer[idx] = scale(scaleFactor - ((ageBuffer[idx].age / ageBuffer[idx].max) * scaleFactor));
+            for (size_type idx = 0; idx < count; idx++)
+            {
+                scaleBuffer[idx] = scale(scaleFactor - ((ageBuffer[idx].age / ageBuffer[idx].max) * scaleFactor));
+            }
         }
     }
 #pragma endregion
