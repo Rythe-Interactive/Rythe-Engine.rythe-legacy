@@ -1,5 +1,5 @@
 #version 450
-#state CULL OFF
+
 generate(vertex, fragment)
 
 #include <stdio.shinc>

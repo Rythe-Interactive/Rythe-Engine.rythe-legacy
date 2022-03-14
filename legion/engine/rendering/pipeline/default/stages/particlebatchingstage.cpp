@@ -28,7 +28,7 @@ namespace legion::rendering
                 return math::distance2(a, camInput.pos) < math::distance2(b, camInput.pos);
             };
 
-            for (size_type i = 1; i < emitter.currentParticleCount; i++)
+            for (size_type i = 1; i < emitter.size(); i++)
             {
                 auto j = i;
                 while (j > 0 && compare(posBuffer[j - 1], posBuffer[j]))
@@ -45,7 +45,7 @@ namespace legion::rendering
             if (batch.second.empty())
                 batchList.push_back(std::ref(batch));
             auto start = batch.second.size();
-            batch.second.insert(batch.second.end(), posBuffer.size(), math::mat4());
+            batch.second.insert(batch.second.end(), emitter.size(), math::mat4());
 
             scale scal = math::vec3::one;
             if (emitter.localScale && ent.has_component<scale>())
@@ -60,7 +60,7 @@ namespace legion::rendering
                 origin = ent.get_component<position>().get();
 
 
-            queueJobs(posBuffer.size(), [&](id_type jobId)
+            queueJobs(emitter.size(), [&](id_type jobId)
                 {
                     if (emitter.is_alive(jobId))
                     {

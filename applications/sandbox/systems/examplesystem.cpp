@@ -35,9 +35,9 @@ void ExampleSystem::setup()
         ent.add_component<gfx::mesh_renderer>(gfx::mesh_renderer(material, model));
         auto emitter = ent.add_component<particle_emitter>();
         emitter->infinite = true;
-        emitter->spawnRate = 100;
+        emitter->spawnRate = 10;
         emitter->spawnInterval = 0.05f;
-        emitter->maxSpawnCount = 100;
+        emitter->resize(100);
         emitter->minLifeTime = 5;
         emitter->maxLifeTime = 15;
         emitter->localScale = false;
@@ -47,8 +47,8 @@ void ExampleSystem::setup()
         orbital_policy orbital;
         orbital.C_MASS = 100.f;
         orbital.G_FORCE = .1f;
-        //emitter->add_policy<orbital_policy>(orbital);
-        emitter->add_policy<gfx::rendering_policy>({ gfx::ModelCache::create_model("Quad", fs::view("assets://models/billboard.glb")), gfx::MaterialCache::create_material("Particle", fs::view("assets://shaders/particle.shs")) });
+        emitter->add_policy<orbital_policy>(orbital);
+        emitter->add_policy<gfx::rendering_policy>(gfx::rendering_policy{ gfx::ModelCache::create_model("Quad", fs::view("assets://models/billboard.glb")), gfx::MaterialCache::create_material("Particle", fs::view("assets://shaders/particle.shs")) });
         gfx::MaterialCache::get_material("Particle").set_param("fixedSize", false);
     }
 
@@ -60,12 +60,12 @@ void ExampleSystem::setup()
 
         auto ent = createEntity("Fountain");
         auto [pos, rot, scal] = ent.add_component<transform>();
-        pos = position(0, 10, 0);
+        pos = position(0, 7, 0);
         auto emitter = ent.add_component<particle_emitter>();
         emitter->infinite = false;
         emitter->spawnRate = 10;
         emitter->spawnInterval = .05f;
-        emitter->maxSpawnCount = 5000;
+        emitter->resize(50000);
         emitter->minLifeTime = 1;
         emitter->maxLifeTime = 2;
         emitter->localScale = false;
@@ -74,10 +74,9 @@ void ExampleSystem::setup()
         fountain.initForce = 20.f;
         emitter->add_policy<fountain_policy>(fountain);
         emitter->add_policy<scale_lifetime_policy>();
-        auto mat = gfx::MaterialCache::create_material("Particle", fs::view("assets://shaders/particle.shs"));
-        mat.set_param("particleSize", 1.f);
-        mat.set_param("particleColor", math::color(1.f, 1.f, 1.f, 1.f));
-        emitter->add_policy<gfx::rendering_policy>({ gfx::ModelCache::create_model("Quad", fs::view("assets://models/billboard.obj")), mat });
+        emitter->add_policy<gfx::rendering_policy>(gfx::rendering_policy{ gfx::ModelCache::create_model("Quad", fs::view("assets://models/billboard.glb")),  gfx::MaterialCache::create_material("Particle", fs::view("assets://shaders/particle.shs")) });
+        gfx::MaterialCache::get_material("Particle").set_param("particleColor", math::color(1.f, 1.f, 1.f, 1.f));
+        gfx::MaterialCache::get_material("Particle").set_param("fixedSize", false);
     }
 
     bindToEvent<events::exit, &ExampleSystem::onExit>();
