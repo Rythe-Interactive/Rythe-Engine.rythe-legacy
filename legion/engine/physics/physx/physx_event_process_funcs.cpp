@@ -14,6 +14,7 @@ namespace legion::physics
     {
         const math::vec3& vel = rigidbody.rigidbodyData.getVelocity();
 
+        if (wrapper.bodyType == physics_body_type::rigidbody)
         PxRigidDynamic* rigid = static_cast<PxRigidDynamic*>(wrapper.physicsActor);
 
         PxVec3 pxVelocity(vel.x, vel.y, vel.z);
@@ -87,12 +88,15 @@ namespace legion::physics
 
         for (SphereColliderData& sphereCollider : data.getSphereData())
         {
+            PxRigidDynamic* rigid = static_cast<PxRigidDynamic*>(wrapper.physicsActor);
             if (sphereCollider.isRegisteredOfType(collider_type::sphere)) { continue; }
 
                 PxVec3 pxVelocity(vel.x, vel.y, vel.z);
                 rigid->setLinearVelocity(pxVelocity);
             sphereCollider.setRegistered(true);
 
+            PxVec3 pxVelocity(vel.x, vel.y, vel.z);
+            rigid->setLinearVelocity(pxVelocity);
         const math::vec3& pos = *entity.get_component<position>();
         const math::quat& rot = *entity.get_component<rotation>();
             PxTransform transform;

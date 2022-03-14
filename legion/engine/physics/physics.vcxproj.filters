@@ -84,6 +84,12 @@
     <ClCompile Include="data\colliders\convex_collider_data.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="diviner\components\physics_component.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="physx\data\physx_wrapper_container.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="diviner\cube_collider_params.hpp">
@@ -240,6 +246,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="data\component_flags.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="data\colliders\convex_collider_data.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="data\physics_component_data.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="diviner\components\physics_component.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="diviner\components\rigidbody.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="components\physics_component.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

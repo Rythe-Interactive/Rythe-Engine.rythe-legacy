@@ -303,7 +303,6 @@ namespace legion::physics
             if (eventsGenerated.test(bitPos))
             {
                 auto& wrapper = m_physxWrapperContainer.findWrapperWithID(physicsComponentToProcess.physicsComponentID).value().get();
-
                 m_physicsComponentActionFuncs[bitPos].invoke(physicsComponentToProcess, physicsEnviromentInfo, wrapper, ent);
             }
         }
@@ -311,22 +310,21 @@ namespace legion::physics
         physicsComponentToProcess.physicsCompData.resetModificationFlags();
     }
 
-    void PhysXPhysicsSystem::processRigidbodyComponentEvents(ecs::entity ent, size_type wrapperID, rigidbody& rigidbody,  const PhysxEnviromentInfo& physicsEnviromentInfo)
+    void PhysXPhysicsSystem::processRigidbodyComponentEvents(ecs::entity ent, size_type wrapperID, rigidbody& rigidbody, physicsComponent& physicsComponentToProcess,
+        const PhysxEnviromentInfo& physicsEnviromentInfo)
     {
         auto& eventsGenerated = rigidbody.rigidbodyData.getGeneratedModifyEvents();
         PhysxInternalWrapper& wrapper = m_physxWrapperContainer.findWrapperWithID(wrapperID).value();
 
-        for (std::unique_ptr<events::event_base>& eventPtr : eventsGenerated)
+        for (size_type bitPos = 0; bitPos < eventsGenerated.size(); ++bitPos)
         {
-            auto findResult = m_eventHashToRBEventProcess.find(eventPtr.get()->get_id());
-
-            if (findResult != m_eventHashToRBEventProcess.end())
+            if (eventsGenerated.test(bitPos))
             {
-                findResult->second.invoke(*eventPtr.get(), physicsEnviromentInfo, wrapper,ent);
+                auto& wrapper = m_physxWrapperContainer.findWrapperWithID(physicsComponentToProcess.physicsComponentID).value().get();
+                m_rigidbodyComponentActionFuncs[bitPos].invoke(rigidbody, physicsEnviromentInfo, wrapper, ent);
             }
         }
 
-        eventsGenerated.clear();
-        
+        rigidbody.rigidbodyData.resetModifications();
     }
 }

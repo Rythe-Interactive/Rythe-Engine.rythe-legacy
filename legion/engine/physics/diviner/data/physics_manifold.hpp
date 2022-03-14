@@ -4,7 +4,7 @@
 #include <core/core.hpp>
 #include <physics/diviner/physics_contact.hpp>
 #include <core/core.hpp>
-#include <physics/diviner/components/dvr_internal_physics_component.hpp>
+#include <physics/diviner/components/physics_component.hpp>
 #include <physics/diviner/data/penetrationquery.hpp>
 
 namespace legion::physics

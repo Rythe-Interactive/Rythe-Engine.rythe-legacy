@@ -3,11 +3,11 @@
 #include <physics/diviner/broadphasecollisionalgorithms/broadphasecollisionalgorithm.hpp>
 #include <physics/diviner/broadphasecollisionalgorithms/broadphaseuniformgrid.hpp>
 #include <physics/diviner/broadphasecollisionalgorithms/broadphasebruteforce.hpp>
-#include <physics/diviner/components/dvr_internal_rigidbody.hpp>
+#include <physics/diviner/components/rigidbody.hpp>
 #include <physics/diviner/data/physics_manifold_precursor.hpp>
 #include <physics/diviner/data/physics_manifold.hpp>
 #include <physics/diviner/physics_contact.hpp>
-#include <physics/diviner/components/dvr_internal_physics_component.hpp>
+#include <physics/diviner/components/physics_component.hpp>
 #include <physics/diviner/data/identifier.hpp>
 #include <physics/events/events.hpp>
 #include <memory>
@@ -87,10 +87,10 @@ namespace legion::physics
                 
                 diviner::physics_component& individualPhysicsComponent = physComps[index].get();
 
-                for (auto& collider : individualDvrInternalPhysicsComponent.colliders)
+                for (auto& collider : individualPhysicsComponent.colliders)
                     collider->UpdateTransformedTightBoundingVolume(transf);
 
-                manifoldPrecursors[index] = { transf, &individualDvrInternalPhysicsComponent, index, manifoldPrecursorQuery[index] };
+                manifoldPrecursors[index] = { transf, &individualPhysicsComponent, index, manifoldPrecursorQuery[index] };
                 }).wait();
         }
 
@@ -149,10 +149,10 @@ namespace legion::physics
             manifold.entityB = precursorB.entity;
 
             if (hasRigidBodies[precursorA.id])
-                manifold.DvrInternalRigidbodyA = &rigidbodies[precursorA.id].get();
+                manifold.rigidbodyA = &rigidbodies[precursorA.id].get();
 
             if (hasRigidBodies[precursorB.id])
-                manifold.DvrInternalRigidbodyB = &rigidbodies[precursorB.id].get();
+                manifold.rigidbodyB = &rigidbodies[precursorB.id].get();
 
             manifold.physicsCompA = precursorA.physicsComp;
             manifold.physicsCompB = precursorB.physicsComp;

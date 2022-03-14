@@ -1,11 +1,10 @@
 #pragma once
-
 #include <core/core.hpp>
 #include <physics/diviner/physicsconstants.hpp>
 
 namespace legion::physics::diviner
 {
-    struct DvrInternalRigidbody
+    struct rigidbody
     {
 
         //linear motion component
