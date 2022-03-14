@@ -38,7 +38,6 @@ namespace legion::physics
 
         //wide block, 1 normal cube on the center, 1 rotated default cube on top of it
         void setupCubeWorldTestScene();
-        void shootPhysXCubes(ShootPhysXBox& action);
 
         //------------------------ Rigidbody Shooter -------------------------------------------//
 
