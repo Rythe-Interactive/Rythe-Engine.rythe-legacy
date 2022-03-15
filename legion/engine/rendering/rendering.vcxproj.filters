@@ -44,6 +44,7 @@
     <ClCompile Include="pipeline\default\postfx\bloom.cpp" />
     <ClCompile Include="pipeline\default\postfx\depthoffield.cpp" />
     <ClCompile Include="util\matini.cpp" />
+    <ClCompile Include="pipeline\default\postfx\skybox.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="components\camera.hpp" />
@@ -91,6 +92,7 @@
     <ClInclude Include="components\point.hpp" />
     <ClInclude Include="pipeline\default\postfx\bloom.hpp" />
     <ClInclude Include="pipeline\default\postfx\depthoffield.hpp" />
+    <ClInclude Include="pipeline\default\postfx\skybox.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\buffer.inl" />

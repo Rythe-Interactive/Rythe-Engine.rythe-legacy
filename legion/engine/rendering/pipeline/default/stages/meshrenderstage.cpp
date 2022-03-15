@@ -2,6 +2,7 @@
 #include <rendering/components/light.hpp>
 #include <rendering/data/buffer.hpp>
 #include <rendering/data/model.hpp>
+#include <rendering/components/renderable.hpp>
 
 namespace legion::rendering
 {
@@ -142,6 +143,9 @@ namespace legion::rendering
                         if (sceneDepth && mater.has_param<texture_handle>(SV_SCENEDEPTH))
                             mater.set_param<texture_handle>(SV_SCENEDEPTH, sceneDepth);
 
+                        if(mater.has_param<texture_handle>("skybox"))
+                            mater.set_param("skybox", TextureCache::create_texture("skybox", fs::view("assets://textures/HDRI/park.jpg")));
+
                         mater.bind();
 
                         ModelCache::create_model(modelHandle.id);
@@ -211,6 +215,15 @@ namespace legion::rendering
 
             if (sceneDepth && material.has_param<texture_handle>(SV_SCENEDEPTH))
                 material.set_param<texture_handle>(SV_SCENEDEPTH, sceneDepth);
+
+            if (material.has_param<texture_handle>("skybox"))
+            {
+                ecs::filter<skybox_renderer> skyboxFilter;
+                if (!skyboxFilter.empty())
+                {
+                    material.set_param("skybox", skyboxFilter.at(0).get_component<skybox_renderer>()->material.get_param<texture_handle>("skybox"));
+                }
+            }
 
             material.bind();
 

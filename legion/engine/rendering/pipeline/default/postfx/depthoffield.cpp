@@ -35,7 +35,7 @@ namespace legion::rendering
     void DepthOfField::renderPass(framebuffer& fbo, RenderPipelineBase* pipeline, camera& cam, const camera::camera_input& camInput, time::span deltaTime)
     {
         //Gets textures from framebuffer.
-        auto [valid_textures, position_texture, color_texture] = getTextures(fbo);
+        auto [valid_textures, depth_texture, color_texture] = getTextures(fbo);
         if (!valid_textures) return;
 
         //Change sizes
@@ -50,7 +50,7 @@ namespace legion::rendering
         }
 
         //Calculates the area of focus and outputs it onto a texture.
-        areaOfFocus(color_texture, camInput, position_texture);
+        areaOfFocus(camInput, depth_texture);
         //Downsizing areaOfFocus.
         preFilter(fbo, color_texture);
         //Uses bokeh blurring to blur low res color_texture.
@@ -67,20 +67,25 @@ namespace legion::rendering
     std::tuple<bool, texture_handle, texture_handle> DepthOfField::getTextures(framebuffer& fbo)
     {
         //Try to get position attachment.
-        auto position_attachment = fbo.getAttachment(POSITION_ATTACHMENT);
-        if (!std::holds_alternative<texture_handle>(position_attachment)) return std::make_tuple(false, invalid_texture_handle, invalid_texture_handle);
+        auto depth_attachment = fbo.getAttachment(GL_DEPTH_ATTACHMENT);
+        if (std::holds_alternative<std::monostate>(depth_attachment))
+            depth_attachment = fbo.getAttachment(GL_DEPTH_STENCIL_ATTACHMENT);
+
+        if (!std::holds_alternative<texture_handle>(depth_attachment))
+            return std::make_tuple(false, invalid_texture_handle, invalid_texture_handle);
 
         //Try to get color attachment.
         auto color_attachment = fbo.getAttachment(FRAGMENT_ATTACHMENT);
-        if (!std::holds_alternative<texture_handle>(color_attachment)) return std::make_tuple(false, invalid_texture_handle, invalid_texture_handle);
+        if (!std::holds_alternative<texture_handle>(color_attachment))
+            return std::make_tuple(false, invalid_texture_handle, invalid_texture_handle);
 
         //Get position texture.
-        auto position_texture = std::get<texture_handle>(position_attachment);
+        auto depth_texture = std::get<texture_handle>(depth_attachment);
 
         //Get color texture.
         auto color_texture = std::get<texture_handle>(color_attachment);
 
-        return std::make_tuple(true, position_texture, color_texture);
+        return std::make_tuple(true, depth_texture, color_texture);
     }
 
     void DepthOfField::renderResults(framebuffer& fbo,texture_handle& texture, texture_handle& color_texture)
@@ -97,7 +102,7 @@ namespace legion::rendering
         fbo.release();
     }
 
-    void DepthOfField::areaOfFocus(texture_handle& color_texture, const camera::camera_input& camInput, texture_handle& position_texture)
+    void DepthOfField::areaOfFocus(const camera::camera_input& camInput, texture_handle& depth_texture)
     {
         // Brightness threshold stage.
         m_thresholdFbo.bind();
@@ -107,13 +112,15 @@ namespace legion::rendering
 
         // Bind and assign the depth threshold shader.
         m_depthThresholdShader.bind();
-        m_depthThresholdShader.get_uniform_with_location<texture_handle>(SV_SCENECOLOR).set_value(color_texture);
         m_depthThresholdShader.get_uniform_with_location<math::vec4>(SV_VIEWDIR).set_value(camInput.vdirfarz);
-        m_depthThresholdShader.get_uniform_with_location<math::mat4>(SV_VIEW).set_value(camInput.view);
-        m_depthThresholdShader.get_uniform_with_location<texture_handle>(SV_SCENEPOSITION).set_value(position_texture);
-        m_depthThresholdShader.get_uniform<float>("sampleOffset").set_value(0.5f);
-        m_depthThresholdShader.get_uniform<float>("focalRange").set_value(20.f);
-        m_depthThresholdShader.get_uniform<float>("focalOffset").set_value(15.f);
+        m_depthThresholdShader.get_uniform_with_location<math::vec4>(SV_CAMPOS).set_value(camInput.posnearz);
+        m_depthThresholdShader.get_uniform_with_location<math::ivec2>(SV_VIEWPORT).set_value(camInput.viewportSize);
+
+        //m_depthThresholdShader.get_uniform_with_location<math::mat4>(SV_VIEW).set_value(camInput.view);
+        m_depthThresholdShader.get_uniform_with_location<texture_handle>(SV_SCENEDEPTH).set_value(depth_texture);
+        //m_depthThresholdShader.get_uniform<float>("sampleOffset").set_value(0.5f);
+        m_depthThresholdShader.get_uniform<float>("focalRange").set_value(15.f);
+        m_depthThresholdShader.get_uniform<float>("focalOffset").set_value(10.f);
         m_depthThresholdShader.get_uniform<float>("bokehRadius").set_value(m_bokehSize);
 
         // Render onto the quad.
@@ -130,7 +137,7 @@ namespace legion::rendering
         fbo.bind();
         m_bokehShader.bind();
         m_bokehShader.get_uniform_with_location<texture_handle>(SV_SCENECOLOR).set_value(m_halfres1);
-        m_bokehShader.get_uniform<math::vec2>("scale").set_value(math::vec2(0.5f));
+        m_bokehShader.get_uniform<math::vec2>("scale").set_value(math::vec2(2.0f));
         m_bokehShader.get_uniform<float>("bokehRadius").set_value(m_bokehSize);
         renderQuad();
         m_bokehShader.release();
@@ -156,7 +163,7 @@ namespace legion::rendering
         fbo.bind();
         m_preFilterShader.bind();
         m_preFilterShader.get_uniform_with_location<texture_handle>(SV_SCENECOLOR).set_value(color_texture);
-        m_preFilterShader.get_uniform<math::vec2>("scale").set_value(math::vec2(0.5f));
+        m_preFilterShader.get_uniform<math::vec2>("scale").set_value(math::vec2(2.0f));
         m_preFilterShader.get_uniform<texture_handle>("aofTexture").set_value(m_thresholdTexture);
         renderQuad();
         m_preFilterShader.release();

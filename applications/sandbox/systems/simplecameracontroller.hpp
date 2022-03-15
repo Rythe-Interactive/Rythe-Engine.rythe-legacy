@@ -94,11 +94,9 @@ public:
 
     void setupCameraEntity()
     {
-        auto skybox = createEntity("Skybox");
         auto skyboxMat = rendering::MaterialCache::create_material("skybox", "assets://shaders/skybox.shs"_view);
-        skyboxMat.set_param("skycolor", math::color(0.1f, 0.3f, 1.0f));
-        skybox.add_component(gfx::mesh_renderer{ skyboxMat, rendering::ModelCache::create_model("Cube", "assets://models/cube.glb"_view) });
-        skybox.add_component<transform>();
+        skyboxMat.set_param("skybox", TextureCache::create_texture("skybox", fs::view("assets://textures/HDRI/park.jpg")));
+        ecs::world.add_component(gfx::skybox_renderer{ skyboxMat });
 
         auto groundplane = createEntity("Ground Plane");
         auto groundmat = rendering::MaterialCache::create_material("floor", "assets://shaders/groundplane.shs"_view);

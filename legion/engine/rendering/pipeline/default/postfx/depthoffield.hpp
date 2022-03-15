@@ -58,7 +58,7 @@ namespace legion::rendering
          * @param camInput The matrix data used to do everything 3D math-i.
          * @param position_texture The scene position texture collected from the framebuffer.
          */
-        void areaOfFocus(texture_handle& color_texture, const camera::camera_input& camInput, texture_handle& position_texture);
+        void areaOfFocus(const camera::camera_input& camInput, texture_handle& depth_texture);
         /**
          * @brief preFilter Pre-bokeh pass, also used to resize the color texture.
          * @param fbo The framebuffer used for this particular effect.

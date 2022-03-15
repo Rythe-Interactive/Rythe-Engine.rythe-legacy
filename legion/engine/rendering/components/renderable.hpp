@@ -4,6 +4,14 @@
 
 namespace legion::rendering
 {
+    struct skybox_renderer
+    {
+        material_handle material = invalid_material_handle;
+
+        skybox_renderer() = default;
+        explicit skybox_renderer(const material_handle& src) { material = src; }
+    };
+
     struct mesh_renderer
     {
     private:

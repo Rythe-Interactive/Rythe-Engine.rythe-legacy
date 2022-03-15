@@ -11,6 +11,7 @@
 #include <rendering/pipeline/default/postfx/fxaa.hpp>
 #include <rendering/pipeline/default/postfx/bloom.hpp>
 #include <rendering/pipeline/default/postfx/depthoffield.hpp>
+#include <rendering/pipeline/default/postfx/skybox.hpp>
 #include <rendering/data/buffer.hpp>
 
 
@@ -29,8 +30,9 @@ namespace legion::rendering
         attachStage<SubmitStage>();
 
         PostProcessingStage::addEffect<Tonemapping>();
+        PostProcessingStage::addEffect<Skybox>(-1);
         PostProcessingStage::addEffect<Bloom>(-64);
-        //PostProcessingStage::addEffect<DepthOfField>(-80);
+        PostProcessingStage::addEffect<DepthOfField>(-80);
         PostProcessingStage::addEffect<FXAA>(-90);
 
 
