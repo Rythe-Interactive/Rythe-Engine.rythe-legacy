@@ -405,7 +405,7 @@ namespace legion::rendering
         {
             shader_variant& variant = shader.m_variants[nameHash(shaderVariant)];
             variant.name = shaderVariant;
-            GLenum blendSrc = GL_SRC_ALPHA, blendDst = GL_ONE_MINUS_SRC_ALPHA;
+            GLenum blendSrc = GL_FALSE, blendDst = GL_FALSE;
 
             for (auto& [func, param] : variant.state)
             {
@@ -696,7 +696,7 @@ namespace legion::rendering
             shader_variant& variant = shader.m_variants[nameHash(shaderVariant)];
             variant.name = shaderVariant;
 
-            GLenum blendSrc = GL_SRC_ALPHA, blendDst = GL_ONE_MINUS_SRC_ALPHA;
+            GLenum blendSrc = GL_FALSE, blendDst = GL_FALSE;
 
             for (auto& [func, param] : variant.state)
             {
@@ -1085,7 +1085,7 @@ namespace legion::rendering
             configure_variant(0);
         }
 
-        GLenum blendSrc = GL_SRC_ALPHA, blendDst = GL_ONE_MINUS_SRC_ALPHA;
+        GLenum blendSrc = GL_FALSE, blendDst = GL_FALSE;
 
         for (auto& [func, param] : m_currentShaderVariant->state)
         {

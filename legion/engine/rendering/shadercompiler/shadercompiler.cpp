@@ -95,7 +95,11 @@ namespace legion::rendering
             auto line = rest.substr(0, seperator);
             auto space = line.find(' ');
             if (space != std::string::npos)
-                stateInput.push_back(std::make_pair(std::string(line.substr(0, space)), std::string(line.substr(space + 1))));
+            {
+                auto param = line.substr(space + 1);
+                auto paramSpace = param.find(' ');
+                stateInput.push_back(std::make_pair(std::string(line.substr(0, space)), std::string(param.substr(0, paramSpace))));
+            }
             else
                 stateInput.push_back(std::make_pair(std::string(line.substr(0, space)), std::string()));
 
@@ -202,12 +206,21 @@ namespace legion::rendering
                     params["ONE_MINUS_CONSTANT_ALPHA"] = GL_ONE_MINUS_CONSTANT_ALPHA;
                     params["SRC_ALPHA_SATURATE"] = GL_SRC_ALPHA_SATURATE;
                     params["OFF"] = GL_FALSE;
+                    params["OPAQUE"] = GL_FALSE;
+                    params["TRANSPARENT"] = GL_INTERNALFORMAT_PREFERRED;
                 }
 
                 if (!params.count(par))
                     continue;
 
                 param = params.at(par);
+
+                if (param == GL_INTERNALFORMAT_PREFERRED)
+                {
+                    state[GL_BLEND_SRC] = GL_SRC_ALPHA;
+                    state[GL_BLEND_DST] = GL_ONE_MINUS_SRC_ALPHA;
+                    continue;
+                }
             }
             break;
             case GL_DITHER:
@@ -441,8 +454,7 @@ namespace legion::rendering
                 shader_state& currentVariantState = state[variant];
                 currentVariantState[GL_DEPTH_TEST] = GL_LEQUAL;
                 currentVariantState[GL_CULL_FACE] = GL_BACK;
-                currentVariantState[GL_BLEND_SRC] = GL_SRC_ALPHA;
-                currentVariantState[GL_BLEND_DST] = GL_ONE_MINUS_SRC_ALPHA;
+                currentVariantState[GL_BLEND] = GL_FALSE;
                 currentVariantState[GL_DITHER] = GL_FALSE;
                 extract_state(source, currentVariantState);
             }

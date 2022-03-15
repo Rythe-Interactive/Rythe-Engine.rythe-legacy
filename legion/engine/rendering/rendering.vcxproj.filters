@@ -45,6 +45,7 @@
     <ClCompile Include="pipeline\default\postfx\depthoffield.cpp" />
     <ClCompile Include="util\matini.cpp" />
     <ClCompile Include="pipeline\default\postfx\skybox.cpp" />
+    <ClCompile Include="pipeline\default\stages\transparencyrenderstage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="components\camera.hpp" />
@@ -93,6 +94,7 @@
     <ClInclude Include="pipeline\default\postfx\bloom.hpp" />
     <ClInclude Include="pipeline\default\postfx\depthoffield.hpp" />
     <ClInclude Include="pipeline\default\postfx\skybox.hpp" />
+    <ClInclude Include="pipeline\default\stages\transparencyrenderstage.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\buffer.inl" />

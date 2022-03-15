@@ -28,8 +28,8 @@ namespace legion::rendering
         // Brightness threshold stage
         fbo.bind();
         // Create 2 color attachments and add them the buffer.
-        uint attachments[4] = { FRAGMENT_ATTACHMENT, NORMAL_ATTACHMENT, POSITION_ATTACHMENT, OVERDRAW_ATTACHMENT };
-        glDrawBuffers(4, attachments);
+        uint attachments[1] = { OVERDRAW_ATTACHMENT };
+        glDrawBuffers(1, attachments);
 
         // Bind and assign the brightness threshold shader.
         m_brightnessThresholdShader.bind();
@@ -100,8 +100,8 @@ namespace legion::rendering
     void Bloom::historyMixOverdraw(framebuffer& fbo, texture_handle overdrawtexture)
     {
         fbo.bind();
-        uint attachments[4] = { FRAGMENT_ATTACHMENT, NORMAL_ATTACHMENT, POSITION_ATTACHMENT, OVERDRAW_ATTACHMENT };
-        glDrawBuffers(4, attachments);
+        uint attachments[1] = { OVERDRAW_ATTACHMENT };
+        glDrawBuffers(1, attachments);
 
         static id_type historySamplerId = nameHash("overdrawHistory");
         static id_type historyMetaId = nameHash("HDR overdraw history");
@@ -126,8 +126,12 @@ namespace legion::rendering
     void Bloom::combineImages(framebuffer& fbo, texture_handle colortexture, texture_handle overdrawtexture)
     {
         // Combining phase.
-        // bind the combining shader.
+
         fbo.bind();
+        uint attachments[1] = { FRAGMENT_ATTACHMENT };
+        glDrawBuffers(1, attachments);
+        
+        // bind the combining shader.
         m_combineShader.bind();
 
         // Assign the lighting data texture and blurred brightness threshold texture.
@@ -137,6 +141,9 @@ namespace legion::rendering
         renderQuad();
         // Release both the combining shader and framebuffer.
         m_combineShader.release();
+
+        uint defaultAttachments[4] = { FRAGMENT_ATTACHMENT, NORMAL_ATTACHMENT, POSITION_ATTACHMENT, OVERDRAW_ATTACHMENT };
+        glDrawBuffers(4, defaultAttachments);
         fbo.release();
     }
 

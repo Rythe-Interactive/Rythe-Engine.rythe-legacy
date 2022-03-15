@@ -1,10 +1,25 @@
 #version 450
-#state CULL BACK
-#state BLEND OFF
+
+variant(default)
+{
+    #state BLEND OFF
+    #state CULL BACK
+}
 
 variant(double_sided)
 {
     #state CULL OFF
+}
+
+variant(transparent)
+{
+    #state BLEND TRANSPARENT    
+}
+
+variant(double_sided_transparent)
+{
+    #state CULL OFF
+    #state BLEND TRANSPARENT
 }
 
 generate(fragment, vertex)
