@@ -108,6 +108,7 @@ namespace legion::physics
         m_physicsComponentActionFuncs[physics_component_flag::pc_add_next_sphere] = &processAddNextSphere;
 
         m_rigidbodyComponentActionFuncs[rigidbody_flag::rb_velocity] = &processVelocityModification;
+        m_rigidbodyComponentActionFuncs[rigidbody_flag::rb_mass] = &processMassModification;
     }
 
     void PhysXPhysicsSystem::releasePhysXVariables()

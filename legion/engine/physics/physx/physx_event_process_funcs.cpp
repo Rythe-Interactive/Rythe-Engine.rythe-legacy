@@ -14,13 +14,18 @@ namespace legion::physics
     {
         const math::vec3& vel = rigidbody.rigidbodyData.getVelocity();
 
-        if (wrapper.bodyType == physics_body_type::rigidbody)
-        {
-            PxRigidDynamic* rigid = static_cast<PxRigidDynamic*>(wrapper.physicsActor);
+        PxRigidDynamic* rigid = static_cast<PxRigidDynamic*>(wrapper.physicsActor);
 
-            PxVec3 pxVelocity(vel.x, vel.y, vel.z);
-            rigid->setLinearVelocity(pxVelocity);
-        }
+        PxVec3 pxVelocity(vel.x, vel.y, vel.z);
+        rigid->setLinearVelocity(pxVelocity);
+    }
+
+    void processMassModification(rigidbody& rigidbody, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
+    {
+        float mass = rigidbody.rigidbodyData.getMass();
+
+        PxRigidDynamic* rigid = static_cast<PxRigidDynamic*>(wrapper.physicsActor);
+        rigid->setMass(mass);
     }
     
     void processAddNextBox(physicsComponent& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)

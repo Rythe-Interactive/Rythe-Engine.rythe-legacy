@@ -114,7 +114,8 @@ namespace legion::physics
             addRobotPartLambda(math::vec3(1.0f), math::vec3(0, -1.0f, 0), unrotatedBlock, math::identity<math::quat>(),sphereH);
             unrotatedBlockPC->physicsCompData.AddSphereCollider(0.5f, math::vec3(0, -1, 0));
 
-            unrotatedBlock.add_component<rigidbody>();
+            auto& rb = *unrotatedBlock.add_component<rigidbody>();
+            rb.rigidbodyData.setMass(5.0f);
         }
  
         //add default cube on top
