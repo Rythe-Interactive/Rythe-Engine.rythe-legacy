@@ -1,7 +1,6 @@
 #pragma once
 #include <core/events/event.hpp>
 #include <physics/diviner/data/physics_manifold.hpp>
-#include <physics/data/colliders/convex_collider_data.hpp>
 
 namespace legion::physics {
 
@@ -70,51 +69,5 @@ namespace legion::physics {
     struct collision_event : public collision_event_base<collision_event>
     {
         using collision_event_base<collision_event>::collision_event_base;
-    };
-
-    struct rb_modify_mass final : public core::events::event<rb_modify_mass>
-    {
-        float newMass;
-
-        rb_modify_mass(float mass) : newMass{ mass } { }
-    };
-
-    //-------------------------------- Rigidbody Component ------------------------------------------------//
-
-    struct rb_modify_inertia_tensor final : public core::events::event<rb_modify_inertia_tensor>
-    {
-        math::mat3 newInertiaTensor;
-
-        rb_modify_inertia_tensor(const math::mat3& inertiaTensor) : newInertiaTensor{ inertiaTensor } { }
-    };
-
-    struct rb_modify_velocity final : public core::events::event<rb_modify_velocity>
-    {
-        math::vec3 newVelocity;
-
-        rb_modify_velocity(const math::vec3& velocity) : newVelocity{ velocity } { }
-    };
-
-    struct rb_modify_linear_drag final : public core::events::event<rb_modify_linear_drag>
-    {
-        float newLinearDrag;
-
-        rb_modify_linear_drag(float linearDrag) : newLinearDrag{ linearDrag } { }
-    };
-
-    struct rb_modify_angular_drag final : public core::events::event<rb_modify_angular_drag>
-    {
-        float newAngularDrag;
-
-        rb_modify_angular_drag(float angularDrag) : newAngularDrag{ angularDrag } { }
-    };
-
-    //-------------------------------- Physics Component ------------------------------------------------//
-
-    struct add_box_collider final : public core::events::event<add_box_collider>
-    {
-        math::vec3 newExtents;
-
-        add_box_collider(const math::vec3& extents) : newExtents{ extents } { }
     };
 }

@@ -23,7 +23,6 @@ namespace legion::physics
             std::swap(m_physxWrappers[index], m_physxWrappers[m_physxWrappers.size() - 1]);
             m_physxWrappers.pop_back();
         }
-        
     }
 
     std::optional<std::reference_wrapper< PhysxInternalWrapper>> PhysxWrapperContainer::findWrapperWithID(size_type id)

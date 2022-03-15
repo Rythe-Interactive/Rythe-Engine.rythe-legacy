@@ -1,22 +1,11 @@
 #pragma once
 #include <core/core.hpp>
 #include <core/events/event.hpp>
-#include <physics/events/events.hpp>
+#include <physics/data/component_flags.hpp>
 #include <bitset>
 
 namespace legion::physics
 {
-    enum rigidbody_flag : size_type
-    {
-        rb_velocity,
-        rb_angular_velocity,
-        rb_inertia_tensor,
-        rb_mass,
-        rb_linear_drag,
-        rb_angular_drag,
-        rb_max //must always be the last enum
-    };
-
     class RigidbodyData
     {
     public:
@@ -74,7 +63,7 @@ namespace legion::physics
             return m_modificationFlags;
         }
 
-        inline void resetModifications() { m_modificationFlags.reset(); }
+        inline void resetModificationFlags() { m_modificationFlags.reset(); }
 
     private:
 

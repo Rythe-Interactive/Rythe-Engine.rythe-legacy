@@ -85,8 +85,8 @@ namespace legion::physics
                         auto& precursorPhyCompA = *precursorA.physicsComp;
                         auto& precursorPhyCompB = *precursorB.physicsComp;
 
-                        auto& precursorDvrInternalRigidbodyA = rigidbodies[precursorA.id];
-                        auto& precursorDvrInternalRigidbodyB = rigidbodies[precursorB.id];
+                        auto& precursorRigidbodyA = rigidbodies[precursorA.id];
+                        auto& precursorRigidbodyB = rigidbodies[precursorB.id];
 
                         //only construct a manifold if at least one of these requirement are fulfilled
                         //1. One of the diviner::physics_components is a trigger and the other one is not
@@ -96,13 +96,13 @@ namespace legion::physics
                         bool isBetweenTriggerAndNonTrigger =
                             (precursorPhyCompA.isTrigger && !precursorPhyCompB.isTrigger) || (!precursorPhyCompA.isTrigger && precursorPhyCompB.isTrigger);
 
-                        bool isBetweenDvrInternalRigidbodyAndNonTrigger =
+                        bool isBetweenRigidbodyAndNonTrigger =
                             (hasRigidBodies[precursorA.id] && !precursorPhyCompB.isTrigger) || (hasRigidBodies[precursorB.id] && !precursorPhyCompA.isTrigger);
 
                         bool isBetween2Rigidbodies = (hasRigidBodies[precursorA.id] && hasRigidBodies[precursorB.id]);
 
 
-                        if (isBetweenTriggerAndNonTrigger || isBetweenDvrInternalRigidbodyAndNonTrigger || isBetween2Rigidbodies)
+                        if (isBetweenTriggerAndNonTrigger || isBetweenRigidbodyAndNonTrigger || isBetween2Rigidbodies)
                         {
                             constructManifoldsWithPrecursors(rigidbodies, hasRigidBodies, precursorA, precursorB,
                                 manifoldsToSolve,

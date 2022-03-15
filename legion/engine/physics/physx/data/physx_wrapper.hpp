@@ -19,8 +19,6 @@ namespace legion::physics
     {
         physx::PxActor* physicsActor = nullptr;
 
-        size_type colliderCount = 0;
-
         physics_body_type bodyType = physics_body_type::static_collider;
 
         PhysxInternalWrapper() = default;

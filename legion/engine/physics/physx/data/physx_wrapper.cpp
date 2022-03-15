@@ -8,6 +8,7 @@ namespace legion::physics
         if (physicsActor)
         {
             physicsActor->release();
+            physicsActor = nullptr;
         }
         
     }

@@ -68,24 +68,19 @@ namespace legion::physics
         shape->release();
     }
 
-    //static collider instantiations
-    template void instantiateStaticActorWith<PxSphereGeometry, float>(physx::PxPhysics* sdk, PhysxInternalWrapper& wrapper,
-        const physx::PxTransform& outGlobalTransform, const physx::PxTransform& outLocalTransform, const PhysxEnviromentInfo& sceneInfo, ecs::entity ent, float x);
+#define DECLARE_STATIC_COLLIDER_TEMPLATE_INSTANTIATION(PxGeometry,...)  template void instantiateStaticActorWith<PxGeometry, __VA_ARGS__>(physx::PxPhysics* sdk, PhysxInternalWrapper& wrapper, const physx::PxTransform& outGlobalTransform, const physx::PxTransform& outLocalTransform, const PhysxEnviromentInfo& sceneInfo, ecs::entity ent, __VA_ARGS__)
 
-    template void instantiateStaticActorWith<PxBoxGeometry, const PxVec3&>(physx::PxPhysics* sdk, PhysxInternalWrapper& wrapper,
-        const physx::PxTransform& outGlobalTransform, const physx::PxTransform& outLocalTransform, const PhysxEnviromentInfo& sceneInfo, ecs::entity ent, const PxVec3& extents);
+    DECLARE_STATIC_COLLIDER_TEMPLATE_INSTANTIATION(PxSphereGeometry, float);
+    DECLARE_STATIC_COLLIDER_TEMPLATE_INSTANTIATION(PxBoxGeometry, const PxVec3&);
 
-    //dynamic collider instantiations
-    template void instantiateDynamicActorWith<PxSphereGeometry, float>(physx::PxPhysics* sdk, PhysxInternalWrapper& wrapper,
-        const physx::PxTransform& outGlobalTransform, const physx::PxTransform& outLocalTransform, const PhysxEnviromentInfo& sceneInfo, ecs::entity ent, float x);
+#define DECLARE_DYNAMIC_COLLIDER_TEMPLATE_INSTANTIATION(PxGeometry,...) template void instantiateDynamicActorWith<PxGeometry, __VA_ARGS__>(physx::PxPhysics* sdk, PhysxInternalWrapper& wrapper,const physx::PxTransform& outGlobalTransform, const physx::PxTransform& outLocalTransform, const PhysxEnviromentInfo& sceneInfo, ecs::entity ent, __VA_ARGS__);
 
-    template void instantiateDynamicActorWith<PxBoxGeometry, const PxVec3&>(physx::PxPhysics* sdk, PhysxInternalWrapper& wrapper,
-        const physx::PxTransform& outGlobalTransform, const physx::PxTransform& outLocalTransform, const PhysxEnviromentInfo& sceneInfo, ecs::entity ent, const PxVec3& extents);
+    DECLARE_DYNAMIC_COLLIDER_TEMPLATE_INSTANTIATION(PxSphereGeometry, float);
+    DECLARE_DYNAMIC_COLLIDER_TEMPLATE_INSTANTIATION(PxBoxGeometry, const PxVec3&);
 
-    //next collider instantiations
-    template void instantiateNextCollider<PxBoxGeometry, const PxVec3&>(physx::PxPhysics* sdk, PhysxInternalWrapper& wrapper,
-        const physx::PxTransform& outGlobalTransform, const physx::PxTransform& outLocalTransform,const PhysxEnviromentInfo& sceneInfo, const PxVec3& extents);
+#define DECLARE_NEXT_COLLIDER_TEMPLATE_INSTANTIATION(PxGeometry,...) template void instantiateNextCollider<PxGeometry, __VA_ARGS__>(physx::PxPhysics* sdk, PhysxInternalWrapper& wrapper, const physx::PxTransform& outGlobalTransform, const physx::PxTransform& outLocalTransform, const PhysxEnviromentInfo& sceneInfo, __VA_ARGS__);
 
-    template void instantiateNextCollider<PxSphereGeometry, float>(physx::PxPhysics* sdk, PhysxInternalWrapper& wrapper,
-        const physx::PxTransform& outGlobalTransform, const physx::PxTransform& outLocalTransform, const PhysxEnviromentInfo& sceneInfo, float x);
+    DECLARE_NEXT_COLLIDER_TEMPLATE_INSTANTIATION(PxSphereGeometry, float);
+    DECLARE_NEXT_COLLIDER_TEMPLATE_INSTANTIATION(PxBoxGeometry, const PxVec3&);
+
 }
