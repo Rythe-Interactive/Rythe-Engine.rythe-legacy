@@ -1,7 +1,8 @@
 #pragma once
 
-#include <core/core.hpp>
 #include <memory>
+
+#include <core/core.hpp>
 #include <physics/halfedgeface.hpp>
 #include <physics/data/convergance_identifier.hpp>
 #include <physics/physics_contact.hpp>

@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="autogen\autogen.cpp" />
     <ClCompile Include="components\light.cpp" />
     <ClCompile Include="data\buffer.cpp" />
     <ClCompile Include="data\framebuffer.cpp" />
@@ -56,6 +57,11 @@
     <ClCompile Include="util\matini.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="autogen\autogen.hpp" />
+    <ClInclude Include="autogen\autogen_prototype_light.hpp" />
+    <ClInclude Include="autogen\autogen_prototype_mesh_renderer.hpp" />
+    <ClInclude Include="autogen\autogen_reflector_light.hpp" />
+    <ClInclude Include="autogen\autogen_reflector_mesh_renderer.hpp" />
     <ClInclude Include="components\camera.hpp" />
     <ClInclude Include="components\light.hpp" />
     <ClInclude Include="components\point.hpp" />
@@ -103,6 +109,10 @@
     <ClInclude Include="util\settings.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="autogen\autogen_prototype_light.inl" />
+    <None Include="autogen\autogen_prototype_mesh_renderer.inl" />
+    <None Include="autogen\autogen_reflector_light.inl" />
+    <None Include="autogen\autogen_reflector_mesh_renderer.inl" />
     <None Include="data\buffer.inl" />
     <None Include="pipeline\base\pipeline.inl" />
     <None Include="pipeline\base\renderstage.inl" />

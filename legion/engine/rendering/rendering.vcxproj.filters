@@ -44,6 +44,7 @@
     <ClCompile Include="pipeline\default\postfx\bloom.cpp" />
     <ClCompile Include="pipeline\default\postfx\depthoffield.cpp" />
     <ClCompile Include="util\matini.cpp" />
+    <ClCompile Include="autogen\autogen.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="components\camera.hpp" />
@@ -91,11 +92,20 @@
     <ClInclude Include="components\point.hpp" />
     <ClInclude Include="pipeline\default\postfx\bloom.hpp" />
     <ClInclude Include="pipeline\default\postfx\depthoffield.hpp" />
+    <ClInclude Include="autogen\autogen.hpp" />
+    <ClInclude Include="autogen\autogen_prototype_light.hpp" />
+    <ClInclude Include="autogen\autogen_prototype_mesh_renderer.hpp" />
+    <ClInclude Include="autogen\autogen_reflector_light.hpp" />
+    <ClInclude Include="autogen\autogen_reflector_mesh_renderer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\buffer.inl" />
     <None Include="pipeline\base\pipeline.inl" />
     <None Include="pipeline\base\renderstage.inl" />
     <None Include="systems\renderer.inl" />
+    <None Include="autogen\autogen_prototype_light.inl" />
+    <None Include="autogen\autogen_prototype_mesh_renderer.inl" />
+    <None Include="autogen\autogen_reflector_light.inl" />
+    <None Include="autogen\autogen_reflector_mesh_renderer.inl" />
   </ItemGroup>
 </Project>

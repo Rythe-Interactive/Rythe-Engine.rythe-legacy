@@ -1,0 +1,10 @@
+#include "autogen.hpp"
+#pragma once
+#include "autogen_prototype_position.inl"
+#include "autogen_reflector_position.inl"
+#include "autogen_prototype_rotation.inl"
+#include "autogen_reflector_rotation.inl"
+#include "autogen_prototype_scale.inl"
+#include "autogen_reflector_scale.inl"
+#include "autogen_prototype_velocity.inl"
+#include "autogen_reflector_velocity.inl"

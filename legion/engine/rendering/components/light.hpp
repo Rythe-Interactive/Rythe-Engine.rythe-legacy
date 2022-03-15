@@ -12,7 +12,7 @@ namespace legion::rendering
 
     namespace detail
     {
-        struct light_data
+        struct [[reflectable]] light_data
         {
             light_type type;
             float attenuation;
@@ -26,7 +26,7 @@ namespace legion::rendering
         };
     }
 
-    struct light
+    struct [[legion::reflectable]] light
     {
     private:
         static uint m_lastidx;

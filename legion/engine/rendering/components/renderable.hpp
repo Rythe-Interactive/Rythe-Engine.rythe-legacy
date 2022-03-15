@@ -4,7 +4,7 @@
 
 namespace legion::rendering
 {
-    struct mesh_renderer
+    struct [[legion::reflectable]] mesh_renderer
     {
     private:
         model_handle m_tempHandle = invalid_model_handle;

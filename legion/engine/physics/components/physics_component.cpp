@@ -1,4 +1,3 @@
-
 #include <physics/components/physics_component.hpp>
 #include <physics/colliders/convexcollider.hpp>
 
@@ -16,7 +15,7 @@ namespace legion::physics
         localCenterOfMass /= static_cast<float>(colliders.size());
     }
 
-    std::shared_ptr<ConvexCollider> physicsComponent::ConstructConvexHull(legion::core::mesh_handle meshHandle, bool shouldDebug )
+    std::shared_ptr<ConvexCollider> physicsComponent::ConstructConvexHull(core::mesh meshHandle, bool shouldDebug )
     {
         auto collider = std::make_shared<ConvexCollider>();
 
@@ -30,7 +29,7 @@ namespace legion::physics
         return collider;
     }
 
-    void physicsComponent::ConstructConvexHull(legion::core::mesh_handle meshHandle, ConvexCollider& col)
+    void physicsComponent::ConstructConvexHull(core::mesh meshHandle, ConvexCollider& col)
     {
         col.doStep(meshHandle);
         calculateNewLocalCenterOfMass();

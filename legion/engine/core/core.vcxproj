@@ -85,7 +85,8 @@ copy /Y "$(SolutionDir)xcopyexclude" ".\"
 
 xcopy "$(ProjectDir)..\$(ProjectName)" "$(SolutionDir)include\$(ProjectName)\" /i /s /r /exclude:xcopyexclude /y &gt; nul
 
-del /q ".\xcopyexclude"</Command>
+del /q ".\xcopyexclude" 
+$(SolutionDir)tools\RythePreprocessor\RytheTributary.exe -root=D:\Repos\Rythe-legacy\ -sysinclude=deps\include -include=legion\engine\ -module=legion\engine\core -module=legion\engine\rendering -module=legion\engine\application -module=legion\engine\audio -module=applications\sandbox -ex=deps -ex=glm -ex=autogen</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -120,7 +121,8 @@ copy /Y "$(SolutionDir)xcopyexclude" ".\"
 
 xcopy "$(ProjectDir)..\$(ProjectName)" "$(SolutionDir)include\$(ProjectName)\" /i /s /r /exclude:xcopyexclude /y &gt; nul
 
-del /q ".\xcopyexclude"</Command>
+del /q ".\xcopyexclude" 
+$(SolutionDir)tools\RythePreprocessor\RytheTributary.exe -root=D:\Repos\Rythe-legacy\ -sysinclude=deps\include -include=legion\engine\ -module=legion\engine\core -module=legion\engine\rendering -module=legion\engine\application -module=legion\engine\audio -module=applications\sandbox -ex=deps -ex=glm -ex=autogen</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -137,6 +139,15 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="async\ring_sync_lock.hpp" />
     <ClInclude Include="async\thread_util.hpp" />
     <ClInclude Include="async\wait_priority.hpp" />
+    <ClInclude Include="autogen\autogen.hpp" />
+    <ClInclude Include="autogen\autogen_prototype_position.hpp" />
+    <ClInclude Include="autogen\autogen_prototype_rotation.hpp" />
+    <ClInclude Include="autogen\autogen_prototype_scale.hpp" />
+    <ClInclude Include="autogen\autogen_prototype_velocity.hpp" />
+    <ClInclude Include="autogen\autogen_reflector_position.hpp" />
+    <ClInclude Include="autogen\autogen_reflector_rotation.hpp" />
+    <ClInclude Include="autogen\autogen_reflector_scale.hpp" />
+    <ClInclude Include="autogen\autogen_reflector_velocity.hpp" />
     <ClInclude Include="common\hash.hpp" />
     <ClInclude Include="common\string_literal.hpp" />
     <ClInclude Include="containers\delegate.hpp" />
@@ -528,6 +539,7 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="serialization\serializer_views\yaml.hpp" />
     <ClInclude Include="time\main_clock.hpp" />
     <ClInclude Include="time\utils.hpp" />
+    <ClInclude Include="types\attributes.hpp" />
     <ClInclude Include="types\prototype.hpp" />
     <ClInclude Include="types\reflector.hpp" />
     <ClInclude Include="time\stopwatch.hpp" />
@@ -544,6 +556,7 @@ del /q ".\xcopyexclude"</Command>
     <ClCompile Include="async\job_pool.cpp" />
     <ClCompile Include="async\rw_spinlock.cpp" />
     <ClCompile Include="async\spinlock.cpp" />
+    <ClCompile Include="autogen\autogen.cpp" />
     <ClCompile Include="common\hash.cpp" />
     <ClCompile Include="compute\buffer.cpp" />
     <ClCompile Include="compute\context.cpp" />
@@ -591,6 +604,14 @@ del /q ".\xcopyexclude"</Command>
     <None Include="..\..\.editorconfig" />
     <None Include="assets\assets.inl" />
     <None Include="assets\functionalbinds.inl" />
+    <None Include="autogen\autogen_prototype_position.inl" />
+    <None Include="autogen\autogen_prototype_rotation.inl" />
+    <None Include="autogen\autogen_prototype_scale.inl" />
+    <None Include="autogen\autogen_prototype_velocity.inl" />
+    <None Include="autogen\autogen_reflector_position.inl" />
+    <None Include="autogen\autogen_reflector_rotation.inl" />
+    <None Include="autogen\autogen_reflector_scale.inl" />
+    <None Include="autogen\autogen_reflector_velocity.inl" />
     <None Include="common\hash.inl" />
     <None Include="containers\data_view.inl" />
     <None Include="containers\shared_data_view.inl" />
