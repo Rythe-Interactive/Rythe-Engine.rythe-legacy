@@ -15,12 +15,12 @@ namespace legion::physics
 
     void PhysxWrapperContainer::PopAndSwapRemoveWrapper(size_type id)
     {
-        auto optIndex = m_wrapperIDSet.index_of(id);
+        size_type index = m_wrapperIDSet.index_of(id);
 
-        if (optIndex.has_value())
+        if (index != m_wrapperIDSet.npos)
         {
             m_wrapperIDSet.erase(id);
-            std::swap(m_physxWrappers[optIndex.value()], m_physxWrappers[m_physxWrappers.size() - 1]);
+            std::swap(m_physxWrappers[index], m_physxWrappers[m_physxWrappers.size() - 1]);
             m_physxWrappers.pop_back();
         }
         
@@ -30,7 +30,7 @@ namespace legion::physics
     {
         if (m_wrapperIDSet.contains(id))
         {
-            PhysxInternalWrapper& wrapper = m_physxWrappers[m_wrapperIDSet.index_of(id).value()];
+            PhysxInternalWrapper& wrapper = m_physxWrappers[m_wrapperIDSet.index_of(id)];
             return std::optional<std::reference_wrapper< PhysxInternalWrapper>>{ wrapper };
         }
 
