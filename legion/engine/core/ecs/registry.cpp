@@ -185,6 +185,12 @@ namespace legion::core::ecs
         // So we need to clear the children list ourselves.
         target->children.clear();
 
+        // Destroy every component in the composition and clear the composition.
+        auto& composition = instance.m_entityCompositions.at(target->id);
+        for (auto& componentId : composition)
+            getFamily(componentId)->destroy_component(target);
+        composition.clear();
+
         // Mark entity as recyclable and invalidate ID.
         instance.m_recyclableEntities.push(target->id);
         target->id = invalid_id;
