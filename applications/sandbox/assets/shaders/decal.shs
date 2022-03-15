@@ -21,41 +21,6 @@ shader(fragment)
 {
     uniform sampler2D skybox;
 
-    vec3 FakeIBL(Camera camera, Material material)
-    {
-        vec3 viewDir = normalize(camera.toView);
-        vec3 lightDirection = reflect(-viewDir, material.normal);
-
-        vec3 halfwayVector = normalize(lightDirection + viewDir);
-
-        float halfwayDotView = dot01(halfwayVector, viewDir);
-        float normalDotHalfway = dot01(material.normal, halfwayVector);
-        float normalDotView = dot01(material.normal, viewDir);
-        float normalDotLight = dot01(material.normal, lightDirection);
-
-        float roughness = pow(material.roughness, 0.5);
-        float metallic = pow(material.metallic, 0.5);
-
-        // cook-torrance brdf
-        vec3 fresnelReflection = fresnelSchlick(mix(halfwayDotView, 1.0, roughness), material.F0);
-        float normalDistribution = DistributionGGX(normalDotHalfway, roughness);
-        float geometryShadowing = GeometrySmith(normalDotView, normalDotLight, roughness);
-        vec3 specular = CookTorranceBRDF(normalDistribution, fresnelReflection, geometryShadowing, normalDotLight, normalDotView);
-
-        vec3 diffuse = LambertianDiffuse(specular, material.albedo.rgb, metallic);
-
-        vec2 horDir = normalize(vec2(lightDirection.x ,lightDirection.z));
-        vec2 uv = vec2(1-(atan(horDir.y,horDir.x)/(2.0*pi)),1-(acos(dot(vec3(0.0,1.0,0.0),lightDirection))/pi));
-        vec3 specularRadiance = pow(textureLod(skybox, uv, textureQueryLevels(skybox) * roughness).rgb, vec3(2.2));
-
-        vec3 diffuseDirection = material.normal;
-        horDir = normalize(vec2(diffuseDirection.x, diffuseDirection.z));
-        uv = vec2(1.0 - (atan(horDir.y, horDir.x) / (2.0 * pi)), 1.0 - (acos(dot(vec3(0.0, 1.0, 0.0), diffuseDirection)) / pi));
-        vec3 diffuseRadiance = pow(textureLod(skybox, uv, textureQueryLevels(skybox)).rgb, vec3(2.2));
-
-        return max(diffuse + (specular * specularRadiance), vec3(0));
-    }
-
     void main(void)
     {
         // Get the world position from the gbuffer.

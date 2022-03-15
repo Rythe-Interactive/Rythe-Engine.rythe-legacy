@@ -77,6 +77,10 @@ namespace legion::rendering
         if (std::holds_alternative<texture_handle>(depthAttachment))
             sceneDepth = std::get<texture_handle>(depthAttachment);
 
+        texture_handle skyboxTex;
+        if (ecs::world.has_component<skybox_renderer>())
+            skyboxTex = ecs::world.get_component<skybox_renderer>()->material.get_param<texture_handle>(SV_SKYBOX);
+
         app::context_guard guard(context);
         if (!guard.contextIsValid())
         {
@@ -143,7 +147,7 @@ namespace legion::rendering
                         if (sceneDepth && mater.has_param<texture_handle>(SV_SCENEDEPTH))
                             mater.set_param<texture_handle>(SV_SCENEDEPTH, sceneDepth);
 
-                        if(mater.has_param<texture_handle>("skybox"))
+                        if (mater.has_param<texture_handle>("skybox"))
                             mater.set_param("skybox", TextureCache::create_texture("skybox", fs::view("assets://textures/HDRI/park.jpg")));
 
                         mater.bind();
@@ -216,14 +220,8 @@ namespace legion::rendering
             if (sceneDepth && material.has_param<texture_handle>(SV_SCENEDEPTH))
                 material.set_param<texture_handle>(SV_SCENEDEPTH, sceneDepth);
 
-            if (material.has_param<texture_handle>("skybox"))
-            {
-                ecs::filter<skybox_renderer> skyboxFilter;
-                if (!skyboxFilter.empty())
-                {
-                    material.set_param("skybox", skyboxFilter.at(0).get_component<skybox_renderer>()->material.get_param<texture_handle>("skybox"));
-                }
-            }
+            if (skyboxTex && material.has_param<texture_handle>(SV_SKYBOX))
+                material.set_param(SV_SKYBOX, skyboxTex);
 
             material.bind();
 

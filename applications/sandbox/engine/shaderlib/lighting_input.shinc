@@ -51,6 +51,31 @@ layout(std140, binding = SV_LIGHTS) readonly buffer LightsBuffer
 
 uniform uint lgn_light_count : SV_LIGHTCOUNT;
 
+uniform sampler2D lgn_skybox_tex : SV_SKYBOX;
+
+#if !defined(NO_MATH_EXT) || defined(MATH_EXT)
+#include <math_ext.shinc>
+
+int SkyboxMipLevels()
+{
+    return textureQueryLevels(lgn_skybox_tex);
+}
+
+vec4 SampleSkyboxLod(vec3 direction, float Lod)
+{
+    vec2 horDir = normalize(vec2(direction.x, direction.z));
+    vec2 uv = vec2(1.0 - (atan(horDir.y, horDir.x) / (2.0 * pi)), 1 - (acos(dot(vec3(0.0, 1.0, 0.0), direction)) / pi));
+    return textureLod(lgn_skybox_tex, uv, Lod);
+}
+
+vec4 SampleSkybox(vec3 direction)
+{
+    vec2 horDir = normalize(vec2(direction.x, direction.z));
+    vec2 uv = vec2(1.0 - (atan(horDir.y, horDir.x) / (2.0 * pi)), 1 - (acos(dot(vec3(0.0, 1.0, 0.0), direction)) / pi));
+    return texture(lgn_skybox_tex, uv);
+}
+#endif
+
 #include <texturemaps.shinc>
 
 #if !defined(NO_MATERIAL_INPUT)
@@ -93,4 +118,35 @@ vec3 GetAllLighting(Material material, Camera camera, vec3 worldPosition)
 
     return lighting + GetAmbientLight(material.ambientOcclusion, material.albedo.rgb);
 }
+
+#if defined(MATH_EXT)
+vec3 FakeIBL(Camera camera, Material material)
+{
+    vec3 viewDir = normalize(camera.toView);
+    vec3 lightDirection = reflect(-viewDir, material.normal);
+
+    vec3 halfwayVector = normalize(lightDirection + viewDir);
+
+    float halfwayDotView = dot01(halfwayVector, viewDir);
+    float normalDotHalfway = dot01(material.normal, halfwayVector);
+    float normalDotView = dot01(material.normal, viewDir);
+    float normalDotLight = dot01(material.normal, lightDirection);
+
+    float roughness = pow(material.roughness, 0.5);
+    float metallic = pow(material.metallic, 0.5);
+
+    // cook-torrance brdf
+    vec3 fresnelReflection = fresnelSchlick(mix(halfwayDotView, 1.0, roughness), material.F0);
+    float normalDistribution = DistributionGGX(normalDotHalfway, roughness);
+    float geometryShadowing = GeometrySmith(normalDotView, normalDotLight, roughness);
+    vec3 specular = CookTorranceBRDF(normalDistribution, fresnelReflection, geometryShadowing, normalDotLight, normalDotView);
+
+    vec3 diffuse = LambertianDiffuse(specular, material.albedo.rgb, metallic);
+
+    vec3 specularRadiance = pow(SampleSkyboxLod(lightDirection, SkyboxMipLevels() * roughness).rgb, vec3(2.2));
+    vec3 diffuseRadiance = pow(SampleSkyboxLod(material.normal, SkyboxMipLevels()).rgb, vec3(2.2));
+
+    return max(diffuse + (specular * specularRadiance), vec3(0));
+}
+#endif
 #endif

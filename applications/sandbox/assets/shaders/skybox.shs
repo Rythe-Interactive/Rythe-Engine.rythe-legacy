@@ -4,7 +4,6 @@
 generate(vertex, fragment)
 
 #include <stdio.shinc>
-#include <color_correction.shinc>
 #include <math_ext.shinc>
 
 shader(vertex)
@@ -18,19 +17,15 @@ shader(vertex)
 
 shader(fragment)
 {
-    uniform sampler2D skybox;
-
+    #include <lighting_input.shinc>
     void main(void)
     {
         if(SceneDepth().r < 1.0)
             discard;
 
         vec3 unitDir = normalize(stdin(position));
-        vec2 horDir = normalize(vec2(unitDir.x ,unitDir.z));
-        vec2 uv = vec2(1-(atan(horDir.y,horDir.x)/(2*pi)),1-(acos(dot(vec3(0,1,0),unitDir))/pi));
-        vec4 color = texture(skybox, uv);
 
-        fragment_color = color;
+        fragment_color = SampleSkybox(unitDir);
         fragment_depth = 0.999;
         fragment_normal = vec4(0.0);
         fragment_position = vec4(unitDir * FarZ, 1.0);
