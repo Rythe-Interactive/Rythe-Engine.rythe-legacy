@@ -3,7 +3,6 @@
 #include <type_traits>
 #include <algorithm>
 #include <stdexcept>
-#include <optional>
 #include <core/platform/platform.hpp>
 #include <core/types/primitives.hpp>
 
@@ -319,16 +318,6 @@ namespace legion::core
             return m_dense[index];
         }
 #pragma endregion
-
-        std::optional<size_type> index_of(const_reference val)
-        {
-            if (contains(val))
-            {
-                return m_sparse[val];
-            }
-
-            return std::nullopt;
-        }
 
         /**@brief Erases item from sparse_set.
          * @param val Value that needs to be erased.
