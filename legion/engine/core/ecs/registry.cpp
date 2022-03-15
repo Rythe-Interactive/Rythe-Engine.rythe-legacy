@@ -162,13 +162,6 @@ namespace legion::core::ecs
     void Registry::destroyEntity(entity target, bool recurse)
     {
         OPTICK_EVENT();
-
-        // Destroy every component in the composition and clear the composition.
-        auto& composition = instance.m_entityCompositions.at(target->id);
-        for (auto& componentId : composition)
-            getFamily(componentId)->destroy_component(target);
-        composition.clear();
-
         // Remove entity from filters to stop it from updating.
         FilterRegistry::markEntityDestruction(target);
 
@@ -196,6 +189,12 @@ namespace legion::core::ecs
         // Due to alive having been set before no children removed themselves from the children list.
         // So we need to clear the children list ourselves.
         target->children.clear();
+
+        // Destroy every component in the composition and clear the composition.
+        auto& composition = instance.m_entityCompositions.at(target->id);
+        for (auto& componentId : composition)
+            getFamily(componentId)->destroy_component(target);
+        composition.clear();
 
         // Mark entity as recyclable and invalidate ID.
         instance.m_recyclableEntities.push(target->id);
