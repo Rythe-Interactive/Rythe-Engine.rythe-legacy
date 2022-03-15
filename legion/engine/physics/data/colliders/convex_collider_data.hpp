@@ -5,19 +5,11 @@
 
 namespace legion::physics
 {
-    enum class collider_type
-    {
-        box,
-        quickhull_convex,
-        sphere,
-        not_set
-    };
-
     class ColliderData
     {
     public:
 
-        inline void setRegistered(bool isRead) { m_isRegistered = isRead; }
+        inline void setRegistered(bool registeredState) { m_isRegistered = registeredState; }
         inline bool isRegistered() const { return m_isRegistered; }
 
         inline const math::vec3& getOffset() const  { return m_positionOffset; }

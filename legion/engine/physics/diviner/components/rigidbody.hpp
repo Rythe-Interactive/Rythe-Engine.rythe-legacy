@@ -1,4 +1,5 @@
 #pragma once
+
 #include <core/core.hpp>
 #include <physics/diviner/physicsconstants.hpp>
 
