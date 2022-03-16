@@ -13,58 +13,17 @@ struct example_comp
 
 };
 
+namespace legion
+{
+    struct pause_action : public app::input_action<pause_action> {};
+    struct play_action : public app::input_action<play_action> {};
+    struct stop_action : public app::input_action<stop_action> {};
 struct tonemap_action : public lgn::app::input_action<tonemap_action> {};
 struct reload_shaders_action : public lgn::app::input_action<reload_shaders_action> {};
 struct switch_skybox_action : public lgn::app::input_action<switch_skybox_action> {};
 namespace legion::core
 {
-    struct example_policy : public particle_policy<example_policy>
-    {
-        NO_DTOR_RULE5_NOEXCEPT(example_policy);
-        ~example_policy() = default;
 
-        virtual void OnSetup(particle_emitter& emitter) override;
-        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override;
-        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
-        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override;
-    };
-
-    struct orbital_policy : public particle_policy<orbital_policy>
-    {
-        NO_DTOR_RULE5_NOEXCEPT(orbital_policy);
-        ~orbital_policy() = default;
-
-        const double C_MASS = 10.f;
-        const double P_MASS = 1.f;
-        const double G_FORCE = 100.0f;
-
-        virtual void OnSetup(particle_emitter& emitter) override;
-        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override;
-        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
-        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override;
-    };
-
-    struct fountain_policy : public particle_policy<fountain_policy>
-    {
-        NO_DTOR_RULE5_NOEXCEPT(fountain_policy);
-        ~fountain_policy() = default;
-
-        virtual void OnSetup(particle_emitter& emitter) override;
-        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override;
-        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
-        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override;
-    };
-
-    struct rendering_policy : particle_policy<rendering_policy>
-    {
-        NO_DTOR_RULE5_NOEXCEPT(rendering_policy);
-        ~rendering_policy() = default;
-
-        virtual void OnSetup(particle_emitter& emitter) override;
-        virtual void OnInit(particle_emitter& emitter, size_type start, size_type end) override;
-        virtual void OnUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
-        virtual void OnDestroy(particle_emitter& emitter, size_type start, size_type end) override;
-    };
 }
 
 class ExampleSystem final : public legion::System<ExampleSystem>
@@ -382,4 +341,10 @@ public:
             //raiseEvent<events::exit>();
         }
     }
+
+    void playEmitter(legion::play_action& action);
+
+    void pauseEmitter(legion::pause_action& action);
+
+    void stopEmitter(legion::stop_action& action);
 };
