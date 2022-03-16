@@ -14,7 +14,6 @@ namespace legion::core::scenemanagement
 
     ecs::entity SceneManager::create_scene_entity()
     {
-        ecs::entity sceneEntity;
         //static ecs::filter sceneEntities = m_ecs->createQuery<scenemanagement::scene>();
         //sceneEntities.queryEntities();
         //if (sceneEntities.size() == 0)
@@ -50,7 +49,7 @@ namespace legion::core::scenemanagement
         //{
         //    sceneEntity = sceneEntities[0];
         //}
-        return sceneEntity;
+        return createEntity();
     }
 
     bool SceneManager::create_scene(const std::string& name)
