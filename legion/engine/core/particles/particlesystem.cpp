@@ -7,7 +7,6 @@ namespace legion::core
     void ParticleSystem::setup()
     {
         log::debug("ParticleSystem setup");
-
         bindToEvent<events::component_creation<particle_emitter>, &ParticleSystem::emitter_setup>();
     }
 
@@ -22,17 +21,20 @@ namespace legion::core
         for (auto& ent : filter)
         {
             auto& emitter = ent.get_component<particle_emitter>().get();
-            emitter.elapsedTime += deltaTime;
+            if (emitter.m_pause)
+                continue;
 
-            if (emitter.currentParticleCount < emitter.maxSpawnCount)
+            emitter.m_elapsedTime += deltaTime;
+
+            if (emitter.m_particleCount < emitter.m_capacity)
             {
-                float scaledSpawnRate = (deltaTime / emitter.spawnInterval) * emitter.spawnRate;
-                emitter.spawnBuffer += scaledSpawnRate;
-                if (emitter.spawnBuffer > emitter.spawnRate)
+                float scaledSpawnRate = (deltaTime / emitter.m_spawnInterval) * emitter.m_spawnRate;
+                emitter.m_spawnBuffer += scaledSpawnRate;
+                if (emitter.m_spawnBuffer > emitter.m_spawnRate)
                 {
-                    emitter.spawnBuffer = math::min(emitter.spawnBuffer, (float)emitter.maxSpawnCount);
-                    emit(emitter, emitter.spawnBuffer);
-                    emitter.spawnBuffer -= math::trunc(emitter.spawnBuffer);
+                    emitter.m_spawnBuffer = math::min(emitter.m_spawnBuffer, (float)emitter.m_capacity);
+                    emit(emitter, emitter.m_spawnBuffer);
+                    emitter.m_spawnBuffer -= math::trunc(emitter.m_spawnBuffer);
                 }
             }
 
@@ -43,30 +45,30 @@ namespace legion::core
     void ParticleSystem::emitter_setup(L_MAYBEUNUSED events::component_creation<particle_emitter>& event)
     {
         auto& emitter = event.entity.get_component<particle_emitter>().get();
-        for (size_type i = 0; i < emitter.maxSpawnCount; i++)
-            emitter.set_alive(i, false);
+        emitter.resize(emitter.m_capacity);
     }
 
     void ParticleSystem::emit(particle_emitter& emitter, size_type count)
     {
-        auto startCount = emitter.currentParticleCount;
-        auto targetCount = emitter.currentParticleCount + count;
-        if (targetCount >= emitter.maxSpawnCount)
-            targetCount = emitter.maxSpawnCount - startCount;
+        auto startCount = emitter.m_particleCount;
+        if (emitter.m_particleCount + count >= emitter.m_capacity)
+            count = emitter.m_capacity - startCount;
 
-        emitter.resize(targetCount);
-        emitter.set_alive(startCount, targetCount, true);
-        emitter.currentParticleCount = targetCount;
+        emitter.set_alive(startCount, count, true);
+        emitter.m_particleCount += count;
 
         auto& ageBuffer = emitter.get_buffer<life_time>("lifetimeBuffer");
-        for (size_type idx = startCount; idx < targetCount; idx++)
+        auto minLifeTime = emitter.has_uniform<float>("minLifeTime") ? emitter.get_uniform<float>("minLifeTime") : 0.f;
+        auto maxLifeTime = emitter.has_uniform<float>("maxLifeTime") ? emitter.get_uniform<float>("maxLifeTime") : 0.f;
+
+        for (size_type idx = startCount; idx < emitter.m_particleCount; idx++)
         {
             ageBuffer.at(idx).age = 0;
-            ageBuffer.at(idx).max = math::linearRand(emitter.minLifeTime, emitter.maxLifeTime);
+            ageBuffer.at(idx).max = math::linearRand(minLifeTime, maxLifeTime);
         }
 
-        for (auto& policy : emitter.particlePolicies)
-            policy->OnInit(emitter, startCount, targetCount);
+        for (auto& policy : emitter.m_particlePolicies)
+            policy->onInit(emitter, startCount, emitter.m_particleCount);
     }
 
 
@@ -75,7 +77,7 @@ namespace legion::core
         auto& ageBuffer = emitter.get_buffer<life_time>("lifetimeBuffer");
         size_type destroyed = 0;
         size_type activeCount = 0;
-        for (activeCount = 0; activeCount < emitter.currentParticleCount; activeCount++)
+        for (activeCount = 0; activeCount < emitter.m_particleCount; activeCount++)
         {
             if (!emitter.is_alive(activeCount))
                 break;
@@ -83,7 +85,7 @@ namespace legion::core
             auto& lifeTime = ageBuffer[activeCount];
             lifeTime.age += deltaTime;
         }
-        if (!emitter.infinite)
+        if (emitter.has_uniform<float>("minLifeTime") && emitter.has_uniform<float>("maxLifeTime"))
         {
             for (size_type i = 0; i < activeCount; i++)
             {
@@ -91,19 +93,17 @@ namespace legion::core
                 if (lifeTime.age > lifeTime.max)
                 {
                     emitter.set_alive(i, false);
-                    emitter.swap(i, emitter.currentParticleCount - 1);
-                    emitter.currentParticleCount--;
+                    emitter.swap(i, emitter.m_particleCount - 1);
+                    emitter.m_particleCount--;
                     destroyed++;
                 }
             }
-            auto targetCount = emitter.currentParticleCount + destroyed;
-            for (auto& policy : emitter.particlePolicies)
-                policy->OnDestroy(emitter, emitter.currentParticleCount, targetCount);
-
-            emitter.resize(emitter.currentParticleCount);
+            auto targetCount = emitter.m_particleCount + destroyed;
+            for (auto& policy : emitter.m_particlePolicies)
+                policy->onDestroy(emitter, emitter.m_particleCount, targetCount);
         }
 
-        for (auto& policy : emitter.particlePolicies)
-            policy->OnUpdate(emitter, deltaTime, emitter.currentParticleCount);
+        for (auto& policy : emitter.m_particlePolicies)
+            policy->onUpdate(emitter, deltaTime, emitter.m_particleCount);
     }
 }

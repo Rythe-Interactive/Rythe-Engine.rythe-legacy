@@ -13,8 +13,8 @@ namespace legion::core
         {
             auto baseDir = math::sphericalRand(1.f);
             baseDir.y = 0;
-            int minBound = 6;
-            int maxBound = 9;
+            int minBound = 2;
+            int maxBound = 4;
             auto pos = math::normalize(baseDir) * minBound + math::normalize(baseDir) * (idx % (maxBound - minBound));
             auto dist = math::length(pos);
             pos.y = math::sin(dist / math::pi<float>()) * 5.f * (pos.x / maxBound);
@@ -78,7 +78,7 @@ namespace legion::core
         for (size_type idx = start; idx < end; idx++)
         {
             posBuffer[idx] = math::vec3::zero;
-            auto direction = math::vec3::up + math::normalize(math::vec3(math::linearRand(-5.f, 5.f), math::linearRand(-5.f, 5.f), math::linearRand(-5.f, 5.f)));
+            auto direction = math::vec3::up + math::normalize(math::vec3(math::linearRand(-5.f, 5.f), 0.f, math::linearRand(-5.f, 5.f)));
             velBuffer[idx] = direction * initForce;
         }
     }
@@ -119,7 +119,7 @@ namespace legion::core
 
         auto scaleFactor = emitter.get_uniform<float>("scaleFactor");
 
-        if (!emitter.infinite)
+        if (!emitter.has_uniform<float>("minLifeTime") && !emitter.has_uniform<float>("maxLifeTime"))
         {
             for (size_type idx = 0; idx < count; idx++)
             {

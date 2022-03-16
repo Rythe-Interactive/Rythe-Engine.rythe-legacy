@@ -6,95 +6,90 @@
 
 namespace legion::core
 {
-    template<typename bufferType>
-    particle_buffer<bufferType>& particle_emitter::create_buffer(const std::string_view& name, particle_buffer<bufferType> buffer)
-    {
-        return create_buffer<bufferType>(name, buffer.data());
-    }
 
-    template<typename bufferType>
-    particle_buffer<bufferType>& particle_emitter::create_buffer(const std::string_view& name, std::vector<bufferType> buffer)
+    template<typename bufferType, typename... Args>
+    particle_buffer<bufferType>& particle_emitter::create_buffer(const std::string_view& name, Args&&... args)
     {
-        auto& bffer = create_buffer<bufferType>(name);
-        bffer.insert(bffr.begin(), buffer.begin(), buffer.end());
-        return bffr;
-    }
-
-    template<typename bufferType>
-    particle_buffer<bufferType>& particle_emitter::create_buffer(const std::string_view& name)
-    {
-        id_type idName = nameHash(name);
-        if (particleBuffers.count(idName) > 0)
+        id_type nameId = nameHash(name);
+        if (has_buffer<bufferType>(nameId))
         {
-            log::warn("Buffer \"{}\" of type {} already exists", name, typeid(bufferType).name());
-            return *dynamic_cast<particle_buffer<bufferType>*>(particleBuffers.at(idName).get());
+            log::warn("Buffer \"{}\" of type {} already exists", name, nameOfType<bufferType>());
+            return get_buffer<bufferType>(name);
         }
-        particleBuffers.try_emplace(idName, std::make_unique<particle_buffer<bufferType>>());
-        auto& bffr = *dynamic_cast<particle_buffer<bufferType>*>(particleBuffers.at(idName).get());
-        bffr.resize(currentParticleCount);
+        auto [it, _] = m_particleBuffers.emplace(nameId, std::make_unique<particle_buffer<bufferType>>(std::forward<Args>(args)...));
+        auto& bffr = *dynamic_cast<particle_buffer<bufferType>*>(it->second.get());
+        bffr.resize(m_capacity);
         return bffr;
     }
 
     template<typename bufferType>
     particle_buffer<bufferType>& particle_emitter::get_buffer(const std::string_view& name)
     {
-        id_type idName = nameHash(name);
-        if (particleBuffers.count(idName) < 1)
+        id_type nameId = nameHash(name);
+        if (!has_buffer<bufferType>(nameId))
         {
-            log::warn("Buffer \"{}\" of type {} does not exist, one will be created for you", name, typeid(bufferType).name());
-            create_buffer<bufferType>(name);
+            log::warn("Buffer \"{}\" of type {} does not exist, one will be created for you", name, nameOfType<bufferType>());
+            return create_buffer<bufferType>(name);
         }
-        return *dynamic_cast<particle_buffer<bufferType>*>(particleBuffers.at(idName).get());
-    }
-
-
-    template<typename uniformType>
-    uniformType& particle_emitter::create_uniform(const std::string_view& name, particle_uniform<uniformType> val)
-    {
-        return create_uniform<uniformType>(name, val.uniform);
+        return *dynamic_cast<particle_buffer<bufferType>*>(m_particleBuffers.at(nameId).get());
     }
 
     template<typename uniformType>
-    uniformType& particle_emitter::create_uniform(const std::string_view& name, uniformType val)
+    bool particle_emitter::has_buffer(const std::string_view& name )noexcept
     {
-        auto& value = create_uniform<uniformType>(name);
-        value = val;
-        return value;
+        return m_particleBuffers.count(nameHash(name)) > 0;
     }
 
     template<typename uniformType>
-    uniformType& particle_emitter::create_uniform(const std::string_view& name)
+    bool particle_emitter::has_buffer(id_type nameId) noexcept
     {
-        id_type idName = nameHash(name);
-        if (particleUniforms.count(idName) < 1)
-            particleUniforms.try_emplace(idName, std::make_unique<particle_uniform<uniformType>>());
+        return m_particleBuffers.count(nameId) > 0;
+    }
 
-        return get_uniform<uniformType>(name);
+    template<typename uniformType, typename... Args>
+    uniformType& particle_emitter::create_uniform(const std::string_view& name, Args&&... args)
+    {
+        id_type nameId = nameHash(name);
+        if (has_uniform<uniformType>(nameId))
+        {
+            log::warn("Uniform \"{}\" of type {} already exists", name, nameOfType<uniformType>());
+            return get_uniform<uniformType>(name);
+        }
+        else
+            return dynamic_cast<particle_uniform<uniformType>*>(m_particleUniforms.emplace(nameId, std::make_unique<particle_uniform<uniformType>>(std::forward<Args>(args)...)).first->second.get())->get();
     }
 
     template<typename uniformType>
     uniformType& particle_emitter::get_uniform(const std::string_view& name)
     {
-        id_type idName = nameHash(name);
-        if (particleUniforms.count(idName) < 1)
-            create_uniform<uniformType>(name);
-        auto& uniform = *dynamic_cast<particle_uniform<uniformType>*>(particleUniforms.at(idName).get());
-        return uniform.get();
+        id_type nameId = nameHash(name);
+        if (!has_uniform<uniformType>(nameId))
+        {
+            log::warn("Uniform \"{}\" of type {} does not exist, one will be created for you", name, nameOfType<uniformType>());
+            return create_uniform<uniformType>(name);
+        }
+        return dynamic_cast<particle_uniform<uniformType>*>(m_particleUniforms.at(nameId).get())->get();
     }
 
-    template<typename Policy>
-    particle_policy<Policy>& particle_emitter::add_policy()
+    template<typename uniformType>
+    bool particle_emitter::has_uniform(const std::string_view& name) noexcept
     {
-        particlePolicies.push_back(std::make_unique<Policy>());
-        particlePolicies[particlePolicies.size() - 1]->OnSetup(*this);
-        return *dynamic_cast<particle_policy<Policy>*>(particlePolicies.at(particlePolicies.size() - 1).get());
+        return m_particleUniforms.count(nameHash(name)) > 0;
     }
 
-    template<typename Policy>
-    particle_policy<Policy>& particle_emitter::add_policy(Policy policy)
+    template<typename uniformType>
+    bool particle_emitter::has_uniform(id_type nameId) noexcept
     {
-        particlePolicies.push_back(std::make_unique<Policy>(policy));
-        particlePolicies[particlePolicies.size() - 1]->OnSetup(*this);
-        return *dynamic_cast<particle_policy<Policy>*>(particlePolicies.at(particlePolicies.size() - 1).get());
+        return m_particleUniforms.count(nameId) > 0;
+    }
+
+    template<typename Policy, typename... Args>
+    particle_policy<Policy>& particle_emitter::add_policy(Args&&... args)
+    {
+        m_particlePolicies.push_back(std::make_unique<Policy>(std::forward<Args...>(args)...));
+        auto& policy = m_particlePolicies[m_particlePolicies.size() - 1];
+        resize(m_capacity);
+        policy->setup(*this);
+        return *dynamic_cast<particle_policy<Policy>*>(policy.get());
     }
 }

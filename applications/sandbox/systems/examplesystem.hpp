@@ -10,6 +10,13 @@ struct example_comp
 
 };
 
+namespace legion
+{
+    struct pause_action : public app::input_action<pause_action> {};
+    struct play_action : public app::input_action<play_action> {};
+    struct stop_action : public app::input_action<stop_action> {};
+}
+
 class ExampleSystem final : public legion::System<ExampleSystem>
 {
     lgn::size_type frames = 0;
@@ -136,4 +143,10 @@ public:
             //raiseEvent<events::exit>();
         }
     }
+
+    void playEmitter(legion::play_action& action);
+
+    void pauseEmitter(legion::pause_action& action);
+
+    void stopEmitter(legion::stop_action& action);
 };

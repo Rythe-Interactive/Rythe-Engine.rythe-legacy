@@ -22,41 +22,41 @@ namespace legion::core
     template<typename policy>
     struct particle_policy;
 
+    enum Space
+    {
+        WORLD,
+        EMITTER
+    };
+
     struct particle_emitter
     {
-    public:
+    private:
         //Maxium amount of particles allowed in an emitter      default: 1000
-        size_type maxSpawnCount = 1000;
-        size_type currentParticleCount = 0;
+        size_type m_capacity = 1000;
+        //Current particle count
+        size_type m_particleCount = 0;
         //How many particles can spawn every interval     default: 1
-        size_type spawnRate = 1;
-        float spawnBuffer = 0.0f;
-
-        //Minimum life time for a particle      default: 1.f
-        float minLifeTime = 1.f;
-        //Maxium life time for a particle       default: 2.f
-        float maxLifeTime = 2.f;
-        //How much time must pass before you spawn more particles       default: .1f
-        float spawnInterval = .1f;
-        //Elapsed time since last spawn interval        default: 0.f
-        float elapsedTime = 0.f;
+        size_type m_spawnRate = 1;
 
         //If enabled the particle system will be paused         default: false
-        bool pause = false;
+        bool m_pause = false;
+        //How much time must pass before you spawn more particles       default: .1f
+        float m_spawnInterval = .1f;
+        //Regulates the spawnrate to stay consistent over different timesteps
+        float m_spawnBuffer = 0.0f;
+        //Elapsed time since last spawn interval        default: 0.f
+        float m_elapsedTime = 0.f;
+    public:
+        //Should particles be in the emitters space or the world space      default: true
+        bool localSpace = true;
         //If enabled no particles can die and the emitter will keep spawning them until it reaches the limit        default: false
-        bool infinite = false;
-        //If enabled particles positions will be in the local space of the emitter      default: true
-        bool localPosition = true;
-        //If enabled particles rotations will be in the local space of the emitter      default: true
-        bool localRotation = true;
-        //If enabled particles scales will be in the local space of the emitter     default: true
-        bool localScale = true;
+        bool particleAging = false;
 
     private:
-        std::vector<bool> livingBuffer{};
-        std::vector<std::unique_ptr<particle_policy_base>> particlePolicies;
-        std::unordered_map<id_type, std::unique_ptr<particle_buffer_base>> particleBuffers;
-        std::unordered_map<id_type, std::unique_ptr<particle_uniform_base>> particleUniforms;
+        std::vector<bool> m_livingBuffer{};
+        std::vector<std::unique_ptr<particle_policy_base>> m_particlePolicies;
+        std::unordered_map<id_type, std::unique_ptr<particle_buffer_base>> m_particleBuffers;
+        std::unordered_map<id_type, std::unique_ptr<particle_uniform_base>> m_particleUniforms;
 
     public:
         particle_emitter() = default;
@@ -64,39 +64,60 @@ namespace legion::core
         particle_emitter(const particle_emitter&) = delete;
         ~particle_emitter() = default;
 
-
-        template<typename bufferType>
-        particle_buffer<bufferType>& create_buffer(const std::string_view& name, particle_buffer<bufferType> buffer);
-        template<typename bufferType>
-        particle_buffer<bufferType>& create_buffer(const std::string_view& name, std::vector<bufferType> buffer);
-        template<typename bufferType>
-        particle_buffer<bufferType>& create_buffer(const std::string_view& name);
+        template<typename bufferType,typename... Args>
+        particle_buffer<bufferType>& create_buffer(const std::string_view& name, Args&&... args);
 
         template<typename bufferType>
         particle_buffer<bufferType>& get_buffer(const std::string_view& name);
 
+        template<typename uniformType>
+        bool has_buffer(const std::string_view& name) noexcept;
+        template<typename uniformType>
+        bool has_buffer(id_type nameId) noexcept;
 
-        template<typename uniformType>
-        uniformType& create_uniform(const std::string_view& name, particle_uniform<uniformType> val);
-        template<typename uniformType>
-        uniformType& create_uniform(const std::string_view& name, uniformType val);
-        template<typename uniformType>
-        uniformType& create_uniform(const std::string_view& name);
+        template<typename uniformType,typename... Args>
+        uniformType& create_uniform(const std::string_view& name, Args&&... args);
 
         template<typename uniformType>
         uniformType& get_uniform(const std::string_view& name);
 
-        template<typename Policy>
-        particle_policy<Policy>& add_policy();
-        template<typename Policy>
-        particle_policy<Policy>& add_policy(Policy policy);
+        template<typename uniformType>
+        bool has_uniform(const std::string_view& name) noexcept;
+        template<typename uniformType>
+        bool has_uniform(id_type nameId) noexcept;
 
+        template<typename Policy, typename... Args>
+        particle_policy<Policy>& add_policy(Args&&... args);
+
+        //Plays the particle emitter
+        void play() noexcept;
+        //Pauses the particle emitter
+        void pause() noexcept;
+        //Pauses and resets the particle emitter
+        void stop();
+
+        //Set how many particles should spawn per intereval
+        void set_spawn_rate(size_type rate) noexcept;
+        //Set the interval of particle spawning
+        void set_spawn_interval(float interval) noexcept;
+        //Set what space particles will be in
+        void set_particle_space(Space coordSpace) noexcept;
+        //Enables a particle
         void set_alive(size_type idx, bool alive);
-        void set_alive(size_type start, size_type end, bool alive);
-        bool is_alive(size_type idx);
+        //Enables a range of particles
+        void set_alive(size_type start, size_type count, bool alive);
+        //Returns whether the particle is alive or dead
+        bool is_alive(size_type idx) const;
 
+        //Swaps two particles indecies in every buffer
         void swap(size_type idx1, size_type idx2);
+        //Returns the current living particle count 
+        size_type size() noexcept;
+        //Resizes all buffers to the chosen size, and modifies the capacity
         void resize(size_type size);
+        void resize_buffers(size_type size);
+        //Returns the maximum particle count
+        size_type capacity() const noexcept;
 
         friend class ParticleSystem;
     };

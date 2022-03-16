@@ -48,24 +48,28 @@ namespace legion::rendering
             batch.second.insert(batch.second.end(), posBuffer.size(), math::mat4());
 
             scale scal = math::vec3::one;
-            if (emitter.localScale && ent.has_component<scale>())
-                scal = ent.get_component<scale>();
-
-            rotation rot = math::quat(0, 0, 0, 1);
-            if (emitter.localRotation && ent.has_component<rotation>())
-                rot = ent.get_component<rotation>().get();
-
+            rotation rot;
             position origin = math::vec3();
-            if (emitter.localPosition && ent.has_component<position>())
-                origin = ent.get_component<position>().get();
+            if (emitter.localSpace)
+            {
+                if (ent.has_component<scale>())
+                    scal = ent.get_component<scale>();
+
+                 if (ent.has_component<rotation>())
+                     rot = ent.get_component<rotation>().get();
+
+                if (ent.has_component<position>())
+                    origin = ent.get_component<position>().get();
+            }
 
 
             queueJobs(posBuffer.size(), [&](id_type jobId)
                 {
                     if (emitter.is_alive(jobId))
                     {
+                        auto transScale = scaleBuffer[jobId] * scal;
                         auto transPos = origin + math::rotate(rot, posBuffer[jobId]) * scal;
-                        batch.second[jobId + start] = math::compose(scaleBuffer[jobId] * scal, rot, transPos);
+                        batch.second[jobId + start] = math::compose(transScale, rot, transPos);
                     }
                 }).wait();
         }
