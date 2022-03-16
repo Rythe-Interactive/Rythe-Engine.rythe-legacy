@@ -42,8 +42,6 @@ namespace legion::physics
         }
 
         setupCubeWorldTestScene();
-
-        bindToEvent<events::component_destruction<self_destruct_component>, &PhysXTestSystem::logDestroyerDestroy>();
     }
 
     void PhysXTestSystem::update(legion::time::span deltaTime)
