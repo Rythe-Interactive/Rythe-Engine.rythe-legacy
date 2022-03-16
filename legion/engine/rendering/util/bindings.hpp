@@ -41,6 +41,8 @@
 
 /* uniform 23 */  #define SV_MATERIAL       SV_ALBEDO
 
+/* uniform 28 */  #define SV_SKYBOX         SV_HEIGHTSCALE + 1
+
 /* attachment 0 */ #define FRAGMENT_ATTACHMENT  GL_COLOR_ATTACHMENT0
 /* attachment 1 */ #define NORMAL_ATTACHMENT    FRAGMENT_ATTACHMENT + 1
 /* attachment 2 */ #define POSITION_ATTACHMENT  NORMAL_ATTACHMENT + 1
@@ -88,6 +90,8 @@ namespace legion::rendering::detail
             defines.push_back("SV_HEIGHTSCALE=" +  std::to_string(SV_HEIGHTSCALE));
 
             defines.push_back("SV_MATERIAL=" +     std::to_string(SV_MATERIAL));
+
+            defines.push_back("SV_SKYBOX=" +       std::to_string(SV_SKYBOX));
 
             defines.push_back("SV_FRAGMENTOUT=" +    std::to_string(FRAGMENT_ATTACHMENT - GL_COLOR_ATTACHMENT0));
             defines.push_back("SV_NORMALOUT=" +      std::to_string(NORMAL_ATTACHMENT - GL_COLOR_ATTACHMENT0));

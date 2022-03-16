@@ -88,16 +88,16 @@ vec3 BaierToneMap(vec3 color)
     return mix(-((rhrd*rhrd*rhrd*1.1)-(rhrd*rhrd*2.0))/0.9, rhrd, vec3(rhrd.r > 1.0, rhrd.g > 1.0, rhrd.b > 1.0));
 }
 
-vec3 LegionToneMap(vec3 color)
+vec3 LegionToneMapOld(vec3 color)
 {
     vec3 rhrd = SimpleReinhard(color);
     return mix(-((rhrd*rhrd*rhrd*rhrd*rhrd*368)-(rhrd*rhrd*rhrd*rhrd*151))/1.1, rhrd, vec3(rhrd.r > 0.306, rhrd.g > 0.306, rhrd.b > 0.306));
 }
 
-vec3 LegionToneMapOld(vec3 color)
+vec3 LegionToneMap(vec3 color)
 {
     vec3 rhrd = SimpleReinhard(color);
-    return mix(-((rhrd*rhrd*rhrd*4.2)-(rhrd*rhrd*4.1))/1.0, rhrd, vec3(rhrd.r > 0.5, rhrd.g > 0.5, rhrd.b > 0.5));
+    return mix(-((rhrd*rhrd*rhrd*4.2)-(rhrd*rhrd*4.1)), rhrd, vec3(rhrd.r > 0.5, rhrd.g > 0.5, rhrd.b > 0.5));
 }
 
 vec3 FunkyToneMap(vec3 color)

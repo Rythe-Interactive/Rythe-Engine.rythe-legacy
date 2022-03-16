@@ -61,7 +61,6 @@ namespace legion
                 decalMaterial.set_param(SV_MRDAO, TextureCache::create_texture("engine://resources/default/MRDAo"_view));
                 decalMaterial.set_param(SV_EMISSIVE, TextureCache::create_texture("engine://resources/default/emissive"_view));
                 decalMaterial.set_param(SV_HEIGHTSCALE, 0.f);
-                decalMaterial.set_param("skycolor", math::color(0.1f, 0.3f, 1.0f));
             }
 
             auto decalEntity = createEntity("Decal");

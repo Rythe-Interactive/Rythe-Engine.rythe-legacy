@@ -144,8 +144,12 @@ namespace legion::rendering
 
                 material_handle material = MaterialCache::create_material(name + "/" + mat.name, defaultLitShader);
 
-                if (mat.doubleSided)
+                if(mat.doubleSided && (mat.transparencyMode == transparency_mode::Blend))
+                    material.set_variant("double_sided_transparent");
+                else if (mat.doubleSided)
                     material.set_variant("double_sided");
+                else if (mat.transparencyMode == transparency_mode::Blend)
+                    material.set_variant("transparent");
 
                 material.set_param("alphaCutoff", mat.alphaCutoff);
 
@@ -289,8 +293,12 @@ namespace legion::rendering
 
                 material_handle material = MaterialCache::create_material(name + "/" + mat.name, defaultLitShader);
 
-                if (mat.doubleSided)
+                if (mat.doubleSided && (mat.transparencyMode == transparency_mode::Blend))
+                    material.set_variant("double_sided_transparent");
+                else if (mat.doubleSided)
                     material.set_variant("double_sided");
+                else if (mat.transparencyMode == transparency_mode::Blend)
+                    material.set_variant("transparent");
 
                 material.set_param("alphaCutoff", mat.alphaCutoff);
 
@@ -434,8 +442,12 @@ namespace legion::rendering
 
                 material_handle material = MaterialCache::create_material(name + "/" + mat.name, defaultLitShader);
 
-                if (mat.doubleSided)
+                if (mat.doubleSided && (mat.transparencyMode == transparency_mode::Blend))
+                    material.set_variant("double_sided_transparent");
+                else if (mat.doubleSided)
                     material.set_variant("double_sided");
+                else if (mat.transparencyMode == transparency_mode::Blend)
+                    material.set_variant("transparent");
 
                 material.set_param("alphaCutoff", mat.alphaCutoff);
 
@@ -579,8 +591,12 @@ namespace legion::rendering
 
                 material_handle material = MaterialCache::create_material(meshName + "/" + mat.name, defaultLitShader);
 
-                if (mat.doubleSided)
+                if (mat.doubleSided && (mat.transparencyMode == transparency_mode::Blend))
+                    material.set_variant("double_sided_transparent");
+                else if (mat.doubleSided)
                     material.set_variant("double_sided");
+                else if (mat.transparencyMode == transparency_mode::Blend)
+                    material.set_variant("transparent");
 
                 material.set_param("alphaCutoff", mat.alphaCutoff);
 
@@ -723,8 +739,12 @@ namespace legion::rendering
 
                 material_handle material = MaterialCache::create_material(name + "/" + mat.name, defaultLitShader);
 
-                if (mat.doubleSided)
+                if (mat.doubleSided && (mat.transparencyMode == transparency_mode::Blend))
+                    material.set_variant("double_sided_transparent");
+                else if (mat.doubleSided)
                     material.set_variant("double_sided");
+                else if (mat.transparencyMode == transparency_mode::Blend)
+                    material.set_variant("transparent");
 
                 material.set_param("alphaCutoff", mat.alphaCutoff);
 
@@ -869,8 +889,12 @@ namespace legion::rendering
 
                 material_handle material = MaterialCache::create_material(meshName + "/" + mat.name, defaultLitShader);
 
-                if (mat.doubleSided)
+                if (mat.doubleSided && (mat.transparencyMode == transparency_mode::Blend))
+                    material.set_variant("double_sided_transparent");
+                else if (mat.doubleSided)
                     material.set_variant("double_sided");
+                else if (mat.transparencyMode == transparency_mode::Blend)
+                    material.set_variant("transparent");
 
                 material.set_param("alphaCutoff", mat.alphaCutoff);
 

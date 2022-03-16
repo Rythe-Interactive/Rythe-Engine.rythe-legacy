@@ -152,13 +152,16 @@ vec3 CalculateLight(Light light, Camera camera, Material material, vec3 worldPos
     float normalDotView = dot01(material.normal, viewDir);
     float normalDotLight = dot01(material.normal, lightDirection);
 
+    float roughness = pow(material.roughness, 0.5);
+    float metallic = pow(material.metallic, 0.5);
+
 	// cook-torrance brdf
-	vec3 fresnelReflection = fresnelSchlick(mix(halfwayDotView, 1.0, material.roughness), material.F0);
-	float normalDistribution = DistributionGGX(normalDotHalfway, material.roughness);
-	float geometryShadowing = GeometrySmith(normalDotView, normalDotLight, material.roughness);
+	vec3 fresnelReflection = fresnelSchlick(mix(halfwayDotView, 1.0, roughness), material.F0);
+	float normalDistribution = DistributionGGX(normalDotHalfway, roughness);
+	float geometryShadowing = GeometrySmith(normalDotView, normalDotLight, roughness);
     vec3 specular = CookTorranceBRDF(normalDistribution, fresnelReflection, geometryShadowing, normalDotLight, normalDotView);
 
-    vec3 diffuse = LambertianDiffuse(fresnelReflection, material.albedo.rgb, material.metallic);
+    vec3 diffuse = LambertianDiffuse(fresnelReflection, material.albedo.rgb, metallic);
 
     return max((diffuse + specular) * radiance * normalDotLight.xxx, vec3(0));
 }

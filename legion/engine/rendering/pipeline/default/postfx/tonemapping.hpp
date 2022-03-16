@@ -13,10 +13,14 @@ namespace legion::rendering
     {
     private:
         static std::atomic<id_type> m_currentShader;
-        float exposure;
+        static std::atomic_bool m_autoExposure;
+        static std::atomic<float> m_exposure;
 
     public:
-        static void setAlgorithm(tonemapping_type type);
+        static void setAlgorithm(tonemapping_type type) noexcept;
+
+        static void enableAutoExposure(bool enable) noexcept;
+        static void setExposure(float value) noexcept;
 
         void setup(app::window& context) override;
 

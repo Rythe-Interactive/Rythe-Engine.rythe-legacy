@@ -4,6 +4,7 @@
 #include <rendering/pipeline/default/stages/lightbufferstage.hpp>
 #include <rendering/pipeline/default/stages/meshbatchingstage.hpp>
 #include <rendering/pipeline/default/stages/meshrenderstage.hpp>
+#include <rendering/pipeline/default/stages/transparencyrenderstage.hpp>
 #include <rendering/pipeline/default/stages/debugrenderstage.hpp>
 #include <rendering/pipeline/default/stages/postprocessingstage.hpp>
 #include <rendering/pipeline/default/stages/submitstage.hpp>
@@ -11,6 +12,7 @@
 #include <rendering/pipeline/default/postfx/fxaa.hpp>
 #include <rendering/pipeline/default/postfx/bloom.hpp>
 #include <rendering/pipeline/default/postfx/depthoffield.hpp>
+#include <rendering/pipeline/default/postfx/skybox.hpp>
 #include <rendering/data/buffer.hpp>
 
 
@@ -24,14 +26,16 @@ namespace legion::rendering
         attachStage<LightBufferStage>();
         attachStage<MeshBatchingStage>();
         attachStage<MeshRenderStage>();
+        attachStage<TransparencyRenderStage>();
         attachStage<DebugRenderStage>();
         attachStage<PostProcessingStage>();
         attachStage<SubmitStage>();
 
-        PostProcessingStage::addEffect<Tonemapping>();
-        PostProcessingStage::addEffect<Bloom>(-64);
-        //PostProcessingStage::addEffect<DepthOfField>(-80);
-        PostProcessingStage::addEffect<FXAA>(-90);
+        PostProcessingStage::addEffect<Skybox>();
+        PostProcessingStage::addEffect<DepthOfField>(-10);
+        PostProcessingStage::addEffect<Bloom>(-15);
+        PostProcessingStage::addEffect<Tonemapping>(-32);
+        PostProcessingStage::addEffect<FXAA>(-64);
 
 
         buffer modelMatrixBuffer;

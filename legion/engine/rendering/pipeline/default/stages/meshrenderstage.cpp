@@ -2,6 +2,7 @@
 #include <rendering/components/light.hpp>
 #include <rendering/data/buffer.hpp>
 #include <rendering/data/model.hpp>
+#include <rendering/components/renderable.hpp>
 
 namespace legion::rendering
 {
@@ -76,6 +77,10 @@ namespace legion::rendering
         if (std::holds_alternative<texture_handle>(depthAttachment))
             sceneDepth = std::get<texture_handle>(depthAttachment);
 
+        texture_handle skyboxTex;
+        if (ecs::world.has_component<skybox_renderer>())
+            skyboxTex = ecs::world.get_component<skybox_renderer>()->material.get_param<texture_handle>(SV_SKYBOX);
+
         app::context_guard guard(context);
         if (!guard.contextIsValid())
         {
@@ -119,6 +124,14 @@ namespace legion::rendering
                         else
                             mater = mesh.materials[submesh.materialIndex];
 
+                        auto& shaderState = mater.get_shader().get_variant(mater.current_variant()).state;
+                        if ((shaderState.count(GL_BLEND) && (shaderState.at(GL_BLEND) != GL_FALSE)) ||
+                            (shaderState.count(GL_BLEND_SRC) && (shaderState.at(GL_BLEND_SRC) != GL_FALSE)) ||
+                            (shaderState.count(GL_BLEND_DST) && (shaderState.at(GL_BLEND_DST) != GL_FALSE)))
+                        {
+                            continue;
+                        }
+
                         OPTICK_EVENT("Rendering material");
                         auto materialName = mater.get_name();
                         OPTICK_TAG("Material", materialName.c_str());
@@ -141,6 +154,9 @@ namespace legion::rendering
 
                         if (sceneDepth && mater.has_param<texture_handle>(SV_SCENEDEPTH))
                             mater.set_param<texture_handle>(SV_SCENEDEPTH, sceneDepth);
+
+                        if (mater.has_param<texture_handle>("skybox"))
+                            mater.set_param("skybox", TextureCache::create_texture("skybox", fs::view("assets://textures/HDRI/park.jpg")));
 
                         mater.bind();
 
@@ -189,6 +205,14 @@ namespace legion::rendering
                 continue;
             }
 
+            auto& shaderState = material.get_shader().get_variant(material.current_variant()).state;
+            if ((shaderState.count(GL_BLEND) && (shaderState.at(GL_BLEND) != GL_FALSE)) ||
+                (shaderState.count(GL_BLEND_SRC) && (shaderState.at(GL_BLEND_SRC) != GL_FALSE)) ||
+                (shaderState.count(GL_BLEND_DST) && (shaderState.at(GL_BLEND_DST) != GL_FALSE)))
+            {
+                continue;
+            }
+
             OPTICK_EVENT("Rendering material");
             auto materialName = material.get_name();
             OPTICK_TAG("Material", materialName.c_str());
@@ -211,6 +235,9 @@ namespace legion::rendering
 
             if (sceneDepth && material.has_param<texture_handle>(SV_SCENEDEPTH))
                 material.set_param<texture_handle>(SV_SCENEDEPTH, sceneDepth);
+
+            if (skyboxTex && material.has_param<texture_handle>(SV_SKYBOX))
+                material.set_param(SV_SKYBOX, skyboxTex);
 
             material.bind();
 

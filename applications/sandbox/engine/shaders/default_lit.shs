@@ -1,10 +1,25 @@
 #version 450
-#state CULL BACK
-#state BLEND OFF
+
+variant(default)
+{
+    #state BLEND OFF
+    #state CULL BACK
+}
 
 variant(double_sided)
 {
     #state CULL OFF
+}
+
+variant(transparent)
+{
+    #state BLEND TRANSPARENT    
+}
+
+variant(double_sided_transparent)
+{
+    #state CULL OFF
+    #state BLEND TRANSPARENT
 }
 
 generate(fragment, vertex)
@@ -69,8 +84,7 @@ shader(fragment)
 
     uniform bool useHeight = false;
     uniform sampler2D heightTex;
-
-    uniform vec4 skycolor;
+    uniform float heightScale = 1.0;
 
     Material GetMaterial(vec2 uv, Camera camera, vec3 worldNormal, vec3 worldTangent)
     {
@@ -78,7 +92,7 @@ shader(fragment)
         material.tbn = GetTBNMatrix(worldNormal, worldTangent);
 
         if(useHeight)
-            material.texcoords = ParallaxMap(heightTex, 1.0, uv, camera, material.tbn, material.height);
+            material.texcoords = ParallaxMap(heightTex, heightScale, uv, camera, material.tbn, material.height);
         else
         {
             material.texcoords = uv;
@@ -148,12 +162,7 @@ shader(fragment)
         vec3 worldpos = (worldNormal * material.height) + GetWorldPosition();
 
         vec3 lighting = GetAllLighting(material, camera, worldpos);
-
-        vec3 unitDir = reflect(-normalize(camera.toView), material.normal);
-        float reflectance = clamp01(0.01 + (pow(max(0.0, (1.0 - material.roughness)), 4) * 0.99));
-        vec3 reflection = mix(mix(vec3(average(skycolor.rgb)), skycolor.rgb, clamp01(dot(unitDir, vec3(0.f, 1.f, 0.f)) + 0.9)), (vec3(average(skycolor.rgb)) + skycolor.rgb)*0.5, material.roughness);
-
-        lighting += reflection * mix(vec3(1.0), material.albedo.rgb, material.metallic) * reflectance;
+        lighting += FakeIBL(camera, material);
 
         SubmitOutput(vec4(lighting, 1.0), material.normal, worldpos, material.emissive);
     }
