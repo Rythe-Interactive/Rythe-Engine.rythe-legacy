@@ -1,8 +1,10 @@
 #pragma once
 #include <unordered_map>
 
+#include <core/containers/pointer.hpp>
 #include <core/platform/platform.hpp>
 #include <core/types/types.hpp>
+
 
 /**
  * @file particleemitter.hpp
@@ -115,7 +117,6 @@ namespace legion::core
         size_type size() noexcept;
         //Resizes all buffers to the chosen size, and modifies the capacity
         void resize(size_type size);
-        void resize_buffers(size_type size);
         //Returns the maximum particle count
         size_type capacity() const noexcept;
 

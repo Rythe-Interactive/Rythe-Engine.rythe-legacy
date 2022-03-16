@@ -15,10 +15,7 @@ namespace legion::core
     void particle_emitter::stop()
     {
         pause();
-        auto cap = capacity();
-        resize(0);
         m_particleCount = 0;
-        resize(cap);
     }
 
     void particle_emitter::set_spawn_rate(size_type rate) noexcept
@@ -30,12 +27,10 @@ namespace legion::core
     {
         m_spawnInterval = interval;
     }
+
     void particle_emitter::set_particle_space(Space coordSpace) noexcept
     {
-        if (coordSpace == Space::WORLD)
-            localSpace = false;
-        else
-            localSpace = true;
+        localSpace = coordSpace == Space::WORLD;
     }
 
     void particle_emitter::set_alive(size_type idx, bool alive)
@@ -72,11 +67,6 @@ namespace legion::core
     {
         m_livingBuffer.resize(size);
         m_capacity = size;
-        resize_buffers(size);
-    }
-
-    void particle_emitter::resize_buffers(size_type size)
-    {
         for (auto& [id, buffer] : m_particleBuffers)
             m_particleBuffers[id]->resize(size);
     }

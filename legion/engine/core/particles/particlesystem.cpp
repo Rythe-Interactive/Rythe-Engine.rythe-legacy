@@ -28,16 +28,14 @@ namespace legion::core
 
             if (emitter.m_particleCount < emitter.m_capacity)
             {
-                float scaledSpawnRate = (deltaTime / emitter.m_spawnInterval) * emitter.m_spawnRate;
-                emitter.m_spawnBuffer += scaledSpawnRate;
-                if (emitter.m_spawnBuffer > emitter.m_spawnRate)
+                emitter.m_spawnBuffer += deltaTime;
+                if (emitter.m_spawnBuffer > emitter.m_spawnInterval)
                 {
-                    emitter.m_spawnBuffer = math::min(emitter.m_spawnBuffer, (float)emitter.m_capacity);
-                    emit(emitter, emitter.m_spawnBuffer);
-                    emitter.m_spawnBuffer -= math::trunc(emitter.m_spawnBuffer);
+                    size_type spawnIterations = static_cast<size_type>(emitter.m_spawnBuffer / emitter.m_spawnInterval);
+                    emit(emitter, spawnIterations * emitter.m_spawnRate);
+                    emitter.m_spawnBuffer -= emitter.m_spawnInterval * spawnIterations;
                 }
             }
-
             maintenance(emitter, deltaTime);
         }
     }
@@ -82,8 +80,7 @@ namespace legion::core
             if (!emitter.is_alive(activeCount))
                 break;
 
-            auto& lifeTime = ageBuffer[activeCount];
-            lifeTime.age += deltaTime;
+            ageBuffer[activeCount].age += deltaTime;
         }
         if (emitter.has_uniform<float>("minLifeTime") && emitter.has_uniform<float>("maxLifeTime"))
         {
