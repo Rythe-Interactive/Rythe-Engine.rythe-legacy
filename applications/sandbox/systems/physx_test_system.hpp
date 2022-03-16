@@ -29,13 +29,6 @@ namespace legion::physics
 
     private:
 
-        inline void logDestroyerDestroy(events::component_destruction<self_destruct_component>& event)
-        {
-            float x = event.entity.get_component<self_destruct_component>().get().selfDestructTimer;
-
-            log::debug("destroyed component from entity {0}", x);
-        }
-
         //wide block, 1 normal cube on the center, 1 rotated default cube on top of it
         void setupCubeWorldTestScene();
 
