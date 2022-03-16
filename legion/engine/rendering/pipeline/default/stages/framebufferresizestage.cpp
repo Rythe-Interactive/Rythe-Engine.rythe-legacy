@@ -27,42 +27,42 @@ namespace legion::rendering
 
         m_colorTexture[0] = TextureCache::create_texture("color_image0", m_framebufferSize, {
         texture_type::two_dimensional, false, channel_format::float_hdr, texture_format::rgba_hdr,
-        texture_components::rgb, false, false, 0, texture_mipmap::linear, texture_mipmap::linear,
+        texture_components::rgba, false, true, 0, texture_mipmap::linear, texture_mipmap::linear,
         texture_wrap::repeat, texture_wrap::repeat, texture_wrap::repeat });
 
         m_colorTexture[1] = TextureCache::create_texture("color_image1", m_framebufferSize, {
         texture_type::two_dimensional, false, channel_format::float_hdr, texture_format::rgba_hdr,
-        texture_components::rgb, false, false, 0, texture_mipmap::linear, texture_mipmap::linear,
+        texture_components::rgba, false, true, 0, texture_mipmap::linear, texture_mipmap::linear,
         texture_wrap::repeat, texture_wrap::repeat, texture_wrap::repeat });
 
         m_normalTexture[0] = TextureCache::create_texture("normal_image0", m_framebufferSize, {
         texture_type::two_dimensional, false, channel_format::float_hdr, texture_format::rgb_hdr,
-        texture_components::rgb, false, false, 0, texture_mipmap::linear, texture_mipmap::linear,
+        texture_components::rgba, false, false, 0, texture_mipmap::linear, texture_mipmap::linear,
         texture_wrap::repeat, texture_wrap::repeat, texture_wrap::repeat });
 
         m_normalTexture[1] = TextureCache::create_texture("normal_image1", m_framebufferSize, {
         texture_type::two_dimensional, false, channel_format::float_hdr, texture_format::rgb_hdr,
-        texture_components::rgb, false, false, 0, texture_mipmap::linear, texture_mipmap::linear,
+        texture_components::rgba, false, false, 0, texture_mipmap::linear, texture_mipmap::linear,
         texture_wrap::repeat, texture_wrap::repeat, texture_wrap::repeat });
 
         m_positionTexture[0] = TextureCache::create_texture("position_image0", m_framebufferSize, {
         texture_type::two_dimensional, false, channel_format::float_hdr, texture_format::rgb_hdr,
-        texture_components::rgb, false, false, 0, texture_mipmap::linear, texture_mipmap::linear,
+        texture_components::rgba, false, false, 0, texture_mipmap::linear, texture_mipmap::linear,
         texture_wrap::repeat, texture_wrap::repeat, texture_wrap::repeat });
 
         m_positionTexture[1] = TextureCache::create_texture("position_image1", m_framebufferSize, {
         texture_type::two_dimensional, false, channel_format::float_hdr, texture_format::rgb_hdr,
-        texture_components::rgb, false, false, 0, texture_mipmap::linear, texture_mipmap::linear,
+        texture_components::rgba, false, false, 0, texture_mipmap::linear, texture_mipmap::linear,
         texture_wrap::repeat, texture_wrap::repeat, texture_wrap::repeat });
 
         m_overdrawTexture[0] = TextureCache::create_texture("overdraw_image0", m_framebufferSize, {
         texture_type::two_dimensional, false, channel_format::float_hdr, texture_format::rgba_hdr,
-        texture_components::rgb, false, false, 0, texture_mipmap::linear, texture_mipmap::linear,
+        texture_components::rgba, false, false, 0, texture_mipmap::linear, texture_mipmap::linear,
         texture_wrap::edge_clamp, texture_wrap::edge_clamp, texture_wrap::edge_clamp });
 
         m_overdrawTexture[1] = TextureCache::create_texture("overdraw_image1", m_framebufferSize, {
         texture_type::two_dimensional, false, channel_format::float_hdr, texture_format::rgba_hdr,
-        texture_components::rgb, false, false, 0, texture_mipmap::linear, texture_mipmap::linear,
+        texture_components::rgba, false, false, 0, texture_mipmap::linear, texture_mipmap::linear,
         texture_wrap::edge_clamp, texture_wrap::edge_clamp, texture_wrap::edge_clamp });
 
         m_depthStencilTexture[0] = TextureCache::create_texture("depth_stencil_image0", m_framebufferSize, {
