@@ -126,7 +126,7 @@ namespace legion::physics
     
     void processAddNextBox(physicsComponent& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
     {
-        physicsComponentData& data = physicsComponent.physicsCompData;
+        PhysicsComponentData& data = physicsComponent.physicsCompData;
 
         for (ConvexColliderData& convexCollider : data.getConvexData())
         {
@@ -145,7 +145,7 @@ namespace legion::physics
         }
     }
     
-    void processAddFirstBox(physicsComponent& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
+    void processAddFirstBox(physics_component& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
     {
         PhysicsComponentData& data = physicsComponent.physicsCompData;
 
@@ -177,9 +177,9 @@ namespace legion::physics
         }
     }
 
-    void processAddFirstSphere(physicsComponent& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
+    void processAddFirstSphere(physics_component& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
     {
-        physicsComponentData& data = physicsComponent.physicsCompData;
+        PhysicsComponentData& data = physicsComponent.physicsCompData;
 
         for (SphereColliderData& sphereCollider : data.getSphereData())
         {
@@ -207,9 +207,9 @@ namespace legion::physics
         }
     }
 
-    void processAddNextSphere(physicsComponent& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
+    void processAddNextSphere(physics_component& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
     {
-        physicsComponentData& data = physicsComponent.physicsCompData;
+        PhysicsComponentData& data = physicsComponent.physicsCompData;
 
         for (SphereColliderData& sphereCollider : data.getSphereData())
         {
