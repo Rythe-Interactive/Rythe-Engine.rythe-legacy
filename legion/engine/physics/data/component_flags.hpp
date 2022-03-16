@@ -38,7 +38,7 @@ namespace legion::physics
         box,
         quickhull_convex,
         sphere,
-        not_set
+        not_set //internal use only
     };
 
     enum rigidbody_flag : size_type
