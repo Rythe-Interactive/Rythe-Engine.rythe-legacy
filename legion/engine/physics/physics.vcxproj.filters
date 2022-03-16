@@ -66,7 +66,7 @@
     <ClCompile Include="physx\data\physx_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="data\colliders\convex_collider_data.cpp">
+    <ClCompile Include="data\colliders\collider_data.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="diviner\components\physics_component.cpp">
@@ -203,7 +203,7 @@
     <ClInclude Include="data\component_flags.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="data\colliders\convex_collider_data.hpp">
+    <ClInclude Include="data\colliders\collider_data.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="data\physics_component_data.hpp">

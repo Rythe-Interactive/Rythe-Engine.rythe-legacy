@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="data\colliders\convex_collider_data.cpp" />
+    <ClCompile Include="data\colliders\collider_data.cpp" />
     <ClCompile Include="diviner\broadphasecollisionalgorithms\broadphaseuniformgrid.cpp" />
     <ClCompile Include="diviner\broadphasecollisionalgorithms\broadphaseuniformgridnocaching.cpp" />
     <ClCompile Include="diviner\colliders\convexcollider.cpp" />
@@ -35,7 +35,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="data\colliders\convex_collider_data.hpp" />
+    <ClInclude Include="data\colliders\collider_data.hpp" />
     <ClInclude Include="data\component_flags.hpp" />
     <ClInclude Include="data\physics_component_data.hpp" />
     <ClInclude Include="data\rigibody_data.hpp" />

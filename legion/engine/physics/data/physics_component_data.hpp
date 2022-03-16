@@ -1,5 +1,5 @@
 #pragma once
-#include <physics/data/colliders/convex_collider_data.hpp>
+#include <physics/data/colliders/collider_data.hpp>
 #include <physics/events/events.hpp>
 #include <physics/data/component_flags.hpp>
 #include <bitset>

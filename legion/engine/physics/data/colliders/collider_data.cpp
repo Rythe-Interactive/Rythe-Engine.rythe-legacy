@@ -1,4 +1,4 @@
-#include "convex_collider_data.hpp"
+#include "collider_data.hpp"
 
 namespace legion::physics
 {

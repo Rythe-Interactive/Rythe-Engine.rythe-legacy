@@ -160,7 +160,7 @@ namespace legion::physics
             }
         }
 
-        //[3] Identify new physics components
+        //[3] Identify new rigidbodies
         ecs::filter<physics_component,rigidbody> physicsAndRigidbodyComponentFilter;
 
         for (auto entity : physicsAndRigidbodyComponentFilter)
@@ -170,8 +170,10 @@ namespace legion::physics
 
             if (optionalPhysxWrapper->get().bodyType != physics::physics_body_type::rigidbody)
             {
-                //the user has switched this body from static to dynamic, reallocate this object to a dynamic object
+                //the user has switched this body from static to dynamic
                 optionalPhysxWrapper->get().bodyType = physics::physics_body_type::rigidbody;
+
+                //TODO Reallocate this object to a dynamic object
             }
         }
 
@@ -194,7 +196,8 @@ namespace legion::physics
             processRigidbodyComponentEvents(entity, rbComp, physComp, enviromentInfo);
         }
 
-        //[4] Physics Objects transformation may get directly modified by other systems. Go through all physics objects and move them
+        //[4] Physics Objects transformation may get directly modified by other systems
+        // Given a list of entities that have been moved, transfer their movements to the respective physics actor
         //TODO identify entities whos transforms have been modified
     }
 
