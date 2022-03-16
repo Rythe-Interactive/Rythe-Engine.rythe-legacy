@@ -6,6 +6,8 @@ namespace legion::rendering
     class DepthOfField : public PostProcessingEffect<DepthOfField>
     {
     private:
+        static std::atomic_bool m_autoFocus;
+
         //Shaders needed.
         shader_handle m_depthThresholdShader;
         shader_handle m_bokehShader;
@@ -40,6 +42,9 @@ namespace legion::rendering
               texture_wrap::mirror
         };
     public:
+
+        static void enableAutoFocus(bool enable) noexcept;
+
         /**
          * @brief setup The setup function of the post processing effect.
          * @param context The current context that is being used inside of the effect.

@@ -86,8 +86,6 @@ shader(fragment)
     uniform sampler2D heightTex;
     uniform float heightScale = 1.0;
 
-    uniform sampler2D skybox;
-
     Material GetMaterial(vec2 uv, Camera camera, vec3 worldNormal, vec3 worldTangent)
     {
         Material material;

@@ -1025,7 +1025,10 @@ namespace legion::rendering
     bool shader::has_variant(id_type variantId) const
     {
         if (variantId == 0)
-            return m_variants.count(nameHash("default"));
+        {
+            static id_type defaultId = nameHash("default");
+            return m_variants.count(defaultId);
+        }
         return m_variants.count(variantId);
     }
 
@@ -1039,7 +1042,10 @@ namespace legion::rendering
     void shader::configure_variant(id_type variantId) const
     {
         if (variantId == 0)
-            m_currentShaderVariant = &m_variants.at(nameHash("default"));
+        {
+            static id_type defaultId = nameHash("default");
+            m_currentShaderVariant = &m_variants.at(defaultId);
+        }
         else if (m_variants.count(variantId))
             m_currentShaderVariant = &m_variants.at(variantId);
     }
@@ -1056,7 +1062,10 @@ namespace legion::rendering
     shader_variant& shader::get_variant(id_type variantId)
     {
         if (variantId == 0)
-            return m_variants.at(nameHash("default"));
+        {
+            static id_type defaultId = nameHash("default");
+            return m_variants.at(defaultId);
+        }
         return m_variants.at(variantId);
     }
 
@@ -1068,7 +1077,10 @@ namespace legion::rendering
     const shader_variant& shader::get_variant(id_type variantId) const
     {
         if (variantId == 0)
-            return m_variants.at(nameHash("default"));
+        {
+            static id_type defaultId = nameHash("default");
+            return m_variants.at(defaultId);
+        }
         return m_variants.at(variantId);
     }
 

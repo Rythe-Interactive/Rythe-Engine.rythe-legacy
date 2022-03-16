@@ -17,10 +17,10 @@ namespace legion::rendering
         static std::atomic<float> m_exposure;
 
     public:
-        static void setAlgorithm(tonemapping_type type);
+        static void setAlgorithm(tonemapping_type type) noexcept;
 
-        static void setAutoExposure(bool value);
-        static void setExposure(float value);
+        static void enableAutoExposure(bool enable) noexcept;
+        static void setExposure(float value) noexcept;
 
         void setup(app::window& context) override;
 

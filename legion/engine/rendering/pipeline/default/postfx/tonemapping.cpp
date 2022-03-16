@@ -6,7 +6,7 @@ namespace legion::rendering
     std::atomic_bool Tonemapping::m_autoExposure = { false };
     std::atomic<float> Tonemapping::m_exposure = { 2.f };
 
-    void Tonemapping::setAlgorithm(tonemapping_type type)
+    void Tonemapping::setAlgorithm(tonemapping_type type) noexcept
     {
         OPTICK_EVENT();
         static id_type acesId = nameHash("aces tonemapping");
@@ -38,12 +38,12 @@ namespace legion::rendering
         }
     }
 
-    void Tonemapping::setAutoExposure(bool value)
+    void Tonemapping::enableAutoExposure(bool enable) noexcept
     {
-        m_autoExposure.store(value, std::memory_order_relaxed);
+        m_autoExposure.store(enable, std::memory_order_relaxed);
     }
 
-    void Tonemapping::setExposure(float value)
+    void Tonemapping::setExposure(float value) noexcept
     {
         m_exposure.store(value, std::memory_order_relaxed);
     }

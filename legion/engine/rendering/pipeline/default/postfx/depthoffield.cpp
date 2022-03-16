@@ -5,6 +5,13 @@
 
 namespace legion::rendering
 {
+    std::atomic_bool DepthOfField::m_autoFocus = { false };
+
+    void DepthOfField::enableAutoFocus(bool enable) noexcept
+    {
+        m_autoFocus.store(enable, std::memory_order_relaxed);
+    }
+
     void DepthOfField::setup(app::window& context)
     {
         using namespace fs::literals;
@@ -110,15 +117,28 @@ namespace legion::rendering
         uint attachment = FRAGMENT_ATTACHMENT;
         glDrawBuffers(1, &attachment);
 
+        static id_type autoFocusId = nameHash("auto_focus");
+
+        auto doAutoFocus = m_autoFocus.load(std::memory_order_relaxed);
+
+        if (doAutoFocus)
+            m_depthThresholdShader.configure_variant(autoFocusId);
+        //else
+        //    m_depthThresholdShader.configure_variant(0);
+
         // Bind and assign the depth threshold shader.
         m_depthThresholdShader.bind();
         m_depthThresholdShader.get_uniform_with_location<math::vec4>(SV_VIEWDIR).set_value(camInput.vdirfarz);
         m_depthThresholdShader.get_uniform_with_location<math::vec4>(SV_CAMPOS).set_value(camInput.posnearz);
         m_depthThresholdShader.get_uniform_with_location<math::ivec2>(SV_VIEWPORT).set_value(camInput.viewportSize);
-
-        //m_depthThresholdShader.get_uniform_with_location<math::mat4>(SV_VIEW).set_value(camInput.view);
         m_depthThresholdShader.get_uniform_with_location<texture_handle>(SV_SCENEDEPTH).set_value(depth_texture);
-        //m_depthThresholdShader.get_uniform<float>("sampleOffset").set_value(0.5f);
+
+        if (doAutoFocus)
+        {
+            m_depthThresholdShader.get_uniform_with_location<math::mat4>(SV_VIEW).set_value(camInput.view);
+            m_depthThresholdShader.get_uniform<float>("sampleOffset").set_value(0.5f);
+        }
+
         m_depthThresholdShader.get_uniform<float>("focalRange").set_value(20.f);
         m_depthThresholdShader.get_uniform<float>("focalOffset").set_value(15.f);
         m_depthThresholdShader.get_uniform<float>("bokehRadius").set_value(m_bokehSize);
