@@ -31,11 +31,11 @@ namespace legion::rendering
         attachStage<PostProcessingStage>();
         attachStage<SubmitStage>();
 
-        PostProcessingStage::addEffect<Tonemapping>();
-        PostProcessingStage::addEffect<Skybox>(-1);
-        PostProcessingStage::addEffect<Bloom>(-64);
-        PostProcessingStage::addEffect<DepthOfField>(-80);
-        PostProcessingStage::addEffect<FXAA>(-90);
+        PostProcessingStage::addEffect<Skybox>();
+        PostProcessingStage::addEffect<DepthOfField>(-10);
+        PostProcessingStage::addEffect<Bloom>(-15);
+        PostProcessingStage::addEffect<Tonemapping>(-32);
+        PostProcessingStage::addEffect<FXAA>(-64);
 
 
         buffer modelMatrixBuffer;

@@ -33,7 +33,12 @@ namespace legion::rendering
 
     void texture::resize(math::ivec2 newSize) const
     {
-        OPTICK_EVENT();
+        if (immutable)
+        {
+            log::error("Can't resize immutable texture {}", name);
+            return;
+        }
+
         glBindTexture(static_cast<GLenum>(type), textureId);
         glTexImage2D(
             static_cast<GLenum>(type),
@@ -165,39 +170,57 @@ namespace legion::rendering
         texture texture{};
         texture.type = settings.type;
         texture.name = name;
+
+        auto glTexType = static_cast<GLenum>(settings.type);
+
         // Allocate and bind the texture.
         glGenTextures(1, &texture.textureId);
-        glBindTexture(static_cast<GLenum>(settings.type), texture.textureId);
+        glBindTexture(glTexType, texture.textureId);
 
         // Handle mips
-        if (settings.generateMipmaps)
-        {
-            glTexParameteri(static_cast<GLenum>(settings.type), GL_TEXTURE_MIN_FILTER, static_cast<GLint>(settings.min));
-            glTexParameteri(static_cast<GLenum>(settings.type), GL_TEXTURE_MAG_FILTER, static_cast<GLint>(settings.mag));
-        }
+        glTexParameteri(glTexType, GL_TEXTURE_MIN_FILTER, static_cast<GLint>(settings.min));
+        glTexParameteri(glTexType, GL_TEXTURE_MAG_FILTER, static_cast<GLint>(settings.mag));
+        glTexParameteri(glTexType, GL_TEXTURE_BASE_LEVEL, 0);
 
         // Handle wrapping behavior.
-        glTexParameteri(static_cast<GLenum>(settings.type), GL_TEXTURE_WRAP_R, static_cast<GLint>(settings.wrapR));
-        glTexParameteri(static_cast<GLenum>(settings.type), GL_TEXTURE_WRAP_S, static_cast<GLint>(settings.wrapS));
-        glTexParameteri(static_cast<GLenum>(settings.type), GL_TEXTURE_WRAP_T, static_cast<GLint>(settings.wrapT));
+        glTexParameteri(glTexType, GL_TEXTURE_WRAP_R, static_cast<GLint>(settings.wrapR));
+        glTexParameteri(glTexType, GL_TEXTURE_WRAP_S, static_cast<GLint>(settings.wrapS));
+        glTexParameteri(glTexType, GL_TEXTURE_WRAP_T, static_cast<GLint>(settings.wrapT));
 
         texture.channels = settings.components;
         texture.format = settings.intendedFormat;
         texture.fileFormat = settings.fileFormat;
 
         // Construct the texture using the loaded data.
-        glTexImage2D(
-            static_cast<GLenum>(settings.type),
-            0,
-            static_cast<GLint>(settings.intendedFormat),
-            size.x,
-            size.y,
-            0,
-            components_to_format[static_cast<int>(settings.components)],
-            channels_to_glenum[static_cast<uint>(settings.fileFormat)],
-            NULL);
+        texture.immutable = settings.immutable;
+        if (settings.immutable)
+        {
+            texture.mipCount = settings.mipCount ? settings.mipCount : (settings.generateMipmaps ? math::log2(math::max(size.x, size.y)) : 1);
+            glTexParameteri(glTexType, GL_TEXTURE_MAX_LEVEL, texture.mipCount);
+            glTexStorage2D(
+                glTexType,
+                static_cast<GLint>(texture.mipCount),
+                static_cast<GLint>(settings.intendedFormat),
+                size.x,
+                size.y);
+        }
+        else
+        {
+            texture.mipCount = settings.generateMipmaps ? math::log2(math::max(size.x, size.y)) : 1;
+            glTexParameteri(glTexType, GL_TEXTURE_MAX_LEVEL, texture.mipCount);
+            glTexImage2D(
+                glTexType,
+                0,
+                static_cast<GLint>(settings.intendedFormat),
+                size.x,
+                size.y,
+                0,
+                components_to_format[static_cast<int>(settings.components)],
+                channels_to_glenum[static_cast<uint>(settings.fileFormat)],
+                nullptr);
+        }
 
-        glBindTexture(static_cast<GLenum>(settings.type), 0);
+        glBindTexture(glTexType, 0);
 
         {
             async::readwrite_guard guard(m_textureLock);
@@ -209,7 +232,6 @@ namespace legion::rendering
         return { id };
 
     }
-
 
     texture_handle TextureCache::create_texture_from_image(const std::string& name, texture_import_settings settings)
     {
@@ -250,42 +272,73 @@ namespace legion::rendering
         texture texture{};
         texture.type = settings.type;
 
+        auto glTexType = static_cast<GLenum>(settings.type);
+
         // Allocate and bind the texture.
         glGenTextures(1, &texture.textureId);
-        glBindTexture(static_cast<GLenum>(settings.type), texture.textureId);
+        glBindTexture(glTexType, texture.textureId);
 
         // Handle mips
-        if (settings.generateMipmaps)
-        {
-            glTexParameteri(static_cast<GLenum>(settings.type), GL_TEXTURE_MIN_FILTER, static_cast<GLint>(settings.min));
-            glTexParameteri(static_cast<GLenum>(settings.type), GL_TEXTURE_MAG_FILTER, static_cast<GLint>(settings.mag));
-        }
+        glTexParameteri(glTexType, GL_TEXTURE_MIN_FILTER, static_cast<GLint>(settings.min));
+        glTexParameteri(glTexType, GL_TEXTURE_MAG_FILTER, static_cast<GLint>(settings.mag));
+        glTexParameteri(glTexType, GL_TEXTURE_BASE_LEVEL, 0);
 
         // Handle wrapping behavior.
-        glTexParameteri(static_cast<GLenum>(settings.type), GL_TEXTURE_WRAP_R, static_cast<GLint>(settings.wrapR));
-        glTexParameteri(static_cast<GLenum>(settings.type), GL_TEXTURE_WRAP_S, static_cast<GLint>(settings.wrapS));
-        glTexParameteri(static_cast<GLenum>(settings.type), GL_TEXTURE_WRAP_T, static_cast<GLint>(settings.wrapT));
+        glTexParameteri(glTexType, GL_TEXTURE_WRAP_R, static_cast<GLint>(settings.wrapR));
+        glTexParameteri(glTexType, GL_TEXTURE_WRAP_S, static_cast<GLint>(settings.wrapS));
+        glTexParameteri(glTexType, GL_TEXTURE_WRAP_T, static_cast<GLint>(settings.wrapT));
+
+        auto& res = img->resolution();
 
         texture.channels = img->components();
         texture.name = img.name();
 
+
         // Construct the texture using the loaded data.
-        glTexImage2D(
-            static_cast<GLenum>(settings.type),
-            0,
-            static_cast<GLint>(settings.intendedFormat),
-            img->resolution().x,
-            img->resolution().y,
-            0,
-            components_to_format[static_cast<int>(img->components())],
-            channels_to_glenum[static_cast<uint>(img->format())],
-            img->data());
+        texture.immutable = settings.immutable;
+        if (settings.immutable)
+        {
+            texture.mipCount = settings.mipCount ? settings.mipCount : (settings.generateMipmaps ? math::log2(math::max(res.x, res.y)) : 1);
+            glTexParameteri(glTexType, GL_TEXTURE_MAX_LEVEL, texture.mipCount);
+            glTexStorage2D(
+                glTexType,
+                static_cast<GLint>(texture.mipCount),
+                static_cast<GLint>(settings.intendedFormat),
+                res.x,
+                res.y);
+
+            glTexSubImage2D(
+                glTexType,
+                0,
+                0,
+                0,
+                res.x,
+                res.y,
+                components_to_format[static_cast<int>(img->components())],
+                channels_to_glenum[static_cast<uint>(img->format())],
+                img->data());
+        }
+        else
+        {
+            texture.mipCount = settings.generateMipmaps ? math::log2(math::max(res.x, res.y)) : 1;
+            glTexParameteri(glTexType, GL_TEXTURE_MAX_LEVEL, texture.mipCount);
+            glTexImage2D(
+                glTexType,
+                0,
+                static_cast<GLint>(settings.intendedFormat),
+                res.x,
+                res.y,
+                0,
+                components_to_format[static_cast<int>(img->components())],
+                channels_to_glenum[static_cast<uint>(img->format())],
+                img->data());
+        }
 
         // Generate mips.
         if (settings.generateMipmaps)
-            glGenerateMipmap(static_cast<GLenum>(settings.type));
+            glGenerateMipmap(glTexType);
 
-        glBindTexture(static_cast<GLenum>(settings.type), 0);
+        glBindTexture(glTexType, 0);
 
         log::debug("Created texture from image {}", texture.name);
 

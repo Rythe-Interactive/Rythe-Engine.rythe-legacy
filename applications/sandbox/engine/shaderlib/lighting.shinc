@@ -161,7 +161,7 @@ vec3 CalculateLight(Light light, Camera camera, Material material, vec3 worldPos
 	float geometryShadowing = GeometrySmith(normalDotView, normalDotLight, roughness);
     vec3 specular = CookTorranceBRDF(normalDistribution, fresnelReflection, geometryShadowing, normalDotLight, normalDotView);
 
-    vec3 diffuse = LambertianDiffuse(specular, material.albedo.rgb, metallic);
+    vec3 diffuse = LambertianDiffuse(fresnelReflection, material.albedo.rgb, metallic);
 
     return max((diffuse + specular) * radiance * normalDotLight.xxx, vec3(0));
 }

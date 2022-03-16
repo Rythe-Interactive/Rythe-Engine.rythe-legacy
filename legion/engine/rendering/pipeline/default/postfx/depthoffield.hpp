@@ -26,11 +26,13 @@ namespace legion::rendering
         //Standard settings for creating textures.
         texture_import_settings settings{
               texture_type::two_dimensional,
+              false,
               channel_format::float_hdr,
               texture_format::rgba_hdr,
               texture_components::rgb,
-              true,
-              true,
+              false,
+              false,
+              0,
               texture_mipmap::linear,
               texture_mipmap::linear,
               texture_wrap::mirror,

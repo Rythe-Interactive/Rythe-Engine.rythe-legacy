@@ -30,13 +30,13 @@ public:
 
         auto material = gfx::MaterialCache::create_material("White", fs::view("assets://shaders/color.shs"));
         material.set_param("color", math::colors::white);
-        {
+        /*{
             auto ent = createEntity("Sun");
             ent.add_component(gfx::light::directional(math::color(1, 1, 0.8f), 10.f));
             auto [pos, rot, scal] = ent.add_component<transform>();
             pos = position(0.f, 3.f, 6.f);
             rot = rotation::lookat(math::vec3::zero, math::vec3(1.f, -1.f, 0.1f));
-        }
+        }*/
 
         //#if defined(LEGION_DEBUG)
         //        for (int i = 0; i < 2000; i++)
