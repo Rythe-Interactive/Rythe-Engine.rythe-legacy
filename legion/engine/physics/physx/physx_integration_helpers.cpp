@@ -11,6 +11,12 @@ namespace legion::physics
         return PhysXPhysicsSystem::getSDK();
     }
 
+    static inline void toPhysxTransform(physx::PxTransform& pxTransform, const math::vec3& pos, const math::quat& rot)
+    {
+        pxTransform.p = { pos.x,pos.y,pos.z };
+        pxTransform.q = { rot.x,rot.y,rot.z,rot.w };
+    }
+
     void calculateGlobalAndLocalTransforms(physx::PxTransform& outLocalTransform, physx::PxTransform& outGlobalTransform, const ColliderData& collider, ecs::entity ent)
     {
         const math::vec3& pos = *ent.get_component<position>();
@@ -20,14 +26,7 @@ namespace legion::physics
         const math::quat& localRot = collider.getRotationOffset();
 
         toPhysxTransform(outGlobalTransform, pos, rot);
-
         toPhysxTransform(outLocalTransform, localOffset, localRot);
-    }
-
-    inline void toPhysxTransform(physx::PxTransform& pxTransform, const math::vec3& pos, const math::quat& rot)
-    {
-        pxTransform.p = { pos.x,pos.y,pos.z };
-        pxTransform.q = { rot.x,rot.y,rot.z,rot.w };
     }
 
     template<class PxGeometry, class ...GeometryArgs>

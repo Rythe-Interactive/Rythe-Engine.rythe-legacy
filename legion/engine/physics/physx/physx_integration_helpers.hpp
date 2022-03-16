@@ -25,8 +25,6 @@ namespace legion::physics
     void calculateGlobalAndLocalTransforms(
         physx::PxTransform& outLocalTransform, physx::PxTransform& outGlobalTransform, const ColliderData& collider,ecs::entity ent);
 
-    inline void toPhysxTransform(physx::PxTransform& pxTransform, const math::vec3& pos, const math::quat& rot);
-
     template<class PxGeometry,class... GeometryArgs>
     void instantiateStaticActorWith(physx::PxPhysics* sdk, PhysxInternalWrapper& wrapper, const physx::PxTransform& globalTransform,
         const physx::PxTransform& localTransform, const PhysxEnviromentInfo& sceneInfo, ecs::entity ent,  GeometryArgs... geometryArgs);
