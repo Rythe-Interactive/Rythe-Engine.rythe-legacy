@@ -42,7 +42,6 @@ namespace legion::physics
 
         void getCameraPositionAndDirection(math::vec3& cameraDirection, math::vec3& cameraPosition);
 
-
         //-------------------------- Scene Setup Helpers ---------------------------------------//
 
         void initializeLitMaterial(rendering::material_handle& materialToInitialize, rendering::shader_handle& litShader,

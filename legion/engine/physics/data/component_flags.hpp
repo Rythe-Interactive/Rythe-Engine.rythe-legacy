@@ -9,7 +9,7 @@ namespace legion::physics
         pc_add_first_sphere,
         pc_add_next_box,
         pc_add_next_sphere,
-        pc_max
+        pc_max //must always be the last enum
     };
 
     enum class collider_type
@@ -17,7 +17,7 @@ namespace legion::physics
         box,
         quickhull_convex,
         sphere,
-        not_set
+        not_set //internal use only
     };
 
     enum rigidbody_flag : size_type

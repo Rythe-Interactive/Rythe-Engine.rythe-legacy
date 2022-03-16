@@ -60,12 +60,10 @@ namespace legion::physics
                 entity.destroy();
             }
         }
-
     }
 
     void PhysXTestSystem::setupCubeWorldTestScene()
     {
-
         auto addRobotPartLambda = [this](const math::vec3& scaleValue, const math::vec3& offset,ecs::entity parent,const math::quat& localRot,rendering::model_handle handle)
         {
             auto nextBlock = createDefaultMeshEntity(offset, handle, legionLogoMat);
@@ -177,7 +175,6 @@ namespace legion::physics
         self_destruct_component& block = *shiftedBlock.add_component<self_destruct_component>();
 
         block.selfDestructTimer = 5.0f;
-
     }
 
     void PhysXTestSystem::getCameraPositionAndDirection(math::vec3& cameraDirection, math::vec3& cameraPosition)

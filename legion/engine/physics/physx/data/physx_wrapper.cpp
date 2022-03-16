@@ -10,7 +10,6 @@ namespace legion::physics
             physicsActor->release();
             physicsActor = nullptr;
         }
-        
     }
 
     PhysxInternalWrapper::PhysxInternalWrapper(PhysxInternalWrapper&& other) noexcept

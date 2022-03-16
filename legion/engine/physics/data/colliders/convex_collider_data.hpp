@@ -58,8 +58,6 @@ namespace legion::physics
     private:
 
         float m_radius{ 0 };
-
     };
-
 }
 

@@ -29,7 +29,7 @@ namespace legion::physics
 
         PhysxInternalWrapper& operator= (PhysxInternalWrapper&& other) noexcept;
 
-        PhysxInternalWrapper& operator= (const PhysxInternalWrapper&& other) = delete;
+        PhysxInternalWrapper& operator= (const PhysxInternalWrapper& other) = delete;
 
         PhysxInternalWrapper(const PhysxInternalWrapper& other) = delete;
     };
