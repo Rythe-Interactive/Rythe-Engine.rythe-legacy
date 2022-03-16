@@ -36,7 +36,7 @@ static void TestRigidbody()
             L_CHECK( NOT modifyEvents.test(physics::rigidbody_flag::rb_angular_drag));
         }
 
-        rbData.resetModifications();
+        rbData.resetModificationFlags();
 
         rbData.setVelocity(math::vec3(5.0f));
         L_CHECK(rbData.getVelocity() == math::vec3(5.0f));
