@@ -38,18 +38,18 @@ namespace legion::physics
 
         void bindEventsToEventProcessors();
 
-        inline void markPhysicsWrapperPendingRemove(events::component_destruction<physicsComponent>& event)
+        inline void markPhysicsWrapperPendingRemove(events::component_destruction<physics_component>& event)
         {
-            m_wrapperPendingRemovalID.push_back(event.entity.get_component<physicsComponent>()->physicsComponentID);
+            m_wrapperPendingRemovalID.push_back(event.entity.get_component<physics_component>()->physicsComponentID);
         }
 
         void executePreSimulationActions();
 
         void executePostSimulationActions();
 
-        void processPhysicsComponentEvents(ecs::entity ent, physicsComponent& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo);
+        void processPhysicsComponentEvents(ecs::entity ent, physics_component& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo);
 
-        void processRigidbodyComponentEvents(ecs::entity ent, rigidbody& rigidbody, physicsComponent& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo);
+        void processRigidbodyComponentEvents(ecs::entity ent, rigidbody& rigidbody, physics_component& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo);
 
         static constexpr float m_timeStep = 0.02f;
 
@@ -60,7 +60,7 @@ namespace legion::physics
 
         std::mutex m_setupShutdownMutex;
 
-        using pcEventProcessFunc = delegate<void(physicsComponent&,const PhysxEnviromentInfo&, PhysxInternalWrapper&, ecs::entity)>;
+        using pcEventProcessFunc = delegate<void(physics_component&,const PhysxEnviromentInfo&, PhysxInternalWrapper&, ecs::entity)>;
         std::array< pcEventProcessFunc, physics_component_flag::pc_max> m_physicsComponentActionFuncs;
 
         using rbEventProcessFunc = delegate<void(rigidbody& rigidbody,const PhysxEnviromentInfo&, PhysxInternalWrapper&, ecs::entity)>;

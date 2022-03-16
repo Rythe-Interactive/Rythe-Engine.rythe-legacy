@@ -8,7 +8,7 @@ namespace legion::physics
 {
     constexpr float boxExtentSizeMultiplier = 0.5f;
 
-    class physicsComponentData
+    class PhysicsComponentData
     {
     public:
 
@@ -39,7 +39,7 @@ namespace legion::physics
            m_colliderCount++;
         }
 
-        const std::bitset<physics_component_flag::pc_max>& GetGeneratedPhysicsComponentEvents() const
+        const std::bitset<physics_component_flag::pc_max>& getGeneratedModifyEvents() const
         {
             return m_modificationFlags;
         };

@@ -5,9 +5,9 @@ namespace legion::physics
 {
     constexpr size_t invalid_physics_component = std::numeric_limits<size_type>::max();
 
-    struct physicsComponent
+    struct physics_component
     {
-        physicsComponentData physicsCompData;
+        PhysicsComponentData physicsCompData;
         size_t physicsComponentID = invalid_physics_component;
     };
 }

@@ -82,7 +82,7 @@ namespace legion::physics
         rotBlock.get_component<rotation>() = math::toQuat(rot);
 
         {
-            auto wideBlockPhysComp = rotBlock.add_component<physicsComponent>();
+            auto wideBlockPhysComp = rotBlock.add_component<physics_component>();
             wideBlockPhysComp->physicsCompData.AddBoxCollider(math::vec3(10, 1, 10));
         }
 
@@ -91,14 +91,14 @@ namespace legion::physics
         wideBlock.get_component<scale>() = math::vec3(10, 1, 10);
 
         {
-            auto wideBlockPhysComp = wideBlock.add_component<physicsComponent>();
+            auto wideBlockPhysComp = wideBlock.add_component<physics_component>();
             wideBlockPhysComp->physicsCompData.AddBoxCollider(math::vec3(10, 1, 10));
         }
 
         //add default cube at center
         auto unrotatedBlock = createDefaultMeshEntity(math::vec3(0, 2, 0), cubeH, tileMat);
         {
-            auto unrotatedBlockPC = unrotatedBlock.add_component<physicsComponent>();
+            auto unrotatedBlockPC = unrotatedBlock.add_component<physics_component>();
             unrotatedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1));
             
             float headOffset = 0.5f;
@@ -121,7 +121,7 @@ namespace legion::physics
         //add default cube on top
         auto shiftedBlock = createDefaultMeshEntity(math::vec3(0, 10, 0), cubeH, concreteMat);
         {
-            auto shiftedBlockPC = shiftedBlock.add_component<physicsComponent>();
+            auto shiftedBlockPC = shiftedBlock.add_component<physics_component>();
             shiftedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1, 1, 1));
 
             shiftedBlock.add_component<rigidbody>();
@@ -145,7 +145,7 @@ namespace legion::physics
         auto shiftedBlock = createDefaultMeshEntity(cameraPosition, cubeH, concreteMat);
 
         {
-            auto shiftedBlockPC = shiftedBlock.add_component<physicsComponent>();
+            auto shiftedBlockPC = shiftedBlock.add_component<physics_component>();
             shiftedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1, 1, 1));
 
             rigidbody& rb = *shiftedBlock.add_component<rigidbody>();
@@ -167,7 +167,7 @@ namespace legion::physics
         auto shiftedBlock = createDefaultMeshEntity(cameraPosition, sphereH, concreteMat);
 
         {
-            auto shiftedBlockPC = shiftedBlock.add_component<physicsComponent>();
+            auto shiftedBlockPC = shiftedBlock.add_component<physics_component>();
             shiftedBlockPC->physicsCompData.AddSphereCollider(0.5f, math::vec3());
 
             rigidbody& rb = *shiftedBlock.add_component<rigidbody>();

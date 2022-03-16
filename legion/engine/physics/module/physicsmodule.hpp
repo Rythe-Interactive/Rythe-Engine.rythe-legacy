@@ -24,7 +24,7 @@ namespace legion::physics
             registerComponentType<identifier>();
 
             reportSystem<PhysXPhysicsSystem>();
-            registerComponentType<physicsComponent>();
+            registerComponentType<physics_component>();
             registerComponentType<rigidbody>();
         }
 

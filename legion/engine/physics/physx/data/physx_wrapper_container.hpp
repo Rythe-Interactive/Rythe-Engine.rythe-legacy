@@ -8,7 +8,7 @@ namespace legion::physics
     {
     public:
 
-        PhysxInternalWrapper& createPhysxWrapper(physicsComponent& unregisteredPhysXWrapper);
+        PhysxInternalWrapper& createPhysxWrapper(physics_component& unregisteredPhysXWrapper);
 
         void PopAndSwapRemoveWrapper(size_type id);
 
