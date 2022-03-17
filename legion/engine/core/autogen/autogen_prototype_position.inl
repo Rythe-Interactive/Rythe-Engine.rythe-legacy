@@ -1,5 +1,5 @@
 #include "autogen_prototype_position.hpp"
-#include "../../core/defaults/defaultcomponents.hpp"
+namespace legion { using namespace core; }
 namespace legion::core
 {
     template<>
@@ -9,7 +9,7 @@ namespace legion::core
         prot.typeId = typeHash<legion::core::position>();
         prot.typeName = "legion::core::position";
         {
-            static const reflectable_attribute reflectable_attr{};
+            static const legion::reflectable_attribute reflectable_attr{};
             prot.attributes.push_back(std::cref(reflectable_attr));
         }
         prot.members = std::vector<member_value>();

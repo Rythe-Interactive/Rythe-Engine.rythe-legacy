@@ -9,7 +9,7 @@ namespace legion::core
         prot.typeId = typeHash<legion::core::scale>();
         prot.typeName = "legion::core::scale";
         {
-            static const reflectable_attribute reflectable_attr{};
+            static const legion::reflectable_attribute reflectable_attr{};
             prot.attributes.push_back(std::cref(reflectable_attr));
         }
         prot.members = std::vector<member_value>();

@@ -8,7 +8,7 @@
 
 namespace legion::core
 {
-    struct [[legion::reflectable]] example_comp
+    struct [[lgn::reflectable]] example_comp
     {
         int value = 1;
     };
