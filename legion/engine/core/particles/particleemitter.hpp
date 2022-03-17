@@ -72,6 +72,8 @@ namespace legion::core
 
         template<typename bufferType>
         particle_buffer<bufferType>& get_buffer(const std::string_view& name);
+        template<typename bufferType>
+        particle_buffer<bufferType>& get_buffer(id_type nameId);
 
         template<typename uniformType>
         bool has_buffer(const std::string_view& name) noexcept;
@@ -83,6 +85,8 @@ namespace legion::core
 
         template<typename uniformType>
         uniformType& get_uniform(const std::string_view& name);
+        template<typename uniformType>
+        uniformType& get_uniform(id_type nameId);
 
         template<typename uniformType>
         bool has_uniform(const std::string_view& name) noexcept;

@@ -323,8 +323,8 @@ void ExampleSystem::playEmitter(legion::play_action& action)
         ecs::filter<particle_emitter> filter;
         for (auto ent : filter)
         {
-            auto& emitter = ent.get_component<particle_emitter>();
-            emitter->play();
+            auto& emitter = ent.get_component<particle_emitter>().get();
+            emitter.play();
         }
     }
 }
@@ -337,8 +337,8 @@ void ExampleSystem::pauseEmitter(legion::pause_action& action)
         ecs::filter<particle_emitter> filter;
         for (auto ent : filter)
         {
-            auto& emitter = ent.get_component<particle_emitter>();
-            emitter->pause();
+            auto& emitter = ent.get_component<particle_emitter>().get();
+            emitter.pause();
         }
     }
 }
@@ -351,8 +351,8 @@ void ExampleSystem::stopEmitter(legion::stop_action& action)
         ecs::filter<particle_emitter> filter;
         for (auto ent : filter)
         {
-            auto& emitter = ent.get_component<particle_emitter>();
-            emitter->stop();
+            auto& emitter = ent.get_component<particle_emitter>().get();
+            emitter.stop();
         }
     }
 }

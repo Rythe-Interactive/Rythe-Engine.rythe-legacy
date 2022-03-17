@@ -11,11 +11,6 @@ namespace legion::core
     particle_buffer<bufferType>& particle_emitter::create_buffer(const std::string_view& name, Args&&... args)
     {
         id_type nameId = nameHash(name);
-        if (has_buffer<bufferType>(nameId))
-        {
-            log::warn("Buffer \"{}\" of type {} already exists", name, nameOfType<bufferType>());
-            return get_buffer<bufferType>(name);
-        }
         auto [it, _] = m_particleBuffers.emplace(nameId, std::make_unique<particle_buffer<bufferType>>(std::forward<Args>(args)...));
         auto& bffr = *dynamic_cast<particle_buffer<bufferType>*>(it->second.get());
         bffr.resize(m_capacity);
@@ -26,16 +21,17 @@ namespace legion::core
     particle_buffer<bufferType>& particle_emitter::get_buffer(const std::string_view& name)
     {
         id_type nameId = nameHash(name);
-        if (!has_buffer<bufferType>(nameId))
-        {
-            log::warn("Buffer \"{}\" of type {} does not exist, one will be created for you", name, nameOfType<bufferType>());
-            return create_buffer<bufferType>(name);
-        }
+        return get_buffer<bufferType>(nameId);
+    }
+
+    template<typename bufferType>
+    particle_buffer<bufferType>& particle_emitter::get_buffer(id_type nameId)
+    {
         return *dynamic_cast<particle_buffer<bufferType>*>(m_particleBuffers.at(nameId).get());
     }
 
     template<typename uniformType>
-    bool particle_emitter::has_buffer(const std::string_view& name )noexcept
+    bool particle_emitter::has_buffer(const std::string_view& name)noexcept
     {
         return m_particleBuffers.count(nameHash(name)) > 0;
     }
@@ -50,24 +46,19 @@ namespace legion::core
     uniformType& particle_emitter::create_uniform(const std::string_view& name, Args&&... args)
     {
         id_type nameId = nameHash(name);
-        if (has_uniform<uniformType>(nameId))
-        {
-            log::warn("Uniform \"{}\" of type {} already exists", name, nameOfType<uniformType>());
-            return get_uniform<uniformType>(name);
-        }
-        else
-            return dynamic_cast<particle_uniform<uniformType>*>(m_particleUniforms.emplace(nameId, std::make_unique<particle_uniform<uniformType>>(std::forward<Args>(args)...)).first->second.get())->get();
+        return dynamic_cast<particle_uniform<uniformType>*>(m_particleUniforms.emplace(nameId, std::make_unique<particle_uniform<uniformType>>(std::forward<Args>(args)...)).first->second.get())->get();
     }
 
     template<typename uniformType>
     uniformType& particle_emitter::get_uniform(const std::string_view& name)
     {
         id_type nameId = nameHash(name);
-        if (!has_uniform<uniformType>(nameId))
-        {
-            log::warn("Uniform \"{}\" of type {} does not exist, one will be created for you", name, nameOfType<uniformType>());
-            return create_uniform<uniformType>(name);
-        }
+        return get_uniform<uniformType>(nameId);
+    }
+
+    template<typename uniformType>
+    uniformType& particle_emitter::get_uniform(id_type nameId)
+    {
         return dynamic_cast<particle_uniform<uniformType>*>(m_particleUniforms.at(nameId).get())->get();
     }
 

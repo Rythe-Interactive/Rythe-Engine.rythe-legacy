@@ -58,7 +58,8 @@ namespace legion::core
         emitter.set_alive(startCount, count, true);
         emitter.m_particleCount += count;
 
-        auto& ageBuffer = emitter.get_buffer<life_time>("lifetimeBuffer");
+        id_type ageBufferId = nameHash("lifetimeBuffer");
+        auto& ageBuffer = emitter.has_buffer<life_time>(ageBufferId) ? emitter.get_buffer<life_time>(ageBufferId) : emitter.create_buffer<life_time>("lifetimeBuffer");
         auto minLifeTime = emitter.has_uniform<float>("minLifeTime") ? emitter.get_uniform<float>("minLifeTime") : 0.f;
         auto maxLifeTime = emitter.has_uniform<float>("maxLifeTime") ? emitter.get_uniform<float>("maxLifeTime") : 0.f;
 
@@ -96,8 +97,6 @@ namespace legion::core
                 {
                     OPTICK_EVENT("[Particle System] Destroy Particle");
                     emitter.set_alive(i, false);
-                    emitter.swap(i, emitter.m_particleCount - 1);
-                    emitter.m_particleCount--;
                     destroyed++;
                 }
             }
