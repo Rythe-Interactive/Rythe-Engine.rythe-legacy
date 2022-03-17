@@ -18,6 +18,7 @@ namespace legion::rendering
 
         for (auto& ent : emitterFilter)
         {
+            OPTICK_EVENT("[ParticleBatchingStage] Emitter");
             auto& emitter = ent.get_component<particle_emitter>().get();
 
             auto& posBuffer = emitter.get_buffer<position>("posBuffer");
@@ -25,18 +26,22 @@ namespace legion::rendering
 
             auto compare = [&](position& a, position& b)
             {
+                OPTICK_EVENT("[ParticleBatchingStage] Compare Lamda");
                 return math::distance2(a, camInput.pos) < math::distance2(b, camInput.pos);
             };
 
-            for (size_type i = 1; i < emitter.size(); i++)
-            {
-                auto j = i;
-                while (j > 0 && compare(posBuffer[j - 1], posBuffer[j]))
-                {
-                    emitter.swap(j, j - 1);
-                    j--;
-                }
-            }
+            //{
+            //    OPTICK_EVENT("[ParticleBatchingStage] Z Sorting");
+            //    for (size_type i = 1; i < emitter.size(); i++)
+            //    {
+            //        auto j = i;
+            //        while (j > 0 && compare(posBuffer[j - 1], posBuffer[j]))
+            //        {
+            //            emitter.swap(j, j - 1);
+            //            j--;
+            //        }
+            //    }
+            //}
 
             auto filter = emitter.get_uniform<mesh_filter>("mesh_filter");
             auto renderer = emitter.get_uniform<mesh_renderer>("renderer");
@@ -45,7 +50,7 @@ namespace legion::rendering
             if (batch.second.empty())
                 batchList.push_back(std::ref(batch));
             auto start = batch.second.size();
-            batch.second.insert(batch.second.end(), posBuffer.size(), math::mat4());
+            batch.second.insert(batch.second.end(), emitter.size(), math::mat4());
 
 
             scale scal;
@@ -63,11 +68,11 @@ namespace legion::rendering
 
             math::mat4 parentMat = math::compose(scal, rot, origin);
 
-            queueJobs(posBuffer.size(), [&](id_type jobId)
+            queueJobs(emitter.size(), [&](id_type jobId)
                 {
                     if (emitter.is_alive(jobId))
                     {
-                        math::mat4 localMat = math::compose(scaleBuffer[jobId], rotation(), posBuffer[jobId]);
+                        math::mat4 localMat = math::compose(scaleBuffer[jobId], rotation{}, posBuffer[jobId]);
                         batch.second[jobId + start] = parentMat * localMat;
                     }
                 }).wait();

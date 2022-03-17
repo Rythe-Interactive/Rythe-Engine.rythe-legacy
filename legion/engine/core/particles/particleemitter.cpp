@@ -52,10 +52,15 @@ namespace legion::core
 
     void particle_emitter::swap(size_type idx1, size_type idx2)
     {
-        std::iter_swap(m_livingBuffer.begin() + idx1, m_livingBuffer.begin() + idx2);
+        //std::iter_swap(m_livingBuffer.begin() + idx1, m_livingBuffer.begin() + idx2);
+        m_livingBuffer.swap(m_livingBuffer.at(idx1), m_livingBuffer.at(idx2));
+        OPTICK_EVENT("[Particle Emitter] Swap");
 
         for (auto& [id, buffer] : m_particleBuffers)
+        {
             m_particleBuffers[id]->swap(idx1, idx2);
+            OPTICK_EVENT("[Particle Emitter] Particle Buffer Swap calls");
+        }
     }
 
     size_type particle_emitter::size() noexcept

@@ -270,76 +270,7 @@ public:
                     debug::drawLine((worldMat * math::vec4(edge.first.x, edge.first.y, edge.first.z, 1.f)).xyz(), (worldMat * math::vec4(edge.second.x, edge.second.y, edge.second.z, 1.f)).xyz(), math::colors::green);
             }
         }
-
-
-        static bool firstFrame = true;
-        if (firstFrame)
-        {
-            timer.start();
-            firstFrame = false;
-        }
-
-        ecs::filter<position, velocity, example_comp> filter;
-
-        float dt = deltaTime;
-        if (dt > 0.07f)
-            return;
-
-        if (filter.size())
-        {
-            auto poolSize = (schd::Scheduler::jobPoolSize() + 1);
-            size_type jobSize = math::iround(math::ceil(filter.size() / static_cast<float>(poolSize)));
-
-            queueJobs(poolSize, [&](id_type jobId)
-                {
-                    auto start = jobId * jobSize;
-                    auto end = start + jobSize;
-                    if (end > filter.size())
-                        end = filter.size();
-
-                    for (size_type i = start; i < end; i++)
-                    {
-                        auto& pos = filter[i].get_component<position>().get();
-                        auto& vel = filter[i].get_component<velocity>().get();
-
-                        if (vel == math::vec3::zero)
-                            vel = math::normalize(pos);
-
-                        math::vec3 perp;
-
-                        perp = math::normalize(math::cross(vel, math::vec3::up));
-
-                        math::vec3 rotated = (math::axisAngleMatrix(vel, math::perlin(pos) * math::pi<float>()) * math::vec4(perp.x, perp.y, perp.z, 0)).xyz();
-                        rotated.y -= 0.5f;
-                        rotated = math::normalize(rotated);
-
-                        vel = math::normalize(vel + rotated * dt);
-
-                        if (math::abs(vel.y) >= 0.9f)
-                        {
-                            auto rand = math::circularRand(1.f);
-                            vel.y = 0.9f;
-                            vel = math::normalize(vel + math::vec3(rand.x, 0.f, rand.y));
-                        }
-
-                        pos += vel * 0.3f * dt;
-                    }
-                }
-            ).wait();
-        }
-
-        time64 delta = schd::Clock::lastTickDuration();
-
-        if (frames < times.size())
-        {
-            times[frames] = delta;
-            frames++;
-            totalTime += delta;
-        }
-        else
-        {
-            //raiseEvent<events::exit>();
-        }
+        
     }
 
     void playEmitter(legion::play_action& action);

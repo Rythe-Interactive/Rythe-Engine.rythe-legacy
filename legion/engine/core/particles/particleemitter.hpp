@@ -1,5 +1,6 @@
 #pragma once
 #include <unordered_map>
+#include <algorithm>
 
 #include <core/containers/pointer.hpp>
 #include <core/platform/platform.hpp>

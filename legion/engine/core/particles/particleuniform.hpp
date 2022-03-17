@@ -1,8 +1,8 @@
 #pragma once
 #include <any>
 
-#include <core/platform/platform.hpp>
 #include <core/types/types.hpp>
+#include <core/platform/platform.hpp>
 
 
 namespace legion::core
@@ -20,6 +20,8 @@ namespace legion::core
         uniformType uniform;
     public:
         NO_DTOR_RULE5_NOEXCEPT(particle_uniform);
+        particle_uniform(const uniformType& u) : uniform(u) {}
+        particle_uniform(uniformType&& u) : uniform(std::move(u)) {}
         ~particle_uniform() = default;
 
         uniformType& get();
