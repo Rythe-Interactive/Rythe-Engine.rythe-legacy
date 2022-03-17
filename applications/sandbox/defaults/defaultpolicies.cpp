@@ -7,14 +7,15 @@ namespace legion::core
 #pragma region Example Policy
     void example_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
     {
+        OPTICK_EVENT("[Example Policy] Init");
         auto& posBuffer = emitter.get_buffer<position>("posBuffer");
 
         for (size_type idx = start; idx < end; idx++)
         {
             auto baseDir = math::sphericalRand(1.f);
             baseDir.y = 0;
-            int minBound = 2;
-            int maxBound = 4;
+            int minBound = 5;
+            int maxBound = 30;
             auto pos = math::normalize(baseDir) * minBound + math::normalize(baseDir) * (idx % (maxBound - minBound));
             auto dist = math::length(pos);
             pos.y = math::sin(dist / math::pi<float>()) * 5.f * (pos.x / maxBound);
@@ -31,6 +32,7 @@ namespace legion::core
 
     void orbital_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
     {
+        OPTICK_EVENT("[Orbital Policy] Init");
         auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
         auto& posBuffer = emitter.get_buffer<position>("posBuffer");
         for (size_type idx = start; idx < end; idx++)
@@ -45,6 +47,7 @@ namespace legion::core
 
     void orbital_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
     {
+        OPTICK_EVENT("[Orbital Policy] Update");
         auto& posBuffer = emitter.get_buffer<position>("posBuffer");
         auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
         auto& timeBuffer = emitter.get_uniform<float>("timeBuffer");
@@ -73,6 +76,7 @@ namespace legion::core
 #pragma region Fountain Policy
     void fountain_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
     {
+        OPTICK_EVENT("[Fountain Policy] Init");
         auto& posBuffer = emitter.get_buffer<position>("posBuffer");
         auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
         for (size_type idx = start; idx < end; idx++)
@@ -85,6 +89,7 @@ namespace legion::core
 
     void fountain_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
     {
+        OPTICK_EVENT("[Fountain Policy] Update");
         auto& posBuffer = emitter.get_buffer<position>("posBuffer");
         auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
         for (size_type idx = 0; idx < count; idx++)
@@ -98,11 +103,14 @@ namespace legion::core
 #pragma region Scale over Lifetime
     void scale_lifetime_policy::setup(particle_emitter& emitter)
     {
-        emitter.create_uniform<float>("scaleFactor") = .5f;
+        OPTICK_EVENT("[Scale over Lifetime] Setup");
+        emitter.create_uniform<float>("scaleFactor") = .4f;
     }
 
     void scale_lifetime_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
     {
+        OPTICK_EVENT("[Scale over Lifetime] Init");
+        auto& ageBuffer = emitter.get_buffer<life_time>("lifetimeBuffer");
         auto scaleFactor = emitter.get_uniform<float>("scaleFactor");
         auto& scaleBuffer = emitter.get_buffer<scale>("scaleBuffer");
 
@@ -114,12 +122,13 @@ namespace legion::core
 
     void scale_lifetime_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
     {
+        OPTICK_EVENT("[Scale over Lifetime] Update");
         auto& ageBuffer = emitter.get_buffer<life_time>("lifetimeBuffer");
         auto& scaleBuffer = emitter.get_buffer<scale>("scaleBuffer");
 
         auto scaleFactor = emitter.get_uniform<float>("scaleFactor");
 
-        if (!emitter.has_uniform<float>("minLifeTime") && !emitter.has_uniform<float>("maxLifeTime"))
+        if (emitter.has_uniform<float>("minLifeTime") && emitter.has_uniform<float>("maxLifeTime"))
         {
             for (size_type idx = 0; idx < count; idx++)
             {

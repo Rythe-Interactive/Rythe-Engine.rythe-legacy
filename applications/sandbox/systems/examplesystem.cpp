@@ -1,6 +1,8 @@
+#include <chrono>
+
 #include "../systems/examplesystem.hpp"
 #include "../defaults/defaultpolicies.hpp"
-#include <chrono>
+
 
 void ExampleSystem::setup()
 {
@@ -16,17 +18,6 @@ void ExampleSystem::setup()
     auto material = gfx::MaterialCache::create_material("White", fs::view("assets://shaders/color.shs"));
     material.set_param("color", math::colors::white);
 
-    //Sun
-    {
-        auto ent = createEntity("Sun");
-        auto [pos, rot, scal] = ent.add_component<transform>();
-        pos->x = 15.f;
-        pos->z = 15.f;
-        material = gfx::MaterialCache::get_material("White");
-        material.set_param("color", math::colors::yellow);
-        ent.add_component<gfx::mesh_renderer>(gfx::mesh_renderer(material, model));
-        ent.add_component(gfx::light::point(math::colors::yellow, 10.f,50.f));
-    }
     //Iron
     {
         material = gfx::MaterialCache::create_material("iron", fs::view("engine://shaders/default_lit.shs"));
@@ -255,6 +246,24 @@ void ExampleSystem::setup()
         //scal = math::vec3(3.f);
         //ent.add_component(gfx::mesh_renderer(material, model));
     }
+    //Sun
+    {
+       /* auto ent = createEntity("Sun");
+        auto [pos, rot, scal] = ent.add_component<transform>();
+        pos->x = -30.f;
+        pos->z = 30.f;
+        scal = scale(10.f);
+        material = gfx::MaterialCache::create_material("Sun", fs::view("assets://shaders/pbr.shs"));
+
+        material.set_param(SV_ALBEDO, rendering::TextureCache::create_texture(fs::view("assets://textures/2kSun.jpg")));
+        material.set_param(SV_NORMALHEIGHT, rendering::TextureCache::create_texture(fs::view("assets://textures/slate/slate-normalHeight-2048.png")));
+        material.set_param(SV_MRDAO, rendering::TextureCache::create_texture(fs::view("assets://textures/slate/slate-MRDAo-2048.png")));
+        material.set_param(SV_EMISSIVE, rendering::TextureCache::create_texture(fs::view("assets://textures/2kSun.jpg")));
+        material.set_param(SV_HEIGHTSCALE, 1.f);
+
+        ent.add_component<gfx::mesh_renderer>(gfx::mesh_renderer(material, model));
+        ent.add_component(gfx::light::point(math::color(1.f, 215.f / 255.f, 0.f), 10.f, 50.f));*/
+    }
 
     {
         auto ent = createEntity("Saturn");
@@ -263,42 +272,45 @@ void ExampleSystem::setup()
         material = gfx::MaterialCache::get_material("bog");
         model = gfx::ModelCache::get_handle("Sphere");
         ent.add_component<gfx::mesh_renderer>(gfx::mesh_renderer(material, model));
-        auto emitter = ent.add_component<particle_emitter>();
-        emitter->set_spawn_rate(10);
-        emitter->set_spawn_interval(0.05f);
-        emitter->resize(100);
-        emitter->localSpace = true;
+        auto orbit = createEntity("orbitRings");
+        ent.add_child(orbit);
+
+        auto emitter = orbit.add_component<particle_emitter>();
+        emitter->set_spawn_rate(100);
+        emitter->set_spawn_interval(0.2f);
+        emitter->resize(10000);
+        emitter->localSpace = false;
 
         emitter->add_policy<example_policy>();
         orbital_policy orbital;
         orbital.C_MASS = 100.f;
         orbital.G_FORCE = .1f;
         emitter->add_policy<orbital_policy>(orbital);
+        emitter->add_policy<scale_lifetime_policy>();
         material = gfx::MaterialCache::get_material("slate");
         emitter->add_policy<gfx::rendering_policy>(gfx::rendering_policy{ model, material });
-        gfx::MaterialCache::get_material("Particle").set_param("fixedSize", false);
     }
 
-    {
-        auto ent = createEntity("Fountain");
-        auto [pos, rot, scal] = ent.add_component<transform>();
-        pos = position(0, 7, 0);
-        auto emitter = ent.add_component<particle_emitter>();
-        emitter->set_spawn_rate(10);
-        emitter->set_spawn_interval(0.05f);
-        emitter->resize(50000);
-        emitter->create_uniform<float>("minLifeTime") = 1.f;
-        emitter->create_uniform<float>("maxLifeTime") = 2.f;
-        emitter->localSpace = false;
+    //{
+    //    auto ent = createEntity("Fountain");
+    //    auto [pos, rot, scal] = ent.add_component<transform>();
+    //    pos = position(0, 7, 0);
+    //    auto emitter = ent.add_component<particle_emitter>();
+    //    emitter->set_spawn_rate(10);
+    //    emitter->set_spawn_interval(0.2f);
+    //    emitter->resize(50000);
+    //    emitter->create_uniform<float>("minLifeTime") = 1.f;
+    //    emitter->create_uniform<float>("maxLifeTime") = 2.f;
+    //    emitter->localSpace = false;
 
-        fountain_policy fountain;
-        fountain.initForce = 20.f;
-        emitter->add_policy<fountain_policy>(fountain);
-        emitter->add_policy<scale_lifetime_policy>();
-        emitter->add_policy<gfx::rendering_policy>(gfx::rendering_policy{ gfx::ModelCache::create_model("Quad", fs::view("assets://models/billboard.glb")),  gfx::MaterialCache::create_material("Particle", fs::view("assets://shaders/particle.shs")) });
-        gfx::MaterialCache::get_material("Particle").set_param("particleColor", math::color(1.f, 1.f, 1.f, 1.f));
-        gfx::MaterialCache::get_material("Particle").set_param("fixedSize", false);
-    }
+    //    fountain_policy fountain;
+    //    fountain.initForce = 20.f;
+    //    emitter->add_policy<fountain_policy>(fountain);
+    //    emitter->add_policy<scale_lifetime_policy>();
+    //    emitter->add_policy<gfx::rendering_policy>(gfx::rendering_policy{ gfx::ModelCache::create_model("Quad", fs::view("assets://models/billboard.glb")),  gfx::MaterialCache::create_material("Particle", fs::view("assets://shaders/particle.shs")) });
+    //    gfx::MaterialCache::get_material("Particle").set_param("particleColor", math::color(1.f, 1.f, 1.f, 1.f));
+    //    gfx::MaterialCache::get_material("Particle").set_param("fixedSize", false);
+    //}
 
     bindToEvent<events::exit, &ExampleSystem::onExit>();
 }
