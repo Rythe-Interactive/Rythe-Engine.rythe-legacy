@@ -315,3 +315,45 @@ void ExampleSystem::setup()
     bindToEvent<events::exit, &ExampleSystem::onExit>();
 }
 
+void ExampleSystem::playEmitter(legion::play_action& action)
+{
+    using namespace legion;
+    if (action.pressed())
+    {
+        ecs::filter<particle_emitter> filter;
+        for (auto ent : filter)
+        {
+            auto& emitter = ent.get_component<particle_emitter>();
+            emitter->play();
+        }
+    }
+}
+
+void ExampleSystem::pauseEmitter(legion::pause_action& action)
+{
+    using namespace legion;
+    if (action.pressed())
+    {
+        ecs::filter<particle_emitter> filter;
+        for (auto ent : filter)
+        {
+            auto& emitter = ent.get_component<particle_emitter>();
+            emitter->pause();
+        }
+    }
+}
+
+void ExampleSystem::stopEmitter(legion::stop_action& action)
+{
+    using namespace legion;
+    if (action.pressed())
+    {
+        ecs::filter<particle_emitter> filter;
+        for (auto ent : filter)
+        {
+            auto& emitter = ent.get_component<particle_emitter>();
+            emitter->stop();
+        }
+    }
+}
+
