@@ -26,7 +26,7 @@ namespace legion::core
 #pragma region Orbital Policy
     void orbital_policy::setup(particle_emitter& emitter)
     {
-        emitter.create_uniform<float>("timeBuffer", 0.0f);
+        emitter.create_uniform<float>("timeBuffer") = 0.0f;
     }
 
     void orbital_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
@@ -98,7 +98,7 @@ namespace legion::core
 #pragma region Scale over Lifetime
     void scale_lifetime_policy::setup(particle_emitter& emitter)
     {
-        emitter.create_uniform<float>("scaleFactor", .5f);
+        emitter.create_uniform<float>("scaleFactor") = .5f;
     }
 
     void scale_lifetime_policy::onInit(particle_emitter& emitter, size_type start, size_type end)

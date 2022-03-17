@@ -16,6 +16,7 @@ void ExampleSystem::setup()
     auto material = gfx::MaterialCache::create_material("White", fs::view("assets://shaders/color.shs"));
     material.set_param("color", math::colors::white);
 
+    //Sun
     {
         auto ent = createEntity("Sun");
         auto [pos, rot, scal] = ent.add_component<transform>();
@@ -26,7 +27,6 @@ void ExampleSystem::setup()
         ent.add_component<gfx::mesh_renderer>(gfx::mesh_renderer(material, model));
         ent.add_component(gfx::light::point(math::colors::yellow, 10.f,50.f));
     }
-
     //Iron
     {
         material = gfx::MaterialCache::create_material("iron", fs::view("engine://shaders/default_lit.shs"));
@@ -264,14 +264,10 @@ void ExampleSystem::setup()
         model = gfx::ModelCache::get_handle("Sphere");
         ent.add_component<gfx::mesh_renderer>(gfx::mesh_renderer(material, model));
         auto emitter = ent.add_component<particle_emitter>();
-        emitter->infinite = true;
-        emitter->spawnRate = 10;
-        emitter->spawnInterval = 0.05f;
+        emitter->set_spawn_rate(10);
+        emitter->set_spawn_interval(0.05f);
         emitter->resize(100);
-        emitter->minLifeTime = 5;
-        emitter->maxLifeTime = 15;
-        emitter->localScale = false;
-        emitter->localPosition = false;
+        emitter->localSpace = true;
 
         emitter->add_policy<example_policy>();
         orbital_policy orbital;
@@ -288,13 +284,12 @@ void ExampleSystem::setup()
         auto [pos, rot, scal] = ent.add_component<transform>();
         pos = position(0, 7, 0);
         auto emitter = ent.add_component<particle_emitter>();
-        emitter->infinite = false;
-        emitter->spawnRate = 10;
-        emitter->spawnInterval = .05f;
+        emitter->set_spawn_rate(10);
+        emitter->set_spawn_interval(0.05f);
         emitter->resize(50000);
-        emitter->minLifeTime = 1;
-        emitter->maxLifeTime = 2;
-        emitter->localScale = false;
+        emitter->create_uniform<float>("minLifeTime") = 1.f;
+        emitter->create_uniform<float>("maxLifeTime") = 2.f;
+        emitter->localSpace = false;
 
         fountain_policy fountain;
         fountain.initForce = 20.f;

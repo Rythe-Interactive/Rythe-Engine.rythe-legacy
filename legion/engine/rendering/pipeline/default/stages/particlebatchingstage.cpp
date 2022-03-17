@@ -28,7 +28,7 @@ namespace legion::rendering
                 return math::distance2(a, camInput.pos) < math::distance2(b, camInput.pos);
             };
 
-            for (size_type i = 1; i < emitter.currentParticleCount; i++)
+            for (size_type i = 1; i < emitter.size(); i++)
             {
                 auto j = i;
                 while (j > 0 && compare(posBuffer[j - 1], posBuffer[j]))
