@@ -35,7 +35,12 @@ namespace legion::core
 
     void particle_emitter::set_alive(size_type idx, bool alive)
     {
-        m_livingBuffer[idx] = alive;
+        m_livingBuffer.at(idx) = alive;
+        if (!alive)
+        {
+            swap(idx, m_particleCount - 1);
+            m_particleCount--;
+        }
     }
 
     void particle_emitter::set_alive(size_type start, size_type count, bool alive)
@@ -46,20 +51,17 @@ namespace legion::core
     bool particle_emitter::is_alive(size_type idx) const
     {
         if (idx < m_livingBuffer.size())
-            return m_livingBuffer[idx];
+            return m_livingBuffer.at(idx);
         return false;
     }
 
     void particle_emitter::swap(size_type idx1, size_type idx2)
     {
-        //std::iter_swap(m_livingBuffer.begin() + idx1, m_livingBuffer.begin() + idx2);
         m_livingBuffer.swap(m_livingBuffer.at(idx1), m_livingBuffer.at(idx2));
-        OPTICK_EVENT("[Particle Emitter] Swap");
 
         for (auto& [id, buffer] : m_particleBuffers)
         {
             m_particleBuffers[id]->swap(idx1, idx2);
-            OPTICK_EVENT("[Particle Emitter] Particle Buffer Swap calls");
         }
     }
 

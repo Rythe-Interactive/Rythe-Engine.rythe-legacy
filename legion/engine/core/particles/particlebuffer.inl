@@ -18,7 +18,6 @@ namespace legion::core
     template<typename bufferType>
     void particle_buffer<bufferType>::swap(size_type idx1, size_type idx2)
     {
-        std::swap(at(idx1), at(idx2));
-        OPTICK_EVENT("[Particle Emitter] std::Swap");
+        std::swap(std::vector<bufferType>::at(idx1), std::vector<bufferType>::at(idx2));
     }
 }
