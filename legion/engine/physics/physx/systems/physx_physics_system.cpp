@@ -18,6 +18,7 @@ namespace legion::physics
         inline static PxPvd* pvd = nullptr;
         inline static PxDefaultCpuDispatcher* dispatcher = nullptr;
         inline static PxPhysics* phyxSDK = nullptr;
+        inline static PxCooking* cooking = nullptr;
 
         inline static PxDefaultAllocator defaultAllocator;
         inline static PxDefaultErrorCallback defaultErrorCallback;
@@ -51,6 +52,9 @@ namespace legion::physics
         createProcess<&PhysXPhysicsSystem::fixedUpdate>("Physics", m_timeStep);
 
         bindToEvent<events::component_destruction<physics_component>, &PhysXPhysicsSystem::markPhysicsWrapperPendingRemove>();
+
+        PhysicsComponentData::m_generateConvexColliderFunc = &PhysXPhysicsSystem::physxGenerateConvexMesh;
+
     }
 
     void PhysXPhysicsSystem::shutdown()
@@ -70,6 +74,22 @@ namespace legion::physics
         }
     }
 
+    void* PhysXPhysicsSystem::physxGenerateConvexMesh(const std::vector<math::vec3>& vertices)
+    {
+        PxConvexMeshDesc convexDesc;
+        convexDesc.points.count = vertices.size();
+        convexDesc.points.stride = sizeof(math::vec3);
+        convexDesc.points.data = vertices.data();
+        convexDesc.flags =
+            PxConvexFlag::eCOMPUTE_CONVEX | PxConvexFlag::eDISABLE_MESH_VALIDATION | PxConvexFlag::eFAST_INERTIA_COMPUTATION;
+
+        #ifdef _DEBUG
+        bool res = PS::cooking->validateConvexMesh(convexDesc);
+        #endif 
+
+        return PS::cooking->createConvexMesh(convexDesc, PS::phyxSDK->getPhysicsInsertionCallback());
+    }
+
     void PhysXPhysicsSystem::lazyInitPhysXVariables()
     {
         if (PS::selfInstanceCounter == 1)
@@ -83,7 +103,15 @@ namespace legion::physics
 
             PS::dispatcher = PxDefaultCpuDispatcherCreate(0); //deal with multithreading later on
 
-            PS::phyxSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *PS::foundation, PxTolerancesScale(), true, PS::pvd);
+            PxTolerancesScale scale;
+            PS::phyxSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *PS::foundation, scale, true, PS::pvd);
+
+            PxCookingParams params(scale);
+            params.meshWeldTolerance = 0.001f;
+            params.meshPreprocessParams = PxMeshPreprocessingFlags(PxMeshPreprocessingFlag::eWELD_VERTICES);
+            params.buildGPUData = false; //TODO set to true later on when GPU bodies are supported 
+
+            PS::cooking = PxCreateCooking(PX_PHYSICS_VERSION, *PS::foundation, params);
         }
     }
 
@@ -113,6 +141,7 @@ namespace legion::physics
 
     void PhysXPhysicsSystem::releasePhysXVariables()
     {
+        PS::cooking->release();
         PS::dispatcher->release();
         PS::phyxSDK->release();
 
