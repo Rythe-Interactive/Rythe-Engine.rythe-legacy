@@ -30,6 +30,8 @@ namespace legion::physics
 
         struct PhysxStatics;
 
+        static void* physxGenerateConvexMesh(const std::vector<math::vec3>& vertices);
+
         void lazyInitPhysXVariables();
 
         void releasePhysXVariables();

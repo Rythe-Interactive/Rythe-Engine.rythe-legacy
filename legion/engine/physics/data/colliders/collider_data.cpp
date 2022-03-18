@@ -13,4 +13,9 @@ namespace legion::physics
     SphereColliderData::SphereColliderData(const math::vec3& offset, float radius) noexcept
         :
         ColliderData(collider_type::sphere, offset, math::identity<math::quat>()), m_radius{radius} { }
+        
+        ConvexColliderData::ConvexColliderData(const math::vec3& offset, const math::quat& rotation, void* internalConvexColliderStructure,
+        const std::bitset<physics_component_flag::pc_max>* modificationBitset)
+        :
+        ColliderData(collider_type::box, offset, rotation, modificationBitset), m_internalConvexStructure{ internalConvexColliderStructure } { }
 }

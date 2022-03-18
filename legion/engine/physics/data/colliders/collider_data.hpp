@@ -40,11 +40,17 @@ namespace legion::physics
 
         ConvexColliderData(const math::vec3& offset,const math::quat& rotation, const math::vec3& boxExtents) noexcept;
 
+        ConvexColliderData(const math::vec3& offset, const math::quat& rotation, void* internalConvexColliderStructure,
+            const std::bitset < physics_component_flag::pc_max>* modificationBitset);
+
+        inline const math::vec3& getBoxExtents() const { return m_boxExtents; }
+        
         L_ALWAYS_INLINE const math::vec3& getBoxExtents() const noexcept { return m_boxExtents; }
 
     private:
 
         math::vec3 m_boxExtents{0.0f};
+        void* m_internalConvexStructure{nullptr};
     };
 
     class SphereColliderData : public ColliderData
