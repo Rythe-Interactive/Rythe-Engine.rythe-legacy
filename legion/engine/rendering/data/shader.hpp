@@ -290,6 +290,10 @@ namespace legion::rendering
     private:
         mutable shader_variant* m_currentShaderVariant;
         mutable std::unordered_map<id_type, shader_variant> m_variants;
+
+        shader_import_settings m_importSettings;
+        id_type m_id;
+
     public:
         std::string name;
         std::string path;
@@ -463,7 +467,10 @@ namespace legion::rendering
 
         attribute get_attribute(id_type attributeId);
 
-        void bind();
+        void destroy();
+        bool is_valid() const;
+
+        void bind() const;
         static void release();
 
         bool operator==(const shader_handle& other) const { return id == other.id; }
@@ -489,6 +496,7 @@ namespace legion::rendering
 
         static sparse_map<id_type, shader> m_shaders;
         static async::rw_spinlock m_shaderLock;
+        static std::unordered_set<id_type> m_checkedPaths;
 
         static shader* get_shader(id_type id);
 
@@ -500,7 +508,19 @@ namespace legion::rendering
 
         static shader_handle create_invalid_shader(const fs::view& file, shader_import_settings settings = default_shader_settings);
 
+        static void clear_modified_from_cache(const fs::view& path);
+
     public:
+        static void clear_checked_paths();
+
+        static void reload_shaders();
+
+        static void delete_shader(const std::string& name);
+        static void delete_shader(id_type id);
+
+        static bool has_shader(const std::string& name);
+        static bool has_shader(id_type id);
+
         static shader_handle create_shader(const std::string& name, const fs::view& file, shader_import_settings settings = default_shader_settings);
         static shader_handle create_shader(const fs::view& file, shader_import_settings settings = default_shader_settings);
         static shader_handle get_handle(const std::string& name);

@@ -124,7 +124,11 @@ namespace legion::rendering
                         else
                             mater = mesh.materials[submesh.materialIndex];
 
-                        auto& shaderState = mater.get_shader().get_variant(mater.current_variant()).state;
+                        auto shader = mater.get_shader();
+                        if (!shader.is_valid())
+                            continue;
+
+                        auto& shaderState = shader.get_variant(mater.current_variant()).state;
                         if ((shaderState.count(GL_BLEND) && (shaderState.at(GL_BLEND) != GL_FALSE)) ||
                             (shaderState.count(GL_BLEND_SRC) && (shaderState.at(GL_BLEND_SRC) != GL_FALSE)) ||
                             (shaderState.count(GL_BLEND_DST) && (shaderState.at(GL_BLEND_DST) != GL_FALSE)))
@@ -204,7 +208,11 @@ namespace legion::rendering
                 continue;
             }
 
-            auto& shaderState = material.get_shader().get_variant(material.current_variant()).state;
+            auto shader = material.get_shader();
+            if (!shader.is_valid())
+                continue;
+
+            auto& shaderState = shader.get_variant(material.current_variant()).state;
             if ((shaderState.count(GL_BLEND) && (shaderState.at(GL_BLEND) != GL_FALSE)) ||
                 (shaderState.count(GL_BLEND_SRC) && (shaderState.at(GL_BLEND_SRC) != GL_FALSE)) ||
                 (shaderState.count(GL_BLEND_DST) && (shaderState.at(GL_BLEND_DST) != GL_FALSE)))

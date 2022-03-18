@@ -7,11 +7,15 @@ namespace legion::rendering
 {
     sparse_map<id_type, shader> ShaderCache::m_shaders;
     async::rw_spinlock ShaderCache::m_shaderLock;
+    std::unordered_set<id_type> ShaderCache::m_checkedPaths;
 
     shader* ShaderCache::get_shader(id_type id)
     {
         async::readonly_guard guard(m_shaderLock);
-        return &m_shaders[id];
+        if (m_shaders.count(id))
+            return &m_shaders.at(id);
+        else
+            return &m_shaders.at(invalid_id);
     }
 
     void ShaderCache::process_io(shader& shader, id_type id)
@@ -165,7 +169,7 @@ namespace legion::rendering
             GLint infoLogLength;
             glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &infoLogLength);
             const char* errorMessage;
-            if (infoLogLength > 0)
+            if (infoLogLength > 0 && infoLogLength < 1024)
             {
                 char* temp = new char[infoLogLength + 1];
                 glGetShaderInfoLog(shaderId, infoLogLength, nullptr, temp);
@@ -203,7 +207,7 @@ namespace legion::rendering
             }
 
             log::error("Error compiling {} shader:\n\t{}", shaderTypename, errorMessage);
-            if (infoLogLength > 0)
+            if (infoLogLength > 0 && infoLogLength < 1024)
                 delete[] errorMessage; // Delete message.
 
             glDeleteShader(shaderId); // Delete shader.
@@ -263,6 +267,7 @@ namespace legion::rendering
             {
                 std::string source;
                 retrieveBinaryData(source, start);
+
                 ilo[shaderVariant].emplace_back(shaderType, source);
             }
             break;
@@ -341,7 +346,7 @@ namespace legion::rendering
                 log::println(severity, errormsg);
             });
 
-        ShaderCompiler::cleanCache();
+        clear_modified_from_cache(file.parent());
 
         std::unordered_map<std::string, shader_state> state;
         shader_ilo shaders;
@@ -403,7 +408,8 @@ namespace legion::rendering
 
         for (auto& [shaderVariant, variantSource] : shaders)
         {
-            shader_variant& variant = shader.m_variants[nameHash(shaderVariant)];
+            id_type variantId = nameHash(shaderVariant);
+            shader_variant& variant = shader.m_variants[variantId];
             variant.name = shaderVariant;
             GLenum blendSrc = GL_FALSE, blendDst = GL_FALSE;
 
@@ -482,15 +488,7 @@ namespace legion::rendering
 
                 if (shaderId == (app::gl_id)-1)
                 {
-                    auto v = common::split_string_at<'\n'>(shaderIL);
-
-                    std::string output;
-                    for (int i = 0; i < v.size(); i++)
-                    {
-                        output += std::to_string(i + 1) + "\t| " + v[i] + "\n";
-                    }
-
-                    log::error("Error occurred in shader: invalid\n{}", output);
+                    log::error("Error occurred in shader: invalid\n");
 
                     for (auto id : shaderIds)
                     {
@@ -499,7 +497,7 @@ namespace legion::rendering
                     }
 
                     glDeleteProgram(variant.programId);
-                    shader.m_variants.erase(nameHash(shaderVariant));
+                    shader.m_variants.erase(variantId);
                     continue;
                 }
 
@@ -514,46 +512,26 @@ namespace legion::rendering
 
             if (!linkStatus)
             {
+                // Create message buffer and fetch message.
                 GLint infoLogLength;
                 glGetProgramiv(variant.programId, GL_INFO_LOG_LENGTH, &infoLogLength);
 
-                char* errorMessage = new char[infoLogLength + 1];
-                glGetProgramInfoLog(variant.programId, infoLogLength, nullptr, errorMessage);
+                const char* errorMessage;
+                if (infoLogLength > 0 && infoLogLength < 1024)
+                {
+                    char* temp = new char[infoLogLength + 1];
+                    glGetProgramInfoLog(variant.programId, infoLogLength, nullptr, temp);
+                    temp[infoLogLength] = '\0';
+                    errorMessage = temp;
+                }
+                else
+                {
+                    errorMessage = "Unknown error, OpenGL context might not have been made current?";
+                }
 
                 log::error("Error linking invalid shader:\n\t{}", errorMessage);
-                delete[] errorMessage;
-
-                for (auto& [shaderType, shaderIL] : variantSource)
-                {
-                    cstring shaderTypename;
-                    switch (shaderType)
-                    {
-                    case GL_FRAGMENT_SHADER:
-                        shaderTypename = "fragment";
-                        break;
-                    case GL_VERTEX_SHADER:
-                        shaderTypename = "vertex";
-                        break;
-                    case GL_GEOMETRY_SHADER:
-                        shaderTypename = "geometry";
-                        break;
-                    case GL_TESS_CONTROL_SHADER:
-                        shaderTypename = "tessellation control";
-                        break;
-                    case GL_TESS_EVALUATION_SHADER:
-                        shaderTypename = "tessellation evaluation";
-                        break;
-                    case GL_COMPUTE_SHADER:
-                        shaderTypename = "compute";
-                        break;
-                    default:
-                        shaderTypename = "unknown type";
-                        break;
-                    }
-
-                    log::error("{}:\n\n{}\n\n", shaderTypename, shaderIL);
-
-                }
+                if (infoLogLength > 0 && infoLogLength < 1024)
+                    delete[] errorMessage; // Delete message.
 
                 for (auto& id : shaderIds)
                 {
@@ -562,7 +540,7 @@ namespace legion::rendering
                 }
 
                 glDeleteProgram(variant.programId);
-                shader.m_variants.erase(nameHash(shaderVariant));
+                shader.m_variants.erase(variantId);
                 continue;
             }
 
@@ -573,14 +551,26 @@ namespace legion::rendering
 
             if (!validationStatus)
             {
+                // Create message buffer and fetch message.
                 GLint infoLogLength;
                 glGetProgramiv(variant.programId, GL_INFO_LOG_LENGTH, &infoLogLength);
 
-                char* errorMessage = new char[infoLogLength + 1];
-                glGetProgramInfoLog(variant.programId, infoLogLength, nullptr, errorMessage);
+                const char* errorMessage;
+                if (infoLogLength > 0 && infoLogLength < 1024)
+                {
+                    char* temp = new char[infoLogLength + 1];
+                    glGetProgramInfoLog(variant.programId, infoLogLength, nullptr, temp);
+                    temp[infoLogLength] = '\0';
+                    errorMessage = temp;
+                }
+                else
+                {
+                    errorMessage = "Unknown error, OpenGL context might not have been made current?";
+                }
 
                 log::error("Error validating invalid shader:\n\t{}", errorMessage);
-                delete[] errorMessage;
+                if (infoLogLength > 0 && infoLogLength < 1024)
+                    delete[] errorMessage; // Delete message.
 
                 for (auto& shaderId : shaderIds)
                 {
@@ -590,7 +580,7 @@ namespace legion::rendering
 
                 glDeleteProgram(variant.programId);
 
-                shader.m_variants.erase(nameHash(shaderVariant));
+                shader.m_variants.erase(variantId);
             }
         }
 
@@ -611,8 +601,91 @@ namespace legion::rendering
         return { invalid_id };
     }
 
+    void ShaderCache::clear_modified_from_cache(const fs::view& path)
+    {
+        auto pathHash = nameHash(path.get_virtual_path());
+        if (m_checkedPaths.count(pathHash))
+            return;
+        else
+            m_checkedPaths.insert(pathHash);
+
+        ShaderCompiler::cleanCache(path);
+    }
+
+    void ShaderCache::clear_checked_paths()
+    {
+        m_checkedPaths.clear();
+    }
+
+    void ShaderCache::reload_shaders()
+    {
+        std::vector<shader> toReload;
+
+        {
+            async::readonly_guard guard(m_shaderLock);
+
+            for (auto [id, shaderProgram] : m_shaders)
+            {
+                if (id != invalid_id)
+                    toReload.emplace_back(std::move(shaderProgram));
+            }
+
+            for (auto& item : toReload)
+            {
+                m_shaders.erase(item.m_id);
+            }
+        }
+
+        glUseProgram(0);
+
+        for (auto& item : toReload)
+        {
+            for (auto& [id, variant] : item.m_variants)
+                glDeleteProgram(variant.programId);
+
+            create_shader(item.name, fs::view(item.path), item.m_importSettings);
+        }
+    }
+
+    void ShaderCache::delete_shader(const std::string& name)
+    {
+        delete_shader(nameHash(name));
+    }
+
+    void ShaderCache::delete_shader(id_type id)
+    {
+        async::readonly_guard guard(m_shaderLock);
+        if (m_shaders.contains(id))
+        {
+            shader temp = std::move(m_shaders.at(id));
+            for (auto& [id, variant] : temp.m_variants)
+                glDeleteProgram(variant.programId);
+            m_shaders.erase(id);
+        }
+    }
+
+    bool ShaderCache::has_shader(const std::string& name)
+    {
+        return has_shader(nameHash(name));
+    }
+
+    bool ShaderCache::has_shader(id_type id)
+    {
+        async::readonly_guard guard(m_shaderLock);
+
+        if (m_shaders.contains(id))
+        {
+            static id_type defaultId = nameHash("default");
+            auto& shader = m_shaders.at(id);
+            return !shader.m_variants.empty() && shader.m_variants.count(defaultId);
+        }
+        return false;
+    }
+
     shader_handle ShaderCache::create_shader(const std::string& name, const fs::view& file, shader_import_settings settings)
     {
+        static id_type defaultId = nameHash("default");
+
         // Get the id of the new shader.
         id_type id = nameHash(name);
 
@@ -626,10 +699,16 @@ namespace legion::rendering
 
             if (m_shaders.contains(id))
             {
+                auto& shader = m_shaders.at(id);
+                if (shader.m_variants.empty() || !shader.m_variants.count(defaultId))
+                    return { invalid_id };
+
                 log::debug("Shader {} already exists, existing shader will be returned instead.", name);
                 return { id };
             }
         }
+
+        clear_modified_from_cache(file.parent());
 
         std::unordered_map<std::string, shader_state> state;
         shader_ilo shaders;
@@ -683,8 +762,6 @@ namespace legion::rendering
             return invalid_shader_handle;
 
         shader shader;
-        shader.name = name;
-        shader.path = file.get_virtual_path();
 
         for (auto& [variant, variantState] : state)
         {
@@ -693,7 +770,8 @@ namespace legion::rendering
 
         for (auto& [shaderVariant, variantSource] : shaders)
         {
-            shader_variant& variant = shader.m_variants[nameHash(shaderVariant)];
+            id_type variantId = nameHash(shaderVariant);
+            shader_variant& variant = shader.m_variants[variantId];
             variant.name = shaderVariant;
 
             GLenum blendSrc = GL_FALSE, blendDst = GL_FALSE;
@@ -772,15 +850,7 @@ namespace legion::rendering
 
                 if (shaderId == (app::gl_id)-1)
                 {
-                    auto v = common::split_string_at<'\n'>(shaderIL);
-
-                    std::string output;
-                    for (int i = 0; i < v.size(); i++)
-                    {
-                        output += std::to_string(i + 1) + "\t| " + v[i] + "\n";
-                    }
-
-                    log::error("Error occurred in shader: {}\n{}", name, output);
+                    log::error("Error occurred in shader: {}", name);
 
                     for (auto id : shaderIds)
                     {
@@ -789,7 +859,7 @@ namespace legion::rendering
                     }
 
                     glDeleteProgram(variant.programId);
-                    shader.m_variants.erase(nameHash(shaderVariant));
+                    shader.m_variants.erase(variantId);
                     continue;
                 }
 
@@ -804,46 +874,25 @@ namespace legion::rendering
 
             if (!linkStatus)
             {
+                // Create message buffer and fetch message.
                 GLint infoLogLength;
                 glGetProgramiv(variant.programId, GL_INFO_LOG_LENGTH, &infoLogLength);
-
-                char* errorMessage = new char[infoLogLength + 1];
-                glGetProgramInfoLog(variant.programId, infoLogLength, nullptr, errorMessage);
+                const char* errorMessage;
+                if (infoLogLength > 0 && infoLogLength < 1024)
+                {
+                    char* temp = new char[infoLogLength + 1];
+                    glGetProgramInfoLog(variant.programId, infoLogLength, nullptr, temp);
+                    temp[infoLogLength] = '\0';
+                    errorMessage = temp;
+                }
+                else
+                {
+                    errorMessage = "Unknown error, OpenGL context might not have been made current?";
+                }
 
                 log::error("Error linking {} shader:\n\t{}", name, errorMessage);
-                delete[] errorMessage;
-
-                for (auto& [shaderType, shaderIL] : variantSource)
-                {
-                    cstring shaderTypename;
-                    switch (shaderType)
-                    {
-                    case GL_FRAGMENT_SHADER:
-                        shaderTypename = "fragment";
-                        break;
-                    case GL_VERTEX_SHADER:
-                        shaderTypename = "vertex";
-                        break;
-                    case GL_GEOMETRY_SHADER:
-                        shaderTypename = "geometry";
-                        break;
-                    case GL_TESS_CONTROL_SHADER:
-                        shaderTypename = "tessellation control";
-                        break;
-                    case GL_TESS_EVALUATION_SHADER:
-                        shaderTypename = "tessellation evaluation";
-                        break;
-                    case GL_COMPUTE_SHADER:
-                        shaderTypename = "compute";
-                        break;
-                    default:
-                        shaderTypename = "unknown type";
-                        break;
-                    }
-
-                    log::error("{}:\n\n{}\n\n", shaderTypename, shaderIL);
-
-                }
+                if (infoLogLength > 0 && infoLogLength < 1024)
+                    delete[] errorMessage; // Delete message.
 
                 for (auto& id : shaderIds)
                 {
@@ -852,7 +901,7 @@ namespace legion::rendering
                 }
 
                 glDeleteProgram(variant.programId);
-                shader.m_variants.erase(nameHash(shaderVariant));
+                shader.m_variants.erase(variantId);
                 continue;
             }
 
@@ -863,14 +912,25 @@ namespace legion::rendering
 
             if (!validationStatus)
             {
+                // Create message buffer and fetch message.
                 GLint infoLogLength;
                 glGetProgramiv(variant.programId, GL_INFO_LOG_LENGTH, &infoLogLength);
-
-                char* errorMessage = new char[infoLogLength + 1];
-                glGetProgramInfoLog(variant.programId, infoLogLength, nullptr, errorMessage);
+                const char* errorMessage;
+                if (infoLogLength > 0 && infoLogLength < 1024)
+                {
+                    char* temp = new char[infoLogLength + 1];
+                    glGetProgramInfoLog(variant.programId, infoLogLength, nullptr, temp);
+                    temp[infoLogLength] = '\0';
+                    errorMessage = temp;
+                }
+                else
+                {
+                    errorMessage = "Unknown error, OpenGL context might not have been made current?";
+                }
 
                 log::error("Error validating {} shader:\n\t{}", name, errorMessage);
-                delete[] errorMessage;
+                if (infoLogLength > 0 && infoLogLength < 1024)
+                    delete[] errorMessage; // Delete message.
 
                 for (auto& shaderId : shaderIds)
                 {
@@ -880,14 +940,38 @@ namespace legion::rendering
 
                 glDeleteProgram(variant.programId);
 
-                shader.m_variants.erase(nameHash(shaderVariant));
+                shader.m_variants.erase(variantId);
+                continue;
             }
+
+            for (auto& shaderId : shaderIds)
+            {
+                glDetachShader(variant.programId, shaderId);
+                glDeleteShader(shaderId);
+            }
+        }
+
+        if (shader.m_variants.empty() || !shader.m_variants.count(defaultId))
+        {
+            shader.name = name;
+            shader.path = file.get_virtual_path();
+            shader.m_importSettings = settings;
+            shader.m_id = id;
+
+            {
+                async::readwrite_guard guard(m_shaderLock);
+                m_shaders.insert(id, std::move(shader));
+            }
+
+            return { invalid_id };
         }
 
         process_io(shader, id);
 
-        if (!shader.m_variants.size())
-            return { invalid_id };
+        shader.name = name;
+        shader.path = file.get_virtual_path();
+        shader.m_importSettings = settings;
+        shader.m_id = id;
 
         {
             async::readwrite_guard guard(m_shaderLock);
@@ -1012,7 +1096,17 @@ namespace legion::rendering
         return ShaderCache::get_shader(id)->get_attribute(attributeId);
     }
 
-    void shader_handle::bind()
+    void shader_handle::destroy()
+    {
+        ShaderCache::delete_shader(id);
+    }
+
+    bool shader_handle::is_valid() const
+    {
+        return ShaderCache::has_shader(id);
+    }
+
+    void shader_handle::bind() const
     {
         ShaderCache::get_shader(id)->bind();
     }
@@ -1061,6 +1155,10 @@ namespace legion::rendering
 
     shader_variant& shader::get_variant(id_type variantId)
     {
+#if defined(LEGION_VALIDATE)
+        if (!m_variants.count(variantId))
+            return const_cast<shader_variant&>(invalid_shader_handle.get_variant(0));
+#endif
         if (variantId == 0)
         {
             static id_type defaultId = nameHash("default");
@@ -1076,6 +1174,10 @@ namespace legion::rendering
 
     const shader_variant& shader::get_variant(id_type variantId) const
     {
+#if defined(LEGION_VALIDATE)
+        if (!m_variants.count(variantId))
+            return invalid_shader_handle.get_variant(0);
+#endif
         if (variantId == 0)
         {
             static id_type defaultId = nameHash("default");
