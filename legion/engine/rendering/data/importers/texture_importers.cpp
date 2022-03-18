@@ -8,8 +8,6 @@ namespace legion::rendering
 {
     common::result<texture, fs_error> stbi_texture_loader::load(const fs::basic_resource& resource, texture_import_settings&& settings)
     {
-        OPTICK_EVENT();
-
         // Prefetch data from the resource.
         const byte_vec& data = resource.get();
 

@@ -109,8 +109,6 @@ namespace legion::core::ecs
 
     entity Registry::createEntity(entity parent)
     {
-        OPTICK_EVENT();
-
         const id_type currentEntityId = getNextEntityId();
 
         // We use try_emplace in order to preserve the memory pooling that the children set might have.
@@ -135,8 +133,6 @@ namespace legion::core::ecs
 
     entity Registry::createEntity(const std::string& name, entity parent)
     {
-        OPTICK_EVENT();
-
         const id_type currentEntityId = getNextEntityId();
 
         // We use try_emplace in order to preserve the memory pooling that the children set might have.
@@ -161,8 +157,6 @@ namespace legion::core::ecs
 
     void Registry::destroyEntity(entity target, bool recurse)
     {
-        OPTICK_EVENT();
-
         // Remove entity from filters to stop it from updating.
         FilterRegistry::markEntityDestruction(target);
 
@@ -209,13 +203,11 @@ namespace legion::core::ecs
 
     bool Registry::checkEntity(entity target)
     {
-        OPTICK_EVENT();
         return target.data && target.data->alive;
     }
 
     bool Registry::checkEntity(id_type target)
     {
-        OPTICK_EVENT();
         return instance.m_entities.count(target) && instance.m_entities.at(target).alive;
     }
 
@@ -251,7 +243,6 @@ namespace legion::core::ecs
 
     void* Registry::createComponent(id_type typeId, entity target)
     {
-        OPTICK_EVENT();
         // Update entity composition.
         instance.m_entityCompositions.at(target).insert(typeId);
         // Update filters.
@@ -262,7 +253,6 @@ namespace legion::core::ecs
 
     void Registry::destroyComponent(id_type typeId, entity target)
     {
-        OPTICK_EVENT();
         // Update entity composition.
         instance.m_entityCompositions.at(target).erase(typeId);
         // Update filters.
@@ -273,13 +263,11 @@ namespace legion::core::ecs
 
     bool Registry::hasComponent(id_type typeId, entity target)
     {
-        OPTICK_EVENT();
         return getFamily(typeId)->contains(target);
     }
 
     void* Registry::getComponent(id_type typeId, entity target)
     {
-        OPTICK_EVENT();
         return getFamily(typeId)->get_component(target);
     }
 

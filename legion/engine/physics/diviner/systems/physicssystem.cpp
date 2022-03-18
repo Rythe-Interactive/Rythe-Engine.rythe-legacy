@@ -34,8 +34,6 @@ namespace legion::physics
         ecs::component_container<scale>& scales,
         float deltaTime)
     {
-        OPTICK_EVENT();
-
         //-------------------------------------------------Broadphase Optimization-----------------------------------------------//
 
         //get all physics components from the world
@@ -50,8 +48,6 @@ namespace legion::physics
         std::vector<physics_manifold> manifoldsToSolve;
 
         {
-            OPTICK_EVENT("Narrowphase");
-
             std::set<std::pair<id_type, id_type>> idPairings;
 
             size_type totalChecks = 0;
@@ -129,8 +125,6 @@ namespace legion::physics
         //we start the solver
 
         {
-            OPTICK_EVENT("Resolve collisions");
-
             initializeManifolds(manifoldsToSolve, manifoldValidity);
 
             for (auto& manifold : manifoldsToSolve)
@@ -139,8 +133,6 @@ namespace legion::physics
             }
 
             {
-                OPTICK_EVENT("Resolve contact constraints");
-
                 //resolve contact constraint
                 for (size_t contactIter = 0;
                     contactIter < constants::contactSolverIterationCount; contactIter++)
@@ -150,8 +142,6 @@ namespace legion::physics
             }
 
             {
-                OPTICK_EVENT("Resolve friction constraints");
-
                 //resolve friction constraint
                 for (size_t frictionIter = 0;
                     frictionIter < constants::frictionSolverIterationCount; frictionIter++)
@@ -161,8 +151,6 @@ namespace legion::physics
             }
 
             {
-                OPTICK_EVENT("Converge manifolds");
-
                 //reset convergance identifiers for all colliders
                 for (auto& manifold : manifoldsToSolve)
                 {
@@ -186,7 +174,6 @@ namespace legion::physics
     void PhysicsSystem::constructManifoldsWithPrecursors(ecs::component_container<rigidbody>& rigidbodies, std::vector<byte>& hasRigidBodies, physics_manifold_precursor& precursorA, physics_manifold_precursor& precursorB,
         std::vector<physics_manifold>& manifoldsToSolve, bool isRigidbodyInvolved, bool isTriggerInvolved)
     {
-        OPTICK_EVENT();
         if (!precursorA.physicsComp || !precursorB.physicsComp) return;
         auto& physicsComponentA = *precursorA.physicsComp;
         auto& physicsComponentB = *precursorB.physicsComp;

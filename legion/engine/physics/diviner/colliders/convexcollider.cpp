@@ -21,8 +21,6 @@ namespace legion::physics
 
     void ConvexCollider::CheckCollisionWith(ConvexCollider* convexCollider, physics_manifold& manifold)
     {
-        OPTICK_EVENT();
-
         // Middle-phase collision detection
         // Do AABB collision to check whether collision is possible
         auto aabbThis = this->GetMinMaxWorldAABB();
@@ -121,7 +119,6 @@ namespace legion::physics
 
     void ConvexCollider::PopulateContactPointsWith(ConvexCollider* convexCollider, physics_manifold& manifold)
     {
-        OPTICK_EVENT();
         math::mat4& refTransform = manifold.penetrationInformation->isARef ? manifold.transformA : manifold.transformB;
         math::mat4& incTransform = manifold.penetrationInformation->isARef ? manifold.transformB : manifold.transformA;
 

@@ -124,8 +124,6 @@ namespace legion::core
 
     common::result<asset_ptr> StbImageLoader::load(id_type nameHash, const fs::view& file, const import_cfg& settings)
     {
-        OPTICK_EVENT();
-
         auto result = file.get();
         if (!result)
             return { legion_exception_msg(result.error().what()), result.warnings() };

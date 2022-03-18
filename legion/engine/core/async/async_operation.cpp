@@ -61,7 +61,6 @@ namespace legion::core::async
 
     void async_operation_base::wait(wait_priority priority) const noexcept
     {
-        OPTICK_EVENT("legion::core::async::async_operation<T>::wait");
         while (!m_progress->is_done())
         {
             switch (priority)

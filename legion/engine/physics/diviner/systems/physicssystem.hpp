@@ -29,14 +29,10 @@ namespace legion::physics
 
         void fixedUpdate(time::time_span<fast_time> deltaTime)
         {
-            OPTICK_EVENT();
-
             ecs::component_container<rigidbody> rigidbodies;
             std::vector<byte> hasRigidBodies;
 
             {
-                OPTICK_EVENT("Fetching data");
-
                 rigidbody emptyRigidbody;
                 rigidbodies.resize(manifoldPrecursorQuery.size(), std::ref(emptyRigidbody));
                 hasRigidBodies.resize(manifoldPrecursorQuery.size());
@@ -83,7 +79,6 @@ namespace legion::physics
             ecs::component_container<scale>& scales,
             std::vector<physics_manifold_precursor>& manifoldPrecursors)
         {
-            OPTICK_EVENT();
             manifoldPrecursors.resize(physComps.size());
 
             queueJobs(physComps.size(), [&]() {
@@ -147,7 +142,6 @@ namespace legion::physics
             PhysicsCollider* colliderA, PhysicsCollider* colliderB
             , physics_manifold_precursor& precursorA, physics_manifold_precursor& precursorB, physics_manifold& manifold)
         {
-            OPTICK_EVENT();
             manifold.colliderA = colliderA;
             manifold.colliderB = colliderB;
 
@@ -176,7 +170,6 @@ namespace legion::physics
         */
         void integrateRigidbodies(std::vector<byte>& hasRigidBodies, ecs::component_container<rigidbody>& rigidbodies, float deltaTime)
         {
-            OPTICK_EVENT();
             queueJobs(manifoldPrecursorQuery.size(), [&]() {
                 if (!hasRigidBodies[async::this_job::get_id()])
                     return;
@@ -202,7 +195,6 @@ namespace legion::physics
             ecs::component_container<rigidbody>& rigidbodies,
             float deltaTime)
         {
-            OPTICK_EVENT();
             queueJobs(manifoldPrecursorQuery.size(), [&]() {
                 id_type index = async::this_job::get_id();
                 if (!hasRigidBodies[index])
@@ -237,7 +229,6 @@ namespace legion::physics
 
         void initializeManifolds(std::vector<physics_manifold>& manifoldsToSolve, std::vector<byte>& manifoldValidity)
         {
-            OPTICK_EVENT();
             for (int i = 0; i < manifoldsToSolve.size(); i++)
             {
                 if (manifoldValidity.at(i))
@@ -256,8 +247,6 @@ namespace legion::physics
 
         void resolveContactConstraint(std::vector<physics_manifold>& manifoldsToSolve, std::vector<byte>& manifoldValidity, float dt, int contactIter)
         {
-            OPTICK_EVENT();
-
             for (int manifoldIter = 0;
                 manifoldIter < manifoldsToSolve.size(); manifoldIter++)
             {
@@ -275,8 +264,6 @@ namespace legion::physics
 
         void resolveFrictionConstraint(std::vector<physics_manifold>& manifoldsToSolve, std::vector<byte>& manifoldValidity)
         {
-            OPTICK_EVENT();
-
             for (int manifoldIter = 0;
                 manifoldIter < manifoldsToSolve.size(); manifoldIter++)
             {

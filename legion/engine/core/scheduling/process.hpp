@@ -1,7 +1,5 @@
 #pragma once
 
-#include <Optick/optick.h>
-
 #include <core/platform/platform.hpp>
 #include <core/types/primitives.hpp>
 #include <core/containers/hashed_sparse_set.hpp>

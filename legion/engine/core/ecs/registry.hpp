@@ -3,8 +3,6 @@
 #include <unordered_map>
 #include <memory>
 
-#include <Optick/optick.h>
-
 #include <core/containers/sparse_map.hpp>
 #include <core/containers/hashed_sparse_set.hpp>
 #include <core/types/types.hpp>

@@ -2,8 +2,6 @@
 #include <thread>
 #include <unordered_map>
 
-#include <Optick/optick.h>
-
 #include <core/engine/enginesubsystem.hpp>
 #include <core/engine/engine.hpp>
 #include <core/async/async.hpp>

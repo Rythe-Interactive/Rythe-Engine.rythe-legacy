@@ -4,8 +4,6 @@
 #include <sstream>
 #include <thread>
 
-#include <Optick/optick.h>
-
 #if !defined(DOXY_EXCLUDE)
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>

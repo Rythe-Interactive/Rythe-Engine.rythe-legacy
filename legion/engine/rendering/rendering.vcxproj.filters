@@ -34,7 +34,6 @@
     <ClCompile Include="pipeline\default\stages\submitstage.cpp" />
     <ClCompile Include="shadercompiler\shadercompiler.cpp" />
     <ClCompile Include="systems\renderer.cpp" />
-    <ClCompile Include="util\ini.c" />
     <ClCompile Include="pipeline\gui\stages\imguirenderstage.cpp" />
     <ClCompile Include="data\postprocessingeffect.cpp" />
     <ClCompile Include="pipeline\default\stages\postprocessingstage.cpp" />
@@ -43,7 +42,6 @@
     <ClCompile Include="pipeline\default\stages\debugrenderstage.cpp" />
     <ClCompile Include="pipeline\default\postfx\bloom.cpp" />
     <ClCompile Include="pipeline\default\postfx\depthoffield.cpp" />
-    <ClCompile Include="util\matini.cpp" />
     <ClCompile Include="pipeline\default\postfx\skybox.cpp" />
     <ClCompile Include="pipeline\default\stages\transparencyrenderstage.cpp" />
   </ItemGroup>
@@ -78,7 +76,6 @@
     <ClInclude Include="rendering.hpp" />
     <ClInclude Include="shadercompiler\shadercompiler.hpp" />
     <ClInclude Include="util\bindings.hpp" />
-    <ClInclude Include="util\matini.hpp" />
     <ClInclude Include="util\settings.hpp" />
     <ClInclude Include="pipeline\gui\stages\imguirenderstage.hpp" />
     <ClInclude Include="util\gui.hpp" />

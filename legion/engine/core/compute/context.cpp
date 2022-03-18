@@ -124,7 +124,6 @@ namespace legion::core::compute {
 
     Program Context::createProgram(const filesystem::basic_resource& data)
     {
-        OPTICK_EVENT();
         return Program(instance.m_context, instance.m_device_id, data);
     }
 }

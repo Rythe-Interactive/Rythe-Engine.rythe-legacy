@@ -35,9 +35,6 @@ namespace legion::core::scheduling
 
     void Process::execute(time::span deltaTime)
     {
-        OPTICK_EVENT("Execute process");
-        OPTICK_TAG("Process", m_name.c_str());
-
         if (!m_fixedTimeStep)
         {
             m_operation(deltaTime);

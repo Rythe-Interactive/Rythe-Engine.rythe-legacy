@@ -216,7 +216,6 @@ namespace legion::core
 
     common::result<std::reference_wrapper<const std::vector<math::color>>> image::read_colors() const
     {
-        OPTICK_EVENT();
         if (m_colors && m_colors->size())
             return std::cref(*m_colors);
         else if (!m_colors)
