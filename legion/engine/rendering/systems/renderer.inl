@@ -33,7 +33,6 @@ namespace legion::rendering
     template<typename Pipeline CNDOXY(inherits_from<Pipeline, RenderPipeline<Pipeline>>)>
     inline void Renderer::setPipeline()
     {
-        OPTICK_EVENT();
         m_pipelineProvider = std::make_unique<pipeline_provider<Pipeline>>();
     }
 }

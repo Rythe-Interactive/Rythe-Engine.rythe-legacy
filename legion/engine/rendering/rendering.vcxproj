@@ -60,7 +60,6 @@
     <ClInclude Include="components\light.hpp" />
     <ClInclude Include="components\point.hpp" />
     <ClInclude Include="components\pointcloud_renderable.hpp" />
-    <ClInclude Include="data\Octree.hpp" />
     <ClInclude Include="data\postprocessingeffect.hpp" />
     <ClInclude Include="data\screen_quad.hpp" />
     <ClInclude Include="pipeline\default\postfx\depthoffield.hpp" />

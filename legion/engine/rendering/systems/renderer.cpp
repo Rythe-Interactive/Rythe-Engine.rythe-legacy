@@ -1,6 +1,5 @@
 #include <rendering/systems/renderer.hpp>
 #include <rendering/debugrendering.hpp>
-#include <Optick/optick.h>
 
 namespace legion::rendering
 {
@@ -12,8 +11,6 @@ namespace legion::rendering
     {
         if (id == 131185) // Filter out annoying Nvidia message of: Buffer you made will use VRAM because you told us that you want it to allocate VRAM.
             return;
-
-        OPTICK_EVENT();
 
         static bool checkedNames = false;
 
@@ -109,7 +106,6 @@ namespace legion::rendering
 
     void Renderer::debugCallbackARB(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, L_MAYBEUNUSED const void* userParam)
     {
-        OPTICK_EVENT();
         static bool checkedNames = false;
 
         if (!checkedNames)
@@ -195,7 +191,6 @@ namespace legion::rendering
 
     void Renderer::debugCallbackAMD(GLuint id, GLenum category, GLenum severity, GLsizei length, const GLchar* message, L_MAYBEUNUSED void* userParam)
     {
-        OPTICK_EVENT();
         static bool checkedNames = false;
 
         if (!checkedNames)
@@ -260,7 +255,6 @@ namespace legion::rendering
 
     bool Renderer::initContext(const app::window& window)
     {
-        OPTICK_EVENT();
         if (!gladLoadGLLoader((GLADloadproc)app::ContextHelper::getProcAddress))
         {
             log::error("Failed to load OpenGL");
@@ -327,8 +321,6 @@ namespace legion::rendering
 
     void Renderer::setup()
     {
-        OPTICK_EVENT();
-
         m_exiting.store(false, std::memory_order_relaxed);
 
         bindToEvent<events::exit, &Renderer::onExit>();
@@ -336,7 +328,6 @@ namespace legion::rendering
         createProcess<&Renderer::render>("Rendering");
 
         {
-            OPTICK_EVENT("Initialization");
             log::trace("Waiting on main window.");
 
             while (!ecs::world.has_component<app::window>())
@@ -372,14 +363,11 @@ namespace legion::rendering
 
     void Renderer::onExit(events::exit& event)
     {
-        OPTICK_EVENT();
         m_exiting.store(true, std::memory_order_release);
     }
 
     void Renderer::render(time::span deltatime)
     {
-        OPTICK_EVENT();
-
         if (!m_pipelineProvider)
             return;
 
@@ -433,7 +421,6 @@ namespace legion::rendering
 
     L_NODISCARD RenderPipelineBase* Renderer::getPipeline(app::window& context)
     {
-        OPTICK_EVENT();
         if (!m_pipelineProvider)
             return nullptr;
 
@@ -450,7 +437,6 @@ namespace legion::rendering
 
     L_NODISCARD RenderPipelineBase* Renderer::getMainPipeline()
     {
-        OPTICK_EVENT();
         if (!m_pipelineProvider)
             return nullptr;
 

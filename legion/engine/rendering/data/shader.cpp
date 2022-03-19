@@ -1077,7 +1077,6 @@ namespace legion::rendering
 
     std::vector<std::tuple<std::string, GLint, GLenum>> shader_handle::get_uniform_info(id_type variantId) const
     {
-        OPTICK_EVENT();
         return ShaderCache::get_shader(id)->get_variant(variantId).get_uniform_info();
     }
 
@@ -1298,7 +1297,6 @@ namespace legion::rendering
 
     attribute shader::get_attribute(const std::string& name)
     {
-        OPTICK_EVENT();
         if (!m_currentShaderVariant)
         {
             log::error("No current shader variant configured for shader {}", name);
@@ -1315,7 +1313,6 @@ namespace legion::rendering
 
     attribute shader::get_attribute(id_type id)
     {
-        OPTICK_EVENT();
         if (!m_currentShaderVariant)
         {
             log::error("No current shader variant configured for shader {}", name);
@@ -1330,7 +1327,6 @@ namespace legion::rendering
 
     std::vector<std::tuple<std::string, GLint, GLenum>> shader_variant::get_uniform_info()
     {
-        OPTICK_EVENT();
         std::vector<std::tuple<std::string, GLint, GLenum>> info;
         for (auto& [_, uniform] : uniforms)
             info.push_back(std::make_tuple(uniform->get_name(), uniform->get_location(), uniform->get_type()));

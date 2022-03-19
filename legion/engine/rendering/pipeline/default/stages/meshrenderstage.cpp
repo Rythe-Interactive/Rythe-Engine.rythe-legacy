@@ -12,7 +12,6 @@ namespace legion::rendering
 
     void MeshRenderStage::render(app::window& context, camera& cam, const camera::camera_input& camInput, time::span deltaTime)
     {
-        OPTICK_EVENT();
         (void)deltaTime;
         (void)cam;
         static id_type mainId = nameHash("main");
@@ -138,9 +137,7 @@ namespace legion::rendering
                         else
                             mater = invalid_material_handle;
 
-                        OPTICK_EVENT("Rendering material");
                         auto materialName = mater.get_name();
-                        OPTICK_TAG("Material", materialName.c_str());
 
                         camInput.bind(mater);
                         if (mater.has_param<uint>(SV_LIGHTCOUNT))
@@ -168,8 +165,6 @@ namespace legion::rendering
 
                         ModelCache::create_model(modelHandle.id);
                         auto modelName = ModelCache::get_model_name(modelHandle.id);
-                        OPTICK_EVENT("Rendering instances");
-                        OPTICK_TAG("Model", modelName.c_str());
 
                         if (!mesh.buffered)
                             modelHandle.buffer_data(*modelMatrixBuffer);
@@ -180,21 +175,9 @@ namespace legion::rendering
                             continue;
                         }
 
-                        {
-                            OPTICK_EVENT("Buffering matrices");
-                            /*m_matrices.resize(instances.size());
-                            int i = 0;
-                            for (auto& ent : instances)
-                            {
-                                m_matrices[i] = transform(ent.get_component_handles<transform>()).get_local_to_world_matrix();
-                                i++;
-                            }*/
-
-                            modelMatrixBuffer->bufferData(instances.second);
-                        }
+                        modelMatrixBuffer->bufferData(instances.second);
 
                         {
-                            OPTICK_EVENT("Draw call");
                             mesh.vertexArray.bind();
                             mesh.indexBuffer.bind();
                             lightsBuffer->bind();
@@ -225,10 +208,6 @@ namespace legion::rendering
             }
             else
                 material = invalid_material_handle;
-
-            OPTICK_EVENT("Rendering material");
-            auto materialName = material.get_name();
-            OPTICK_TAG("Material", materialName.c_str());
 
             camInput.bind(material);
             if (material.has_param<uint>(SV_LIGHTCOUNT))
@@ -266,8 +245,6 @@ namespace legion::rendering
 
                 ModelCache::create_model(modelHandle.id);
                 auto modelName = ModelCache::get_model_name(modelHandle.id);
-                OPTICK_EVENT("Rendering instances");
-                OPTICK_TAG("Model", modelName.c_str());
 
                 const model& mesh = modelHandle.get_model();
 
@@ -280,21 +257,9 @@ namespace legion::rendering
                     continue;
                 }
 
-                {
-                    OPTICK_EVENT("Buffering matrices");
-                    /*m_matrices.resize(instances.size());
-                    int i = 0;
-                    for (auto& ent : instances)
-                    {
-                        m_matrices[i] = transform(ent.get_component_handles<transform>()).get_local_to_world_matrix();
-                        i++;
-                    }*/
-
-                    modelMatrixBuffer->bufferData(instances.second);
-                }
+                modelMatrixBuffer->bufferData(instances.second);
 
                 {
-                    OPTICK_EVENT("Draw call");
                     mesh.vertexArray.bind();
                     mesh.indexBuffer.bind();
                     lightsBuffer->bind();
