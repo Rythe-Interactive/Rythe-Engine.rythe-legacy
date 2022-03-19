@@ -326,7 +326,6 @@ namespace legion::rendering
         template<typename T>
         uniform<T> get_uniform(const std::string& uniformName)
         {
-            OPTICK_EVENT();
             if (!m_currentShaderVariant)
             {
                 log::error("No current shader variant configured for shader {}", name);
@@ -343,7 +342,6 @@ namespace legion::rendering
         template<typename T>
         bool has_uniform(const std::string& uniformName)
         {
-            OPTICK_EVENT();
             if (!m_currentShaderVariant)
             {
                 log::error("No current shader variant configured for shader {}", name);
@@ -357,7 +355,6 @@ namespace legion::rendering
         template<typename T>
         uniform<T> get_uniform(id_type id)
         {
-            OPTICK_EVENT();
             if (!m_currentShaderVariant)
             {
                 log::error("No current shader variant configured for shader {}", name);
@@ -374,7 +371,6 @@ namespace legion::rendering
         template<typename T>
         bool has_uniform(id_type id)
         {
-            OPTICK_EVENT();
             if (!m_currentShaderVariant)
             {
                 log::error("No current shader variant configured for shader {}", name);
@@ -387,7 +383,6 @@ namespace legion::rendering
         template<typename T>
         uniform<T> get_uniform_with_location(GLint location)
         {
-            OPTICK_EVENT();
             if (!m_currentShaderVariant)
             {
                 log::error("No current shader variant configured for shader {}", name);
@@ -404,7 +399,6 @@ namespace legion::rendering
         template<typename T>
         bool has_uniform_with_location(GLint location)
         {
-            OPTICK_EVENT();
             if (!m_currentShaderVariant)
             {
                 log::error("No current shader variant configured for shader {}", name);
@@ -530,42 +524,36 @@ namespace legion::rendering
     template<typename T>
     uniform<T> shader_handle::get_uniform(const std::string& name)
     {
-        OPTICK_EVENT();
         return ShaderCache::get_shader(id)->get_uniform<T>(name);
     }
 
     template<typename T>
     inline bool shader_handle::has_uniform(const std::string& name)
     {
-        OPTICK_EVENT();
         return ShaderCache::get_shader(id)->has_uniform<T>(name);
     }
 
     template<typename T>
     uniform<T> shader_handle::get_uniform(id_type uniformId)
     {
-        OPTICK_EVENT();
         return ShaderCache::get_shader(id)->get_uniform<T>(uniformId);
     }
 
     template<typename T>
     inline bool shader_handle::has_uniform(id_type uniformId)
     {
-        OPTICK_EVENT();
         return ShaderCache::get_shader(id)->has_uniform<T>(uniformId);
     }
 
     template<typename T>
     inline uniform<T> shader_handle::get_uniform_with_location(GLint location)
     {
-        OPTICK_EVENT();
         return ShaderCache::get_shader(id)->get_uniform_with_location<T>(location);
     }
 
     template<typename T>
     inline bool shader_handle::has_uniform_with_location(GLint location)
     {
-        OPTICK_EVENT();
         return ShaderCache::get_shader(id)->has_uniform_with_location<T>(location);
     }
 

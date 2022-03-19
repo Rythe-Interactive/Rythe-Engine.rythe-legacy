@@ -4,13 +4,11 @@ namespace  legion::rendering
 {
     void MeshBatchingStage::setup(app::window& context)
     {
-        OPTICK_EVENT();
         create_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<ecs::entity>, std::vector<math::mat4>>>>>("mesh batches");
     }
 
     void MeshBatchingStage::render(app::window& context, camera& cam, const camera::camera_input& camInput, time::span deltaTime)
     {
-        OPTICK_EVENT();
         (void)deltaTime;
         (void)camInput;
         (void)cam;
@@ -25,7 +23,6 @@ namespace  legion::rendering
         auto& renderers = renderablesQuery.get<mesh_renderer>();
 
         {
-            OPTICK_EVENT("Clear instances");
             for (auto [material, models] : *batches)
                 for (auto [model, batch] : models)
                 {
@@ -35,12 +32,9 @@ namespace  legion::rendering
         }
 
         {
-            OPTICK_EVENT("Calculate instances");
-
             std::vector<std::reference_wrapper<std::pair<std::vector<ecs::entity>, std::vector<math::mat4>>>> batchList;
             for (size_type i = 0; i < renderablesQuery.size(); i++)
             {
-                OPTICK_EVENT("instance");
                 auto& batch = (*batches)[renderers[i].get().material][model_handle{ filters[i].get().shared_mesh.id() }];
                 if (batch.first.empty())
                     batchList.push_back(std::ref(batch));

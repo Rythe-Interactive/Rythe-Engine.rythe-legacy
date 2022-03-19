@@ -31,7 +31,6 @@ namespace legion::rendering
         virtual void setup(app::window& context) LEGION_PURE;
         void renderQuad()
         {
-            OPTICK_EVENT();
             m_quad.render();
         }
     private:

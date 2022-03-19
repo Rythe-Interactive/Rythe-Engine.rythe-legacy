@@ -3,13 +3,9 @@
 #include <core/common/string_extra.hpp>
 #include <core/filesystem/provider_registry.hpp>
 
-#include <Optick/optick.h>
-
 namespace legion::core::filesystem {
     common::result<navigator::solution,fs_error> navigator::find_solution(const std::string& opt_root_domain) const 
     {
-        OPTICK_EVENT();
-
         std::string root_domain;
         std::string to_process;
 

@@ -17,7 +17,6 @@ namespace legion::rendering
 
     void FramebufferResizeStage::setup(app::window& context)
     {
-        OPTICK_EVENT();
         float renderScale = m_renderScale.load(std::memory_order_acquire);
         m_framebufferSize = context.framebufferSize();
         m_framebufferSize.x = math::max((int)(m_framebufferSize.x * renderScale), 1);
@@ -119,7 +118,6 @@ namespace legion::rendering
 
     void FramebufferResizeStage::render(app::window& context, camera& cam, const camera::camera_input& camInput, time::span deltaTime)
     {
-        OPTICK_EVENT();
         static id_type sceneColorId = nameHash("scene color history");
         static id_type sceneNormalId = nameHash("scene normal history");
         static id_type scenePositionId = nameHash("scene position history");

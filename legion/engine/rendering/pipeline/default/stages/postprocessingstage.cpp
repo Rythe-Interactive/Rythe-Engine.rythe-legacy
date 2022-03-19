@@ -8,7 +8,6 @@ namespace legion::rendering
 
     void PostProcessingStage::setup(app::window& context)
     {
-        OPTICK_EVENT();
         using namespace legion::core::fs::literals;
 
         app::context_guard guard(context);
@@ -27,7 +26,6 @@ namespace legion::rendering
 
     void PostProcessingStage::render(app::window& context, camera& cam, const camera::camera_input& camInput, time::span deltaTime)
     {
-        OPTICK_EVENT();
         static id_type mainId = nameHash("main");
 
         auto fbo = getFramebuffer(mainId);
@@ -87,13 +85,9 @@ namespace legion::rendering
 
         for (auto& [_, effect] : m_effects)
         {
-            OPTICK_EVENT("Rendering effect");
-            OPTICK_TAG("Effect", effect->getName().c_str());
-
             if (!effect->isInitialized()) effect->init(context);
             for (auto& pass : effect->renderPasses)
             {
-                OPTICK_EVENT("Effect pass");
                 pass.invoke(*fbo, m_pipeline, cam, camInput, deltaTime);
             }
         }

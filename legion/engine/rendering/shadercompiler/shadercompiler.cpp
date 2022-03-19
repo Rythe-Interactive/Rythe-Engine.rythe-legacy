@@ -367,7 +367,6 @@ namespace legion::rendering
 
     void ShaderCompiler::cleanCache(const fs::view& path)
     {
-        OPTICK_EVENT();
         using severity = log::severity;
         std::string out, err;
 
@@ -393,7 +392,6 @@ namespace legion::rendering
 
     bool ShaderCompiler::process(const fs::view& file, bitfield8 compilerSettings, shader_ilo& ilo, std::unordered_map<std::string, shader_state>& state, const std::vector<std::string>& defines, const std::vector<std::string>& additionalIncludes)
     {
-        OPTICK_EVENT();
         using severity = log::severity;
 
         log::info("Compiling shader: {}", file.get_virtual_path());

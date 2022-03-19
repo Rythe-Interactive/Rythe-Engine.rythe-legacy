@@ -8,7 +8,6 @@ namespace legion::rendering
 
     void Tonemapping::setAlgorithm(tonemapping_type type) noexcept
     {
-        OPTICK_EVENT();
         static id_type acesId = nameHash("aces tonemapping");
         static id_type reinhardId = nameHash("reinhard tonemapping");
         static id_type reinhardJodieId = nameHash("reinhard jodie tonemapping");
@@ -50,7 +49,6 @@ namespace legion::rendering
 
     void Tonemapping::setup(app::window& context)
     {
-        OPTICK_EVENT();
         using namespace legion::core::fs::literals;
         rendering::ShaderCache::create_shader("aces tonemapping", "engine://shaders/aces.shs"_view);
         rendering::ShaderCache::create_shader("reinhard tonemapping", "engine://shaders/reinhard.shs"_view);
@@ -69,7 +67,6 @@ namespace legion::rendering
         //Get color texture.
         auto color_texture = std::get<texture_handle>(color_attachment);
 
-        OPTICK_EVENT();
         static id_type exposureId = nameHash("exposure");
 
         auto exposure = m_exposure.load(std::memory_order_relaxed);

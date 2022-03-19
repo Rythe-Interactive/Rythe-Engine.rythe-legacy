@@ -7,8 +7,6 @@
 #include <core/filesystem/view.hpp>
 #include <core/logging/logging.hpp>
 
-#include <Optick/optick.h>
-
 /**
  * @file assetimporter.hpp
  */
@@ -78,7 +76,6 @@ namespace legion::core::filesystem
         template<typename T>
         static void reportConverter(cstring extension)
         {
-            OPTICK_EVENT();
             m_converters[nameHash(extension)].push_back(std::make_unique<T>());
         }
 
@@ -92,8 +89,6 @@ namespace legion::core::filesystem
         template<typename T, typename... Settings>
         static common::result<T, fs_error> tryLoad(const view& view, Settings&&... settings)
         {
-            OPTICK_EVENT();
-
             // Debug log the settings used for loading the files so that you can track down why something got loaded wrong if it did.
             if constexpr (sizeof...(settings) == 0)
                 log::trace("Tried to load asset of type{}", nameOfType<T>());
