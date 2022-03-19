@@ -61,25 +61,21 @@ namespace legion::core
 
         L_NODISCARD math::vec3 right() const
         {
-            OPTICK_EVENT();
             return math::toMat3(*this) * math::vec3::right;
         }
 
         L_NODISCARD math::vec3 up() const
         {
-            OPTICK_EVENT();
             return math::toMat3(*this) * math::vec3::up;
         }
 
         L_NODISCARD math::vec3 forward() const
         {
-            OPTICK_EVENT();
             return math::toMat3(*this) * math::vec3::forward;
         }
 
         L_NODISCARD math::mat3 matrix() const
         {
-            OPTICK_EVENT();
             return math::toMat3(*this);
         }
 
@@ -88,7 +84,6 @@ namespace legion::core
 
     L_NODISCARD inline rotation rotation::lookat(math::vec3 position, math::vec3 center, math::vec3 up)
     {
-        OPTICK_EVENT();
         return math::conjugate(math::normalize(math::toQuat(math::lookAt(position, center, up))));
     }
 
@@ -131,7 +126,6 @@ namespace legion::core
 
         L_NODISCARD math::mat4 to_world_matrix()
         {
-            OPTICK_EVENT();
             if (owner->parent)
             {
                 transform parentTrans = owner->parent.get_component<transform>();
@@ -148,7 +142,6 @@ namespace legion::core
 
         L_NODISCARD math::mat4 to_parent_matrix()
         {
-            OPTICK_EVENT();
             auto [position, rotation, scale] = values();
             return math::compose(scale, rotation, position);
         }

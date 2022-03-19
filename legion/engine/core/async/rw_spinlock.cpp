@@ -1,5 +1,4 @@
 #include <core/async/rw_spinlock.hpp>
-#include <Optick/optick.h>
 #include <sstream>
 
 namespace legion::core::async
@@ -27,7 +26,6 @@ namespace legion::core::async
 
     void rw_spinlock::read_lock(wait_priority priority) const
     {
-        OPTICK_EVENT();
         if (m_forceRelease)
             return;
 
@@ -45,8 +43,6 @@ namespace legion::core::async
             // Read the current value and continue waiting until we're in a lockable state.
             while ((state = m_lockState.load(std::memory_order_relaxed)) == static_cast<int>(lock_state::write))
             {
-                OPTICK_EVENT("Acquire read lock");
-
                 switch (priority)
                 {
                 case wait_priority::sleep:
@@ -74,7 +70,6 @@ namespace legion::core::async
 
     bool rw_spinlock::read_try_lock() const
     {
-        OPTICK_EVENT();
         if (m_forceRelease)
             return true;
 
@@ -100,7 +95,6 @@ namespace legion::core::async
 
     void rw_spinlock::write_lock(wait_priority priority) const
     {
-        OPTICK_EVENT();
         if (m_forceRelease)
             return;
 
@@ -122,8 +116,6 @@ namespace legion::core::async
             // Read the current value and continue waiting until we're in a lockable state.
             while ((state = m_lockState.load(std::memory_order_relaxed)) != static_cast<int>(lock_state::idle))
             {
-                OPTICK_EVENT("Acquire write lock");
-
                 switch (priority)
                 {
                 case wait_priority::sleep:
@@ -152,7 +144,6 @@ namespace legion::core::async
 
     bool rw_spinlock::write_try_lock() const
     {
-        OPTICK_EVENT();
         if (m_forceRelease)
             return true;
 
@@ -191,7 +182,6 @@ namespace legion::core::async
 
     void rw_spinlock::read_unlock() const
     {
-        OPTICK_EVENT();
         if (m_forceRelease)
             return;
 
@@ -210,7 +200,6 @@ namespace legion::core::async
 
     void rw_spinlock::write_unlock() const
     {
-        OPTICK_EVENT();
         if (m_forceRelease)
             return;
 
@@ -258,7 +247,6 @@ namespace legion::core::async
 
     void rw_spinlock::lock(lock_state permissionLevel, wait_priority priority) const
     {
-        OPTICK_EVENT();
         if (m_forceRelease)
             return;
 
@@ -283,7 +271,6 @@ namespace legion::core::async
 
     bool rw_spinlock::try_lock(lock_state permissionLevel) const
     {
-        OPTICK_EVENT();
         if (m_forceRelease)
             return true;
 
@@ -308,7 +295,6 @@ namespace legion::core::async
 
     void rw_spinlock::unlock(lock_state permissionLevel) const
     {
-        OPTICK_EVENT();
         if (m_forceRelease)
             return;
 
@@ -326,7 +312,6 @@ namespace legion::core::async
 
     void rw_spinlock::lock_shared() const
     {
-        OPTICK_EVENT();
         if (m_forceRelease)
             return;
 
@@ -335,7 +320,6 @@ namespace legion::core::async
 
     bool rw_spinlock::try_lock_shared() const
     {
-        OPTICK_EVENT();
         if (m_forceRelease)
             return true;
 
@@ -344,7 +328,6 @@ namespace legion::core::async
 
     void rw_spinlock::unlock_shared() const
     {
-        OPTICK_EVENT();
         if (m_forceRelease)
             return;
 

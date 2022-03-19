@@ -37,7 +37,6 @@ namespace legion::rendering
 
         void init(app::window& context)
         {
-            OPTICK_EVENT("Setup render stage");
             m_isInitialized = true;
             setup(context);
         }

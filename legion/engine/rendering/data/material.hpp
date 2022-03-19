@@ -2,7 +2,6 @@
 #include <rendering/data/shader.hpp>
 #include <memory>
 #include <core/filesystem/filesystem.hpp>
-#include <rendering/util/matini.hpp>
 
 /**
  * @file material.hpp

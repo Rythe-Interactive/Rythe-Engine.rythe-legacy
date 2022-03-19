@@ -2,8 +2,6 @@
 #include <queue>
 #include <memory>
 
-#include <Optick/optick.h>
-
 #include <core/containers/delegate.hpp>
 
 #include <core/async/async_operation.hpp>
@@ -56,7 +54,6 @@ namespace legion::core::async
 
         auto execute()
         {
-            OPTICK_EVENT();
             if constexpr (std::is_same_v<payload_type, void>)
             {
                 if constexpr (std::is_invocable_v<functor, async_progress_base&>)

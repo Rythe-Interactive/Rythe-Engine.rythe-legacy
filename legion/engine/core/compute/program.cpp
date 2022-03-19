@@ -10,8 +10,8 @@ namespace legion::core::compute {
     /**
      * Sadly it seems at though the current nVidia driver does not support clCreateProgramWithIL
      */
-    Program::Program(cl_context ctx, cl_device_id device, filesystem::basic_resource container /* , bool source_is_il */) {
-        OPTICK_EVENT();
+    Program::Program(cl_context ctx, cl_device_id device, filesystem::basic_resource container /* , bool source_is_il */)
+    {
         //bind command queue creation to surrogate
         this->make_command_queue = std::function([ctx, device]() -> cl_command_queue
             {
@@ -86,7 +86,6 @@ namespace legion::core::compute {
 
     Kernel Program::kernelContext(const std::string& name)
     {
-        OPTICK_EVENT();
         // check if we already have the kernel and create a context from it if we do, otherwise initialize it
 
         if (const auto it = m_kernelCache.find(name); it != m_kernelCache.end())
@@ -103,7 +102,6 @@ namespace legion::core::compute {
 
     cl_kernel Program::prewarm(const std::string& name)
     {
-        OPTICK_EVENT();
         // create the kernel and push it into the cache
         // do some error checking along the way
 
@@ -121,7 +119,6 @@ namespace legion::core::compute {
 
     void Program::from_resource(Program* value, const filesystem::basic_resource& resource)
     {
-        OPTICK_EVENT();
         *value = Context::createProgram(resource);
     }
 }

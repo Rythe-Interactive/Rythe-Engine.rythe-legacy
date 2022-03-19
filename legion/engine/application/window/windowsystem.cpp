@@ -293,7 +293,6 @@ namespace legion::application
 
     void WindowSystem::createWindows()
     {
-        OPTICK_EVENT();
         if (m_exit) // If the engine is exiting then we can't create new windows.
             return;
 
@@ -425,7 +424,6 @@ namespace legion::application
 
     void WindowSystem::fullscreenWindows()
     {
-        OPTICK_EVENT();
         if (m_exit) // If the engine is exiting then we can't change any windows.
             return;
 
@@ -478,7 +476,6 @@ namespace legion::application
 
     void WindowSystem::updateWindowIcons()
     {
-        OPTICK_EVENT();
         if (m_exit) // If the engine is exiting then we can't change any windows.
             return;
 
@@ -515,7 +512,6 @@ namespace legion::application
 
     void WindowSystem::refreshWindows(time::time_span<fast_time> deltaTime)
     {
-        OPTICK_EVENT();
         if (!ContextHelper::initialized())
             return;
 
@@ -535,7 +531,6 @@ namespace legion::application
 
     void WindowSystem::handleWindowEvents(time::time_span<fast_time> deltaTime)
     {
-        OPTICK_EVENT();
         createWindows();
         updateWindowIcons();
         fullscreenWindows();

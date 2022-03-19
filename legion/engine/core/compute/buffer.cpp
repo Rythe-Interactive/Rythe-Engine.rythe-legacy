@@ -9,7 +9,6 @@ namespace legion::core::compute
         , m_data(static_cast<byte*>(data))
 
     {
-        OPTICK_EVENT();
         size_type channelSize;
 
         switch (format->image_channel_order)
@@ -97,7 +96,6 @@ namespace legion::core::compute
         , m_data(nullptr)
         , m_size(0)
     {
-        OPTICK_EVENT();
         m_ref_count = new size_type(1);
         //convert buffer_type to cl_mem_flags
         if (type == buffer_type::READ_BUFFER)
@@ -124,7 +122,6 @@ namespace legion::core::compute
 
     Buffer::Buffer(cl_context ctx, byte* data, size_type len, buffer_type type, std::string name) : m_name(std::move(name)), m_data(data), m_size(len)
     {
-        OPTICK_EVENT();
         if (!ctx) return;
         //initialize new ref-counter
         m_ref_count = new size_t(1);
@@ -155,7 +152,6 @@ namespace legion::core::compute
         , m_data(nullptr)
         , m_size(0)
     {
-        OPTICK_EVENT();
         m_ref_count = new size_type(1);
         //convert buffer_type to cl_mem_flags
         if (type == buffer_type::READ_BUFFER)

@@ -59,7 +59,6 @@ namespace legion::core::scheduling
 
     void ProcessChain::runInCurrentThread(time::span deltaTime)
     {
-        OPTICK_EVENT(m_name.c_str());
         m_onChainStart(deltaTime, time::span(Clock::elapsedSinceTickStart()));
 
         for (auto [_, ptr] : m_processes)

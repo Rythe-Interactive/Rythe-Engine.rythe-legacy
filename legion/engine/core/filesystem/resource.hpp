@@ -1,10 +1,8 @@
 #pragma once
-#include <core/types/types.hpp>       // byte_vec
-#include <core/platform/platform.hpp> // L_NODISCARD
-
 #include <string_view>                // std::string_view
 
-#include <Optick/optick.h>
+#include <core/types/types.hpp>       // byte_vec
+#include <core/platform/platform.hpp> // L_NODISCARD
 
 #include "detail/resource_meta.hpp"   //has_to_resource<T,Sig>, has_from_resource<T,Sig>
 
@@ -22,13 +20,12 @@ namespace legion::core::filesystem
         /**@brief Constructor that keeps the container empty.
          * @param [in] placeholder Must be nullptr, used to signal that the resource should be kept empty.
          */
-        explicit basic_resource(std::nullptr_t placeholder) : m_container{}{}
+        explicit basic_resource(std::nullptr_t placeholder) : m_container{} {}
 
         /**@brief Constructs a basic resource from a legion::core::byte_vec.
          * @param [in] v The resource from which the resource is created (copy operation/move).
          */
         explicit basic_resource(byte_vec v) : m_container(std::move(v)) {
-            OPTICK_EVENT();
         }
 
         /**@brief Constructs a basic resource from a std::string
@@ -36,7 +33,6 @@ namespace legion::core::filesystem
          */
         explicit basic_resource(std::string_view v) : basic_resource(nullptr)
         {
-            OPTICK_EVENT();
             m_container.assign(v.begin(), v.end());
         }
 
@@ -55,7 +51,7 @@ namespace legion::core::filesystem
         {
             return m_container.begin();
         }
-        
+
         /**@brief Gets an iterator to the first element of the container.
          * @return iterator to first element
          */
@@ -118,15 +114,15 @@ namespace legion::core::filesystem
         }
 
         /**@brief Gets the container element
-         * @return legion::core::byte_vec 
+         * @return legion::core::byte_vec
          */
         L_NODISCARD byte_vec& get() noexcept
         {
             return m_container;
         }
-        
+
         /**@brief Gets the container element.
-         * @return legion::core::byte_vec 
+         * @return legion::core::byte_vec
          */
         L_NODISCARD const byte_vec& get() const noexcept
         {
@@ -139,17 +135,17 @@ namespace legion::core::filesystem
          */
         basic_resource& operator=(const std::string_view& value)
         {
-            m_container.assign(value.begin(),value.end());
+            m_container.assign(value.begin(), value.end());
             return *this;
         }
-        
+
         /**@brief String conversion.
          * @return std::string, The container converted to const char *.
          */
         L_NODISCARD std::string to_string() const
         {
             const char* const cstr = reinterpret_cast<const char*>(data());
-            return std::string(cstr,size());
+            return std::string(cstr, size());
         }
 
 
@@ -162,11 +158,11 @@ namespace legion::core::filesystem
          *
          * @tparam T The class you want to convert to.
          * @param args Additional construction parameters required to create T.
-         * 
-         *         
+         *
+         *
          * @return T Created from this resources data.
          */
-        template <typename T,class... Args>
+        template <typename T, class... Args>
         L_NODISCARD T to(Args&&...args) const;
 
         /**@brief Generic conversion from T.
@@ -178,79 +174,72 @@ namespace legion::core::filesystem
          */
         template <class T>
         void from(const T& v);
-        
+
     private:
         byte_vec m_container;
     };
 
-    #ifndef DOXY_EXCLUDE
+#ifndef DOXY_EXCLUDE
     /**@cond INTERNAL
      * @{
      */
-    
+
     template<typename T,
-             typename C1 = std::enable_if<detail::has_to_resource<T,void(basic_resource*,const T&)>::value>>
-    void to_resource(basic_resource* resource,const T& value)
+        typename C1 = std::enable_if<detail::has_to_resource<T, void(basic_resource*, const T&)>::value>>
+        void to_resource(basic_resource* resource, const T& value)
     {
-        OPTICK_EVENT();
-        T::to_resource(resource,value);
+        T::to_resource(resource, value);
     }
 
     template<typename T,
-             typename C1 = std::enable_if<detail::has_to_resource<T,void(basic_resource*,const T&)>::value>>
-    basic_resource to_resource(const T& value)
+        typename C1 = std::enable_if<detail::has_to_resource<T, void(basic_resource*, const T&)>::value>>
+        basic_resource to_resource(const T& value)
     {
-        OPTICK_EVENT();
         basic_resource res(nullptr);
-        T::to_resource(&res,value);
+        T::to_resource(&res, value);
         return res;
     }
 
     template<typename T,
-             typename C1 = std::enable_if<detail::has_from_resource<T,void(T*,const basic_resource&)>::value>>
-    void from_resource(T* value, const basic_resource& resource)
+        typename C1 = std::enable_if<detail::has_from_resource<T, void(T*, const basic_resource&)>::value>>
+        void from_resource(T* value, const basic_resource& resource)
     {
-        OPTICK_EVENT();
         T::from_resource(value, resource);
     }
-    
-   template<typename T,
-            typename C1 = std::enable_if<detail::has_from_resource<T,void(T*,const basic_resource&)>::value>,
-            typename C2 = std::enable_if<std::is_default_constructible<T>::value>,
-            typename C3 = std::enable_if<std::is_move_constructible<T>::value>>
-    T from_resource(const basic_resource& resource)
+
+    template<typename T,
+        typename C1 = std::enable_if<detail::has_from_resource<T, void(T*, const basic_resource&)>::value>,
+        typename C2 = std::enable_if<std::is_default_constructible<T>::value>,
+        typename C3 = std::enable_if<std::is_move_constructible<T>::value>>
+        T from_resource(const basic_resource& resource)
     {
-       OPTICK_EVENT();
-       T value;
-        T::from_resource(&value,resource);
+        T value;
+        T::from_resource(&value, resource);
         return std::move(value);
     }
-    
-   template<typename T,
-            typename C1 = std::enable_if<detail::has_from_resource<T,void(T*,const basic_resource&)>::value>,
-            typename C2 = std::enable_if<std::is_move_constructible<T>::value>,
-            class ... Args>
-    T from_resource(const basic_resource& resource,Args&&... args)
+
+    template<typename T,
+        typename C1 = std::enable_if<detail::has_from_resource<T, void(T*, const basic_resource&)>::value>,
+        typename C2 = std::enable_if<std::is_move_constructible<T>::value>,
+        class ... Args>
+        T from_resource(const basic_resource& resource, Args&&... args)
     {
-       OPTICK_EVENT();
-       T value(std::forward<Args>(args)...);
-        T::from_resource(&value,resource);
+        T value(std::forward<Args>(args)...);
+        T::from_resource(&value, resource);
         return std::move(value);
     }
 
 
-    template <typename T,class... Args>
+    template <typename T, class... Args>
     L_NODISCARD T basic_resource::to(Args&&...args) const
     {
-        OPTICK_EVENT();
         return std::move(from_resource<T>(*this, std::forward<Args>(args)...));
     }
 
     template <class T>
     void basic_resource::from(const T& v)
     {
-        OPTICK_EVENT();
-        to_resource(this,v);
+        to_resource(this, v);
     }
     /**
      * //cond
@@ -261,12 +250,12 @@ namespace legion::core::filesystem
     {
         /**@brief. creates a view from a string literal
          */
-       inline basic_resource operator""_res(const char* str,size_type len)
-       {
-           return basic_resource(std::string_view(str,len));
-       }
+        inline basic_resource operator""_res(const char* str, size_type len)
+        {
+            return basic_resource(std::string_view(str, len));
+        }
 
     }
 
-    #endif
+#endif
 }

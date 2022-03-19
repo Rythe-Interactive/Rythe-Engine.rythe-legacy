@@ -54,8 +54,6 @@
     <ClCompile Include="pipeline\default\stages\postprocessingstage.cpp" />
     <ClCompile Include="shadercompiler\shadercompiler.cpp" />
     <ClCompile Include="systems\renderer.cpp" />
-    <ClCompile Include="util\ini.c" />
-    <ClCompile Include="util\matini.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="components\camera.hpp" />
@@ -103,7 +101,6 @@
     <ClInclude Include="shadercompiler\shadercompiler.hpp" />
     <ClInclude Include="util\bindings.hpp" />
     <ClInclude Include="util\gui.hpp" />
-    <ClInclude Include="util\matini.hpp" />
     <ClInclude Include="util\settings.hpp" />
   </ItemGroup>
   <ItemGroup>

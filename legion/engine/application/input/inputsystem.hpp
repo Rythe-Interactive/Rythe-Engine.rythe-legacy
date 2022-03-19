@@ -243,7 +243,6 @@ namespace legion::application
             data.callback = action_callback::from(
                 [](InputSystem* self, bool state, inputmap::modifier_keys mods, inputmap::method method, float def, float delta)
                 {
-                    OPTICK_EVENT("Key to action callback");
                     (void)def;
                     Event e;
                     e.input_delta = delta;
@@ -283,7 +282,6 @@ namespace legion::application
             data.callback = axis_callback::from(
                 [](InputSystem* self, float value, inputmap::modifier_keys mods, inputmap::method method, float delta)
                 {
-                    OPTICK_EVENT("Axis to action callback");
                     Event e;
                     e.input_delta = delta;
                     e.set(value > 0.05f || value < -0.05f, mods, method); //convert float range 0-1 to key state false:true
@@ -325,11 +323,9 @@ namespace legion::application
 
         void onUpdate(time::time_span<fast_time> deltaTime)
         {
-            OPTICK_EVENT();
             onJoystick(deltaTime);
 
             {
-                OPTICK_EVENT("Update axes");
                 //update all axis with their current values
                 for (auto [_, inner_map] : m_axes)
                 {
@@ -341,7 +337,6 @@ namespace legion::application
             }
 
             {
-                OPTICK_EVENT("Action repeating callbacks");
                 for (auto [_, inner_map] : m_actions)
                 {
                     for (auto [_, action] : inner_map)
@@ -360,7 +355,6 @@ namespace legion::application
         void matchGLFWAxisWithSignalAxis(const GLFWgamepadstate& state, inputmap::modifier_keys joystick,
             const size_type glfw, inputmap::method m)
         {
-            OPTICK_EVENT();
             const float value = state.axes[glfw];
             for (auto [_, axis] : m_axes[m])
             {
@@ -389,7 +383,6 @@ namespace legion::application
 
         void onJoystick(float dt)
         {
-            OPTICK_EVENT();
             for (int glfw_joystick_id : m_presentGamepads)
             {
                 using mods = inputmap::modifier_keys;
@@ -562,7 +555,6 @@ namespace legion::application
 
         void raiseCommandQueues(float delta)
         {
-            OPTICK_EVENT();
             input_axis<std::nullptr_t> axis;
             axis.input_delta = delta;
 

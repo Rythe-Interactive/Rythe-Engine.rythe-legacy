@@ -40,8 +40,6 @@ namespace legion::core::scheduling
         async::set_thread_name(name.c_str());
         log::info("Thread {} assigned.", std::this_thread::get_id());
 
-        OPTICK_THREAD(name.c_str());
-
         while (!instance.m_start.load(std::memory_order_relaxed))
             std::this_thread::yield();
 
@@ -102,12 +100,10 @@ namespace legion::core::scheduling
 
                 if (lowPower || LEGION_CONFIGURATION == LEGION_DEBUG_VALUE)
                 {
-                    OPTICK_EVENT("Sleep");
                     std::this_thread::sleep_for(std::chrono::microseconds(1));
                 }
                 else if (timeBuffer >= sleepTime * instance.m_pollTime.load(std::memory_order_relaxed))
                 {
-                    OPTICK_EVENT("Sleep");
                     timeBuffer -= sleepTime;
 
                     time::timer sleepTimer;
@@ -140,8 +136,6 @@ namespace legion::core::scheduling
 
     void Scheduler::doTick(Clock::span_type deltaTime)
     {
-        OPTICK_FRAME("Main thread");
-
         time::span dt{ deltaTime };
         instance.m_onFrameStart(dt, time::span(Clock::elapsedSinceTickStart()));
 
