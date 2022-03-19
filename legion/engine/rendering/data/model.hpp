@@ -78,6 +78,7 @@ namespace legion::rendering
         static model_handle create_model(assets::asset<mesh> mesh);
         static model_handle get_handle(const std::string& name);
         static model_handle get_handle(id_type id);
+        static sparse_map<id_type, model> get_all_models();
         static assets::asset<mesh> get_mesh(const std::string& name);
         static assets::asset<mesh> get_mesh(id_type id);
 

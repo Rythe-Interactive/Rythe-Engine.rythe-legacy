@@ -12,18 +12,15 @@ struct example_comp
 {
 
 };
-
 namespace legion
 {
     struct pause_action : public app::input_action<pause_action> {};
     struct play_action : public app::input_action<play_action> {};
     struct stop_action : public app::input_action<stop_action> {};
-struct tonemap_action : public lgn::app::input_action<tonemap_action> {};
-struct reload_shaders_action : public lgn::app::input_action<reload_shaders_action> {};
-struct switch_skybox_action : public lgn::app::input_action<switch_skybox_action> {};
-namespace legion::core
-{
-
+    struct change_mat_action : public app::input_action<change_mat_action> {};
+    struct tonemap_action : public lgn::app::input_action<tonemap_action> {};
+    struct reload_shaders_action : public lgn::app::input_action<reload_shaders_action> {};
+    struct switch_skybox_action : public lgn::app::input_action<switch_skybox_action> {};
 }
 
 class ExampleSystem final : public legion::System<ExampleSystem>
@@ -274,8 +271,11 @@ public:
     }
 
     void playEmitter(legion::play_action& action);
-
     void pauseEmitter(legion::pause_action& action);
-
     void stopEmitter(legion::stop_action& action);
+    void changeMaterial(legion::change_mat_action& action);
+    void onShaderReload(legion::reload_shaders_action& event);
+    void onTonemapSwitch(legion::tonemap_action& event);
+    void onSkyboxSwitch(legion::switch_skybox_action& event);
+
 };

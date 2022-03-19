@@ -248,12 +248,17 @@ void ExampleSystem::setup()
     }
     //Sun
     {
-       /* auto ent = createEntity("Sun");
+        auto ent = createEntity("Sun");
         auto [pos, rot, scal] = ent.add_component<transform>();
         pos->x = -30.f;
         pos->z = 30.f;
         scal = scale(10.f);
         material = gfx::MaterialCache::create_material("Sun", fs::view("assets://shaders/pbr.shs"));
+        //gfx::ModelCache::create_model("Sponza", fs::view("assets://models/Sponza/Sponza.gltf"));
+        gfx::ModelCache::create_model("Cola", fs::view("assets://models/cola.glb"));
+        //gfx::ModelCache::create_model("Fireplace", fs::view("assets://models/Fireplace.glb"));
+        gfx::ModelCache::create_model("Gnome", fs::view("assets://models/gnomecentered.obj"));
+        gfx::MaterialCache::create_material("Test", fs::view("assets://shaders/uv.shs"));
 
         material.set_param(SV_ALBEDO, rendering::TextureCache::create_texture(fs::view("assets://textures/2kSun.jpg")));
         material.set_param(SV_NORMALHEIGHT, rendering::TextureCache::create_texture(fs::view("assets://textures/slate/slate-normalHeight-2048.png")));
@@ -262,7 +267,7 @@ void ExampleSystem::setup()
         material.set_param(SV_HEIGHTSCALE, 1.f);
 
         ent.add_component<gfx::mesh_renderer>(gfx::mesh_renderer(material, model));
-        ent.add_component(gfx::light::point(math::color(1.f, 215.f / 255.f, 0.f), 10.f, 50.f));*/
+        ent.add_component(gfx::light::point(math::color(1.f, 215.f / 255.f, 0.f), 10.f, 50.f));
     }
 
     {
@@ -279,7 +284,7 @@ void ExampleSystem::setup()
         emitter->set_spawn_rate(100);
         emitter->set_spawn_interval(0.2f);
         emitter->resize(10000);
-        emitter->localSpace = false;
+        emitter->localSpace = true;
 
         emitter->add_policy<example_policy>();
         orbital_policy orbital;
@@ -311,6 +316,24 @@ void ExampleSystem::setup()
     //    gfx::MaterialCache::get_material("Particle").set_param("particleColor", math::color(1.f, 1.f, 1.f, 1.f));
     //    gfx::MaterialCache::get_material("Particle").set_param("fixedSize", false);
     //}
+
+    app::InputSystem::createBinding<play_action>(app::inputmap::method::RIGHT);
+    app::InputSystem::createBinding<pause_action>(app::inputmap::method::UP);
+    app::InputSystem::createBinding<stop_action>(app::inputmap::method::DOWN);
+    app::InputSystem::createBinding<change_mat_action>(app::inputmap::method::LEFT);
+    app::InputSystem::createBinding<tonemap_action>(app::inputmap::method::F2);
+    app::InputSystem::createBinding<reload_shaders_action>(app::inputmap::method::F3);
+    app::InputSystem::createBinding<switch_skybox_action>(app::inputmap::method::F4);
+
+    bindToEvent<tonemap_action, &ExampleSystem::onTonemapSwitch>();
+    bindToEvent<reload_shaders_action, &ExampleSystem::onShaderReload>();
+    bindToEvent<switch_skybox_action, &ExampleSystem::onSkyboxSwitch>();
+    bindToEvent<events::exit, &ExampleSystem::onExit>();
+    bindToEvent<play_action, &ExampleSystem::playEmitter>();
+    bindToEvent<pause_action, &ExampleSystem::pauseEmitter>();
+    bindToEvent<stop_action, &ExampleSystem::stopEmitter>();
+    bindToEvent<change_mat_action, &ExampleSystem::changeMaterial>();
+
 
     bindToEvent<events::exit, &ExampleSystem::onExit>();
 }
@@ -356,4 +379,133 @@ void ExampleSystem::stopEmitter(legion::stop_action& action)
         }
     }
 }
+
+void ExampleSystem::changeMaterial(legion::change_mat_action& action)
+{
+    using namespace legion;
+    if (action.pressed())
+    {
+        ecs::filter<particle_emitter> filter;
+        for (auto ent : filter)
+        {
+            auto& emitter = ent.get_component<particle_emitter>().get();
+            auto models = gfx::ModelCache::get_all_models();
+            auto randModel = gfx::ModelCache::get_handle(models.keys()[std::rand() % models.size()]);
+            auto randMesh = randModel.get_mesh();
+            log::debug("Random Model Name: {}", randModel.get_mesh().name());
+            if (emitter.has_uniform<mesh_filter>("mesh_filter"))
+                emitter.get_uniform<mesh_filter>("mesh_filter") = mesh_filter(randMesh);
+
+            auto& mats = gfx::MaterialCache::get_all_materials().second;
+            auto pair = std::next(mats.begin(), std::rand() % mats.size());
+            auto randMat = gfx::MaterialCache::get_material(pair->first);
+            log::debug("Random Material Name: {}", pair->second.get_name());
+            if (emitter.has_uniform<gfx::mesh_renderer>("renderer"))
+                emitter.get_uniform<gfx::mesh_renderer>("renderer") = gfx::mesh_renderer(randMat, randModel);
+        }
+    }
+}
+
+void ExampleSystem::onShaderReload(legion::reload_shaders_action& event)
+{
+    using namespace legion;
+    if (event.pressed())
+    {
+        auto targetWin = ecs::world.get_component<app::window>();
+        if (!targetWin)
+            return;
+
+        app::window& win = targetWin.get();
+
+        if (!app::WindowSystem::windowStillExists(win.handle))
+            return;
+
+        app::context_guard guard(win);
+        if (guard.contextIsValid())
+        {
+            gfx::ShaderCache::clear_checked_paths();
+            gfx::ShaderCache::reload_shaders();
+        }
+    }
+}
+
+void ExampleSystem::onTonemapSwitch(legion::tonemap_action& event)
+{
+    using namespace legion;
+    if (event.pressed())
+    {
+        static size_type type = static_cast<size_type>(gfx::tonemapping_type::legion);
+        type = (type + 1) % (static_cast<size_type>(gfx::tonemapping_type::unreal3) + 1);
+
+        auto typeEnum = static_cast<gfx::tonemapping_type>(type);
+
+        std::string algorithmName;
+        switch (typeEnum)
+        {
+        case gfx::tonemapping_type::aces:
+            algorithmName = "aces";
+            break;
+        case gfx::tonemapping_type::reinhard:
+            algorithmName = "reinhard";
+            break;
+        case gfx::tonemapping_type::reinhard_jodie:
+            algorithmName = "reinhard_jodie";
+            break;
+        case gfx::tonemapping_type::legion:
+            algorithmName = "legion";
+            break;
+        case gfx::tonemapping_type::unreal3:
+            algorithmName = "unreal3";
+            break;
+        default:
+            algorithmName = "legion";
+            break;
+        }
+        log::debug("Set tonemapping algorithm to {}", algorithmName);
+
+        gfx::Tonemapping::setAlgorithm(typeEnum);
+    }
+}
+
+void ExampleSystem::onSkyboxSwitch(legion::switch_skybox_action& event)
+{
+    using namespace legion;
+    if (event.pressed())
+    {
+        static size_type idx = 0;
+        static gfx::texture_handle textures[4] = {};
+        static bool initialized = false;
+
+        if (!initialized)
+        {
+            auto targetWin = ecs::world.get_component<app::window>();
+            if (!targetWin)
+                return;
+
+            app::window& win = targetWin.get();
+
+            if (!app::WindowSystem::windowStillExists(win.handle))
+                return;
+
+            app::context_guard guard(win);
+            if (guard.contextIsValid())
+            {
+                textures[0] = gfx::TextureCache::create_texture("morning islands", fs::view("assets://textures/HDRI/morning_islands.jpg"));
+                textures[1] = gfx::TextureCache::create_texture("earth", fs::view("assets://textures/HDRI/earth.png"));
+                textures[2] = gfx::TextureCache::create_texture("park", fs::view("assets://textures/HDRI/park.jpg"));
+                textures[3] = gfx::TextureCache::create_texture("atmosphere", fs::view("assets://textures/HDRI/planetatmo.png"));
+                initialized = true;
+            }
+            else
+                return;
+        }
+
+        idx = (idx + 1) % 4;
+        auto skyboxRenderer = ecs::world.get_component<gfx::skybox_renderer>();
+        skyboxRenderer->material.set_param(SV_SKYBOX, textures[idx]);
+
+        log::debug("Set skybox to {}", textures[idx].get_texture().name);
+    }
+}
+
 

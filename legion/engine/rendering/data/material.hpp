@@ -331,6 +331,7 @@ namespace legion::rendering
          * @return material_handle Handle to a material attached to the given name, may be invalid if there is no material attached to that name yet.
          */
         static material_handle get_material(const std::string& name);
+        static material_handle get_material(id_type materialId);
 
         static std::pair<async::rw_spinlock&, std::unordered_map<id_type, material>&> get_all_materials();
 
