@@ -6,7 +6,7 @@ namespace legion::rendering
 {
     enum struct tonemapping_type
     {
-        aces, reinhard, reinhard_jodie, legion, unreal3
+        aces, legion, reinhard, reinhard_jodie, unreal3
     };
 
     class Tonemapping : public PostProcessingEffect<Tonemapping>

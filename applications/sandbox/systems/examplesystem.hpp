@@ -9,6 +9,10 @@ struct example_comp
 
 };
 
+struct tonemap_action : public lgn::app::input_action<tonemap_action> {};
+struct reload_shaders_action : public lgn::app::input_action<reload_shaders_action> {};
+struct switch_skybox_action : public lgn::app::input_action<switch_skybox_action> {};
+
 class ExampleSystem final : public legion::System<ExampleSystem>
 {
     lgn::size_type frames = 0;
@@ -22,6 +26,13 @@ public:
         using namespace legion;
         log::filter(log::severity_debug);
         log::debug("ExampleSystem setup");
+
+        app::InputSystem::createBinding<tonemap_action>(app::inputmap::method::F2);
+        app::InputSystem::createBinding<reload_shaders_action>(app::inputmap::method::F3);
+        app::InputSystem::createBinding<switch_skybox_action>(app::inputmap::method::F4);
+        bindToEvent<tonemap_action, &ExampleSystem::onTonemapSwitch>();
+        bindToEvent<reload_shaders_action, &ExampleSystem::onShaderReload>();
+        bindToEvent<switch_skybox_action, &ExampleSystem::onSkyboxSwitch>();
 
         app::window& win = ecs::world.get_component<app::window>();
         app::context_guard guard(win);
@@ -278,6 +289,108 @@ public:
     void shutdown()
     {
         lgn::log::debug("ExampleSystem shutdown");
+    }
+
+    void onShaderReload(reload_shaders_action& event)
+    {
+        using namespace legion;
+        if (event.pressed())
+        {
+            auto targetWin = ecs::world.get_component<app::window>();
+            if (!targetWin)
+                return;
+
+            app::window& win = targetWin.get();
+
+            if (!app::WindowSystem::windowStillExists(win.handle))
+                return;
+
+            app::context_guard guard(win);
+            if (guard.contextIsValid())
+            {
+                gfx::ShaderCache::clear_checked_paths();
+                gfx::ShaderCache::reload_shaders();
+            }
+        }
+    }
+
+    void onTonemapSwitch(tonemap_action& event)
+    {
+        using namespace legion;
+        if (event.pressed())
+        {
+            static size_type type = static_cast<size_type>(gfx::tonemapping_type::legion);
+            type = (type + 1) % (static_cast<size_type>(gfx::tonemapping_type::unreal3) + 1);
+
+            auto typeEnum = static_cast<gfx::tonemapping_type>(type);
+
+            std::string algorithmName;
+            switch (typeEnum)
+            {
+            case gfx::tonemapping_type::aces:
+                algorithmName = "aces";
+                break;
+            case gfx::tonemapping_type::reinhard:
+                algorithmName = "reinhard";
+                break;
+            case gfx::tonemapping_type::reinhard_jodie:
+                algorithmName = "reinhard_jodie";
+                break;
+            case gfx::tonemapping_type::legion:
+                algorithmName = "legion";
+                break;
+            case gfx::tonemapping_type::unreal3:
+                algorithmName = "unreal3";
+                break;
+            default:
+                algorithmName = "legion";
+                break;
+            }
+            log::debug("Set tonemapping algorithm to {}", algorithmName);
+
+            gfx::Tonemapping::setAlgorithm(typeEnum);
+        }
+    }
+
+    void onSkyboxSwitch(switch_skybox_action& event)
+    {
+        using namespace legion;
+        if (event.pressed())
+        {
+            static size_type idx = 0;
+            static gfx::texture_handle textures[4] = {};
+            static bool initialized = false;
+
+            if (!initialized)
+            {
+                auto targetWin = ecs::world.get_component<app::window>();
+                if (!targetWin)
+                    return;
+
+                app::window& win = targetWin.get();
+
+                if (!app::WindowSystem::windowStillExists(win.handle))
+                    return;
+
+                app::context_guard guard(win);
+                if (guard.contextIsValid())
+                {
+                    textures[0] = gfx::TextureCache::create_texture("morning islands", fs::view("assets://textures/HDRI/morning_islands.jpg"));
+                    textures[1] = gfx::TextureCache::create_texture("earth", fs::view("assets://textures/HDRI/earth.png"));
+                    textures[2] = gfx::TextureCache::create_texture("park", fs::view("assets://textures/HDRI/park.jpg"));
+                    textures[3] = gfx::TextureCache::create_texture("atmosphere", fs::view("assets://textures/HDRI/planetatmo.png"));
+                    initialized = true;
+                }
+                else
+                    return;
+            }
+
+            idx = (idx + 1) % 4;
+            auto skyboxRenderer = ecs::world.get_component<gfx::skybox_renderer>();
+            skyboxRenderer->material.set_param(SV_SKYBOX, textures[idx]);
+
+            log::debug("Set skybox to {}", textures[idx].get_texture().name);
+        }
     }
 
     void onExit(L_MAYBEUNUSED lgn::events::exit& event)

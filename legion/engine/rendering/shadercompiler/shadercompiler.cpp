@@ -1,6 +1,7 @@
+#include <lgnspre/gl_consts.hpp>
+
 #include <rendering/shadercompiler/shadercompiler.hpp>
 #include <rendering/util/settings.hpp>
-#include <lgnspre/gl_consts.hpp>
 #include <application/application.hpp>
 
 namespace legion::rendering
@@ -10,7 +11,6 @@ namespace legion::rendering
 
     std::string ShaderCompiler::get_view_path(const fs::view& view, bool mustBeFile)
     {
-        OPTICK_EVENT();
         using severity = log::severity;
 
         fs::navigator navigator(view.get_virtual_path());
@@ -54,16 +54,12 @@ namespace legion::rendering
 
     const std::string& ShaderCompiler::get_shaderlib_path()
     {
-        OPTICK_EVENT();
-        static std::string libPath;
-        if (libPath.empty())
-            libPath = get_view_path(fs::view("engine://shaderlib"), false);
+        static std::string libPath = get_view_path(fs::view("engine://shaderlib"), false);
         return libPath;
     }
 
     const std::string& ShaderCompiler::get_compiler_path()
     {
-        OPTICK_EVENT();
         static std::string compPath;
         if (compPath.empty())
             compPath = get_view_path(fs::view("engine://tools"), false) + fs::strpath_manip::separator() + "lgnspre" + fs::strpath_manip::separator() + "lgnspre";
@@ -72,7 +68,6 @@ namespace legion::rendering
 
     const std::string& ShaderCompiler::get_cachecleaner_path()
     {
-        OPTICK_EVENT();
         static std::string compPath;
         if (compPath.empty())
             compPath = get_view_path(fs::view("engine://tools"), false) + fs::strpath_manip::separator() + "lgnspre" + fs::strpath_manip::separator() + "lgncleancache";
@@ -81,7 +76,6 @@ namespace legion::rendering
 
     void ShaderCompiler::extract_state(std::string_view source, shader_state& state)
     {
-        OPTICK_EVENT();
         std::string_view rest = source;
         std::vector<std::pair<std::string, std::string>> stateInput;
         while (!rest.empty())
@@ -253,7 +247,6 @@ namespace legion::rendering
 
     bool ShaderCompiler::extract_ilo(const std::string& variant, std::string_view source, uint64 shaderType, shader_ilo& ilo)
     {
-        OPTICK_EVENT();
         using severity = log::severity;
 
         GLuint glShaderType = detail::get_gl_type(shaderType);
@@ -295,7 +288,6 @@ namespace legion::rendering
 
     std::string ShaderCompiler::invoke_compiler(const fs::view& file, bitfield8 compilerSettings, const std::vector<std::string>& defines, const std::vector<std::string>& additionalIncludes)
     {
-        OPTICK_EVENT();
         using severity = log::severity;
 
         std::string filepath = get_view_path(file, true);
@@ -373,13 +365,13 @@ namespace legion::rendering
         return out;
     }
 
-    void ShaderCompiler::cleanCache()
+    void ShaderCompiler::cleanCache(const fs::view& path)
     {
         OPTICK_EVENT();
         using severity = log::severity;
         std::string out, err;
 
-        std::string command = "\"" + get_cachecleaner_path() + "\" -I \"" + get_shaderlib_path() + "\" ./ --filter=shil";
+        std::string command = "\"" + get_cachecleaner_path() + "\" \"" + get_view_path(path, false) + "\" -I \"" + get_shaderlib_path() + "\" ./ --filter=shil";
 
         if (!ShellInvoke(command, out, err))
         {

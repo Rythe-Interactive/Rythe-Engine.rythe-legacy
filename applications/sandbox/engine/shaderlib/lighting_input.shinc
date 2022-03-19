@@ -140,10 +140,10 @@ vec3 GetAllLighting(Material material, Camera camera, vec3 worldPosition)
 vec3 FakeIBL(Camera camera, Material material)
 {
     vec3 viewDir = normalize(camera.toView);
-    vec3 lightDirection = reflect(-viewDir, material.normal);
+    vec3 lightDirection = normalize(reflect(-viewDir, material.normal));
 
     vec3 halfwayVector = normalize(lightDirection + viewDir);
-
+ 
     float halfwayDotView = dot01(halfwayVector, viewDir);
     float normalDotHalfway = dot01(material.normal, halfwayVector);
     float normalDotView = dot01(material.normal, viewDir);
@@ -153,21 +153,15 @@ vec3 FakeIBL(Camera camera, Material material)
     float metallic = clamp(material.metallic, 0.001, 0.999);
 
     // cook-torrance brdf
-    vec3 fresnelReflection = fresnelSchlick(mix(halfwayDotView, 1.0, roughness), material.F0);
-    float normalDistribution = DistributionGGX(normalDotHalfway, roughness);
-    float geometryShadowing = GeometrySmith(normalDotView, normalDotLight, roughness);
-    vec3 specular = CookTorranceBRDF(normalDistribution, fresnelReflection, geometryShadowing, normalDotLight, normalDotView) * 0.01;
-
+    vec3 specular = fresnelSchlick(mix(halfwayDotView, 1.0, roughness), material.F0);
     vec3 specularRadiance = SampleSkyboxLod(lightDirection, SkyboxMipLevels() * roughness).rgb;
 
     halfwayVector = normalize(material.normal + viewDir);
     halfwayDotView = dot01(halfwayVector, viewDir);
-    fresnelReflection = fresnelSchlick(mix(halfwayDotView, 1.0, roughness), material.F0);
+    vec3 fresnelReflection = fresnelSchlick(mix(halfwayDotView, 1.0, roughness), material.F0);
     vec3 diffuse = LambertianDiffuse(fresnelReflection, material.albedo.rgb, metallic);
 
-    vec3 kS = max(fresnelReflection + specular, vec3(0.0));
-
-    int diffuseMip =  int((SkyboxMipLevels() * roughness) + 0.5);
+    int diffuseMip =  int(((SkyboxMipLevels() - 1) * roughness) + 0.5);
     vec4 texelOffset = SkyboxTexelSize(diffuseMip).xyxy * vec2(-1.0, 1.0).xxyy;
     vec2 diffuseSkyUV = SkyboxUV(material.normal);
 
@@ -175,9 +169,9 @@ vec3 FakeIBL(Camera camera, Material material)
                             SampleSkyboxLod(diffuseSkyUV + texelOffset.xy, diffuseMip).rgb +
                             SampleSkyboxLod(diffuseSkyUV + texelOffset.zy, diffuseMip).rgb +
                             SampleSkyboxLod(diffuseSkyUV + texelOffset.xw, diffuseMip).rgb +
-                            SampleSkyboxLod(diffuseSkyUV + texelOffset.zw, diffuseMip).rgb) * 0.2 * pi * 1.5;
+                            SampleSkyboxLod(diffuseSkyUV + texelOffset.zw, diffuseMip).rgb) * 0.2 * pi;
 
-    return max((diffuse * diffuseRadiance * diffuseRadiance) + (kS * specularRadiance), vec3(0));
+    return max((diffuse * diffuseRadiance * diffuseRadiance) + (specular * specularRadiance), vec3(0.0));
 }
 #endif
 #endif

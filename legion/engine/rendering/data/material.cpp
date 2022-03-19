@@ -252,6 +252,12 @@ namespace legion::rendering
 
     void material::bind()
     {
+        if (!m_shader.is_valid())
+        {
+            invalid_shader_handle.bind();
+            return;
+        }
+
         m_shader.configure_variant(m_currentVariant);
         m_shader.bind();
         for (auto& [_, param] : m_variants[m_currentVariant].parameters)

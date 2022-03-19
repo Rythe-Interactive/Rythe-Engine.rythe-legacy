@@ -98,9 +98,9 @@ namespace legion::rendering
 
         fbo->bind();
 
-        for (auto [material, instancesPerMaterial] : *batches)
+        for (auto [m, instancesPerMaterial] : *batches)
         {
-            if (material.get_name() == "Test")
+            if (m.get_name() == "Test")
             {
                 for (auto [modelHandle, instances] : instancesPerMaterial)
                 {
@@ -118,19 +118,25 @@ namespace legion::rendering
                     for (auto submesh : mesh.submeshes)
                     {
                         if (mesh.materials.empty())
-                            mater = material;
+                            mater = m;
                         else if (submesh.materialIndex == -1)
                             continue;
                         else
                             mater = mesh.materials[submesh.materialIndex];
 
-                        auto& shaderState = mater.get_shader().get_variant(mater.current_variant()).state;
-                        if ((shaderState.count(GL_BLEND) && (shaderState.at(GL_BLEND) != GL_FALSE)) ||
-                            (shaderState.count(GL_BLEND_SRC) && (shaderState.at(GL_BLEND_SRC) != GL_FALSE)) ||
-                            (shaderState.count(GL_BLEND_DST) && (shaderState.at(GL_BLEND_DST) != GL_FALSE)))
+                        auto shader = mater.get_shader();
+                        if (shader.is_valid())
                         {
-                            continue;
+                            auto& shaderState = shader.get_variant(mater.current_variant()).state;
+                            if ((shaderState.count(GL_BLEND) && (shaderState.at(GL_BLEND) != GL_FALSE)) ||
+                                (shaderState.count(GL_BLEND_SRC) && (shaderState.at(GL_BLEND_SRC) != GL_FALSE)) ||
+                                (shaderState.count(GL_BLEND_DST) && (shaderState.at(GL_BLEND_DST) != GL_FALSE)))
+                            {
+                                continue;
+                            }
                         }
+                        else
+                            mater = invalid_material_handle;
 
                         OPTICK_EVENT("Rendering material");
                         auto materialName = mater.get_name();
@@ -205,13 +211,20 @@ namespace legion::rendering
                 continue;
             }
 
-            auto& shaderState = material.get_shader().get_variant(material.current_variant()).state;
-            if ((shaderState.count(GL_BLEND) && (shaderState.at(GL_BLEND) != GL_FALSE)) ||
-                (shaderState.count(GL_BLEND_SRC) && (shaderState.at(GL_BLEND_SRC) != GL_FALSE)) ||
-                (shaderState.count(GL_BLEND_DST) && (shaderState.at(GL_BLEND_DST) != GL_FALSE)))
+            material_handle material = m;
+            auto shader = material.get_shader();
+            if (shader.is_valid())
             {
-                continue;
+                auto& shaderState = shader.get_variant(material.current_variant()).state;
+                if ((shaderState.count(GL_BLEND) && (shaderState.at(GL_BLEND) != GL_FALSE)) ||
+                    (shaderState.count(GL_BLEND_SRC) && (shaderState.at(GL_BLEND_SRC) != GL_FALSE)) ||
+                    (shaderState.count(GL_BLEND_DST) && (shaderState.at(GL_BLEND_DST) != GL_FALSE)))
+                {
+                    continue;
+                }
             }
+            else
+                material = invalid_material_handle;
 
             OPTICK_EVENT("Rendering material");
             auto materialName = material.get_name();
