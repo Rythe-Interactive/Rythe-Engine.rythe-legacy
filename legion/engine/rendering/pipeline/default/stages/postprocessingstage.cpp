@@ -63,13 +63,9 @@ namespace legion::rendering
             return;
         }
 
-        //texture_handle texture = std::get<texture_handle>(colorAttachment);
-
-        bool stencil = false;
         auto depthAttachment = fbo->getAttachment(GL_DEPTH);
         if (std::holds_alternative<std::monostate>(depthAttachment))
         {
-            stencil = true;
             depthAttachment = fbo->getAttachment(GL_DEPTH_STENCIL);
         }
 

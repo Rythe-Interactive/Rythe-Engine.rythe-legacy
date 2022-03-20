@@ -12,10 +12,20 @@ namespace legion::rendering
     shader* ShaderCache::get_shader(id_type id)
     {
         async::readonly_guard guard(m_shaderLock);
-        if (m_shaders.count(id))
-            return &m_shaders.at(id);
-        else
+
+#if defined(LEGION_VALIDATE)
+        if (!m_shaders.count(id))
+        {
+            if (!m_shaders.contains(invalid_id) || (!m_shaders.at(invalid_id).has_variant(0)))
+            {
+                create_invalid_shader(fs::view("engine://shaders/invalid.shs"));
+            }
+
             return &m_shaders.at(invalid_id);
+        }
+#endif
+
+        return &m_shaders.at(id);
     }
 
     void ShaderCache::process_io(shader& shader, id_type id)
@@ -332,15 +342,6 @@ namespace legion::rendering
 
     shader_handle ShaderCache::create_invalid_shader(const fs::view& file, shader_import_settings settings)
     {
-        { // Check if the shader already exists.
-            async::readonly_guard guard(m_shaderLock);
-            if (m_shaders.contains(invalid_id) && m_shaders[invalid_id].has_variant(0))
-            {
-                log::debug("Shader invalid already exists, existing shader will be returned instead.");
-                return { invalid_id };
-            }
-        }
-
         ShaderCompiler::setErrorCallback([](const std::string& errormsg, log::severity severity)
             {
                 log::println(severity, errormsg);
@@ -673,13 +674,7 @@ namespace legion::rendering
     {
         async::readonly_guard guard(m_shaderLock);
 
-        if (m_shaders.contains(id))
-        {
-            static id_type defaultId = nameHash("default");
-            auto& shader = m_shaders.at(id);
-            return !shader.m_variants.empty() && shader.m_variants.count(defaultId);
-        }
-        return false;
+        return m_shaders.contains(id);
     }
 
     shader_handle ShaderCache::create_shader(const std::string& name, const fs::view& file, shader_import_settings settings)
@@ -692,7 +687,7 @@ namespace legion::rendering
         { // Check if the shader already exists.
             async::readonly_guard guard(m_shaderLock);
 
-            if (!m_shaders.contains(invalid_id) || (!m_shaders[invalid_id].has_variant(0)))
+            if (!m_shaders.contains(invalid_id) || (!m_shaders.at(invalid_id).has_variant(0)))
             {
                 create_invalid_shader(fs::view("engine://shaders/invalid.shs"));
             }
@@ -963,7 +958,7 @@ namespace legion::rendering
                 m_shaders.insert(id, std::move(shader));
             }
 
-            return { invalid_id };
+            return { id };
         }
 
         process_io(shader, id);
@@ -1154,15 +1149,21 @@ namespace legion::rendering
 
     shader_variant& shader::get_variant(id_type variantId)
     {
+        if (variantId == 0)
+        {
+            static id_type defaultId = nameHash("default");
+
+#if defined(LEGION_VALIDATE)
+            if (!m_variants.count(defaultId))
+                return const_cast<shader_variant&>(invalid_shader_handle.get_variant(0));
+#endif
+            return m_variants.at(defaultId);
+        }
+
 #if defined(LEGION_VALIDATE)
         if (!m_variants.count(variantId))
             return const_cast<shader_variant&>(invalid_shader_handle.get_variant(0));
 #endif
-        if (variantId == 0)
-        {
-            static id_type defaultId = nameHash("default");
-            return m_variants.at(defaultId);
-        }
         return m_variants.at(variantId);
     }
 
