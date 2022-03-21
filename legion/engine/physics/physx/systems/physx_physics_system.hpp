@@ -58,8 +58,6 @@ namespace legion::physics
 
         PhysxWrapperContainer m_physxWrapperContainer;
 
-        std::mutex m_setupShutdownMutex;
-
         using pcEventProcessFunc = delegate<void(physics_component&,const PhysxEnviromentInfo&, PhysxInternalWrapper&, ecs::entity)>;
         std::array< pcEventProcessFunc, physics_component_flag::pc_max> m_physicsComponentActionFuncs;
 

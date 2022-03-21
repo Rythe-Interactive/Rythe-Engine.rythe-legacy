@@ -39,17 +39,17 @@ namespace legion::physics
            m_colliderCount++;
         }
 
-        L_ALWAYS_INLINE const std::bitset<physics_component_flag::pc_max>& getGeneratedModifyEvents() const
+        L_ALWAYS_INLINE const std::bitset<physics_component_flag::pc_max>& getGeneratedModifyEvents() const noexcept
         {
             return m_modificationFlags;
         };
 
-        L_ALWAYS_INLINE std::vector<ConvexColliderData>& getConvexData()
+        L_ALWAYS_INLINE std::vector<ConvexColliderData>& getConvexData() noexcept
         {
             return m_convexColliderData;
         }
 
-        L_ALWAYS_INLINE std::vector<SphereColliderData>& getSphereData()
+        L_ALWAYS_INLINE std::vector<SphereColliderData>& getSphereData() noexcept
         {
             return m_sphereColliderData;
         }
