@@ -12,9 +12,9 @@ namespace legion::physics
     {
     public:
 
-        inline void AddBoxCollider(const math::vec3& extents, const math::vec3& offset, const math::quat& rotation)
+        L_ALWAYS_INLINE void AddBoxCollider(const math::vec3& extents, const math::vec3& offset, const math::quat& rotation)
         {
-            m_convexColliderData.push_back(ConvexColliderData(offset,rotation,extents * boxExtentSizeMultiplier,&m_modificationFlags));
+            m_convexColliderData.push_back(ConvexColliderData(offset,rotation,extents * boxExtentSizeMultiplier));
 
             m_colliderCount == 0 ?
                 m_modificationFlags.set(physics::physics_component_flag::pc_add_first_box) :
@@ -23,14 +23,14 @@ namespace legion::physics
             m_colliderCount++;
         }
 
-        inline void AddBoxCollider(const math::vec3& extents)
+        L_ALWAYS_INLINE void AddBoxCollider(const math::vec3& extents)
         {
             AddBoxCollider(extents, math::vec3(0.0f), math::identity<math::quat>());
         }
 
-        inline void AddSphereCollider(float radius, const math::vec3& offset)
+        L_ALWAYS_INLINE void AddSphereCollider(float radius, const math::vec3& offset)
         {
-           m_sphereColliderData.push_back(SphereColliderData(offset, radius, &m_modificationFlags));
+           m_sphereColliderData.push_back(SphereColliderData(offset, radius));
 
            m_colliderCount == 0 ?
                m_modificationFlags.set(physics::physics_component_flag::pc_add_first_sphere) :
@@ -39,22 +39,22 @@ namespace legion::physics
            m_colliderCount++;
         }
 
-        const std::bitset<physics_component_flag::pc_max>& getGeneratedModifyEvents() const
+        L_ALWAYS_INLINE const std::bitset<physics_component_flag::pc_max>& getGeneratedModifyEvents() const
         {
             return m_modificationFlags;
         };
 
-        inline std::vector<ConvexColliderData>& getConvexData()
+        L_ALWAYS_INLINE std::vector<ConvexColliderData>& getConvexData()
         {
             return m_convexColliderData;
         }
 
-        inline std::vector<SphereColliderData>& getSphereData()
+        L_ALWAYS_INLINE std::vector<SphereColliderData>& getSphereData()
         {
             return m_sphereColliderData;
         }
 
-        inline void resetModificationFlags() { m_modificationFlags.reset(); }
+        L_ALWAYS_INLINE void resetModificationFlags() { m_modificationFlags.reset(); }
 
     private:
 

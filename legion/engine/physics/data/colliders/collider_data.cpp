@@ -2,19 +2,15 @@
 
 namespace legion::physics
 {
-    ColliderData::ColliderData(collider_type colliderType, const math::vec3& offset, const math::quat& rotation,
-        const std::bitset<physics_component_flag::pc_max>* modificationBitset)
+    ColliderData::ColliderData(collider_type colliderType, const math::vec3& offset, const math::quat& rotation) noexcept
         :
-        m_rotationOffset(rotation), m_positionOffset(offset), m_isRegistered(false),
-        m_bitsetPtr{ modificationBitset }, m_colliderType(colliderType)  { }
+        m_rotationOffset(rotation), m_positionOffset(offset), m_isRegistered(false), m_colliderType(colliderType)  { }
 
-    ConvexColliderData::ConvexColliderData(const math::vec3& offset, const math::quat& rotation, const math::vec3& boxExtents,
-        const std::bitset<physics_component_flag::pc_max>* changeFlag)
+    ConvexColliderData::ConvexColliderData(const math::vec3& offset, const math::quat& rotation, const math::vec3& boxExtents) noexcept
         :
-        ColliderData(collider_type::box,offset,rotation, changeFlag), m_boxExtents{ boxExtents } { }
+        ColliderData(collider_type::box,offset,rotation), m_boxExtents{ boxExtents } { }
 
-    SphereColliderData::SphereColliderData(const math::vec3& offset, float radius,
-        const std::bitset<physics_component_flag::pc_max>* modificationBitset)
+    SphereColliderData::SphereColliderData(const math::vec3& offset, float radius) noexcept
         :
-        ColliderData(collider_type::sphere, offset, math::identity<math::quat>(), modificationBitset), m_radius{radius} { }
+        ColliderData(collider_type::sphere, offset, math::identity<math::quat>()), m_radius{radius} { }
 }

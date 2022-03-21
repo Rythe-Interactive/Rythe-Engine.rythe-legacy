@@ -8,26 +8,26 @@ namespace legion::physics
     class ColliderData
     {
     public:
+        
+        L_ALWAYS_INLINE void setRegistered(bool registeredState) noexcept { m_isRegistered = registeredState; }
+        L_ALWAYS_INLINE bool isRegistered() const noexcept   { return m_isRegistered; }
 
-        inline void setRegistered(bool registeredState) { m_isRegistered = registeredState; }
-        inline bool isRegistered() const { return m_isRegistered; }
+        L_ALWAYS_INLINE const math::vec3& getOffset() const noexcept   { return m_positionOffset; }
+        L_ALWAYS_INLINE const math::quat& getRotationOffset() const noexcept  { return m_rotationOffset; }
 
-        inline const math::vec3& getOffset() const  { return m_positionOffset; }
-        inline const math::quat& getRotationOffset() const { return m_rotationOffset; }
+        L_ALWAYS_INLINE collider_type getColliderType() const noexcept  { return m_colliderType; }
 
-        inline collider_type getColliderType() const { return m_colliderType; }
-
-        inline bool isRegisteredOfType(collider_type colliderType) const { return m_isRegistered && colliderType == m_colliderType; }
+        L_ALWAYS_INLINE bool isRegisteredOfType(collider_type colliderType) const noexcept
+        {
+            return m_isRegistered && colliderType == m_colliderType;
+        }
         
     protected:
 
-        ColliderData(collider_type colliderType, const math::vec3& offset, const math::quat& rotation,
-            const std::bitset < physics_component_flag::pc_max>* modificationBitset);
+        ColliderData(collider_type colliderType, const math::vec3& offset, const math::quat& rotation) noexcept;
             
         math::quat m_rotationOffset{ math::identity<math::quat>()};
         math::vec3 m_positionOffset{0};
-
-        const std::bitset < physics_component_flag::pc_max>* m_bitsetPtr;
 
         bool m_isRegistered = false;
         collider_type m_colliderType = collider_type::not_set;
@@ -36,11 +36,11 @@ namespace legion::physics
     class ConvexColliderData : public ColliderData
     {
     public:
+        friend class ConvexColliderHandle;
 
-        ConvexColliderData(const math::vec3& offset,const math::quat& rotation, const math::vec3& boxExtents,
-            const std::bitset < physics_component_flag::pc_max>* modificationBitset);
+        ConvexColliderData(const math::vec3& offset,const math::quat& rotation, const math::vec3& boxExtents) noexcept;
 
-        inline const math::vec3& getBoxExtents() const { return m_boxExtents; }
+        L_ALWAYS_INLINE const math::vec3& getBoxExtents() const noexcept { return m_boxExtents; }
 
     private:
 
@@ -51,9 +51,9 @@ namespace legion::physics
     {
     public:
 
-        SphereColliderData(const math::vec3& offset, float radius, const std::bitset < physics_component_flag::pc_max>* modificationBitset);
+        SphereColliderData(const math::vec3& offset, float radius) noexcept;
 
-        inline const float getRadius() const { return m_radius; }
+        L_ALWAYS_INLINE const float getRadius() const noexcept { return m_radius; }
 
     private:
 
