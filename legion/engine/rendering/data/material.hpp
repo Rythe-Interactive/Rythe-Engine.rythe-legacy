@@ -443,7 +443,7 @@ namespace legion::rendering
         if (!submaterial.parameters.count(id) || submaterial.parameters.at(id)->type() != typeHash<math::vec4>())
         {
             log::warn("material {}:{} does not have a parameter named {} of type {}", m_name, submaterial.name, name, nameOfType<math::color>());
-            submaterial.parameters.emplace(id, new material_parameter<math::color>(name, 0));
+            submaterial.parameters.emplace(id, new material_parameter<math::vec4>(name, 0));
         }
 #endif
 
@@ -518,7 +518,7 @@ namespace legion::rendering
         if (!submaterial.parameters.count(id) || submaterial.parameters.at(id)->type() != typeHash<math::vec4>())
         {
             log::warn("material {}:{} does not have a parameter at location {} of type {}", m_name, submaterial.name, location, nameOfType<math::color>());
-            submaterial.parameters.emplace(id, new material_parameter<math::color>("location " + std::to_string(location), location));
+            submaterial.parameters.emplace(id, new material_parameter<math::vec4>("location " + std::to_string(location), location));
         }
 #endif
 

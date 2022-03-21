@@ -694,10 +694,6 @@ namespace legion::rendering
 
             if (m_shaders.contains(id))
             {
-                auto& shader = m_shaders.at(id);
-                if (shader.m_variants.empty() || !shader.m_variants.count(defaultId))
-                    return { invalid_id };
-
                 log::debug("Shader {} already exists, existing shader will be returned instead.", name);
                 return { id };
             }
