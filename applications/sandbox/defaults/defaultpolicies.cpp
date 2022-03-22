@@ -187,22 +187,30 @@ namespace legion::core
         auto& visionRadius = emitter.get_uniform<float>("visionRadius");
         auto& speed = emitter.get_uniform<float>("speed");
 
-        auto& spatiaGrid = emitter.get_buffer<std::vector<id_type>>("spatialGrid");
+        auto& spatialGrid = emitter.get_buffer<std::vector<id_type>>("spatialGrid");
 
         for (size_type idx = 0; idx < count; idx++)
         {
             auto& pos = posBuffer[idx];
-            for (size_type neighbor = 0; neighbor < count; neighbor++)
+            spatialGrid[idx].clear();
+            for (size_type idx2 = 0; idx2 < count; idx2++)
             {
-                if (idx == neighbor)
+                if (idx == idx2)
                     continue;
-                if (math::distance(pos, posBuffer[neighbor]).length() < visionRadius)
+                if (math::length(posBuffer[idx2]-pos) < visionRadius)
                 {
-                    spatiaGrid[idx].push_back(neighbor);
+                    spatialGrid[idx].push_back(idx2);
                 }
             }
 
-            velBuffer[idx] = math::normalize(velBuffer[idx] + math::ballRand(0.1f));
+            for (size_type neighbor = 0; neighbor < spatialGrid[idx].size(); neighbor++)
+            {
+                auto& neighborPos = posBuffer[spatialGrid[idx][neighbor]];
+                auto diff = neighborPos - pos;
+                velBuffer[idx] += diff * -(1.f / math::length2((math::vec3)diff));
+            }
+
+            velBuffer[idx] = math::normalize(velBuffer[idx]);
             rotBuffer[idx] = math::quatLookAt(velBuffer[idx], math::vec3::up);
             pos += velBuffer[idx] * speed * deltaTime;
 

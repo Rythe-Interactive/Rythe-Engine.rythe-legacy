@@ -303,8 +303,8 @@ void ExampleSystem::setup()
         auto [pos, rot, scal] = ent.add_component<transform>();
         auto emitter = ent.add_component<particle_emitter>();
         emitter->set_spawn_rate(10);
-        emitter->set_spawn_interval(1.f);
-        emitter->resize(100);
+        emitter->set_spawn_interval(.5f);
+        emitter->resize(1000);
         emitter->localSpace = false;
         emitter->add_policy<seperation_policy>();
         auto model = gfx::ModelCache::create_model("Suzanne",fs::view("assets://models/suzanne.obj"));
