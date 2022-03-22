@@ -58,6 +58,9 @@ namespace legion::physics
         //models
         rendering::model_handle cubeH;
         rendering::model_handle sphereH;
-        rendering::model_handle directionalLightH; 
+        rendering::model_handle directionalLightH;
+
+        rendering::model_handle suzanneH;
+        rendering::model_handle statueH;
     };
 }

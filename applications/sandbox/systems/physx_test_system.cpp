@@ -26,6 +26,8 @@ namespace legion::physics
 
         cubeH = rendering::ModelCache::create_model("cube", "assets://models/cube.obj"_view);
         sphereH = rendering::ModelCache::create_model("sphere", "assets://models/sphere.obj"_view);
+        suzanneH = rendering::ModelCache::create_model("suzanne", "assets://models/suzanne.glb"_view);
+        statueH = rendering::ModelCache::create_model("statue", "assets://models/gnomecentered.obj"_view);
 
         directionalLightH = rendering::ModelCache::create_model("directional light", "assets://models/directional-light.obj"_view);
 
@@ -82,13 +84,16 @@ namespace legion::physics
             wideBlockPhysComp->physicsCompData.AddBoxCollider(math::vec3(10, 1, 10));
         }
 
-        //add wide block
-        auto wideBlock = createDefaultMeshEntity(math::vec3(0, 0, 0), cubeH, legionLogoMat);
-        wideBlock.get_component<scale>() = math::vec3(10, 1, 10);
-
         {
-            auto wideBlockPhysComp = wideBlock.add_component<physics_component>();
-            wideBlockPhysComp->physicsCompData.AddBoxCollider(math::vec3(10, 1, 10));
+            //add wide block
+            auto wideBlock = createDefaultMeshEntity(math::vec3(0, 0, 0), cubeH, legionLogoMat);
+            wideBlock.get_component<scale>() = math::vec3(10, 1, 10);
+
+            {
+                auto wideBlockPhysComp = wideBlock.add_component<physics_component>();
+                wideBlockPhysComp->physicsCompData.AddBoxCollider(math::vec3(10, 1, 10));
+            }
+
         }
 
         //add default cube at center
@@ -129,6 +134,35 @@ namespace legion::physics
 
         app::InputSystem::createBinding<ShootPhysXSphere>(app::inputmap::method::V);
         bindToEvent<ShootPhysXSphere, &PhysXTestSystem::shootPhysXSphere>();
+
+        //---------------------------------------------- CONVEX TEST -----------------------------------------------------//
+
+        {
+            //add wide block
+            auto convexTestBlock = createDefaultMeshEntity(math::vec3(15, 0, 0), cubeH, legionLogoMat);
+            convexTestBlock.get_component<scale>() = math::vec3(10, 1, 10);
+
+            {
+                auto wideBlockPhysComp = convexTestBlock.add_component<physics_component>();
+                wideBlockPhysComp->physicsCompData.AddBoxCollider(math::vec3(10, 1, 10));
+            }
+
+        }
+
+        {
+            auto statue = createDefaultMeshEntity(math::vec3(15, 3, 0), statueH, tileMat);
+            auto& renderable = *statue.get_component<mesh_filter>();
+            const std::vector<math::vec3>& verts = renderable.shared_mesh.ptr->vertices;
+
+        }
+
+        {
+            auto statue = createDefaultMeshEntity(math::vec3(15, 3, 5), suzanneH, tileMat);
+
+
+        }
+
+
     }
 
     void PhysXTestSystem::shootPhysXCubes(ShootPhysXBox& action)
