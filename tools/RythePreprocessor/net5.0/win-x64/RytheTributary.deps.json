@@ -9,8 +9,9 @@
     ".NETCoreApp,Version=v5.0/win-x64": {
       "RytheTributary/1.0.0": {
         "dependencies": {
-          "CppAst": "0.8.0-alpha-001",
-          "CppAst.CodeGen": "0.7.0",
+          "CppAst": "0.8.0",
+          "CppAst.CodeGen": "0.8.2",
+          "libclang": "13.0.1",
           "runtimepack.Microsoft.NETCore.App.Runtime.win-x64": "5.0.15"
         },
         "runtime": {
@@ -848,7 +849,7 @@
         "dependencies": {
           "Microsoft.Bcl.HashCode": "1.1.0",
           "System.Memory": "4.5.4",
-          "libclang": "10.0.0",
+          "libclang": "13.0.1",
           "libClangSharp": "10.0.0-beta1"
         },
         "runtime": {
@@ -858,7 +859,7 @@
           }
         }
       },
-      "CppAst/0.8.0-alpha-001": {
+      "CppAst/0.8.0": {
         "dependencies": {
           "ClangSharp": "10.0.0-beta"
         },
@@ -869,27 +870,27 @@
           }
         }
       },
-      "CppAst.CodeGen/0.7.0": {
+      "CppAst.CodeGen/0.8.2": {
         "dependencies": {
-          "CppAst": "0.8.0-alpha-001",
-          "Zio": "0.11.0"
+          "CppAst": "0.8.0",
+          "Zio": "0.14.0"
         },
         "runtime": {
           "lib/netstandard2.0/CppAst.CodeGen.dll": {
-            "assemblyVersion": "0.7.0.0",
-            "fileVersion": "0.7.0.0"
+            "assemblyVersion": "0.0.0.0",
+            "fileVersion": "0.8.2.0"
           }
         }
       },
-      "libclang/10.0.0": {
+      "libclang/13.0.1": {
         "dependencies": {
-          "libclang.runtime.win-x64": "10.0.0"
+          "libclang.runtime.win-x64": "13.0.0"
         }
       },
-      "libclang.runtime.win-x64/10.0.0": {
+      "libclang.runtime.win-x64/13.0.0": {
         "native": {
           "runtimes/win-x64/native/libclang.dll": {
-            "fileVersion": "10.0.0.0"
+            "fileVersion": "13.0.0.0"
           }
         }
       },
@@ -914,11 +915,11 @@
         }
       },
       "System.Memory/4.5.4": {},
-      "Zio/0.11.0": {
+      "Zio/0.14.0": {
         "runtime": {
           "lib/netstandard2.1/Zio.dll": {
-            "assemblyVersion": "0.11.0.0",
-            "fileVersion": "0.11.0.0"
+            "assemblyVersion": "0.14.0.0",
+            "fileVersion": "0.14.0.0"
           }
         }
       }
@@ -942,33 +943,33 @@
       "path": "clangsharp/10.0.0-beta",
       "hashPath": "clangsharp.10.0.0-beta.nupkg.sha512"
     },
-    "CppAst/0.8.0-alpha-001": {
+    "CppAst/0.8.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-YFB1sjYk/7Gn6PGw4dUIC/xTzid4V6INvPFeL5bcU2Zq6efrGaBRMz7XH6Qvt+tKjmIOjx2Iq/jazsUDF4wlKg==",
-      "path": "cppast/0.8.0-alpha-001",
-      "hashPath": "cppast.0.8.0-alpha-001.nupkg.sha512"
+      "sha512": "sha512-wYye7X5W4nXWGVEj+06UwztSoUiE6Ox5cnzz8L5Ayfd+ghd7X9ZbqKvxjZCdvoXVTwrbDWYHZtRwk5QHJcTqSQ==",
+      "path": "cppast/0.8.0",
+      "hashPath": "cppast.0.8.0.nupkg.sha512"
     },
-    "CppAst.CodeGen/0.7.0": {
+    "CppAst.CodeGen/0.8.2": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-ML6ZMbcXAVVX48liH6oCWdP5Kdh46dHUCDsnop7v2kGtQy/w2RukZgULzQIufVpoZrh0yA/umsfTMClX0am3MQ==",
-      "path": "cppast.codegen/0.7.0",
-      "hashPath": "cppast.codegen.0.7.0.nupkg.sha512"
+      "sha512": "sha512-79n1b3Pr4UhEFMMhaAcg9Pu1aTkOKolyAYChnQ5unYoUL/tZjk3LQK8MPtpY7DuoVK2owBy0wdZ35+FqzMW16g==",
+      "path": "cppast.codegen/0.8.2",
+      "hashPath": "cppast.codegen.0.8.2.nupkg.sha512"
     },
-    "libclang/10.0.0": {
+    "libclang/13.0.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-SqUUQvGNjDY4mKXZ+4Iz1DkHnkkTxsANnvW4oewbVnnEZqJ5QjVV/e+yrlSe+56BeJtbqojNeGmTwt6IzyhD5Q==",
-      "path": "libclang/10.0.0",
-      "hashPath": "libclang.10.0.0.nupkg.sha512"
+      "sha512": "sha512-dp72xfe8BcV1T+yTc4VWrRi+iBjOANJkEXqLF2sPWrI0ZMGEWXTYH/7oK1REfHhecMwf1hkcyoo5lx9FLvvg4A==",
+      "path": "libclang/13.0.1",
+      "hashPath": "libclang.13.0.1.nupkg.sha512"
     },
-    "libclang.runtime.win-x64/10.0.0": {
+    "libclang.runtime.win-x64/13.0.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-OUhomhI1gYFxPT3NzLj7QKyIX3pKkOHLYKdxd8qaBlBueS0oMTHO3/yU4rFco8y8iJv0n6HGrbByqc507pmV4A==",
-      "path": "libclang.runtime.win-x64/10.0.0",
-      "hashPath": "libclang.runtime.win-x64.10.0.0.nupkg.sha512"
+      "sha512": "sha512-ozRiMXrTPBMLDNMsf8kIbyF1emDx3rydCEBzACBOYEmzji9wyKpo2RUrX+sLk5yh0ibZK1PNLpMxBYn1PpMnoQ==",
+      "path": "libclang.runtime.win-x64/13.0.0",
+      "hashPath": "libclang.runtime.win-x64.13.0.0.nupkg.sha512"
     },
     "libClangSharp/10.0.0-beta1": {
       "type": "package",
@@ -998,12 +999,12 @@
       "path": "system.memory/4.5.4",
       "hashPath": "system.memory.4.5.4.nupkg.sha512"
     },
-    "Zio/0.11.0": {
+    "Zio/0.14.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-eNHy6n/UCuQKtqCVw2XIw7L9g1/5vEFuMJ8aLM6tXLxh+vAFajwW1+oFAL65t31YNWro0uLDCez5mGsamC73QA==",
-      "path": "zio/0.11.0",
-      "hashPath": "zio.0.11.0.nupkg.sha512"
+      "sha512": "sha512-6J0jEgrNLlcxUshz8cDHQfCDxRxlINEROJByGt3/3FAEY7xZZPheeXSuagFjrNG9LXbkasnIknQkKLGIZtwRaA==",
+      "path": "zio/0.14.0",
+      "hashPath": "zio.0.14.0.nupkg.sha512"
     }
   },
   "runtimes": {
