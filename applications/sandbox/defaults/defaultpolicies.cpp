@@ -16,7 +16,7 @@ namespace legion::core
             baseDir.y = 0;
             int minBound = 5;
             int maxBound = 30;
-            auto pos = math::normalize(baseDir) * minBound + math::normalize(baseDir) * (idx % (maxBound - minBound))/2.f;
+            auto pos = math::normalize(baseDir) * minBound + math::normalize(baseDir) * (idx % (maxBound - minBound)) / 2.f;
             auto dist = math::length(pos);
             pos.y = math::sin(dist / math::pi<float>()) * 5.f * (pos.x / maxBound);
             posBuffer[idx] = pos;
@@ -142,4 +142,131 @@ namespace legion::core
         }
     }
 #pragma endregion
+
+#pragma region Boids
+    void seperation_policy::setup(particle_emitter& emitter)
+    {
+        if (!emitter.has_uniform<bounds>("Bounds"))
+            emitter.create_uniform<bounds>("Bounds", bounds{ position(-20.f),position(20.f) });
+        if (!emitter.has_uniform<float>("visionRadius"))
+            emitter.create_uniform<float>("visionRadius", 10.f);
+        if (!emitter.has_uniform<float>("visionAngle"))
+            emitter.create_uniform<float>("visionAngle", 45.f);
+        if (!emitter.has_uniform<float>("speed"))
+            emitter.create_uniform<float>("speed", 10.f);
+
+        if (!emitter.has_buffer<velocity>("velBuffer"))
+            emitter.create_buffer<velocity>("velBuffer");
+        if (!emitter.has_buffer<position>("posBuffer"))
+            emitter.create_buffer<position>("posBuffer");
+        if (!emitter.has_buffer<rotation>("rotBuffer"))
+            emitter.create_buffer<rotation>("rotBuffer");
+        if (!emitter.has_buffer<std::vector<id_type>>("spatialGrid"))
+            emitter.create_buffer<std::vector<id_type>>("spatialGrid");
+    }
+    void seperation_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
+    {
+        auto& posBuffer = emitter.get_buffer<position>("posBuffer");
+        auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
+        auto& rotBuffer = emitter.get_buffer<rotation>("rotBuffer");
+        auto& bnds = emitter.get_uniform<bounds>("Bounds");
+
+        for (size_type idx = start; idx < end; idx++)
+        {
+            posBuffer[idx] = math::linearRand(bnds.min - math::vec3(-5.f), bnds.max - math::vec3(5.f));
+            velBuffer[idx] = math::sphericalRand(1.f);
+            rotBuffer[idx] = math::quatLookAt(velBuffer[idx], math::vec3::up);
+        }
+    }
+    void seperation_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
+    {
+        auto& posBuffer = emitter.get_buffer<position>("posBuffer");
+        auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
+        auto& rotBuffer = emitter.get_buffer<rotation>("rotBuffer");
+        auto& bnds = emitter.get_uniform<bounds>("Bounds");
+        auto& visionRadius = emitter.get_uniform<float>("visionRadius");
+        auto& speed = emitter.get_uniform<float>("speed");
+
+        auto& spatiaGrid = emitter.get_buffer<std::vector<id_type>>("spatialGrid");
+
+        for (size_type idx = 0; idx < count; idx++)
+        {
+            auto& pos = posBuffer[idx];
+            for (size_type neighbor = 0; neighbor < count; neighbor++)
+            {
+                if (idx == neighbor)
+                    continue;
+                if (math::distance(pos, posBuffer[neighbor]).length() < visionRadius)
+                {
+                    spatiaGrid[idx].push_back(neighbor);
+                }
+            }
+
+            velBuffer[idx] = math::normalize(velBuffer[idx] + math::ballRand(0.1f));
+            rotBuffer[idx] = math::quatLookAt(velBuffer[idx], math::vec3::up);
+            pos += velBuffer[idx] * speed * deltaTime;
+
+
+            if (pos.x > bnds.max.x)
+                pos.x = bnds.min.x;
+            else if (pos.x < bnds.min.x)
+                pos.x = bnds.max.x;
+
+            if (pos.y > bnds.max.y)
+                pos.y = bnds.min.y;
+            else if (pos.y < bnds.min.y)
+                pos.y = bnds.max.y;
+
+            if (pos.z > bnds.max.z)
+                pos.z = bnds.min.z;
+            else if (pos.z < bnds.min.z)
+                pos.z = bnds.max.z;
+        }
+    }
+
+#pragma endregion
+    void alignment_policy::setup(particle_emitter& emitter)
+    {
+        if (!emitter.has_uniform<bounds>("Bounds"))
+            emitter.create_uniform<bounds>("Bounds", bounds{ position(-20.f),position(20.f) });
+        if (!emitter.has_uniform<float>("visionRadius"))
+            emitter.create_uniform<float>("visionRadius", 10.f);
+        if (!emitter.has_uniform<float>("visionAngle"))
+            emitter.create_uniform<float>("visionAngle", 45.f);
+        if (!emitter.has_uniform<float>("speed"))
+            emitter.create_uniform<float>("speed", 10.f);
+
+        if (!emitter.has_buffer<velocity>("velBuffer"))
+            emitter.create_buffer<velocity>("velBuffer");
+        if (!emitter.has_buffer<position>("posBuffer"))
+            emitter.create_buffer<position>("posBuffer");
+    }
+    void alignment_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
+    {
+    }
+    void alignment_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
+    {
+    }
+    void cohesion_policy::setup(particle_emitter& emitter)
+    {
+        if (!emitter.has_uniform<bounds>("Bounds"))
+            emitter.create_uniform<bounds>("Bounds", bounds{ position(-20.f),position(20.f) });
+        if (!emitter.has_uniform<float>("visionRadius"))
+            emitter.create_uniform<float>("visionRadius", 10.f);
+        if (!emitter.has_uniform<float>("visionAngle"))
+            emitter.create_uniform<float>("visionAngle", 45.f);
+        if (!emitter.has_uniform<float>("speed"))
+            emitter.create_uniform<float>("speed", 10.f);
+
+        if (!emitter.has_buffer<velocity>("velBuffer"))
+            emitter.create_buffer<velocity>("velBuffer");
+        if (!emitter.has_buffer<position>("posBuffer"))
+            emitter.create_buffer<position>("posBuffer");
+    }
+    void cohesion_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
+    {
+    }
+    void cohesion_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
+    {
+    }
 }

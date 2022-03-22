@@ -49,13 +49,37 @@ namespace legion::core
         virtual void onInit(particle_emitter & emitter, size_type start, size_type end) override;
         virtual void onUpdate(particle_emitter & emitter, float deltaTime, size_type count) override;
     };
-    struct boid_policy : public particle_policy<boid_policy>
+
+    struct bounds
     {
-        NO_DTOR_RULE5_NOEXCEPT(boid_policy);
-        ~boid_policy() = default;
+        position min;
+        position max;
+    };
+    struct seperation_policy : public particle_policy<seperation_policy>
+    {
+        NO_DTOR_RULE5_NOEXCEPT(seperation_policy);
+        ~seperation_policy() = default;
 
         virtual void setup(particle_emitter& emitter) override;
         virtual void onInit(particle_emitter& emitter, size_type start, size_type end) override;
         virtual void onUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
-    }
+    };
+    struct alignment_policy : public particle_policy<alignment_policy>
+    {
+        NO_DTOR_RULE5_NOEXCEPT(alignment_policy);
+        ~alignment_policy() = default;
+
+        virtual void setup(particle_emitter& emitter) override;
+        virtual void onInit(particle_emitter& emitter, size_type start, size_type end) override;
+        virtual void onUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
+    };
+    struct cohesion_policy : public particle_policy<cohesion_policy>
+    {
+        NO_DTOR_RULE5_NOEXCEPT(cohesion_policy);
+        ~cohesion_policy() = default;
+
+        virtual void setup(particle_emitter& emitter) override;
+        virtual void onInit(particle_emitter& emitter, size_type start, size_type end) override;
+        virtual void onUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
+    };
 }
