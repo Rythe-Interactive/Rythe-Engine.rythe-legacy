@@ -299,7 +299,7 @@ namespace legion::physics
         {
             if (eventsGenerated.test(bitPos))
             {
-                m_physicsComponentActionFuncs[bitPos].invoke(physicsComponentToProcess, physicsEnviromentInfo, wrapper, ent);
+                m_physicsComponentActionFuncs[bitPos].invoke(physicsComponentToProcess, physicsEnviromentInfo, *wrapperPtr, ent);
             }
         }
 
@@ -311,13 +311,14 @@ namespace legion::physics
     {
         size_type physicsComponentID = physicsComponentToProcess.physicsComponentID;
         auto& eventsGenerated = rigidbody.rigidbodyData.getGeneratedModifyEvents();
-        PhysxInternalWrapper& wrapper = m_physxWrapperContainer.findWrapperWithID(physicsComponentID).value();
+
+        core::pointer<PhysxInternalWrapper> wrapperPtr = m_physxWrapperContainer.findWrapperWithID(physicsComponentID).value();
 
         for (size_type bitPos = 0; bitPos < eventsGenerated.size(); ++bitPos)
         {
             if (eventsGenerated.test(bitPos))
             {
-                m_rigidbodyComponentActionFuncs[bitPos].invoke(rigidbody, physicsEnviromentInfo, wrapper, ent);
+                m_rigidbodyComponentActionFuncs[bitPos].invoke(rigidbody, physicsEnviromentInfo, *wrapperPtr, ent);
             }
         }
 

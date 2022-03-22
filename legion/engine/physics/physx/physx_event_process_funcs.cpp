@@ -136,12 +136,11 @@ namespace legion::physics
 
             PxTransform transform;
             PxTransform localTransform;
-
-            calculateGlobalAndLocalTransforms(localTransform, transform, convexCollider, entity);
+            calculateLocalColliderTransform(localTransform, convexCollider);
 
             const math::vec3& extents = convexCollider.getBoxExtents();
 
-            instantiateNextCollider<PxBoxGeometry,const PxVec3&>(getSDK(), wrapper, transform, localTransform, sceneInfo, PxVec3(extents.x, extents.y, extents.z));
+            instantiateNextCollider<PxBoxGeometry,const PxVec3&>(getSDK(), wrapper, localTransform, sceneInfo, PxVec3(extents.x, extents.y, extents.z));
         }
     }
     
@@ -196,11 +195,11 @@ namespace legion::physics
 
             if (wrapper.bodyType == physics_body_type::rigidbody)
             {
-                instantiateDynamicActorWith<PxSphereGeometry>(getSDK(), wrapper, transform, localTransform, sceneInfo, entity, radius);
+                instantiateDynamicActorWith<PxSphereGeometry,float&>(getSDK(), wrapper, transform, localTransform, sceneInfo, entity, radius);
             }
             else if (wrapper.bodyType == physics_body_type::static_collider)
             {
-                instantiateStaticActorWith<PxSphereGeometry>(getSDK(), wrapper, transform, localTransform, sceneInfo, entity, radius);
+                instantiateStaticActorWith<PxSphereGeometry, float&>(getSDK(), wrapper, transform, localTransform, sceneInfo, entity, radius);
             }
 
             break;
@@ -217,14 +216,12 @@ namespace legion::physics
 
             sphereCollider.setRegistered(true);
 
-            PxTransform transform;
             PxTransform localTransform;
-
-            calculateGlobalAndLocalTransforms(localTransform, transform, sphereCollider, entity);
+            calculateLocalColliderTransform(localTransform, sphereCollider);
 
             float radius = sphereCollider.getRadius();
 
-            instantiateNextCollider<PxSphereGeometry>(getSDK(), wrapper, transform, localTransform, sceneInfo, radius);
+            instantiateNextCollider<PxSphereGeometry, float&>(getSDK(), wrapper, localTransform, sceneInfo, radius);
         }
 
 
