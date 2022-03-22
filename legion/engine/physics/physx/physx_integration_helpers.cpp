@@ -27,9 +27,12 @@ namespace legion::physics
 
     void calculateGlobalAndLocalTransforms(physx::PxTransform& outLocalTransform, physx::PxTransform& outGlobalTransform, const ColliderData& collider, ecs::entity ent)
     {
-        const math::vec3& pos = *ent.get_component<position>();
-        const math::quat& rot = *ent.get_component<rotation>();
+        transform trans = ent.get_component<transform>();
+        const math::mat4& globalTransform = trans.to_world_matrix();
 
+        math::vec3 pos; math::quat rot; math::vec3 tempScale;
+        math::decompose(globalTransform, tempScale, rot, pos);
+       
         calculateLocalColliderTransform(outLocalTransform, collider);
         toPhysxTransform(outGlobalTransform, pos, rot);
     }
