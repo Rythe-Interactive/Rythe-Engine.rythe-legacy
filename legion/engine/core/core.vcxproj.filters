@@ -462,14 +462,6 @@
     <ClInclude Include="serialization\serializer_views\bson.hpp" />
     <ClInclude Include="types\attributes.hpp" />
     <ClInclude Include="autogen\autogen.hpp" />
-    <ClInclude Include="autogen\autogen_prototype_position.hpp" />
-    <ClInclude Include="autogen\autogen_prototype_rotation.hpp" />
-    <ClInclude Include="autogen\autogen_prototype_scale.hpp" />
-    <ClInclude Include="autogen\autogen_prototype_velocity.hpp" />
-    <ClInclude Include="autogen\autogen_reflector_position.hpp" />
-    <ClInclude Include="autogen\autogen_reflector_rotation.hpp" />
-    <ClInclude Include="autogen\autogen_reflector_scale.hpp" />
-    <ClInclude Include="autogen\autogen_reflector_velocity.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="platform\cpp.hint" />
@@ -638,13 +630,5 @@
     <None Include="serialization\serializationregistry.inl" />
     <None Include="serialization\serializer_views\serializer_view.inl" />
     <None Include="serialization\serialization.inl" />
-    <None Include="autogen\autogen_prototype_position.inl" />
-    <None Include="autogen\autogen_prototype_rotation.inl" />
-    <None Include="autogen\autogen_prototype_scale.inl" />
-    <None Include="autogen\autogen_prototype_velocity.inl" />
-    <None Include="autogen\autogen_reflector_position.inl" />
-    <None Include="autogen\autogen_reflector_rotation.inl" />
-    <None Include="autogen\autogen_reflector_scale.inl" />
-    <None Include="autogen\autogen_reflector_velocity.inl" />
   </ItemGroup>
 </Project>

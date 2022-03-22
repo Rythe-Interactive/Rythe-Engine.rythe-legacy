@@ -93,19 +93,11 @@
     <ClInclude Include="pipeline\default\postfx\bloom.hpp" />
     <ClInclude Include="pipeline\default\postfx\depthoffield.hpp" />
     <ClInclude Include="autogen\autogen.hpp" />
-    <ClInclude Include="autogen\autogen_prototype_light.hpp" />
-    <ClInclude Include="autogen\autogen_prototype_mesh_renderer.hpp" />
-    <ClInclude Include="autogen\autogen_reflector_light.hpp" />
-    <ClInclude Include="autogen\autogen_reflector_mesh_renderer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\buffer.inl" />
     <None Include="pipeline\base\pipeline.inl" />
     <None Include="pipeline\base\renderstage.inl" />
     <None Include="systems\renderer.inl" />
-    <None Include="autogen\autogen_prototype_light.inl" />
-    <None Include="autogen\autogen_prototype_mesh_renderer.inl" />
-    <None Include="autogen\autogen_reflector_light.inl" />
-    <None Include="autogen\autogen_reflector_mesh_renderer.inl" />
   </ItemGroup>
 </Project>

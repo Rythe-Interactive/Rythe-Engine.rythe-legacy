@@ -85,7 +85,7 @@ copy /Y "$(SolutionDir)xcopyexclude" ".\"
 
 xcopy "$(ProjectDir)..\$(ProjectName)" "$(SolutionDir)include\$(ProjectName)\" /i /s /r /exclude:xcopyexclude /y &gt; nul
 
-del /q ".\xcopyexclude"</Command>
+del /q ".\xcopyexclude" </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -120,7 +120,7 @@ copy /Y "$(SolutionDir)xcopyexclude" ".\"
 
 xcopy "$(ProjectDir)..\$(ProjectName)" "$(SolutionDir)include\$(ProjectName)\" /i /s /r /exclude:xcopyexclude /y &gt; nul
 
-del /q ".\xcopyexclude"</Command>
+del /q ".\xcopyexclude" </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -138,14 +138,6 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="async\thread_util.hpp" />
     <ClInclude Include="async\wait_priority.hpp" />
     <ClInclude Include="autogen\autogen.hpp" />
-    <ClInclude Include="autogen\autogen_prototype_position.hpp" />
-    <ClInclude Include="autogen\autogen_prototype_rotation.hpp" />
-    <ClInclude Include="autogen\autogen_prototype_scale.hpp" />
-    <ClInclude Include="autogen\autogen_prototype_velocity.hpp" />
-    <ClInclude Include="autogen\autogen_reflector_position.hpp" />
-    <ClInclude Include="autogen\autogen_reflector_rotation.hpp" />
-    <ClInclude Include="autogen\autogen_reflector_scale.hpp" />
-    <ClInclude Include="autogen\autogen_reflector_velocity.hpp" />
     <ClInclude Include="common\hash.hpp" />
     <ClInclude Include="common\string_literal.hpp" />
     <ClInclude Include="containers\delegate.hpp" />

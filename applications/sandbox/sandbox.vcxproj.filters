@@ -62,21 +62,9 @@
     <ClInclude Include="autogen\autogen.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="autogen\autogen_prototype_example_comp.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="autogen\autogen_reflector_example_comp.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\kernels\vadd_kernel.cl" />
-    <None Include="autogen\autogen_prototype_example_comp.inl">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="autogen\autogen_reflector_example_comp.inl">
-      <Filter>Header Files</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="sandbox.rc">
