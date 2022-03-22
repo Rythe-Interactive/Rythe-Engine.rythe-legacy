@@ -15,9 +15,9 @@ namespace legion::rendering
         return ModelCache::get_model(id).buffered;
     }
 
-    void model_handle::buffer_data(const buffer& matrixBuffer) const
+    void model_handle::buffer_data(const buffer& matrixBuffer, const buffer& entityBuffer) const
     {
-        ModelCache::buffer_model(id, matrixBuffer);
+        ModelCache::buffer_model(id, matrixBuffer, entityBuffer);
     }
 
     void model_handle::overwrite_buffer(buffer& newBuffer, uint bufferID, bool perInstance) const
@@ -65,7 +65,7 @@ namespace legion::rendering
         }
     }
 
-    void ModelCache::buffer_model(id_type id, const buffer& matrixBuffer)
+    void ModelCache::buffer_model(id_type id, const buffer& matrixBuffer, const buffer& entityBuffer)
     {
         if (id == invalid_id)
             return;
@@ -93,6 +93,9 @@ namespace legion::rendering
 
         model.uvBuffer = buffer(GL_ARRAY_BUFFER, mesh_handle->uvs, GL_STATIC_DRAW);
         model.vertexArray.setAttribPointer(model.uvBuffer, SV_TEXCOORD0, 2, GL_FLOAT, false, 0, 0);
+
+        model.vertexArray.setAttribPointer(entityBuffer, SV_ENTITYID, 1, GL_UNSIGNED_INT64_ARB, false, 0, 0);
+        model.vertexArray.setAttribDivisor(SV_ENTITYID, 1);
 
         model.vertexArray.setAttribPointer(matrixBuffer, SV_MODELMATRIX + 0, 4, GL_FLOAT, false, sizeof(math::mat4), 0 * sizeof(math::mat4::col_type));
         model.vertexArray.setAttribPointer(matrixBuffer, SV_MODELMATRIX + 1, 4, GL_FLOAT, false, sizeof(math::mat4), 1 * sizeof(math::mat4::col_type));

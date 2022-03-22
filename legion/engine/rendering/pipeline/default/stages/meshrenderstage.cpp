@@ -19,13 +19,13 @@ namespace legion::rendering
         static id_type lightsId = nameHash("light buffer");
         static id_type lightCountId = nameHash("light count");
         static id_type matricesId = nameHash("model matrix buffer");
+        static id_type entityBufferId = nameHash("entity id buffer");
 
         // Leave this for later implementation, no time rn. (Glyn)
         // static id_type sceneColorId = nameHash("scene color history");
         // static id_type sceneDepthId = nameHash("scene depth history");
 
-        //auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::unordered_set<ecs::entity>>>>(batchesId);
-        auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<ecs::entity>, std::vector<math::mat4>>>>>(batchesId);
+        auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<id_type>, std::vector<math::mat4>>>>>(batchesId);
         if (!batches)
             return;
 
@@ -39,6 +39,10 @@ namespace legion::rendering
 
         buffer* modelMatrixBuffer = get_meta<buffer>(matricesId);
         if (!modelMatrixBuffer)
+            return;
+
+        buffer* entityIdBuffer = get_meta<buffer>(entityBufferId);
+        if (!entityIdBuffer)
             return;
 
         auto* fbo = getFramebuffer(mainId);
@@ -108,7 +112,7 @@ namespace legion::rendering
                     if (modelHandle.id == invalid_id)
                     {
                         for (auto& ent : instances.first)
-                            log::warn("Invalid mesh found on entity {}.", ent->name);
+                            log::warn("Invalid mesh found on entity {}.", ecs::Registry::getEntity(ent)->name);
 
                         continue;
                     }
@@ -137,8 +141,6 @@ namespace legion::rendering
                         else
                             mater = invalid_material_handle;
 
-                        auto materialName = mater.get_name();
-
                         camInput.bind(mater);
                         if (mater.has_param<uint>(SV_LIGHTCOUNT))
                             mater.set_param<uint>(SV_LIGHTCOUNT, *lightCount);
@@ -164,17 +166,17 @@ namespace legion::rendering
                         mater.bind();
 
                         ModelCache::create_model(modelHandle.id);
-                        auto modelName = ModelCache::get_model_name(modelHandle.id);
 
                         if (!mesh.buffered)
-                            modelHandle.buffer_data(*modelMatrixBuffer);
+                            modelHandle.buffer_data(*modelMatrixBuffer, *entityIdBuffer);
 
                         if (mesh.submeshes.empty())
                         {
-                            log::warn("Empty mesh found. Model name: {},  Model ID {}", modelName, modelHandle.get_mesh().id());
+                            log::warn("Empty mesh found. Model name: {},  Model ID {}", ModelCache::get_model_name(modelHandle.id), modelHandle.get_mesh().id());
                             continue;
                         }
 
+                        entityIdBuffer->bufferData(instances.first);
                         modelMatrixBuffer->bufferData(instances.second);
 
                         {
@@ -238,25 +240,25 @@ namespace legion::rendering
                 if (modelHandle.id == invalid_id)
                 {
                     for (auto& ent : instances.first)
-                        log::warn("Invalid mesh found on entity {}.", ent->name);
+                        log::warn("Invalid mesh found on entity {}.", ecs::Registry::getEntity(ent)->name);
 
                     continue;
                 }
 
                 ModelCache::create_model(modelHandle.id);
-                auto modelName = ModelCache::get_model_name(modelHandle.id);
 
                 const model& mesh = modelHandle.get_model();
 
                 if (!mesh.buffered)
-                    modelHandle.buffer_data(*modelMatrixBuffer);
+                    modelHandle.buffer_data(*modelMatrixBuffer, *entityIdBuffer);
 
                 if (mesh.submeshes.empty())
                 {
-                    log::warn("Empty mesh found. Model name: {},  Model ID {}", modelName, modelHandle.get_mesh().id());
+                    log::warn("Empty mesh found. Model name: {},  Model ID {}", ModelCache::get_model_name(modelHandle.id), modelHandle.get_mesh().id());
                     continue;
                 }
 
+                entityIdBuffer->bufferData(instances.first);
                 modelMatrixBuffer->bufferData(instances.second);
 
                 {

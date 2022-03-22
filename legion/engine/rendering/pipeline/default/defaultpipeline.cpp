@@ -38,14 +38,17 @@ namespace legion::rendering
 
 
         buffer modelMatrixBuffer;
+        buffer entityIdBuffer;
 
         {
             app::context_guard guard(context);
             addFramebuffer("main");
             modelMatrixBuffer = buffer(GL_ARRAY_BUFFER, sizeof(math::mat4) * 1024, nullptr, GL_DYNAMIC_DRAW);
+            entityIdBuffer = buffer(GL_ARRAY_BUFFER, sizeof(id_type) * 1024, nullptr, GL_DYNAMIC_DRAW);
         }
 
         create_meta<buffer>("model matrix buffer", modelMatrixBuffer);
+        create_meta<buffer>("entity id buffer", entityIdBuffer);
     }
 
 }

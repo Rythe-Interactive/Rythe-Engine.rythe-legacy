@@ -14,6 +14,7 @@ in vec3 normal : SV_NORMAL;
 in vec3 tangent : SV_TANGENT;
 in vec4 vertexcolor : SV_COLOR;
 in vec2 uv : SV_TEXCOORD0;
+in uint64_t entityId : SV_ENTITYID;
 in mat4 modelMatrix : SV_MODELMATRIX;
 #endif
 
