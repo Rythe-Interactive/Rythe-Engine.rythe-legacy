@@ -1,0 +1,1 @@
+start "Rythe Preprocessor" "D:\Repos\Rythe-legacy\tools\RythePreprocessor\net5.0\RytheTributary.exe" -include=D:\Repos\Rythe-legacy\deps\include -moduleinclude=D:\Repos\Rythe-legacy\legion\engine -module=core -ex=deps -ex=glm -ex=autogen
