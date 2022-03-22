@@ -13,7 +13,7 @@ namespace legion::physics
     }
 
     PhysxInternalWrapper::PhysxInternalWrapper(PhysxInternalWrapper&& other) noexcept
-        : bodyType(other.bodyType), physicsActor(std::move(other.physicsActor))
+        : bodyType(other.bodyType), physicsActor(other.physicsActor)
     {
         other.bodyType = physics_body_type::none;
         other.physicsActor = nullptr;
@@ -22,7 +22,7 @@ namespace legion::physics
     PhysxInternalWrapper& PhysxInternalWrapper::operator=(PhysxInternalWrapper&& other) noexcept
     {
         bodyType = other.bodyType;
-        physicsActor = std::move(other.physicsActor);
+        physicsActor = other.physicsActor;
 
         other.bodyType = physics_body_type::none;
         other.physicsActor = nullptr;

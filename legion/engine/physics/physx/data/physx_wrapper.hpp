@@ -21,7 +21,7 @@ namespace legion::physics
 
         physics_body_type bodyType = physics_body_type::static_collider;
 
-        PhysxInternalWrapper() = default;
+        PhysxInternalWrapper() noexcept = default;
 
         ~PhysxInternalWrapper();
 

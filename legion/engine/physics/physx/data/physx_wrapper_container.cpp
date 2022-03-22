@@ -25,12 +25,12 @@ namespace legion::physics
         }
     }
 
-    std::optional<std::reference_wrapper< PhysxInternalWrapper>> PhysxWrapperContainer::findWrapperWithID(size_type id)
+    std::optional<core::pointer< PhysxInternalWrapper>> PhysxWrapperContainer::findWrapperWithID(size_type id)
     {
         if (m_wrapperIDSet.contains(id))
         {
-            PhysxInternalWrapper& wrapper = m_physxWrappers[m_wrapperIDSet.index_of(id)];
-            return std::optional<std::reference_wrapper< PhysxInternalWrapper>>{ wrapper };
+            core::pointer<PhysxInternalWrapper> wrapper{ &m_physxWrappers[m_wrapperIDSet.index_of(id)] };
+            return std::optional<core::pointer< PhysxInternalWrapper>>{ wrapper };
         }
 
         return std::nullopt;

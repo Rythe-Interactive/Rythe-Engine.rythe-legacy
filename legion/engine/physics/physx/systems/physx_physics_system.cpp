@@ -166,12 +166,12 @@ namespace legion::physics
         for (auto entity : physicsAndRigidbodyComponentFilter)
         {
             auto& physComp = *entity.get_component<physics_component>();
-            auto optionalPhysxWrapper = m_physxWrapperContainer.findWrapperWithID(physComp.physicsComponentID);
+            auto physxWrapper = m_physxWrapperContainer.findWrapperWithID(physComp.physicsComponentID).value();
 
-            if (optionalPhysxWrapper->get().bodyType != physics::physics_body_type::rigidbody)
+            if (physxWrapper->bodyType != physics::physics_body_type::rigidbody)
             {
                 //the user has switched this body from static to dynamic
-                optionalPhysxWrapper->get().bodyType = physics::physics_body_type::rigidbody;
+                physxWrapper->bodyType = physics::physics_body_type::rigidbody;
 
                 //TODO Reallocate this object to a dynamic object
             }
@@ -229,13 +229,14 @@ namespace legion::physics
     void PhysXPhysicsSystem::processPhysicsComponentEvents(ecs::entity ent, physics_component& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo)
     {
         const std::bitset<physics_component_flag::pc_max>& eventsGenerated = physicsComponentToProcess.physicsCompData.getGeneratedModifyEvents();
-        auto& wrapper = m_physxWrapperContainer.findWrapperWithID(physicsComponentToProcess.physicsComponentID).value().get();
+
+        core::pointer<PhysxInternalWrapper> wrapperPtr = m_physxWrapperContainer.findWrapperWithID(physicsComponentToProcess.physicsComponentID).value();
 
         for(size_type bitPos = 0; bitPos < eventsGenerated.size(); ++bitPos)
         {
             if (eventsGenerated.test(bitPos))
             {
-                m_physicsComponentActionFuncs[bitPos].invoke(physicsComponentToProcess, physicsEnviromentInfo, wrapper, ent);
+                m_physicsComponentActionFuncs[bitPos].invoke(physicsComponentToProcess, physicsEnviromentInfo, *wrapperPtr, ent);
             }
         }
 
@@ -247,13 +248,14 @@ namespace legion::physics
     {
         size_type physicsComponentID = physicsComponentToProcess.physicsComponentID;
         auto& eventsGenerated = rigidbody.rigidbodyData.getGeneratedModifyEvents();
-        PhysxInternalWrapper& wrapper = m_physxWrapperContainer.findWrapperWithID(physicsComponentID).value();
+
+        core::pointer<PhysxInternalWrapper> wrapperPtr = m_physxWrapperContainer.findWrapperWithID(physicsComponentID).value();
 
         for (size_type bitPos = 0; bitPos < eventsGenerated.size(); ++bitPos)
         {
             if (eventsGenerated.test(bitPos))
             {
-                m_rigidbodyComponentActionFuncs[bitPos].invoke(rigidbody, physicsEnviromentInfo, wrapper, ent);
+                m_rigidbodyComponentActionFuncs[bitPos].invoke(rigidbody, physicsEnviromentInfo, *wrapperPtr, ent);
             }
         }
 
