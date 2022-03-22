@@ -109,6 +109,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="renderstages\mousehover.cpp" />
     <ClCompile Include="source.cpp" />
     <ClCompile Include="systems\gui_test.cpp" />
     <ClCompile Include="systems\physics_test_system.cpp" />
@@ -117,6 +118,7 @@
     <ClInclude Include="data\pp_bloom.hpp" />
     <ClInclude Include="data\pp_edgedetect.hpp" />
     <ClInclude Include="module\examplemodule.hpp" />
+    <ClInclude Include="renderstages\mousehover.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="systems\CustomSystem.hpp">
       <SubType>
