@@ -85,8 +85,7 @@ copy /Y "$(SolutionDir)xcopyexclude" ".\"
 
 xcopy "$(ProjectDir)..\$(ProjectName)" "$(SolutionDir)include\$(ProjectName)\" /i /s /r /exclude:xcopyexclude /y &gt; nul
 
-del /q ".\xcopyexclude" 
-$(SolutionDir)tools\RythePreprocessor\RytheTributary.exe -root=D:\Repos\Rythe-legacy\ -sysinclude=deps\include -include=legion\engine\ -module=legion\engine\core -module=legion\engine\rendering -module=legion\engine\application -module=legion\engine\audio -module=applications\sandbox -ex=deps -ex=glm -ex=autogen</Command>
+del /q ".\xcopyexclude"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -121,8 +120,7 @@ copy /Y "$(SolutionDir)xcopyexclude" ".\"
 
 xcopy "$(ProjectDir)..\$(ProjectName)" "$(SolutionDir)include\$(ProjectName)\" /i /s /r /exclude:xcopyexclude /y &gt; nul
 
-del /q ".\xcopyexclude" 
-$(SolutionDir)tools\RythePreprocessor\RytheTributary.exe -root=D:\Repos\Rythe-legacy\ -sysinclude=deps\include -include=legion\engine\ -module=legion\engine\core -module=legion\engine\rendering -module=legion\engine\application -module=legion\engine\audio -module=applications\sandbox -ex=deps -ex=glm -ex=autogen</Command>
+del /q ".\xcopyexclude"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -604,14 +602,6 @@ $(SolutionDir)tools\RythePreprocessor\RytheTributary.exe -root=D:\Repos\Rythe-le
     <None Include="..\..\.editorconfig" />
     <None Include="assets\assets.inl" />
     <None Include="assets\functionalbinds.inl" />
-    <None Include="autogen\autogen_prototype_position.inl" />
-    <None Include="autogen\autogen_prototype_rotation.inl" />
-    <None Include="autogen\autogen_prototype_scale.inl" />
-    <None Include="autogen\autogen_prototype_velocity.inl" />
-    <None Include="autogen\autogen_reflector_position.inl" />
-    <None Include="autogen\autogen_reflector_rotation.inl" />
-    <None Include="autogen\autogen_reflector_scale.inl" />
-    <None Include="autogen\autogen_reflector_velocity.inl" />
     <None Include="common\hash.inl" />
     <None Include="containers\data_view.inl" />
     <None Include="containers\shared_data_view.inl" />
