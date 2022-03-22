@@ -310,6 +310,11 @@ public:
             {
                 gfx::ShaderCache::clear_checked_paths();
                 gfx::ShaderCache::reload_shaders();
+
+                auto [lock, materials] = gfx::MaterialCache::get_all_materials();
+                async::readonly_guard materialsGuard(lock);
+                for (auto& [id, mat] : materials)
+                    mat.reload();
             }
         }
     }
