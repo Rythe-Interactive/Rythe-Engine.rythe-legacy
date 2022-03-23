@@ -197,7 +197,7 @@ namespace legion::core
             {
                 if (idx == idx2)
                     continue;
-                if (math::length(posBuffer[idx2]-pos) < visionRadius)
+                if (math::length(posBuffer[idx2] - pos) < visionRadius)
                 {
                     spatialGrid[idx].push_back(idx2);
                 }
@@ -206,33 +206,13 @@ namespace legion::core
             for (size_type neighbor = 0; neighbor < spatialGrid[idx].size(); neighbor++)
             {
                 auto& neighborPos = posBuffer[spatialGrid[idx][neighbor]];
-                auto diff = neighborPos - pos;
-                velBuffer[idx] += diff * -(1.f / math::length2((math::vec3)diff));
+                auto diff = pos - neighborPos;
             }
-
-            velBuffer[idx] = math::normalize(velBuffer[idx]);
-            rotBuffer[idx] = math::quatLookAt(velBuffer[idx], math::vec3::up);
-            pos += velBuffer[idx] * speed * deltaTime;
-
-
-            if (pos.x > bnds.max.x)
-                pos.x = bnds.min.x;
-            else if (pos.x < bnds.min.x)
-                pos.x = bnds.max.x;
-
-            if (pos.y > bnds.max.y)
-                pos.y = bnds.min.y;
-            else if (pos.y < bnds.min.y)
-                pos.y = bnds.max.y;
-
-            if (pos.z > bnds.max.z)
-                pos.z = bnds.min.z;
-            else if (pos.z < bnds.min.z)
-                pos.z = bnds.max.z;
         }
     }
 
 #pragma endregion
+#pragma region Alignment
     void alignment_policy::setup(particle_emitter& emitter)
     {
         if (!emitter.has_uniform<bounds>("Bounds"))
@@ -255,6 +235,8 @@ namespace legion::core
     void alignment_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
     {
     }
+#pragma endregion
+#pragma region Cohesion
     void cohesion_policy::setup(particle_emitter& emitter)
     {
         if (!emitter.has_uniform<bounds>("Bounds"))
@@ -277,4 +259,60 @@ namespace legion::core
     void cohesion_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
     {
     }
+#pragma endregion
+#pragma region Steering
+    void steering_policy::setup(particle_emitter& emitter)
+    {
+    }
+    void steering_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
+    {
+    }
+    void steering_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
+    {
+    }
+#pragma endregion
+#pragma region Locomotion
+    void locomotion_policy::setup(particle_emitter& emitter)
+    {
+        if (!emitter.has_buffer<velocity>("velBuffer"))
+            emitter.create_buffer<velocity>("velBuffer");
+        if (!emitter.has_buffer<position>("posBuffer"))
+            emitter.create_buffer<position>("posBuffer");
+    }
+    void locomotion_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
+    {
+    }
+    void locomotion_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
+    {
+        auto& posBuffer = emitter.get_buffer<position>("posBuffer");
+        auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
+        auto& rotBuffer = emitter.get_buffer<rotation>("rotBuffer");
+        auto& bnds = emitter.get_uniform<bounds>("Bounds");
+        auto& speed = emitter.get_uniform<float>("speed");
+
+        for (size_type idx = 0; idx < count; idx++)
+        {
+            velBuffer[idx] = math::normalize(velBuffer[idx]);
+            rotBuffer[idx] = math::quatLookAt(velBuffer[idx], math::vec3::up);
+            auto& pos = posBuffer[idx];
+            pos += velBuffer[idx] * speed * deltaTime;
+
+
+            if (pos.x > bnds.max.x)
+                pos.x = bnds.min.x;
+            else if (pos.x < bnds.min.x)
+                pos.x = bnds.max.x;
+
+            if (pos.y > bnds.max.y)
+                pos.y = bnds.min.y;
+            else if (pos.y < bnds.min.y)
+                pos.y = bnds.max.y;
+
+            if (pos.z > bnds.max.z)
+                pos.z = bnds.min.z;
+            else if (pos.z < bnds.min.z)
+                pos.z = bnds.max.z;
+        }
+    }
+#pragma endregion
 }
