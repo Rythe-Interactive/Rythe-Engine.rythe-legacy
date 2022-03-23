@@ -166,12 +166,14 @@ namespace legion::physics
         for (auto entity : physicsAndRigidbodyComponentFilter)
         {
             auto& physComp = *entity.get_component<physics_component>();
-            auto physxWrapper = m_physxWrapperContainer.findWrapperWithID(physComp.physicsComponentID).value();
+            pointer<PhysxInternalWrapper> physxWrapperPtr = m_physxWrapperContainer.findWrapperWithID(physComp.physicsComponentID);
 
-            if (physxWrapper->bodyType != physics::physics_body_type::rigidbody)
+            if (!physxWrapperPtr) { continue; }
+
+            if (physxWrapperPtr->bodyType != physics::physics_body_type::rigidbody)
             {
                 //the user has switched this body from static to dynamic
-                physxWrapper->bodyType = physics::physics_body_type::rigidbody;
+                physxWrapperPtr->bodyType = physics::physics_body_type::rigidbody;
 
                 //TODO Reallocate this object to a dynamic object
             }
@@ -230,7 +232,9 @@ namespace legion::physics
     {
         const std::bitset<physics_component_flag::pc_max>& eventsGenerated = physicsComponentToProcess.physicsCompData.getGeneratedModifyEvents();
 
-        core::pointer<PhysxInternalWrapper> wrapperPtr = m_physxWrapperContainer.findWrapperWithID(physicsComponentToProcess.physicsComponentID).value();
+        core::pointer<PhysxInternalWrapper> wrapperPtr = m_physxWrapperContainer.findWrapperWithID(physicsComponentToProcess.physicsComponentID);
+
+        if (!wrapperPtr) { return; }
 
         for(size_type bitPos = 0; bitPos < eventsGenerated.size(); ++bitPos)
         {
@@ -249,7 +253,9 @@ namespace legion::physics
         size_type physicsComponentID = physicsComponentToProcess.physicsComponentID;
         auto& eventsGenerated = rigidbody.rigidbodyData.getGeneratedModifyEvents();
 
-        core::pointer<PhysxInternalWrapper> wrapperPtr = m_physxWrapperContainer.findWrapperWithID(physicsComponentID).value();
+        pointer<PhysxInternalWrapper> wrapperPtr = m_physxWrapperContainer.findWrapperWithID(physicsComponentID);
+
+        if (!wrapperPtr) { return; }
 
         for (size_type bitPos = 0; bitPos < eventsGenerated.size(); ++bitPos)
         {

@@ -12,7 +12,7 @@ namespace legion::physics
 
         void PopAndSwapRemoveWrapper(size_type id);
 
-        std::optional<core::pointer<PhysxInternalWrapper>> findWrapperWithID(size_type id);
+        pointer<PhysxInternalWrapper> findWrapperWithID(size_type id);
 
         inline void ReleasePhysicsWrappers() { m_physxWrappers.clear(); }
 
