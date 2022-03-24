@@ -226,4 +226,49 @@ namespace legion::physics
 
 
     }
+
+    void processAddFirstConvex(physics_component& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
+    {
+        PhysicsComponentData& data = physicsComponent.physicsCompData;
+
+        for (ConvexColliderData& convex : data.getConvexData())
+        {
+            if (convex.isRegisteredOfType(collider_type::quickhull_convex)) { continue; }
+
+            convex.setRegistered(true);
+
+            PxTransform transform;
+            PxTransform localTransform;
+
+            calculateGlobalAndLocalTransforms(localTransform, transform, convex, entity);
+            PxConvexMesh* convexMesh = static_cast<PxConvexMesh*>(convex.getConvexPtr());
+
+            if (wrapper.bodyType == physics_body_type::rigidbody)
+            {
+                instantiateDynamicActorWith<PxConvexMeshGeometry, PxConvexMesh*&>(getSDK(), wrapper, transform, localTransform, sceneInfo, entity, convexMesh);
+            }
+            else if (wrapper.bodyType == physics_body_type::static_collider)
+            {
+                instantiateStaticActorWith<PxConvexMeshGeometry, PxConvexMesh*&>(getSDK(), wrapper, transform, localTransform, sceneInfo, entity, convexMesh);
+            }
+        }
+    }
+
+    void processAddNextConvex(physics_component& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
+    {
+        PhysicsComponentData& data = physicsComponent.physicsCompData;
+
+        for (ConvexColliderData& convex : data.getConvexData())
+        {
+            if (!convex.isRegisteredOfType(collider_type::quickhull_convex)) { continue; }
+
+            convex.setRegistered(true);
+
+            PxTransform localTransform;
+            calculateLocalColliderTransform(localTransform, convex);
+
+            PxConvexMesh* convexMesh = static_cast<PxConvexMesh*>(convex.getConvexPtr());
+            instantiateNextCollider<PxConvexMeshGeometry, PxConvexMesh*&>(getSDK(), wrapper, localTransform, sceneInfo, convexMesh);
+        }
+    }
 }
