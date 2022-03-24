@@ -1,6 +1,7 @@
 #include "defaultpolicies.hpp"
 #include <core/particles/particleemitter.hpp>
 #include <core/particles/particlesystem.hpp>
+#include <rendering/debugrendering.hpp>
 
 namespace legion::core
 {
@@ -144,16 +145,18 @@ namespace legion::core
 #pragma endregion
 
 #pragma region Boids
-    void seperation_policy::setup(particle_emitter& emitter)
+#pragma region Locomotion
+    void locomotion_policy::setup(particle_emitter& emitter)
     {
         if (!emitter.has_uniform<bounds>("Bounds"))
-            emitter.create_uniform<bounds>("Bounds", bounds{ position(-20.f),position(20.f) });
+            emitter.create_uniform<bounds>("Bounds", bounds{ position(-20.f),position(20.f), 5.f });
         if (!emitter.has_uniform<float>("visionRadius"))
-            emitter.create_uniform<float>("visionRadius", 10.f);
+            emitter.create_uniform<float>("visionRadius", 5.f);
         if (!emitter.has_uniform<float>("visionAngle"))
             emitter.create_uniform<float>("visionAngle", 45.f);
         if (!emitter.has_uniform<float>("speed"))
-            emitter.create_uniform<float>("speed", 10.f);
+            emitter.create_uniform<float>("speed", 2.f);
+
 
         if (!emitter.has_buffer<velocity>("velBuffer"))
             emitter.create_buffer<velocity>("velBuffer");
@@ -163,35 +166,119 @@ namespace legion::core
             emitter.create_buffer<rotation>("rotBuffer");
         if (!emitter.has_buffer<std::vector<id_type>>("spatialGrid"))
             emitter.create_buffer<std::vector<id_type>>("spatialGrid");
+        if (!emitter.has_buffer<math::vec3>("steeringBuffer"))
+            emitter.create_buffer<math::vec3>("steeringBuffer");
     }
-    void seperation_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
+    void locomotion_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
     {
+        auto& bnds = emitter.get_uniform<bounds>("Bounds");
+
         auto& posBuffer = emitter.get_buffer<position>("posBuffer");
         auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
         auto& rotBuffer = emitter.get_buffer<rotation>("rotBuffer");
-        auto& bnds = emitter.get_uniform<bounds>("Bounds");
+        auto& steering = emitter.get_buffer<math::vec3>("steeringBuffer");
 
         for (size_type idx = start; idx < end; idx++)
         {
-            posBuffer[idx] = math::linearRand(bnds.min - math::vec3(-5.f), bnds.max - math::vec3(5.f));
-            velBuffer[idx] = math::sphericalRand(1.f);
-            rotBuffer[idx] = math::quatLookAt(velBuffer[idx], math::vec3::up);
+            posBuffer[idx] = math::linearRand(bnds.min + math::vec3(bnds.border), bnds.max - math::vec3(bnds.border));
+            steering[idx] = math::sphericalRand(.1f);
         }
     }
-    void seperation_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
+    void locomotion_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
     {
         auto& posBuffer = emitter.get_buffer<position>("posBuffer");
         auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
         auto& rotBuffer = emitter.get_buffer<rotation>("rotBuffer");
-        auto& bnds = emitter.get_uniform<bounds>("Bounds");
-        auto& visionRadius = emitter.get_uniform<float>("visionRadius");
-        auto& speed = emitter.get_uniform<float>("speed");
-
         auto& spatialGrid = emitter.get_buffer<std::vector<id_type>>("spatialGrid");
+        auto& visionRadius = emitter.get_uniform<float>("visionRadius");
+        auto& bnds = emitter.get_uniform<bounds>("Bounds");
+        auto& speed = emitter.get_uniform<float>("speed");
+        auto& steering = emitter.get_buffer<math::vec3>("steeringBuffer");
+
+        debug::drawCube(bnds.min, bnds.max);
+        debug::drawCube(bnds.min + math::vec3(bnds.border), bnds.max - math::vec3(bnds.border), math::colors::yellow);
 
         for (size_type idx = 0; idx < count; idx++)
         {
             auto& pos = posBuffer[idx];
+
+            //Border avoidance
+            auto distanceToMin = math::abs(bnds.min + pos - velBuffer[idx]);
+            auto distanceToMax = math::abs(bnds.max - pos + velBuffer[idx]);
+
+            //X axis
+            if (distanceToMax.x <= bnds.border && velBuffer[idx].x >= 0)
+                if (math::linearRand(0, 2) == 0)
+                    steering[idx] = math::rotateY(steering[idx], math::linearRand(10.f, 15.f) * math::angleBetween(distanceToMax, steering[idx]) < 0 ? 1 : -1.f);
+                else
+                    steering[idx] = math::rotateZ(steering[idx], math::linearRand(10.f, 15.f) * math::angleBetween(distanceToMax, steering[idx]) < 0 ? 1 : -1.f);
+
+            if (distanceToMin.x <= bnds.border && velBuffer[idx].x < 0)
+                if (math::linearRand(0, 2) == 0)
+                    steering[idx] = math::rotateY(steering[idx], math::linearRand(10.f, 15.f) * math::angleBetween(distanceToMin, steering[idx]) < 0 ? 1 : -1.f);
+                else
+                    steering[idx] = math::rotateZ(steering[idx], math::linearRand(10.f, 15.f) * math::angleBetween(distanceToMin, steering[idx]) < 0 ? 1 : -1.f);
+
+            //Y axis
+            if (distanceToMax.y <= bnds.border && velBuffer[idx].y >= 0)
+                if (math::linearRand(0, 2) == 0)
+                    steering[idx] = math::rotateX(steering[idx], math::linearRand(10.f, 15.f) * math::angleBetween(distanceToMax, steering[idx]) < 0 ? 1 : -1.f);
+                else
+                    steering[idx] = math::rotateZ(steering[idx], math::linearRand(10.f, 15.f) * math::angleBetween(distanceToMax, steering[idx]) < 0 ? 1 : -1.f);
+
+            if (distanceToMin.y <= bnds.border && velBuffer[idx].y < 0)
+                if (math::linearRand(0, 2) == 0)
+                    steering[idx] = math::rotateX(steering[idx], math::linearRand(10.f, 15.f) * math::angleBetween(distanceToMin, steering[idx]) < 0 ? 1 : -1.f);
+                else
+                    steering[idx] = math::rotateZ(steering[idx], math::linearRand(10.f, 15.f) * math::angleBetween(distanceToMin, steering[idx]) < 0 ? 1 : -1.f);
+
+            //Z axis
+            if (distanceToMax.z <= bnds.border && velBuffer[idx].z >= 0)
+                if (math::linearRand(0, 2) == 0)
+                    steering[idx] = math::rotateX(steering[idx], math::linearRand(10.f, 15.f) * math::angleBetween(distanceToMax, steering[idx]) < 0 ? 1 : -1.f);
+                else
+                    steering[idx] = math::rotateY(steering[idx], math::linearRand(10.f, 15.f) * math::angleBetween(distanceToMax, steering[idx]) < 0 ? 1 : -1.f);
+
+            if (distanceToMin.z <= bnds.border && velBuffer[idx].z < 0)
+                if (math::linearRand(0, 2) == 0)
+                    steering[idx] = math::rotateX(steering[idx], math::linearRand(10.f, 15.f) * math::angleBetween(distanceToMin, steering[idx]) < 0 ? 1 : -1.f);
+                else
+                    steering[idx] = math::rotateY(steering[idx], math::linearRand(10.f, 15.f) * math::angleBetween(distanceToMin, steering[idx]) < 0 ? 1 : -1.f);
+
+
+            debug::drawLine(pos, pos + math::normalize(steering[idx]));
+            log::debug(steering[idx]);
+
+            //Particle Integration
+            velBuffer[idx] += steering[idx] * deltaTime;
+            velBuffer[idx] = math::min(velBuffer[idx].xyz(), math::normalize(velBuffer[idx]));
+            rotBuffer[idx] = math::quatLookAt(math::normalize(velBuffer[idx]), math::vec3::up);
+            pos += velBuffer[idx] * speed * deltaTime;
+            steering[idx] = math::normalize(velBuffer[idx]);
+
+            //Moves a boid to the opposite side of the cube if it crosses the boundarys
+            //if (pos.x > bnds.max.x && velBuffer[idx].x >= 0)
+            //    velBuffer[idx].x *= -1;
+
+            //if (pos.x < bnds.min.x && velBuffer[idx].x < 0)
+            //    velBuffer[idx].x *= -1;
+
+
+            //if (pos.y > bnds.max.y && velBuffer[idx].y >= 0)
+            //    velBuffer[idx].y *= -1;
+
+            //if (pos.y < bnds.min.y && velBuffer[idx].y < 0)
+            //    velBuffer[idx].y *= -1;
+
+
+            //if (pos.z > bnds.max.z && velBuffer[idx].z >= 0)
+            //    velBuffer[idx].z *= -1;
+
+            //if (pos.z < bnds.min.z && velBuffer[idx].z < 0)
+            //    velBuffer[idx].z *= -1;
+
+
+            //Recalculates the spatial grid
             spatialGrid[idx].clear();
             for (size_type idx2 = 0; idx2 < count; idx2++)
             {
@@ -202,12 +289,44 @@ namespace legion::core
                     spatialGrid[idx].push_back(idx2);
                 }
             }
+        }
+    }
+#pragma endregion
+#pragma region Seperation
+    void seperation_policy::setup(particle_emitter& emitter)
+    {
+    }
+    void seperation_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
+    {
 
-            for (size_type neighbor = 0; neighbor < spatialGrid[idx].size(); neighbor++)
+    }
+    void seperation_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
+    {
+        auto& posBuffer = emitter.get_buffer<position>("posBuffer");
+        auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
+        auto& bnds = emitter.get_uniform<bounds>("Bounds");
+        auto& visionRadius = emitter.get_uniform<float>("visionRadius");
+        auto& speed = emitter.get_uniform<float>("speed");
+        auto& steering = emitter.get_buffer<math::vec3>("steeringBuffer");
+
+        auto& spatialGrid = emitter.get_buffer<std::vector<id_type>>("spatialGrid");
+
+        for (size_type idx = 0; idx < count; idx++)
+        {
+            auto& pos = posBuffer[idx];
+            math::vec3 force = math::vec3::zero;
+            if (spatialGrid[idx].size() > 0)
             {
-                auto& neighborPos = posBuffer[spatialGrid[idx][neighbor]];
-                auto diff = pos - neighborPos;
+                for (size_type neighbor = 0; neighbor < spatialGrid[idx].size(); neighbor++)
+                {
+                    auto& neighborPos = posBuffer[spatialGrid[idx][neighbor]];
+                    auto diff = pos - neighborPos;
+                    if (diff.length() < 2.f)
+                        force += diff * (1 / diff.length());
+                }
+                steering[idx] += force / spatialGrid[idx].size();
             }
+            legion::debug::drawLine(pos, pos + math::normalize(steering[idx]), math::colors::red);
         }
     }
 
@@ -215,43 +334,43 @@ namespace legion::core
 #pragma region Alignment
     void alignment_policy::setup(particle_emitter& emitter)
     {
-        if (!emitter.has_uniform<bounds>("Bounds"))
-            emitter.create_uniform<bounds>("Bounds", bounds{ position(-20.f),position(20.f) });
-        if (!emitter.has_uniform<float>("visionRadius"))
-            emitter.create_uniform<float>("visionRadius", 10.f);
-        if (!emitter.has_uniform<float>("visionAngle"))
-            emitter.create_uniform<float>("visionAngle", 45.f);
-        if (!emitter.has_uniform<float>("speed"))
-            emitter.create_uniform<float>("speed", 10.f);
-
-        if (!emitter.has_buffer<velocity>("velBuffer"))
-            emitter.create_buffer<velocity>("velBuffer");
-        if (!emitter.has_buffer<position>("posBuffer"))
-            emitter.create_buffer<position>("posBuffer");
     }
     void alignment_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
     {
     }
     void alignment_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
     {
+        auto& posBuffer = emitter.get_buffer<position>("posBuffer");
+        auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
+        auto& bnds = emitter.get_uniform<bounds>("Bounds");
+        auto& visionRadius = emitter.get_uniform<float>("visionRadius");
+        auto& speed = emitter.get_uniform<float>("speed");
+        auto& steering = emitter.get_buffer<math::vec3>("steeringBuffer");
+
+        auto& spatialGrid = emitter.get_buffer<std::vector<id_type>>("spatialGrid");
+
+        for (size_type idx = 0; idx < count; idx++)
+        {
+            if (spatialGrid[idx].size() < 1)
+                continue;
+
+            math::vec3 force = math::vec3::zero;
+            for (size_type neighbor = 0; neighbor < spatialGrid[idx].size(); neighbor++)
+            {
+                force += velBuffer[spatialGrid[idx][neighbor]].xyz();
+            }
+
+            steering[idx] += force / spatialGrid[idx].size();
+            steering[idx] -= velBuffer[idx].xyz();
+            auto& pos = posBuffer[idx];
+            legion::debug::drawLine(pos, pos + math::normalize(steering[idx]), math::colors::green);
+        }
     }
 #pragma endregion
 #pragma region Cohesion
     void cohesion_policy::setup(particle_emitter& emitter)
     {
-        if (!emitter.has_uniform<bounds>("Bounds"))
-            emitter.create_uniform<bounds>("Bounds", bounds{ position(-20.f),position(20.f) });
-        if (!emitter.has_uniform<float>("visionRadius"))
-            emitter.create_uniform<float>("visionRadius", 10.f);
-        if (!emitter.has_uniform<float>("visionAngle"))
-            emitter.create_uniform<float>("visionAngle", 45.f);
-        if (!emitter.has_uniform<float>("speed"))
-            emitter.create_uniform<float>("speed", 10.f);
 
-        if (!emitter.has_buffer<velocity>("velBuffer"))
-            emitter.create_buffer<velocity>("velBuffer");
-        if (!emitter.has_buffer<position>("posBuffer"))
-            emitter.create_buffer<position>("posBuffer");
     }
     void cohesion_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
     {
@@ -260,59 +379,6 @@ namespace legion::core
     {
     }
 #pragma endregion
-#pragma region Steering
-    void steering_policy::setup(particle_emitter& emitter)
-    {
-    }
-    void steering_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
-    {
-    }
-    void steering_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
-    {
-    }
-#pragma endregion
-#pragma region Locomotion
-    void locomotion_policy::setup(particle_emitter& emitter)
-    {
-        if (!emitter.has_buffer<velocity>("velBuffer"))
-            emitter.create_buffer<velocity>("velBuffer");
-        if (!emitter.has_buffer<position>("posBuffer"))
-            emitter.create_buffer<position>("posBuffer");
-    }
-    void locomotion_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
-    {
-    }
-    void locomotion_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
-    {
-        auto& posBuffer = emitter.get_buffer<position>("posBuffer");
-        auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
-        auto& rotBuffer = emitter.get_buffer<rotation>("rotBuffer");
-        auto& bnds = emitter.get_uniform<bounds>("Bounds");
-        auto& speed = emitter.get_uniform<float>("speed");
 
-        for (size_type idx = 0; idx < count; idx++)
-        {
-            velBuffer[idx] = math::normalize(velBuffer[idx]);
-            rotBuffer[idx] = math::quatLookAt(velBuffer[idx], math::vec3::up);
-            auto& pos = posBuffer[idx];
-            pos += velBuffer[idx] * speed * deltaTime;
-
-
-            if (pos.x > bnds.max.x)
-                pos.x = bnds.min.x;
-            else if (pos.x < bnds.min.x)
-                pos.x = bnds.max.x;
-
-            if (pos.y > bnds.max.y)
-                pos.y = bnds.min.y;
-            else if (pos.y < bnds.min.y)
-                pos.y = bnds.max.y;
-
-            if (pos.z > bnds.max.z)
-                pos.z = bnds.min.z;
-            else if (pos.z < bnds.min.z)
-                pos.z = bnds.max.z;
-        }
-    }
 #pragma endregion
 }
