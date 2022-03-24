@@ -22,11 +22,16 @@ namespace legion::physics
 
         virtual void shutdown();
 
-        void fixedUpdate(time::time_span<fast_time> deltaTime);
+        void physicsStep();
+
+        void update(legion::time::span deltaTime);
 
         static physx::PxPhysics* getSDK();
 
     private:
+
+        float m_accumulation;
+        const size_type m_maxPhysicsStep = 3;
 
         struct PhysxStatics;
 

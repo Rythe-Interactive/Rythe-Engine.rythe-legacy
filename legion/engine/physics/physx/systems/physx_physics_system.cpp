@@ -51,7 +51,7 @@ namespace legion::physics
         }
 
         bindEventsToEventProcessors();
-        createProcess<&PhysXPhysicsSystem::fixedUpdate>("Physics", m_timeStep);
+        //createProcess<&PhysXPhysicsSystem::fixedUpdate>("Physics", m_timeStep);
 
         bindToEvent<events::component_destruction<physics_component>, &PhysXPhysicsSystem::markPhysicsWrapperPendingRemove>();
 
@@ -164,7 +164,21 @@ namespace legion::physics
         PS::foundation->release();
     }
 
-    void PhysXPhysicsSystem::fixedUpdate(time::time_span<fast_time> deltaTime)
+    void PhysXPhysicsSystem::update(legion::time::span deltaTime)
+    {
+        m_accumulation += deltaTime;
+
+        size_type tickAmount = 0;
+
+        while (m_accumulation > m_timeStep && tickAmount < m_maxPhysicsStep)
+        {
+            m_accumulation -= m_timeStep;
+            physicsStep();
+            ++tickAmount;
+        }
+    }
+
+    void PhysXPhysicsSystem::physicsStep()
     {
         executePreSimulationActions();
 
