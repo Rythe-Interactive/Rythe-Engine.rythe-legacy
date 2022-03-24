@@ -17,7 +17,7 @@ namespace legion::physics
         inline static PxFoundation* foundation = nullptr;
         inline static PxPvd* pvd = nullptr;
         inline static PxDefaultCpuDispatcher* dispatcher = nullptr;
-        inline static PxPhysics* phyxSDK = nullptr;
+        inline static PxPhysics* physxSDK = nullptr;
         inline static PxCooking* cooking = nullptr;
 
         inline static PxDefaultAllocator defaultAllocator;
@@ -32,9 +32,11 @@ namespace legion::physics
     constexpr size_type defaultPVDListeningPort = 5425;
     constexpr size_type defaultPVDHostTimeout = 10;
 
+    constexpr size_type convexHullVertexLimit = 256;
+
     physx::PxPhysics* PhysXPhysicsSystem::getSDK()
     {
-        return PS::phyxSDK;
+        return PS::physxSDK;
     }
 
     void PhysXPhysicsSystem::setup()
@@ -82,14 +84,14 @@ namespace legion::physics
         convexDesc.points.data = vertices.data();
         convexDesc.flags =
             PxConvexFlag::eCOMPUTE_CONVEX | PxConvexFlag::eDISABLE_MESH_VALIDATION | PxConvexFlag::eFAST_INERTIA_COMPUTATION;
-        convexDesc.vertexLimit = 256;
+        convexDesc.vertexLimit = convexHullVertexLimit;
 
         PxDefaultMemoryOutputStream buf;
         if (!PS::cooking->cookConvexMesh(convexDesc, buf))
             return NULL;
 
         PxDefaultMemoryInputData input(buf.getData(), buf.getSize());
-        auto convex = PS::phyxSDK->createConvexMesh(input);
+        auto convex = PS::physxSDK->createConvexMesh(input);
 
         return convex;
     }
@@ -108,7 +110,7 @@ namespace legion::physics
             PS::dispatcher = PxDefaultCpuDispatcherCreate(0); //deal with multithreading later on
 
             PxTolerancesScale scale;
-            PS::phyxSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *PS::foundation, scale, true, PS::pvd);
+            PS::physxSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *PS::foundation, scale, true, PS::pvd);
 
             PxCookingParams params(scale);
             params.meshWeldTolerance = 0.001f;
@@ -121,15 +123,15 @@ namespace legion::physics
 
     void PhysXPhysicsSystem::setupDefaultScene()
     {
-        PxSceneDesc sceneDesc(PS::phyxSDK->getTolerancesScale());
+        PxSceneDesc sceneDesc(PS::physxSDK->getTolerancesScale());
         sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
         sceneDesc.cpuDispatcher = PS::dispatcher;
         sceneDesc.filterShader = PxDefaultSimulationFilterShader;
         sceneDesc.flags |= PxSceneFlag::eENABLE_STABILIZATION;
         sceneDesc.flags |= PxSceneFlag::eENABLE_ACTIVE_ACTORS;
 
-        m_physxScene = PS::phyxSDK->createScene(sceneDesc);
-        m_defaultMaterial = PS::phyxSDK->createMaterial(0.5f, 0.5f, 0.1f);
+        m_physxScene = PS::physxSDK->createScene(sceneDesc);
+        m_defaultMaterial = PS::physxSDK->createMaterial(0.5f, 0.5f, 0.1f);
     }
 
     void PhysXPhysicsSystem::bindEventsToEventProcessors()
@@ -149,7 +151,7 @@ namespace legion::physics
     {
         PS::cooking->release();
         PS::dispatcher->release();
-        PS::phyxSDK->release();
+        PS::physxSDK->release();
 
         if (PS::pvd)
         {
