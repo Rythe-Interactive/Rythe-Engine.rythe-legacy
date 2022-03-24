@@ -113,6 +113,8 @@ namespace legion::core::assets
         static asset_ptr get(const std::string& name);
         static asset_ptr get(id_type nameHash);
 
+        static std::vector<asset_ptr> getAll();
+
         static void destroy(const std::string& name);
         static void destroy(id_type nameHash);
         static void destroy(asset_ptr asset);

@@ -21,10 +21,6 @@ namespace legion::rendering
         static id_type matricesId = nameHash("model matrix buffer");
         static id_type entityBufferId = nameHash("entity id buffer");
 
-        // Leave this for later implementation, no time rn. (Glyn)
-        // static id_type sceneColorId = nameHash("scene color history");
-        // static id_type sceneDepthId = nameHash("scene depth history");
-
         auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<id_type>, std::vector<math::mat4>>>>>(batchesId);
         if (!batches)
             return;
@@ -160,8 +156,8 @@ namespace legion::rendering
                         if (sceneDepth && mater.has_param<texture_handle>(SV_SCENEDEPTH))
                             mater.set_param<texture_handle>(SV_SCENEDEPTH, sceneDepth);
 
-                        if (mater.has_param<texture_handle>("skybox"))
-                            mater.set_param("skybox", TextureCache::create_texture("skybox", fs::view("assets://textures/HDRI/park.jpg")));
+                        if (skyboxTex && mater.has_param<texture_handle>(SV_SKYBOX))
+                            mater.set_param(SV_SKYBOX, skyboxTex);
 
                         mater.bind();
 

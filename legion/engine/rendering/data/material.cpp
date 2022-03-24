@@ -225,6 +225,12 @@ namespace legion::rendering
         return MaterialCache::m_materials.at(id).current_variant();
     }
 
+    std::vector<std::reference_wrapper<variant_submaterial>> material_handle::get_variants()
+    {
+        async::readonly_guard guard(MaterialCache::m_materialLock);
+        return MaterialCache::m_materials.at(id).get_variants();
+    }
+
     bool material_handle::has_variant(id_type variantId) const
     {
         async::readonly_guard guard(MaterialCache::m_materialLock);
@@ -346,6 +352,16 @@ namespace legion::rendering
 #endif
 
         return MaterialCache::m_materials.at(id).m_shader.get_attribute(name);
+    }
+
+    std::vector<std::reference_wrapper<variant_submaterial>> material::get_variants()
+    {
+        std::vector<std::reference_wrapper<variant_submaterial>> variants;
+        variants.reserve(m_variants.size());
+        for (auto& [id, variant] : m_variants)
+            variants.push_back(std::ref(variant));
+
+        return variants;
     }
 
     id_type material::current_variant() const

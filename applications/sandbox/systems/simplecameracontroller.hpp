@@ -95,7 +95,13 @@ public:
     void setupCameraEntity()
     {
         auto skyboxMat = rendering::MaterialCache::create_material("skybox", "assets://shaders/skybox.shs"_view);
-        skyboxMat.set_param(SV_SKYBOX, TextureCache::create_texture("morning islands", fs::view("assets://textures/HDRI/morning_islands.jpg")));
+        skyboxMat.set_param(SV_SKYBOX, TextureCache::create_texture("morning islands", fs::view("assets://textures/HDRI/morning_islands.jpg"),
+            texture_import_settings
+            {
+                texture_type::two_dimensional, true, channel_format::eight_bit, texture_format::rgba_hdr,
+                texture_components::rgba, true, true, 0, texture_mipmap::linear_mipmap_linear, texture_mipmap::linear,
+                texture_wrap::edge_clamp, texture_wrap::repeat, texture_wrap::edge_clamp
+            }));
         ecs::world.add_component(gfx::skybox_renderer{ skyboxMat });
 
         auto groundplane = createEntity("Ground Plane");

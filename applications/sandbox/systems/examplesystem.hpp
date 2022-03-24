@@ -366,10 +366,11 @@ public:
     void onSkyboxSwitch(switch_skybox_action& event)
     {
         using namespace legion;
+        using namespace rendering;
         if (event.pressed())
         {
             static size_type idx = 0;
-            static gfx::texture_handle textures[4] = {};
+            static texture_handle textures[4] = {};
             static bool initialized = false;
 
             if (!initialized)
@@ -386,10 +387,15 @@ public:
                 app::context_guard guard(win);
                 if (guard.contextIsValid())
                 {
-                    textures[0] = gfx::TextureCache::create_texture("morning islands", fs::view("assets://textures/HDRI/morning_islands.jpg"));
-                    textures[1] = gfx::TextureCache::create_texture("earth", fs::view("assets://textures/HDRI/earth.png"));
-                    textures[2] = gfx::TextureCache::create_texture("park", fs::view("assets://textures/HDRI/park.jpg"));
-                    textures[3] = gfx::TextureCache::create_texture("atmosphere", fs::view("assets://textures/HDRI/planetatmo.png"));
+                    auto importSettings = texture_import_settings{
+                            texture_type::two_dimensional, true, channel_format::eight_bit, texture_format::rgba_hdr,
+                            texture_components::rgba, true, true, 0, texture_mipmap::linear_mipmap_linear, texture_mipmap::linear,
+                            texture_wrap::edge_clamp,texture_wrap::repeat, texture_wrap::edge_clamp };
+
+                    textures[0] = TextureCache::create_texture("morning islands", fs::view("assets://textures/HDRI/morning_islands.jpg"), importSettings);
+                    textures[1] = TextureCache::create_texture("earth", fs::view("assets://textures/HDRI/earth.png"), importSettings);
+                    textures[2] = TextureCache::create_texture("park", fs::view("assets://textures/HDRI/park.jpg"), importSettings);
+                    textures[3] = TextureCache::create_texture("atmosphere", fs::view("assets://textures/HDRI/planetatmo.png"), importSettings);
                     initialized = true;
                 }
                 else
@@ -397,7 +403,7 @@ public:
             }
 
             idx = (idx + 1) % 4;
-            auto skyboxRenderer = ecs::world.get_component<gfx::skybox_renderer>();
+            auto skyboxRenderer = ecs::world.get_component<skybox_renderer>();
             skyboxRenderer->material.set_param(SV_SKYBOX, textures[idx]);
 
             log::debug("Set skybox to {}", textures[idx].get_texture().name);

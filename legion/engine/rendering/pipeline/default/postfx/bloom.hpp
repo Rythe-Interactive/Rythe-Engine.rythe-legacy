@@ -46,7 +46,7 @@ namespace legion::rendering
          */
         void setup(app::window& context) override;
 
-        void seperateOverdraw(framebuffer& fbo, texture_handle colortexture, texture_handle overdrawtexture);
+        void seperateOverdraw(framebuffer& fbo, texture_handle colortexture, texture_handle depthtexture, texture_handle overdrawtexture);
 
         texture_handle blurOverdraw(const math::ivec2& framebufferSize, texture_handle overdrawtexture);
 

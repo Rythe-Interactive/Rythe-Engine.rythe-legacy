@@ -558,6 +558,7 @@ namespace legion::rendering
         static shader_handle create_shader(const fs::view& file, shader_import_settings settings = default_shader_settings);
         static shader_handle get_handle(const std::string& name);
         static shader_handle get_handle(id_type id);
+        static std::vector<shader_handle> get_all();
     };
 
     template<typename T>

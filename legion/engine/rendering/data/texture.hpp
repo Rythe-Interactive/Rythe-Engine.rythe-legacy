@@ -204,5 +204,7 @@ namespace legion::rendering
          * @param id Name hash
          */
         static texture_handle get_handle(id_type id);
+
+        static std::vector<texture_handle> get_all();
     };
 }

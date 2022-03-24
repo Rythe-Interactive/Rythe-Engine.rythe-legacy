@@ -38,7 +38,7 @@ namespace legion::rendering
         addRenderPass<&Bloom::renderPass>();
     }
 
-    void Bloom::seperateOverdraw(framebuffer& fbo, texture_handle colortexture, texture_handle overdrawtexture)
+    void Bloom::seperateOverdraw(framebuffer& fbo, texture_handle colortexture, texture_handle depthtexture, texture_handle overdrawtexture)
     {
         // Brightness threshold stage
         fbo.bind();
@@ -49,6 +49,7 @@ namespace legion::rendering
         // Bind and assign the brightness threshold shader.
         m_brightnessThresholdShader.bind();
         m_brightnessThresholdShader.get_uniform_with_location<texture_handle>(SV_SCENECOLOR).set_value(colortexture);
+        m_brightnessThresholdShader.get_uniform_with_location<texture_handle>(SV_SCENEDEPTH).set_value(depthtexture);
         m_brightnessThresholdShader.get_uniform_with_location<texture_handle>(SV_HDROVERDRAW).set_value(overdrawtexture);
         // Render onto the quad.
         renderQuad();
@@ -149,8 +150,16 @@ namespace legion::rendering
                 overdrawTexture = std::get<texture_handle>(attachment);
         }
 
+
+        texture_handle sceneDepth;
+        auto depthAttachment = fbo.getAttachment(GL_DEPTH_ATTACHMENT);
+        if (std::holds_alternative<std::monostate>(depthAttachment))
+            depthAttachment = fbo.getAttachment(GL_DEPTH_STENCIL_ATTACHMENT);
+        if (std::holds_alternative<texture_handle>(depthAttachment))
+            sceneDepth = std::get<texture_handle>(depthAttachment);
+
         // Get brightest parts of the scene and append to overdraw buffer.
-        seperateOverdraw(fbo, color_texture, overdrawTexture);
+        seperateOverdraw(fbo, color_texture, sceneDepth, overdrawTexture);
 
         // Gets the size of the lighting data texture.
         math::ivec2 framebufferSize = color_texture.get_texture().size();

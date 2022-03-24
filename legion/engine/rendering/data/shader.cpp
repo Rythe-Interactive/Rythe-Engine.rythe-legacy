@@ -430,6 +430,11 @@ namespace legion::rendering
                     glDepthFunc(param);
                 }
                 break;
+                case GL_DEPTH_WRITEMASK:
+                {
+                    glDepthMask(param);
+                }
+                break;
                 case GL_CULL_FACE:
                 {
                     if (param == GL_FALSE)
@@ -444,16 +449,22 @@ namespace legion::rendering
                 break;
                 case GL_BLEND:
                 {
-                    blendSrc = param;
-                    blendDst = param;
+                    if (blendSrc == GL_FALSE)
+                        blendSrc = param;
+                    if (blendDst == GL_FALSE)
+                        blendDst = param;
                 }
+                break;
                 case GL_BLEND_SRC:
                 {
-                    blendSrc = param;
+                    if (blendSrc == GL_FALSE)
+                        blendSrc = param;
                 }
+                break;
                 case GL_BLEND_DST:
                 {
-                    blendDst = param;
+                    if (blendDst == GL_FALSE)
+                        blendDst = param;
                 }
                 break;
                 case GL_DITHER:
@@ -783,6 +794,11 @@ namespace legion::rendering
                     glDepthFunc(param);
                 }
                 break;
+                case GL_DEPTH_WRITEMASK:
+                {
+                    glDepthMask(param);
+                }
+                break;
                 case GL_CULL_FACE:
                 {
                     if (param == GL_FALSE)
@@ -797,16 +813,22 @@ namespace legion::rendering
                 break;
                 case GL_BLEND:
                 {
-                    blendSrc = param;
-                    blendDst = param;
+                    if (blendSrc == GL_FALSE)
+                        blendSrc = param;
+                    if (blendDst == GL_FALSE)
+                        blendDst = param;
                 }
+                break;
                 case GL_BLEND_SRC:
                 {
-                    blendSrc = param;
+                    if (blendSrc == GL_FALSE)
+                        blendSrc = param;
                 }
+                break;
                 case GL_BLEND_DST:
                 {
-                    blendDst = param;
+                    if (blendDst == GL_FALSE)
+                        blendDst = param;
                 }
                 break;
                 case GL_DITHER:
@@ -1013,6 +1035,18 @@ namespace legion::rendering
             return { id };
     }
 
+    std::vector<shader_handle> ShaderCache::get_all()
+    {
+        std::vector<shader_handle> shaders;
+        async::readonly_guard guard(m_shaderLock);
+        shaders.reserve(m_shaders.size());
+
+        for (auto [id, shader] : m_shaders)
+            shaders.push_back(shader_handle{ id });
+
+        return shaders;
+    }
+
     shader_variant& shader_handle::get_variant(id_type variantId)
     {
         return ShaderCache::get_shader(id)->get_variant(variantId);
@@ -1213,6 +1247,11 @@ namespace legion::rendering
                 glDepthFunc(param);
             }
             break;
+            case GL_DEPTH_WRITEMASK:
+            {
+                glDepthMask(param);
+            }
+            break;
             case GL_CULL_FACE:
             {
                 if (param == GL_FALSE)
@@ -1227,16 +1266,22 @@ namespace legion::rendering
             break;
             case GL_BLEND:
             {
-                blendSrc = param;
-                blendDst = param;
+                if (blendSrc == GL_FALSE)
+                    blendSrc = param;
+                if (blendDst == GL_FALSE)
+                    blendDst = param;
             }
+            break;
             case GL_BLEND_SRC:
             {
-                blendSrc = param;
+                if (blendSrc == GL_FALSE)
+                    blendSrc = param;
             }
+            break;
             case GL_BLEND_DST:
             {
-                blendDst = param;
+                if (blendDst == GL_FALSE)
+                    blendDst = param;
             }
             break;
             case GL_DITHER:

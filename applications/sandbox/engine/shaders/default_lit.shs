@@ -13,13 +13,21 @@ variant(double_sided)
 
 variant(transparent)
 {
-    #state BLEND TRANSPARENT    
+    #state BLEND TRANSPARENT
+    #state DEPTH_WRITE OFF
 }
 
 variant(double_sided_transparent)
 {
     #state CULL OFF
     #state BLEND TRANSPARENT
+    #state DEPTH_WRITE OFF
+}
+
+variant(depth only)
+{
+    #state BLEND TRANSPARENT
+    #define DEPTH_ONLY
 }
 
 generate(fragment, vertex)
@@ -37,133 +45,140 @@ shader(vertex)
 
 shader(fragment)
 {
-    #define NO_MATERIAL_INPUT
-    #define HEIGHT_MAP_R
-    #include <lighting.shinc>
-
-    struct TexColorInput
-    {
-        bool useTex;
-        vec4 color;
-        sampler2D tex;
-    };
-
-    struct TexScalarInput
-    {
-        bool useTex;
-        float value;
-        sampler2D tex;
-    };
-
-    uniform float alphaCutoff = 0.5;
-
-    uniform bool useAlbedoTex = false;
-    uniform vec4 albedoColor = vec4(1.0);
-    uniform sampler2D albedoTex;
-
-    uniform bool useMetallicTex = false;
-    uniform float metallicValue = 1.0;
-    uniform sampler2D metallicTex;
-
-    uniform bool useRoughnessTex = false;
-    uniform float roughnessValue = 1.0;
-    uniform sampler2D roughnessTex;
-
-    uniform bool useMetallicRoughness = false;
-    uniform sampler2D metallicRoughness;
-
-    uniform bool useEmissiveTex = false;
-    uniform vec4 emissiveColor = vec4(0.0);
-    uniform sampler2D emissiveTex;
-
-    uniform bool useNormal = false;
-    uniform sampler2D normalTex;
-
-    uniform bool useAmbientOcclusion = false;
-    uniform sampler2D ambientOcclusionTex;
-
-    uniform bool useHeight = false;
-    uniform sampler2D heightTex;
-    uniform float heightScale = 1.0;
-
-    Material GetMaterial(vec2 uv, Camera camera, vec3 worldNormal, vec3 worldTangent)
-    {
-        Material material;
-        material.tbn = GetTBNMatrix(worldNormal, worldTangent);
-
-        if(useHeight)
-            material.texcoords = ParallaxMap(heightTex, heightScale, uv, camera, material.tbn, material.height);
-        else
+    #if defined(DEPTH_ONLY)
+        void main(void)
         {
-            material.texcoords = uv;
-            material.height = 0.0;
+            fragment_color = vec4(0.0);
         }
+    #else
+        #define NO_MATERIAL_INPUT
+        #define HEIGHT_MAP_R
+        #include <lighting.shinc>
 
-        if(useAlbedoTex)
-            material.albedo = AlbedoMap(albedoTex, stdio(vertexcolor), material.texcoords);
-        else
-            material.albedo = pow(albedoColor * stdio(vertexcolor), vec4(vec3(2.2), 1.0));
-
-        if(useNormal)
-            material.normal = NormalMap(normalTex, material.texcoords, material.tbn);
-        else
-            material.normal = worldNormal;
-
-        // Assumption that dielectrics all have a fresnell reflectance at 0° of about 4%
-        // of course not accurate for some dielectrics like water (2%),
-        // crystals (5-8%) and diamond like materials (10-20%).
-        // Semi-conductors also have other values (20-40%)
-        material.dielectric = 0.04;
-
-        if(useMetallicRoughness)
+        struct TexColorInput
         {
-            vec2 mr = texture(metallicRoughness, material.texcoords).xy;
-            material.metallic = mr.x;
-            material.roughness = mr.y;
-        }
-        else
+            bool useTex;
+            vec4 color;
+            sampler2D tex;
+        };
+
+        struct TexScalarInput
         {
-            if(useMetallicTex)
-                material.metallic = texture(metallicTex, material.texcoords).r;
+            bool useTex;
+            float value;
+            sampler2D tex;
+        };
+
+        uniform float alphaCutoff = 0.5;
+
+        uniform bool useAlbedoTex = false;
+        uniform vec4 albedoColor = vec4(1.0);
+        uniform sampler2D albedoTex : SV_ALBEDO;
+
+        uniform bool useMetallicTex = false;
+        uniform float metallicValue = 1.0;
+        uniform sampler2D metallicTex;
+
+        uniform bool useRoughnessTex = false;
+        uniform float roughnessValue = 1.0;
+        uniform sampler2D roughnessTex;
+
+        uniform bool useMetallicRoughness = false;
+        uniform sampler2D metallicRoughness;
+
+        uniform bool useEmissiveTex = false;
+        uniform vec4 emissiveColor = vec4(0.0);
+        uniform sampler2D emissiveTex : SV_EMISSIVE;
+
+        uniform bool useNormal = false;
+        uniform sampler2D normalTex;
+
+        uniform bool useAmbientOcclusion = false;
+        uniform sampler2D ambientOcclusionTex;
+
+        uniform bool useHeight = false;
+        uniform sampler2D heightTex;
+        uniform float heightScale : SV_HEIGHTSCALE;
+
+        Material GetMaterial(vec2 uv, Camera camera, vec3 worldNormal, vec3 worldTangent)
+        {
+            Material material;
+            material.tbn = GetTBNMatrix(worldNormal, worldTangent);
+
+            if(useHeight)
+                material.texcoords = ParallaxMap(heightTex, heightScale, uv, camera, material.tbn, material.height);
             else
-                material.metallic = metallicValue;
+            {
+                material.texcoords = uv;
+                material.height = 0.0;
+            }
 
-            if(useRoughnessTex)
-                material.roughness = texture(roughnessTex, material.texcoords).r;
+            if(useAlbedoTex)
+                material.albedo = AlbedoMap(albedoTex, stdio(vertexcolor), material.texcoords);
             else
-                material.roughness = roughnessValue;
+                material.albedo = pow(albedoColor * stdio(vertexcolor), vec4(vec3(2.2), 1.0));
+
+            if(useNormal)
+                material.normal = NormalMap(normalTex, material.texcoords, material.tbn);
+            else
+                material.normal = worldNormal;
+
+            // Assumption that dielectrics all have a fresnell reflectance at 0° of about 4%
+            // of course not accurate for some dielectrics like water (2%),
+            // crystals (5-8%) and diamond like materials (10-20%).
+            // Semi-conductors also have other values (20-40%)
+            material.dielectric = 0.04;
+
+            if(useMetallicRoughness)
+            {
+                vec2 mr = texture(metallicRoughness, material.texcoords).xy;
+                material.metallic = mr.x;
+                material.roughness = mr.y;
+            }
+            else
+            {
+                if(useMetallicTex)
+                    material.metallic = texture(metallicTex, material.texcoords).r;
+                else
+                    material.metallic = metallicValue;
+
+                if(useRoughnessTex)
+                    material.roughness = texture(roughnessTex, material.texcoords).r;
+                else
+                    material.roughness = roughnessValue;
+            }
+
+            if(useAmbientOcclusion)
+                material.ambientOcclusion = texture(ambientOcclusionTex, material.texcoords).r;
+            else
+                material.ambientOcclusion = 1.0;
+
+            material.F0 = Fresnel0(material.albedo, material.metallic, material.dielectric);
+
+            if(useEmissiveTex)
+                material.emissive = texture(emissiveTex, material.texcoords).rgb;
+            else
+                material.emissive = emissiveColor.rgb;
+
+            return material;
         }
 
-        if(useAmbientOcclusion)
-            material.ambientOcclusion = texture(ambientOcclusionTex, material.texcoords).r;
-        else
-            material.ambientOcclusion = 1.0;
+        void main(void)
+        {
+            Camera camera = GetCamera();
 
-        material.F0 = Fresnel0(material.albedo, material.metallic, material.dielectric);
+            vec3 worldNormal = GetWorldNormal();
+            Material material = GetMaterial(stdio(uv), camera, worldNormal, GetWorldTangent(worldNormal));
 
-        if(useEmissiveTex)
-            material.emissive = texture(emissiveTex, material.texcoords).rgb;
-        else
-            material.emissive = emissiveColor.rgb;
+            if(alphaCutoff > material.albedo.a)
+                discard;
 
-        return material;
-    }
+            vec3 worldpos = (worldNormal * material.height) + GetWorldPosition();
 
-    void main(void)
-    {
-        Camera camera = GetCamera();
+            vec3 lighting = GetAllLighting(material, camera, worldpos);
+            lighting += FakeIBL(camera, material);
 
-        vec3 worldNormal = GetWorldNormal();
-        Material material = GetMaterial(stdio(uv), camera, worldNormal, GetWorldTangent(worldNormal));
-
-        if(alphaCutoff > material.albedo.a)
-            discard;
-
-        vec3 worldpos = (worldNormal * material.height) + GetWorldPosition();
-
-        vec3 lighting = GetAllLighting(material, camera, worldpos);
-        lighting += FakeIBL(camera, material);
-
-        SubmitOutput(vec4(lighting, 1.0), material.normal, worldpos, material.emissive);
-    }
+            SubmitOutput(vec4(lighting, material.albedo.a), material.normal, worldpos, material.emissive);
+        }
+    #endif
 }

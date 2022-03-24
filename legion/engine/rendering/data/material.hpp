@@ -139,6 +139,8 @@ namespace legion::rendering
         std::unordered_map<id_type, variant_submaterial> m_variants;
     public:
 
+        std::vector<std::reference_wrapper<variant_submaterial>> get_variants();
+
         void reload() { init(m_shader); }
 
         id_type current_variant() const;
@@ -228,6 +230,8 @@ namespace legion::rendering
         id_type id;
 
         id_type current_variant() const;
+
+        std::vector<std::reference_wrapper<variant_submaterial>> get_variants();
 
         bool has_variant(id_type variantId) const;
         bool has_variant(const std::string& variant) const;
