@@ -279,7 +279,6 @@ namespace legion::rendering
         if (!GLAD_GL_ARB_gpu_shader_int64)
         {
             log::error("Could not load extension \"ARB_gpu_shader_int64\" which is required for this renderer.");
-            return false;
         }
 
         log::info("loaded OpenGL version: {}.{}", GLVersion.major, GLVersion.minor);

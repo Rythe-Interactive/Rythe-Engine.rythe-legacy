@@ -94,7 +94,7 @@ namespace legion::rendering
         model.uvBuffer = buffer(GL_ARRAY_BUFFER, mesh_handle->uvs, GL_STATIC_DRAW);
         model.vertexArray.setAttribPointer(model.uvBuffer, SV_TEXCOORD0, 2, GL_FLOAT, false, 0, 0);
 
-        model.vertexArray.setAttribPointer(entityBuffer, SV_ENTITYID, 1, GL_UNSIGNED_INT64_ARB, false, 0, 0);
+        model.vertexArray.setAttribPointer(entityBuffer, SV_ENTITYID, 2, GL_UNSIGNED_INT, false, 0, 0);
         model.vertexArray.setAttribDivisor(SV_ENTITYID, 1);
 
         model.vertexArray.setAttribPointer(matrixBuffer, SV_MODELMATRIX + 0, 4, GL_FLOAT, false, sizeof(math::mat4), 0 * sizeof(math::mat4::col_type));

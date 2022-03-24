@@ -11,6 +11,7 @@ namespace legion::rendering
     {
         ecs::filter<skybox_renderer> filter;
         static id_type matricesId = nameHash("model matrix buffer");
+        static id_type entityBufferId = nameHash("entity id buffer");
         static auto modelHandle = rendering::ModelCache::create_model("Cube", fs::view("assets://models/cube.glb"));
 
         if (filter.empty())
@@ -24,8 +25,12 @@ namespace legion::rendering
         if (!modelMatrixBuffer)
             return;
 
+        buffer* entityIdBuffer = pipeline->get_meta<buffer>(entityBufferId);
+        if (!entityIdBuffer)
+            return;
+
         if (!mesh.buffered)
-            modelHandle.buffer_data(*modelMatrixBuffer);
+            modelHandle.buffer_data(*modelMatrixBuffer, *entityIdBuffer);
 
         modelMatrixBuffer->bufferData(std::vector<math::mat4>{math::mat4(1.f)});
 

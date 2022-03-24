@@ -179,7 +179,7 @@ namespace legion::rendering
             GLint infoLogLength;
             glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &infoLogLength);
             const char* errorMessage;
-            if (infoLogLength > 0 && infoLogLength < 1024)
+            if (infoLogLength > 0 && infoLogLength < 65536)
             {
                 char* temp = new char[infoLogLength + 1];
                 glGetShaderInfoLog(shaderId, infoLogLength, nullptr, temp);
@@ -217,7 +217,7 @@ namespace legion::rendering
             }
 
             log::error("Error compiling {} shader:\n\t{}", shaderTypename, errorMessage);
-            if (infoLogLength > 0 && infoLogLength < 1024)
+            if (infoLogLength > 0 && infoLogLength < 65536)
                 delete[] errorMessage; // Delete message.
 
             glDeleteShader(shaderId); // Delete shader.
@@ -518,7 +518,7 @@ namespace legion::rendering
                 glGetProgramiv(variant.programId, GL_INFO_LOG_LENGTH, &infoLogLength);
 
                 const char* errorMessage;
-                if (infoLogLength > 0 && infoLogLength < 1024)
+                if (infoLogLength > 0 && infoLogLength < 65536)
                 {
                     char* temp = new char[infoLogLength + 1];
                     glGetProgramInfoLog(variant.programId, infoLogLength, nullptr, temp);
@@ -531,7 +531,7 @@ namespace legion::rendering
                 }
 
                 log::error("Error linking invalid shader:\n\t{}", errorMessage);
-                if (infoLogLength > 0 && infoLogLength < 1024)
+                if (infoLogLength > 0 && infoLogLength < 65536)
                     delete[] errorMessage; // Delete message.
 
                 for (auto& id : shaderIds)
@@ -557,7 +557,7 @@ namespace legion::rendering
                 glGetProgramiv(variant.programId, GL_INFO_LOG_LENGTH, &infoLogLength);
 
                 const char* errorMessage;
-                if (infoLogLength > 0 && infoLogLength < 1024)
+                if (infoLogLength > 0 && infoLogLength < 65536)
                 {
                     char* temp = new char[infoLogLength + 1];
                     glGetProgramInfoLog(variant.programId, infoLogLength, nullptr, temp);
@@ -570,7 +570,7 @@ namespace legion::rendering
                 }
 
                 log::error("Error validating invalid shader:\n\t{}", errorMessage);
-                if (infoLogLength > 0 && infoLogLength < 1024)
+                if (infoLogLength > 0 && infoLogLength < 65536)
                     delete[] errorMessage; // Delete message.
 
                 for (auto& shaderId : shaderIds)
@@ -869,7 +869,7 @@ namespace legion::rendering
                 GLint infoLogLength;
                 glGetProgramiv(variant.programId, GL_INFO_LOG_LENGTH, &infoLogLength);
                 const char* errorMessage;
-                if (infoLogLength > 0 && infoLogLength < 1024)
+                if (infoLogLength > 0 && infoLogLength < 65536)
                 {
                     char* temp = new char[infoLogLength + 1];
                     glGetProgramInfoLog(variant.programId, infoLogLength, nullptr, temp);
@@ -882,7 +882,7 @@ namespace legion::rendering
                 }
 
                 log::error("Error linking {} shader:\n\t{}", name, errorMessage);
-                if (infoLogLength > 0 && infoLogLength < 1024)
+                if (infoLogLength > 0 && infoLogLength < 65536)
                     delete[] errorMessage; // Delete message.
 
                 for (auto& id : shaderIds)
@@ -907,7 +907,7 @@ namespace legion::rendering
                 GLint infoLogLength;
                 glGetProgramiv(variant.programId, GL_INFO_LOG_LENGTH, &infoLogLength);
                 const char* errorMessage;
-                if (infoLogLength > 0 && infoLogLength < 1024)
+                if (infoLogLength > 0 && infoLogLength < 65536)
                 {
                     char* temp = new char[infoLogLength + 1];
                     glGetProgramInfoLog(variant.programId, infoLogLength, nullptr, temp);
@@ -920,7 +920,7 @@ namespace legion::rendering
                 }
 
                 log::error("Error validating {} shader:\n\t{}", name, errorMessage);
-                if (infoLogLength > 0 && infoLogLength < 1024)
+                if (infoLogLength > 0 && infoLogLength < 65536)
                     delete[] errorMessage; // Delete message.
 
                 for (auto& shaderId : shaderIds)

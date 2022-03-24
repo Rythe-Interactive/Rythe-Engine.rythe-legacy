@@ -1,8 +1,49 @@
 #include "mousehover.hpp"
+#include <rendering/pipeline/default/stages/framebufferresizestage.hpp>
+
 using namespace legion;
+
+id_type MouseHover::m_hoveredEntityId = invalid_id;
+
+id_type MouseHover::getHoveredEntityId() noexcept
+{
+    return m_hoveredEntityId;
+}
 
 void MouseHover::setup(app::window& context)
 {
+    using namespace rendering;
+
+    float renderScale = FramebufferResizeStage::getRenderScale();
+    m_framebufferSize = context.framebufferSize();
+    m_framebufferSize.x = math::max((int)(m_framebufferSize.x * renderScale), 1);
+    m_framebufferSize.y = math::max((int)(m_framebufferSize.y * renderScale), 1);
+
+    app::context_guard guard(context);
+    if (!guard.contextIsValid())
+        return;
+
+    m_defaultMetaMaterial = MaterialCache::create_material("editor meta", fs::view("assets://shaders/editormeta.shs"));
+
+    m_entityIdTexture = TextureCache::create_texture("entity id texture", m_framebufferSize, {
+        texture_type::two_dimensional, false, channel_format::float_hdr, texture_format::rgba_hdr,
+        texture_components::rgba, false, true, 0, texture_mipmap::linear, texture_mipmap::linear,
+        texture_wrap::repeat, texture_wrap::repeat, texture_wrap::repeat });
+
+    m_depthTexture = TextureCache::create_texture("editor meta depth", m_framebufferSize, {
+        texture_type::two_dimensional, false, channel_format::depth_stencil, texture_format::depth_stencil,
+        texture_components::depth_stencil, false, false, 0, texture_mipmap::linear, texture_mipmap::linear,
+        texture_wrap::repeat, texture_wrap::repeat, texture_wrap::repeat });
+
+    m_fbo = lgn::gfx::framebuffer(GL_FRAMEBUFFER);
+
+    m_fbo.attach(m_entityIdTexture, FRAGMENT_ATTACHMENT);
+    m_fbo.attach(m_depthTexture, GL_DEPTH_STENCIL_ATTACHMENT);
+
+    m_fbo.bind();
+    uint attachments[1] = { FRAGMENT_ATTACHMENT };
+    glDrawBuffers(1, attachments);
+    m_fbo.release();
 }
 
 void MouseHover::render(app::window& context, gfx::camera& cam, const gfx::camera::camera_input& camInput, time::span deltaTime)
@@ -16,10 +57,18 @@ void MouseHover::render(app::window& context, gfx::camera& cam, const gfx::camer
     static id_type lightCountId = nameHash("light count");
     static id_type matricesId = nameHash("model matrix buffer");
     static id_type entityBufferId = nameHash("entity id buffer");
+    static id_type editorMetaVariant = nameHash("editor_meta");
 
-    // Leave this for later implementation, no time rn. (Glyn)
-    // static id_type sceneColorId = nameHash("scene color history");
-    // static id_type sceneDepthId = nameHash("scene depth history");
+    float renderScale = FramebufferResizeStage::getRenderScale();
+    math::ivec2 framebufferSize = context.framebufferSize();
+    framebufferSize.x *= renderScale;
+    framebufferSize.y *= renderScale;
+
+    if (framebufferSize.x == 0 || framebufferSize.y == 0)
+    {
+        abort();
+        return;
+    }
 
     auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<id_type>, std::vector<math::mat4>>>>>(batchesId);
     if (!batches)
@@ -87,7 +136,17 @@ void MouseHover::render(app::window& context, gfx::camera& cam, const gfx::camer
         return;
     }
 
+    if (framebufferSize != m_framebufferSize)
+    {
+        m_framebufferSize = framebufferSize;
+        m_entityIdTexture.get_texture().resize(framebufferSize);
+        m_depthTexture.get_texture().resize(framebufferSize);
+    }
+
     m_fbo.bind();
+
+    glClearColor(0.f, 0.f, 0.f, 0.f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     for (auto [m, instancesPerMaterial] : *batches)
     {
@@ -115,9 +174,12 @@ void MouseHover::render(app::window& context, gfx::camera& cam, const gfx::camer
                     else
                         mater = mesh.materials[submesh.materialIndex];
 
+                    auto currentVariant = mater.current_variant();
                     auto shader = mater.get_shader();
-                    if (!shader.is_valid() || !shader.has_variant(mater.current_variant()))
-                        mater = invalid_material_handle;
+                    if (!shader.is_valid() || !shader.has_variant(editorMetaVariant))
+                        mater = m_defaultMetaMaterial;
+                    else
+                        mater.set_variant(editorMetaVariant);
 
                     camInput.bind(mater);
                     if (mater.has_param<uint>(SV_LIGHTCOUNT))
@@ -160,23 +222,31 @@ void MouseHover::render(app::window& context, gfx::camera& cam, const gfx::camer
                     {
                         mesh.vertexArray.bind();
                         mesh.indexBuffer.bind();
+                        lightsBuffer->bind();
 
                         glDrawElementsInstanced(GL_TRIANGLES, (GLuint)submesh.indexCount, GL_UNSIGNED_INT, (GLvoid*)(submesh.indexOffset * sizeof(uint)), (GLsizei)instances.second.size());
 
+                        lightsBuffer->release();
                         mesh.indexBuffer.release();
                         mesh.vertexArray.release();
                     }
 
                     mater.release();
+
+                    if (mater != m_defaultMetaMaterial)
+                        mater.set_variant(currentVariant);
                 }
             }
             continue;
         }
 
         material_handle material = m;
+        auto currentVariant = material.current_variant();
         auto shader = material.get_shader();
-        if (!shader.is_valid() || !shader.has_variant(material.current_variant()))
-            material = invalid_material_handle;
+        if (!shader.is_valid() || !shader.has_variant(editorMetaVariant))
+            material = m_defaultMetaMaterial;
+        else
+            material.set_variant(editorMetaVariant);
 
         camInput.bind(material);
         if (material.has_param<uint>(SV_LIGHTCOUNT))
@@ -231,18 +301,46 @@ void MouseHover::render(app::window& context, gfx::camera& cam, const gfx::camer
             {
                 mesh.vertexArray.bind();
                 mesh.indexBuffer.bind();
+                lightsBuffer->bind();
 
                 for (auto submesh : mesh.submeshes)
                     glDrawElementsInstanced(GL_TRIANGLES, (GLuint)submesh.indexCount, GL_UNSIGNED_INT, (GLvoid*)(submesh.indexOffset * sizeof(uint)), (GLsizei)instances.second.size());
 
+                lightsBuffer->release();
                 mesh.indexBuffer.release();
                 mesh.vertexArray.release();
             }
         }
 
         material.release();
+
+        if (material != m_defaultMetaMaterial)
+            material.set_variant(currentVariant);
     }
+
+    glFlush();
+    glFinish();
+
+    auto& texture = m_entityIdTexture.get_texture();
+    glBindTexture(static_cast<GLenum>(texture.type), texture.textureId);
+
+    glPixelStoref(GL_UNPACK_ALIGNMENT, 1);
+    math::color hoveredColor = math::colors::transparent;
+
+    auto normalizedMousePos = app::InputSystem::getMousePosition();
+    normalizedMousePos.y = 1.0 - normalizedMousePos.y;
+
+    auto mousePos = math::ivec2(normalizedMousePos * math::dvec2(m_framebufferSize));
+    glReadPixels(mousePos.x, mousePos.y, 1, 1, GL_RGBA, GL_FLOAT, &hoveredColor);
+
+    glBindTexture(static_cast<GLenum>(texture.type), 0);
     m_fbo.release();
+
+    id_type r = static_cast<id_type>(math::iround<float, int64>(hoveredColor.r * 65535.f));
+    id_type g = static_cast<id_type>(math::iround<float, int64>(hoveredColor.g * 65535.f));
+    id_type b = static_cast<id_type>(math::iround<float, int64>(hoveredColor.b * 65535.f));
+    id_type a = static_cast<id_type>(math::iround<float, int64>(hoveredColor.a * 65535.f));
+    m_hoveredEntityId = r | (g << 16ull) | (b << 32ull) | (a << 48ull);
 }
 
 priority_type MouseHover::priority()

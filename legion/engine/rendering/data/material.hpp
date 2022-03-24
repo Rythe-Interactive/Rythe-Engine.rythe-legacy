@@ -135,7 +135,7 @@ namespace legion::rendering
         }
 
         std::string m_name;
-        id_type m_currentVariant = 0;
+        id_type m_currentVariant = nameHash("default");
         std::unordered_map<id_type, variant_submaterial> m_variants;
     public:
 
@@ -286,6 +286,7 @@ namespace legion::rendering
         attribute get_attribute(const std::string& name);
 
         bool operator==(const material_handle& other) const { return id == other.id; }
+        bool operator!=(const material_handle& other) const { return id != other.id; }
     };
 
 

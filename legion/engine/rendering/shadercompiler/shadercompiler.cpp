@@ -282,7 +282,20 @@ namespace legion::rendering
             }
         }
 
-        ilo[variant].emplace_back(glShaderType, std::string(source));
+        auto versionIdx = source.find("#version");
+
+        if (versionIdx == std::string::npos)
+        {
+            m_callback("Shader processor error: no shader version", severity::error);
+            return false;
+        }
+
+        auto versionEnd = source.find_first_of('\n', versionIdx) + 1;
+
+        auto start = source.substr(0, versionEnd);
+        auto rest = source.substr(versionEnd);
+
+        ilo[variant].emplace_back(glShaderType, std::string(start) + "#extension GL_ARB_gpu_shader_int64 : enable\n" + std::string(rest));
         return true;
     }
 

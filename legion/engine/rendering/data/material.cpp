@@ -369,8 +369,13 @@ namespace legion::rendering
         if (!m_shader.has_variant(variantId))
             log::error("Shader {} does not have a variant with id {}", m_shader.get_name(), variantId);
 #endif
-
-        m_currentVariant = variantId;
+        if (variantId == 0)
+        {
+            static id_type defaultId = nameHash("default");
+            m_currentVariant = defaultId;
+        }
+        else
+            m_currentVariant = variantId;
     }
 
     void material::set_variant(const std::string& variant)
