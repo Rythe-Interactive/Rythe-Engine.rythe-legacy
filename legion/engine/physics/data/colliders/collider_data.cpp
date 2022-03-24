@@ -16,5 +16,5 @@ namespace legion::physics
         
     ConvexColliderData::ConvexColliderData(const math::vec3& offset, const math::quat& rotation, void* internalConvexColliderStructure)
         :
-        ColliderData(collider_type::box, offset, rotation), m_internalConvexStructure{ internalConvexColliderStructure } { }
+        ColliderData(collider_type::quickhull_convex, offset, rotation), m_internalConvexStructure{ internalConvexColliderStructure } { }
 }

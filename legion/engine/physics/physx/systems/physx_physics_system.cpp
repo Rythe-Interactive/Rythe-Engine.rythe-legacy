@@ -82,12 +82,16 @@ namespace legion::physics
         convexDesc.points.data = vertices.data();
         convexDesc.flags =
             PxConvexFlag::eCOMPUTE_CONVEX | PxConvexFlag::eDISABLE_MESH_VALIDATION | PxConvexFlag::eFAST_INERTIA_COMPUTATION;
+        convexDesc.vertexLimit = 256;
 
-        #ifdef _DEBUG
-        bool res = PS::cooking->validateConvexMesh(convexDesc);
-        #endif 
+        PxDefaultMemoryOutputStream buf;
+        if (!PS::cooking->cookConvexMesh(convexDesc, buf))
+            return NULL;
 
-        return PS::cooking->createConvexMesh(convexDesc, PS::phyxSDK->getPhysicsInsertionCallback());
+        PxDefaultMemoryInputData input(buf.getData(), buf.getSize());
+        auto convex = PS::phyxSDK->createConvexMesh(input);
+
+        return convex;
     }
 
     void PhysXPhysicsSystem::lazyInitPhysXVariables()
@@ -134,6 +138,8 @@ namespace legion::physics
         m_physicsComponentActionFuncs[physics_component_flag::pc_add_next_box] = &processAddNextBox;
         m_physicsComponentActionFuncs[physics_component_flag::pc_add_first_sphere] = &processAddFirstSphere;
         m_physicsComponentActionFuncs[physics_component_flag::pc_add_next_sphere] = &processAddNextSphere;
+        m_physicsComponentActionFuncs[physics_component_flag::pc_add_first_convex] = &processAddFirstConvex;
+        m_physicsComponentActionFuncs[physics_component_flag::pc_add_next_convex] = &processAddNextConvex;
 
         m_rigidbodyComponentActionFuncs[rigidbody_flag::rb_velocity] = &processVelocityModification;
         m_rigidbodyComponentActionFuncs[rigidbody_flag::rb_mass] = &processMassModification;

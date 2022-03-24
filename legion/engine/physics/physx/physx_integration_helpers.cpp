@@ -79,15 +79,18 @@ namespace legion::physics
 
     DECLARE_STATIC_COLLIDER_TEMPLATE_INSTANTIATION(PxSphereGeometry, float&);
     DECLARE_STATIC_COLLIDER_TEMPLATE_INSTANTIATION(PxBoxGeometry, const PxVec3&);
+    DECLARE_STATIC_COLLIDER_TEMPLATE_INSTANTIATION(PxConvexMeshGeometry, PxConvexMesh*&);
 
 #define DECLARE_DYNAMIC_COLLIDER_TEMPLATE_INSTANTIATION(PxGeometry,...) template void instantiateDynamicActorWith<PxGeometry, __VA_ARGS__>(physx::PxPhysics* sdk, PhysxInternalWrapper& wrapper,const physx::PxTransform& outGlobalTransform, const physx::PxTransform& outLocalTransform, const PhysxEnviromentInfo& sceneInfo, ecs::entity ent, __VA_ARGS__);
 
     DECLARE_DYNAMIC_COLLIDER_TEMPLATE_INSTANTIATION(PxSphereGeometry, float&);
     DECLARE_DYNAMIC_COLLIDER_TEMPLATE_INSTANTIATION(PxBoxGeometry, const PxVec3&);
+    DECLARE_DYNAMIC_COLLIDER_TEMPLATE_INSTANTIATION(PxConvexMeshGeometry, PxConvexMesh*&);
 
 #define DECLARE_NEXT_COLLIDER_TEMPLATE_INSTANTIATION(PxGeometry,...) template void instantiateNextCollider<PxGeometry, __VA_ARGS__>(physx::PxPhysics* sdk, PhysxInternalWrapper& wrapper, const physx::PxTransform& outLocalTransform, const PhysxEnviromentInfo& sceneInfo, __VA_ARGS__);
 
     DECLARE_NEXT_COLLIDER_TEMPLATE_INSTANTIATION(PxSphereGeometry, float&);
     DECLARE_NEXT_COLLIDER_TEMPLATE_INSTANTIATION(PxBoxGeometry, const PxVec3&);
+    DECLARE_NEXT_COLLIDER_TEMPLATE_INSTANTIATION(PxConvexMeshGeometry, PxConvexMesh*&);
 
 }

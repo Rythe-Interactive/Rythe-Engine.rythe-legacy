@@ -29,13 +29,14 @@ namespace legion::physics
             AddBoxCollider(extents, math::vec3(0.0f), math::identity<math::quat>());
         }
 
-        L_ALWAYS_INLINE void AddConvexCollider(const std::vector<math::vec3>& vertices, const math::vec3& offset, const math::quat& rotation)
+        void AddConvexCollider(const std::vector<math::vec3>& vertices, const math::vec3& offset, const math::quat& rotation)
         {
             //convex colliders depend on an external vertex array, needs to be handled immediately 
-            void* convexCollider = m_generateConvexColliderFunc(vertices);
+            void* convexColliderPtr = m_generateConvexColliderFunc(vertices);
 
-            if (convexCollider)
+            if (convexColliderPtr)
             {
+                m_convexColliderData.push_back(ConvexColliderData(offset, rotation, convexColliderPtr));
                 updateColliderRecords(physics_component_flag::pc_add_first_convex, physics_component_flag::pc_add_next_convex);
             }
             else
