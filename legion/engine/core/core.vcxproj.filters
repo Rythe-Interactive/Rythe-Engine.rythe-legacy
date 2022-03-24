@@ -46,6 +46,7 @@
     <ClCompile Include="serialization\serializer_views\bson.cpp" />
     <ClCompile Include="serialization\serializer_views\yaml.cpp" />
     <ClCompile Include="serialization\serializationregistry.cpp" />
+    <ClCompile Include="autogen\autogen.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="async\async.hpp" />
@@ -459,6 +460,8 @@
     <ClInclude Include="serialization\serializer_views\yaml.hpp" />
     <ClInclude Include="serialization\serializer_views\json.hpp" />
     <ClInclude Include="serialization\serializer_views\bson.hpp" />
+    <ClInclude Include="types\attributes.hpp" />
+    <ClInclude Include="autogen\autogen.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="platform\cpp.hint" />

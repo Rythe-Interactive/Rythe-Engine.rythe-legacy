@@ -6,58 +6,13 @@
 
 #include <core/ecs/handles/entity.hpp>
 
-namespace legion
-{
-    struct reflectable_attribute {};
-#define reflectable reflectable_attribute
-}
-
-struct [[legion::reflectable]] example_comp 
-{
-    int value = 1;
-};
-
 namespace legion::core
 {
-    template<>
-    L_NODISCARD reflector make_reflector<example_comp>(example_comp& obj)
+    struct [[lgn::reflectable]] example_comp
     {
-        reflector refl;
-        refl.typeId = typeHash<example_comp>();
-        refl.typeName = "example_comp";
-        refl.members = std::vector<member_reference>
-        {
-            member_reference
-            {
-                "value",
-                primitive_reference{ typeHash<int>(), &obj.value }
-            }
-        };
-        refl.data = std::addressof(obj);
-        return refl;
-    }
-
-    template<>
-    L_NODISCARD const reflector make_reflector<const example_comp>(const example_comp& obj)
-    {
-        ptr_type adress = reinterpret_cast<ptr_type>(std::addressof(obj));
-        reflector refl;
-        refl.typeId = typeHash<example_comp>();
-        refl.typeName = "example_comp";
-        refl.members = std::vector<member_reference>
-        {
-            member_reference
-            {
-                "value",
-                primitive_reference{ typeHash<int>(), &obj.value }
-            }
-        };
-        refl.data = reinterpret_cast<void*>(adress);
-        return refl;
-    }
+        int value = 1;
+    };
 }
-
-#include <core/serialization/serialization.hpp>
 
 class ExampleSystem final : public legion::System<ExampleSystem>
 {
@@ -97,14 +52,14 @@ public:
         //Serialization Test
         srl::SerializerRegistry::registerSerializer<example_comp>();
         srl::SerializerRegistry::registerSerializer<ecs::entity>();
-        //srl::SerializerRegistry::registerSerializer<position>();
-        //srl::SerializerRegistry::registerSerializer<rotation>();
-        //srl::SerializerRegistry::registerSerializer<velocity>();
-        //srl::SerializerRegistry::registerSerializer<scale>();
+        srl::SerializerRegistry::registerSerializer<position>();
+        srl::SerializerRegistry::registerSerializer<rotation>();
+        srl::SerializerRegistry::registerSerializer<velocity>();
+        srl::SerializerRegistry::registerSerializer<scale>();
 
         auto rootEnt = createEntity();
         rootEnt->name = "Root";
-        rootEnt.add_component<example_comp>();
+        auto comp = rootEnt.add_component<example_comp>();
 
         for (int i = 0; i < 3; i++)
         {
@@ -116,7 +71,13 @@ public:
                 child.add_child(child2);
                 if (j == 0)
                     child2.add_component(example_comp{ i });
+                if (i == 0)
+                    child2.add_component<velocity>();
+                if (i == 1)
+                    child2.add_component<rotation>();
             }
+            if (i == 0)
+                rootEnt.add_component<position>();
         }
 
         srl::write<srl::yaml>(fs::view("assets://scenes/scene1.yaml"), rootEnt, "scene");

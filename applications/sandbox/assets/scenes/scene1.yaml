@@ -13,15 +13,16 @@ scene:
                     children:
                         []
                     components:
-                        -   type_name: example_comp
+                        -   type_name: legion::core::example_comp
                             value: 0
+                        -   type_name: legion::core::velocity
                 -   type_name: legion::core::ecs::entity_data
                     name: 9
                     active: true
                     children:
                         []
                     components:
-                        []
+                        -   type_name: legion::core::velocity
             components:
                 []
         -   type_name: legion::core::ecs::entity_data
@@ -34,15 +35,16 @@ scene:
                     children:
                         []
                     components:
-                        -   type_name: example_comp
+                        -   type_name: legion::core::example_comp
                             value: 1
+                        -   type_name: legion::core::rotation
                 -   type_name: legion::core::ecs::entity_data
                     name: 12
                     active: true
                     children:
                         []
                     components:
-                        []
+                        -   type_name: legion::core::rotation
             components:
                 []
         -   type_name: legion::core::ecs::entity_data
@@ -55,7 +57,7 @@ scene:
                     children:
                         []
                     components:
-                        -   type_name: example_comp
+                        -   type_name: legion::core::example_comp
                             value: 2
                 -   type_name: legion::core::ecs::entity_data
                     name: 15
@@ -67,5 +69,6 @@ scene:
             components:
                 []
     components:
-        -   type_name: example_comp
+        -   type_name: legion::core::example_comp
             value: 1
+        -   type_name: legion::core::position

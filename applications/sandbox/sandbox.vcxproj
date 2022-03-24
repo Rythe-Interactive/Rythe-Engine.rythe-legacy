@@ -81,6 +81,14 @@
       <AdditionalDependencies>legion-application.lib;legion-audio.lib;legion-core.lib;legion-networking.lib;legion-physics.lib;legion-rendering.lib;legion-scripting.lib;OpenCL.lib;OpenAL32.lib;glfw3.lib;%(AdditionalDependencies);mono-2.0-sgen.lib;OptickCore.lib</AdditionalDependencies>
       -->
     </Link>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>
+      </Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -107,12 +115,20 @@
       <AdditionalDependencies>legion-application.lib;legion-audio.lib;legion-core.lib;legion-networking.lib;legion-physics.lib;legion-rendering.lib;legion-scripting.lib;OpenCL.lib;OpenAL32.lib;glfw3.lib;%(AdditionalDependencies);mono-2.0-sgen.lib;OptickCore.lib</AdditionalDependencies>
       -->
     </Link>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="autogen\autogen.cpp" />
     <ClCompile Include="source.cpp" />
     <ClCompile Include="systems\gui_test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="autogen\autogen.hpp" />
     <ClInclude Include="data\pp_bloom.hpp" />
     <ClInclude Include="data\pp_edgedetect.hpp" />
     <ClInclude Include="module\examplemodule.hpp" />
