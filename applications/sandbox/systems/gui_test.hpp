@@ -8,6 +8,8 @@
 #include <rendering/pipeline/gui/stages/imguirenderstage.hpp>
 #include <rendering/systems/renderer.hpp>
 
+#include "../renderstages/mousehover.hpp"
+
 LEGION_CLANG_SUPPRESS_WARNING_WITH_PUSH("-Wdeprecated-declarations")
 
 namespace legion
@@ -16,9 +18,14 @@ namespace legion
     using namespace legion::core::filesystem::literals;
     //using namespace legion::core::scenemanagement;
 
+    struct click_action : public app::input_action<click_action> {};
+
     class GuiTestSystem : public System<GuiTestSystem>
     {
         static bool captured;
+
+        bool clicked = false;
+
     public:
         static bool isEditingText;
 
@@ -39,9 +46,19 @@ namespace legion
         math::mat4 projection = math::mat4(1.0f);
         math::mat4 model = math::mat4(1.0f);
 
+
+        void onClick(click_action& event)
+        {
+            if (event.released())
+                clicked = true;
+        }
+
         void setup()
         {
             static_cast<DefaultPipeline*>(Renderer::getMainPipeline())->attachStage<ImGuiStage>();
+
+            app::InputSystem::createBinding<click_action>(app::inputmap::method::MOUSE_LEFT);
+            bindToEvent<click_action, &GuiTestSystem::onClick>();
 
             //gui code goes here
             ImGuiStage::addGuiRender<GuiTestSystem, &GuiTestSystem::onGUI>(this);
@@ -64,7 +81,6 @@ namespace legion
             }
 
             auto decalEntity = createEntity("Decal");
-            selected = decalEntity;
 
             position pos(5.f, 0.f, 5.f);
             scale scal(3.f, 2.f, 3.f);
@@ -573,6 +589,17 @@ namespace legion
               //  SceneManager::currentScene = SceneManager::create_scene();
 
             ImGuiIO& io = ImGui::GetIO();
+
+            if (clicked && !io.MouseDownOwned[0])
+            {
+                auto selectedId = MouseHover::getHoveredEntityId();
+                if (selectedId != invalid_id)
+                    selected = ecs::Registry::getEntity(selectedId);
+                else
+                    selected = ecs::entity();
+            }
+
+            clicked = false;
 
             if (captured)
             {
