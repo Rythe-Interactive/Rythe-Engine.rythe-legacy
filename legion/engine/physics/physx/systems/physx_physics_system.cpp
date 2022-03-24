@@ -10,6 +10,24 @@ namespace legion::physics
 {
     using namespace physx;
 
+    static void debugDrawPhysXScene(PxScene* sceneToDraw)
+    {
+        const PxRenderBuffer& rb = sceneToDraw->getRenderBuffer();
+        for (PxU32 i = 0; i < rb.getNbLines(); i++)
+        {
+            const PxDebugLine& line = rb.getLines()[i];
+            // render the line
+
+            const PxVec3& pxStart = line.pos0;
+            const PxVec3& pxEnd = line.pos1;
+
+            math::vec3 start{ pxStart.x, pxStart.y, pxStart.z };
+            math::vec3 end{ pxEnd.x, pxEnd.y,pxEnd.z };
+
+            debug::drawLine(start, end, math::colors::green, 1.0f, 0.0f);
+        }
+    }
+
     struct PhysxStatics
     {
         inline static size_type selfInstanceCounter = 0;
@@ -132,6 +150,9 @@ namespace legion::physics
 
         m_physxScene = PS::physxSDK->createScene(sceneDesc);
         m_defaultMaterial = PS::physxSDK->createMaterial(0.5f, 0.5f, 0.1f);
+
+        m_physxScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
+        m_physxScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES, 2.0f);
     }
 
     void PhysXPhysicsSystem::bindEventsToEventProcessors()
@@ -176,6 +197,8 @@ namespace legion::physics
             physicsStep();
             ++tickAmount;
         }
+
+        debugDrawPhysXScene(m_physxScene);
     }
 
     void PhysXPhysicsSystem::physicsStep()
