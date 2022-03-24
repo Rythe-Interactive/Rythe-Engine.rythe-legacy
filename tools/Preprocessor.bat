@@ -1,3 +1,3 @@
 cd ".\RythePreprocessor\"
-RytheTributary -moduleroot=..\..\legion\engine\core -include=..\..\deps\include -ex=deps -ex=glm -ex=autogen
+RytheTributary -moduleroot=..\..\legion\engine\ -include=..\..\deps\include -module="core" -ex=deps -ex=glm -ex=autogen
 pause
