@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="autogen\autogen.cpp" />
     <ClCompile Include="components\light.cpp" />
     <ClCompile Include="data\buffer.cpp" />
     <ClCompile Include="data\framebuffer.cpp" />
@@ -56,6 +57,7 @@
     <ClCompile Include="systems\renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="autogen\autogen.hpp" />
     <ClInclude Include="components\camera.hpp" />
     <ClInclude Include="components\light.hpp" />
     <ClInclude Include="components\point.hpp" />

@@ -43,6 +43,7 @@
     <ClCompile Include="pipeline\default\postfx\bloom.cpp" />
     <ClCompile Include="pipeline\default\postfx\depthoffield.cpp" />
     <ClCompile Include="pipeline\default\stages\skybox.cpp" />
+    <ClCompile Include="autogen\autogen.cpp" />
     <ClCompile Include="pipeline\default\stages\transparencyrenderstage.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -89,6 +90,7 @@
     <ClInclude Include="components\point.hpp" />
     <ClInclude Include="pipeline\default\postfx\bloom.hpp" />
     <ClInclude Include="pipeline\default\postfx\depthoffield.hpp" />
+    <ClInclude Include="autogen\autogen.hpp" />
     <ClInclude Include="pipeline\default\stages\skybox.hpp" />
     <ClInclude Include="pipeline\default\stages\transparencyrenderstage.hpp" />
   </ItemGroup>

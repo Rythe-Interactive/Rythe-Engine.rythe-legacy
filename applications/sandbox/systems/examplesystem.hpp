@@ -7,10 +7,13 @@
 #include "../renderstages/mousehover.hpp"
 #include "gui_test.hpp"
 
-struct example_comp
+namespace legion::core
 {
-
-};
+    struct [[lgn::reflectable]] example_comp
+    {
+        int value = 1;
+    };
+}
 
 struct tonemap_action : public lgn::app::input_action<tonemap_action> {};
 struct reload_shaders_action : public lgn::app::input_action<reload_shaders_action> {};
@@ -291,6 +294,14 @@ public:
             scal = math::vec3(3.f);
             ent.add_component(gfx::mesh_renderer(material, model));
         }
+
+        //Serialization Test
+        srl::SerializerRegistry::registerSerializer<example_comp>();
+        srl::SerializerRegistry::registerSerializer<ecs::entity>();
+        srl::SerializerRegistry::registerSerializer<position>();
+        srl::SerializerRegistry::registerSerializer<rotation>();
+        srl::SerializerRegistry::registerSerializer<velocity>();
+        srl::SerializerRegistry::registerSerializer<scale>();
 
         bindToEvent<events::exit, &ExampleSystem::onExit>();
     }

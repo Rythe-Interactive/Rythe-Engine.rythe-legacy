@@ -10,3 +10,6 @@
 #include <core/types/meta.hpp>
 #include <core/types/reflector.hpp>
 #include <core/types/prototype.hpp>
+#include <core/types/attributes.hpp>
+
+#define reflectable reflectable_attribute
