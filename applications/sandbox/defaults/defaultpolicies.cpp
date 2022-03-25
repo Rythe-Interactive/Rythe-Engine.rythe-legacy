@@ -151,7 +151,7 @@ namespace legion::core
         if (!emitter.has_uniform<bounds>("Bounds"))
             emitter.create_uniform<bounds>("Bounds", bounds{ position(-20.f),position(20.f), 5.f });
         if (!emitter.has_uniform<float>("visionRadius"))
-            emitter.create_uniform<float>("visionRadius", 10.f);
+            emitter.create_uniform<float>("visionRadius", 5.f);
         if (!emitter.has_uniform<float>("visionAngle"))
             emitter.create_uniform<float>("visionAngle", 45.f);
         if (!emitter.has_uniform<float>("speed"))
@@ -169,29 +169,26 @@ namespace legion::core
             emitter.create_buffer<std::vector<id_type>>("spatialGrid");
         if (!emitter.has_buffer<math::vec3>("steeringBuffer"))
             emitter.create_buffer<math::vec3>("steeringBuffer");
-        if (!emitter.has_buffer<math::vec3>("accelBuffer"))
-            emitter.create_buffer<math::vec3>("accelBuffer");
     }
     void locomotion_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
     {
         auto& bnds = emitter.get_uniform<bounds>("Bounds");
-
+        auto& speed = emitter.get_uniform<float>("speed");
         auto& posBuffer = emitter.get_buffer<position>("posBuffer");
         auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
-        auto& rotBuffer = emitter.get_buffer<rotation>("rotBuffer");
         auto& steering = emitter.get_buffer<math::vec3>("steeringBuffer");
 
         for (size_type idx = start; idx < end; idx++)
         {
             posBuffer[idx] = math::linearRand(bnds.min + math::vec3(bnds.border), bnds.max - math::vec3(bnds.border));
-            steering[idx] = math::sphericalRand(1.0f);
+            velBuffer[idx] = math::sphericalRand(1.0f) * speed;
+            steering[idx] = velBuffer[idx];
         }
     }
     void locomotion_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
     {
         auto& posBuffer = emitter.get_buffer<position>("posBuffer");
         auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
-        auto& accelBuffer = emitter.get_buffer<math::vec3>("accelBuffer");
         auto& rotBuffer = emitter.get_buffer<rotation>("rotBuffer");
         auto& spatialGrid = emitter.get_buffer<std::vector<id_type>>("spatialGrid");
         auto& visionRadius = emitter.get_uniform<float>("visionRadius");
@@ -207,10 +204,11 @@ namespace legion::core
             auto& pos = posBuffer[idx];
 
             //Particle Integration
-            velBuffer[idx] = math::lerp(velBuffer[idx], math::normalize(steering[idx]), deltaTime);
+            velBuffer[idx] = math::max(math::normalize(velBuffer[idx]) * speed, math::lerp(velBuffer[idx], steering[idx], deltaTime));
             debug::drawLine(pos, pos + velBuffer[idx]);
             rotBuffer[idx] = math::quatLookAt(math::normalize(velBuffer[idx]), math::vec3::up);
             pos += velBuffer[idx] * speed * deltaTime;
+            steering[idx] = velBuffer[idx];
 
             if (pos.x < bnds.min.x)
                 pos.x = bnds.max.x;
@@ -242,22 +240,11 @@ namespace legion::core
     }
 #pragma endregion
 #pragma region Seperation
-    void seperation_policy::setup(particle_emitter& emitter)
-    {
-    }
-    void seperation_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
-    {
-
-    }
     void seperation_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
     {
         auto& posBuffer = emitter.get_buffer<position>("posBuffer");
         auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
-        auto& bnds = emitter.get_uniform<bounds>("Bounds");
-        auto& visionRadius = emitter.get_uniform<float>("visionRadius");
-        auto& speed = emitter.get_uniform<float>("speed");
         auto& steering = emitter.get_buffer<math::vec3>("steeringBuffer");
-
         auto& spatialGrid = emitter.get_buffer<std::vector<id_type>>("spatialGrid");
 
         for (size_type idx = 0; idx < count; idx++)
@@ -270,32 +257,25 @@ namespace legion::core
             for (size_type neighbor = 0; neighbor < spatialGrid[idx].size(); neighbor++)
             {
                 auto& neighborPos = posBuffer[spatialGrid[idx][neighbor]];
-                auto diff = pos - neighborPos;
-                if (diff.length() < 1.f)
-                    force += diff * (1 / diff.length());
+                auto diff = (pos - neighborPos).xyz();
+                if (math::length(diff) < 3.f)
+                {
+                    force += diff;
+                    debug::drawLine(pos, neighborPos, math::colors::magenta);
+                }
             }
             steering[idx] += force / spatialGrid[idx].size();
-            legion::debug::drawLine(pos, pos + steering[idx], math::colors::red);
+            legion::debug::drawLine(pos, pos + (force / spatialGrid[idx].size()), math::colors::red);
         }
     }
 
 #pragma endregion
 #pragma region Alignment
-    void alignment_policy::setup(particle_emitter& emitter)
-    {
-    }
-    void alignment_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
-    {
-    }
     void alignment_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
     {
         auto& posBuffer = emitter.get_buffer<position>("posBuffer");
         auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
-        auto& bnds = emitter.get_uniform<bounds>("Bounds");
-        auto& visionRadius = emitter.get_uniform<float>("visionRadius");
-        auto& speed = emitter.get_uniform<float>("speed");
         auto& steering = emitter.get_buffer<math::vec3>("steeringBuffer");
-
         auto& spatialGrid = emitter.get_buffer<std::vector<id_type>>("spatialGrid");
 
         for (size_type idx = 0; idx < count; idx++)
@@ -312,7 +292,7 @@ namespace legion::core
             steering[idx] += force / spatialGrid[idx].size();
             steering[idx] -= velBuffer[idx].xyz();
             auto& pos = posBuffer[idx];
-            legion::debug::drawLine(pos, pos + steering[idx], math::colors::green);
+            legion::debug::drawLine(pos, pos + (force / spatialGrid[idx].size()), math::colors::green);
         }
     }
 #pragma endregion
