@@ -661,11 +661,22 @@ namespace legion::rendering
 
     void ShaderCache::delete_shader(const std::string& name)
     {
-        delete_shader(nameHash(name));
+        log::debug("Destroyed shader {}", name);
+        auto id = nameHash(name);
+
+        async::readonly_guard guard(m_shaderLock);
+        if (m_shaders.contains(id))
+        {
+            shader temp = std::move(m_shaders.at(id));
+            for (auto& [id, variant] : temp.m_variants)
+                glDeleteProgram(variant.programId);
+            m_shaders.erase(id);
+        }
     }
 
     void ShaderCache::delete_shader(id_type id)
     {
+        log::debug("Destroyed shader with id: {}", id);
         async::readonly_guard guard(m_shaderLock);
         if (m_shaders.contains(id))
         {

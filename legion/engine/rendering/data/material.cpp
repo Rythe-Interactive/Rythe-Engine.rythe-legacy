@@ -195,11 +195,16 @@ namespace legion::rendering
 
     void MaterialCache::delete_material(const std::string& name)
     {
-        delete_material(nameHash(name));
+        log::debug("Destroyed material {}", name);
+        auto id = nameHash(name);
+
+        async::readwrite_guard guard(MaterialCache::m_materialLock);
+        m_materials.erase(id);
     }
 
     void MaterialCache::delete_material(id_type id)
     {
+        log::debug("Destroyed material with id: {}", id);
         async::readwrite_guard guard(MaterialCache::m_materialLock);
         m_materials.erase(id);
     }

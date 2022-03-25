@@ -218,7 +218,6 @@ namespace legion
             bool loadTexture = false;
             bool loadModel = false;
             bool loadMaterial = false;
-            bool loadShader = false;
 
             static char buffer[512];
             static shader_handle shader;
@@ -285,10 +284,7 @@ namespace legion
                 ImGui::OpenPopup("Load Model");
 
             if (loadMaterial)
-            {
                 ImGui::OpenPopup("New Material");
-                loadMaterial = false;
-            }
 
             if (ImGui::BeginPopupModal("New Material"))
             {
@@ -306,9 +302,23 @@ namespace legion
                 ImGui::SameLine();
                 ImGui::InputText("##shader", shaderName.data(), shaderName.size(), ImGuiInputTextFlags_ReadOnly);
                 ImGui::SameLine();
+
                 if (ImGui::Button("Load Shader"))
                 {
-                    loadShader = true;
+                    ImGui::OpenPopup("Load Shader");
+                }
+
+                if (browser.showFileDialog("Load Shader", imgui::filebrowser::ImGuiFileBrowser::DialogMode::OPEN))
+                {
+                    if (ShaderCache::has_shader(browser.selected_fn))
+                    {
+                        shader = ShaderCache::get_handle(browser.selected_fn);
+                    }
+                    else
+                    {
+                        createdNewShader = true;
+                        shader = ShaderCache::create_shader(browser.selected_fn, fs::view(browser.selected_path));
+                    }
                 }
 
                 if (shader != invalid_shader_handle && material == invalid_material_handle)
@@ -395,9 +405,6 @@ namespace legion
                 ImGui::EndPopup();
             }
 
-            if(loadShader)
-                ImGui::OpenPopup("Load Shader");
-
             if (browser.showFileDialog("Load Texture", imgui::filebrowser::ImGuiFileBrowser::DialogMode::OPEN))
             {
                 TextureCache::create_texture(browser.selected_fn, fs::view(browser.selected_path));
@@ -407,23 +414,6 @@ namespace legion
             {
                 ModelCache::create_model(browser.selected_fn, fs::view(browser.selected_path));
             }
-
-            if (browser.showFileDialog("Load Shader", imgui::filebrowser::ImGuiFileBrowser::DialogMode::OPEN))
-            {
-                if (ShaderCache::has_shader(browser.selected_fn))
-                {
-                    shader = ShaderCache::get_handle(browser.selected_fn);
-                }
-                else
-                {
-                    createdNewShader = true;
-                    shader = ShaderCache::create_shader(browser.selected_fn, fs::view(browser.selected_path));
-                }
-                loadMaterial = true;
-            }
-
-            if (loadMaterial)
-                ImGui::OpenPopup("New Material");
         }
 
         template<typename Vec>
