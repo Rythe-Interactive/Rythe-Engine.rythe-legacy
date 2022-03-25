@@ -127,3 +127,6 @@ docs/venv
 **/__pycache__/**
 **/imgui.ini
 legion/engine/core/Output.txt
+tools/RythePreprocessor/net5.0
+tools/RythePreprocessor/Output.txt
+tools/RythePreprocessor/Output.txt
