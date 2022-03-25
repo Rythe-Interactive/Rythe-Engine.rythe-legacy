@@ -45,7 +45,7 @@ namespace legion
         math::mat4 view = math::mat4(1.0f);
         math::mat4 projection = math::mat4(1.0f);
         math::mat4 model = math::mat4(1.0f);
-
+        imgui::filebrowser::ImGuiFileBrowser browser;
 
         void onClick(click_action& event)
         {
@@ -215,43 +215,215 @@ namespace legion
 
         void DisplayFileHandling()
         {
+            bool loadTexture = false;
+            bool loadModel = false;
+            bool loadMaterial = false;
+            bool loadShader = false;
+
+            static char buffer[512];
+            static shader_handle shader;
+            static bool createdNewShader = false;
+            static material_handle material;
+
             if (ImGui::BeginMainMenuBar())
             {
-                //if (ImGui::BeginMenu("File"))
-                //{
-                //    if (ImGui::BeginMenu("Save Scene"))
-                //    {
-                //        if (!SceneManager::currentScene)
-                //        {
-                //            SceneManager::currentScene = SceneManager::create_scene();
-                //        }
-                //        auto sceneEntity = SceneManager::currentScene.entity;
-                //        std::string sceneName = sceneEntity.get_name();
+                if (ImGui::BeginMenu("File"))
+                {
+                    if (ImGui::MenuItem("New Texture"))
+                        loadTexture = true;
 
-                //        std::string text = "Save scene as:";
-                //        text += sceneName;
-                //        if (ImGui::Button(text.c_str()))
-                //        {
-                //            SceneManager::create_scene(sceneName, sceneEntity);
-                //        }
-                //        ImGui::EndMenu();
-                //    }
+                    if (ImGui::MenuItem("New Model"))
+                        loadModel = true;
+                    
+                    if (ImGui::MenuItem("New Material"))
+                    {
+                        memset(buffer, '\0', 512);
+                        shader = invalid_shader_handle;
+                        material = invalid_material_handle;
+                        createdNewShader = false;
+                        loadMaterial = true;
+                    }
 
-                //    if (ImGui::BeginMenu("Load Scene"))
-                //    {
-                //        for (auto& [id, name] : SceneManager::sceneNames)
-                //        {
-                //            if (id && ImGui::MenuItem(name.c_str()))
-                //            {
-                //                SceneManager::load_scene(name);
-                //            }
-                //        }
-                //        ImGui::EndMenu();
-                //    }
-                //    ImGui::EndMenu();
-                //}
+                    //if (ImGui::BeginMenu("Save Scene"))
+                    //{
+                    //    if (!SceneManager::currentScene)
+                    //    {
+                    //        SceneManager::currentScene = SceneManager::create_scene();
+                    //    }
+                    //    auto sceneEntity = SceneManager::currentScene.entity;
+                    //    std::string sceneName = sceneEntity.get_name();
+
+                    //    std::string text = "Save scene as:";
+                    //    text += sceneName;
+                    //    if (ImGui::Button(text.c_str()))
+                    //    {
+                    //        SceneManager::create_scene(sceneName, sceneEntity);
+                    //    }
+                    //    ImGui::EndMenu();
+                    //}
+
+                    //if (ImGui::BeginMenu("Load Scene"))
+                    //{
+                    //    for (auto& [id, name] : SceneManager::sceneNames)
+                    //    {
+                    //        if (id && ImGui::MenuItem(name.c_str()))
+                    //        {
+                    //            SceneManager::load_scene(name);
+                    //        }
+                    //    }
+                    //    ImGui::EndMenu();
+                    //}
+                    ImGui::EndMenu();
+                }
                 ImGui::EndMainMenuBar();
             }
+
+            if (loadTexture)
+                ImGui::OpenPopup("Load Texture");
+
+            if (loadModel)
+                ImGui::OpenPopup("Load Model");
+
+            if (loadMaterial)
+            {
+                ImGui::OpenPopup("New Material");
+                loadMaterial = false;
+            }
+
+            if (ImGui::BeginPopupModal("New Material"))
+            {
+                ImGui::Text("Material name:");
+                ImGui::SameLine();
+                ImGui::InputText("##material", buffer, 512, ImGuiInputTextFlags_EnterReturnsTrue);
+
+                ImGui::Text("Shader:");
+
+                std::string shaderName;
+
+                if (shader != invalid_shader_handle)
+                    shaderName = shader.get_name();
+
+                ImGui::SameLine();
+                ImGui::InputText("##shader", shaderName.data(), shaderName.size(), ImGuiInputTextFlags_ReadOnly);
+                ImGui::SameLine();
+                if (ImGui::Button("Load Shader"))
+                {
+                    loadShader = true;
+                }
+
+                if (shader != invalid_shader_handle && material == invalid_material_handle)
+                {
+                    material = MaterialCache::create_material("_internal_tmp_material_", shader);
+                }
+
+                if (material != invalid_material_handle)
+                {
+                    ImGui::Indent();
+
+                    auto variants = material.get_variants();
+
+                    int currentVariantIdx;
+
+                    auto currentVariant = material.current_variant();
+                    if (currentVariant == 0)
+                        currentVariant = nameHash("default");
+
+                    std::vector<cstring> variantNames;
+                    variantNames.reserve(variants.size());
+                    for (size_type i = 0; i < variants.size(); i++)
+                    {
+                        variantNames.push_back(variants[i].get().name.c_str());
+                        if (nameHash(variants[i].get().name) == currentVariant)
+                            currentVariantIdx = i;
+                    }
+
+                    ImGui::Text("Variant:");
+                    ImGui::SameLine();
+                    if (ImGui::Combo("##variant", &currentVariantIdx, variantNames.data(), variantNames.size()))
+                    {
+                        material.set_variant(variantNames[currentVariantIdx]);
+                    }
+
+                    for (auto& [id, paramPtr] : variants[currentVariantIdx].get().parameters)
+                    {
+                        DisplayParamEditor(material, paramPtr->get_name(), paramPtr->type());
+                    }
+
+                    ImGui::Unindent();
+                }
+
+                if (ImGui::Button("Confirm"))
+                {
+                    auto newMat = MaterialCache::create_material(buffer, shader);
+
+                    auto variants = material.get_variants();
+                    auto newVariants = newMat.get_variants();
+                    for (size_type i = 0; i < variants.size(); i++)
+                    {
+                        auto& variant = variants[i].get();
+                        auto& newVariant = newVariants[i].get();
+
+                        for (auto& [id, ptr] : variant.parameters)
+                        {
+                            newVariant.parameters[id].swap(ptr);
+                        }
+                    }
+
+                    material.destroy();
+
+                    memset(buffer, '\0', 512);
+                    shader = invalid_shader_handle;
+                    material = invalid_material_handle;
+                    createdNewShader = false;
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Cancel"))
+                {
+                    material.destroy();
+
+                    if (createdNewShader)
+                        shader.destroy();
+
+                    memset(buffer, '\0', 512);
+                    shader = invalid_shader_handle;
+                    material = invalid_material_handle;
+                    createdNewShader = false;
+                    ImGui::CloseCurrentPopup();
+                }
+
+                ImGui::EndPopup();
+            }
+
+            if(loadShader)
+                ImGui::OpenPopup("Load Shader");
+
+            if (browser.showFileDialog("Load Texture", imgui::filebrowser::ImGuiFileBrowser::DialogMode::OPEN))
+            {
+                TextureCache::create_texture(browser.selected_fn, fs::view(browser.selected_path));
+            }
+
+            if (browser.showFileDialog("Load Model", imgui::filebrowser::ImGuiFileBrowser::DialogMode::OPEN))
+            {
+                ModelCache::create_model(browser.selected_fn, fs::view(browser.selected_path));
+            }
+
+            if (browser.showFileDialog("Load Shader", imgui::filebrowser::ImGuiFileBrowser::DialogMode::OPEN))
+            {
+                if (ShaderCache::has_shader(browser.selected_fn))
+                {
+                    shader = ShaderCache::get_handle(browser.selected_fn);
+                }
+                else
+                {
+                    createdNewShader = true;
+                    shader = ShaderCache::create_shader(browser.selected_fn, fs::view(browser.selected_path));
+                }
+                loadMaterial = true;
+            }
+
+            if (loadMaterial)
+                ImGui::OpenPopup("New Material");
         }
 
         template<typename Vec>

@@ -240,6 +240,8 @@ namespace legion::rendering
 
         L_NODISCARD shader_handle get_shader();
 
+        void destroy();
+
         /**@brief Bind the material to the rendering context and prepare for use.
          */
         void bind();
@@ -331,6 +333,9 @@ namespace legion::rendering
         static material_handle get_material(const std::string& name);
 
         static std::pair<async::rw_spinlock&, std::unordered_map<id_type, material>&> get_all_materials();
+
+        static void delete_material(const std::string& name);
+        static void delete_material(id_type id);
     };
 
 #pragma region implementations

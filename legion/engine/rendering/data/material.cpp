@@ -193,6 +193,17 @@ namespace legion::rendering
         return std::make_pair(std::ref(m_materialLock), std::ref(m_materials));
     }
 
+    void MaterialCache::delete_material(const std::string& name)
+    {
+        delete_material(nameHash(name));
+    }
+
+    void MaterialCache::delete_material(id_type id)
+    {
+        async::readwrite_guard guard(MaterialCache::m_materialLock);
+        m_materials.erase(id);
+    }
+
     material_handle MaterialCache::get_material(const std::string& name)
     {
         id_type id = nameHash(name);
@@ -291,6 +302,11 @@ namespace legion::rendering
 #endif
 
         return MaterialCache::m_materials.at(id).m_shader;
+    }
+
+    void material_handle::destroy()
+    {
+        MaterialCache::delete_material(id);
     }
 
     void material_handle::bind()
