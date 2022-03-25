@@ -104,6 +104,5 @@ namespace legion::core
 
         for (auto& policy : emitter.m_particlePolicies)
             policy->onUpdate(emitter, deltaTime, emitter.m_particleCount);
-        log::debug("");
     }
 }

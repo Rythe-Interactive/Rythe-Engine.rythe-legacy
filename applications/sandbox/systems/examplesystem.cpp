@@ -309,7 +309,7 @@ void ExampleSystem::setup()
         emitter->add_policy<locomotion_policy>();
         emitter->pause();
         emitter->add_policy<alignment_policy>();
-        //emitter->add_policy<seperation_policy>();
+        emitter->add_policy<seperation_policy>();
         auto model = gfx::ModelCache::create_model("Suzanne",fs::view("assets://models/suzanne.obj"));
         material = gfx::MaterialCache::get_material("slate");
         emitter->add_policy<gfx::rendering_policy>(gfx::rendering_policy{ model, material });

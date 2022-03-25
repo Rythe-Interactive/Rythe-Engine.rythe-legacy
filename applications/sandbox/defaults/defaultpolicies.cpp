@@ -151,7 +151,7 @@ namespace legion::core
         if (!emitter.has_uniform<bounds>("Bounds"))
             emitter.create_uniform<bounds>("Bounds", bounds{ position(-20.f),position(20.f), 5.f });
         if (!emitter.has_uniform<float>("visionRadius"))
-            emitter.create_uniform<float>("visionRadius", 5.f);
+            emitter.create_uniform<float>("visionRadius", 10.f);
         if (!emitter.has_uniform<float>("visionAngle"))
             emitter.create_uniform<float>("visionAngle", 45.f);
         if (!emitter.has_uniform<float>("speed"))
@@ -184,7 +184,7 @@ namespace legion::core
         for (size_type idx = start; idx < end; idx++)
         {
             posBuffer[idx] = math::linearRand(bnds.min + math::vec3(bnds.border), bnds.max - math::vec3(bnds.border));
-            steering[idx] = math::sphericalRand(.1f);
+            steering[idx] = math::sphericalRand(1.0f);
         }
     }
     void locomotion_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
@@ -206,33 +206,11 @@ namespace legion::core
         {
             auto& pos = posBuffer[idx];
 
-            ////Border avoidance
-            //if (math::distance(bnds.max.x, pos.x) < bnds.border && velBuffer[idx].x >= 0)
-            //    steering[idx] += math::vec3(-1.f, 0.f, 0.f);
-            //
-            //if (math::distance(bnds.min.x, pos.x) < bnds.border && velBuffer[idx].x < 0)
-            //    steering[idx] += math::vec3(1.f, 0.f, 0.f);
-
-            //if (math::distance(bnds.max.y, pos.y) < bnds.border && velBuffer[idx].y >= 0)
-            //    steering[idx] += math::vec3(0.f, -1.f, 0.f);
-
-            //if (math::distance(bnds.min.y, pos.y) < bnds.border && velBuffer[idx].y < 0)
-            //    steering[idx] += math::vec3(0.f, 1.f, 0.f);
-
-            //if (math::distance(bnds.max.z, pos.z) < bnds.border && velBuffer[idx].z >= 0)
-            //    steering[idx] += math::vec3(0.f, 0.f, -1.f);
-
-            //if (math::distance(bnds.min.z, pos.z) < bnds.border && velBuffer[idx].z < 0)
-            //    steering[idx] += math::vec3(0.f, 0.f, 1.f);
-
-            debug::drawLine(pos, pos + steering[idx]);
-
             //Particle Integration
-            velBuffer[idx] += steering[idx] * deltaTime;
-            velBuffer[idx] = math::min(velBuffer[idx].xyz(), math::normalize(velBuffer[idx]));
+            velBuffer[idx] = math::lerp(velBuffer[idx], math::normalize(steering[idx]), deltaTime);
+            debug::drawLine(pos, pos + velBuffer[idx]);
             rotBuffer[idx] = math::quatLookAt(math::normalize(velBuffer[idx]), math::vec3::up);
             pos += velBuffer[idx] * speed * deltaTime;
-            steering[idx] = math::vec3(0.f);
 
             if (pos.x < bnds.min.x)
                 pos.x = bnds.max.x;
@@ -284,20 +262,20 @@ namespace legion::core
 
         for (size_type idx = 0; idx < count; idx++)
         {
+            if (spatialGrid[idx].size() == 0)
+                continue;
+
             auto& pos = posBuffer[idx];
             math::vec3 force = math::vec3::zero;
-            if (spatialGrid[idx].size() > 0)
+            for (size_type neighbor = 0; neighbor < spatialGrid[idx].size(); neighbor++)
             {
-                for (size_type neighbor = 0; neighbor < spatialGrid[idx].size(); neighbor++)
-                {
-                    auto& neighborPos = posBuffer[spatialGrid[idx][neighbor]];
-                    auto diff = pos - neighborPos;
-                    if (diff.length() < 2.f)
-                        force += diff * (1 / diff.length());
-                }
-                steering[idx] += force / spatialGrid[idx].size();
+                auto& neighborPos = posBuffer[spatialGrid[idx][neighbor]];
+                auto diff = pos - neighborPos;
+                if (diff.length() < 1.f)
+                    force += diff * (1 / diff.length());
             }
-            legion::debug::drawLine(pos, pos + math::normalize(steering[idx]), math::colors::red);
+            steering[idx] += force / spatialGrid[idx].size();
+            legion::debug::drawLine(pos, pos + steering[idx], math::colors::red);
         }
     }
 
@@ -322,7 +300,7 @@ namespace legion::core
 
         for (size_type idx = 0; idx < count; idx++)
         {
-            if (spatialGrid[idx].size() < 1)
+            if (spatialGrid[idx].size() == 0)
                 continue;
 
             math::vec3 force = math::vec3::zero;
@@ -334,7 +312,7 @@ namespace legion::core
             steering[idx] += force / spatialGrid[idx].size();
             steering[idx] -= velBuffer[idx].xyz();
             auto& pos = posBuffer[idx];
-            legion::debug::drawLine(pos, pos + math::normalize(steering[idx]), math::colors::green);
+            legion::debug::drawLine(pos, pos + steering[idx], math::colors::green);
         }
     }
 #pragma endregion
