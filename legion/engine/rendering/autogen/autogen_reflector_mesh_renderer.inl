@@ -1,5 +1,6 @@
 #include "autogen_reflector_mesh_renderer.hpp"
 #include "../../rendering/components/renderable.hpp"
+namespace legion { using namespace core; }
 namespace legion::core
 {
     template<>

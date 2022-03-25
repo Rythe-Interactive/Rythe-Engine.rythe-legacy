@@ -1,5 +1,6 @@
 #include "autogen_prototype_light.hpp"
 #include "../../rendering/components/light.hpp"
+namespace legion { using namespace core; }
 namespace legion::core
 {
     template<>

@@ -1,13 +1,14 @@
 #include "autogen_reflector_example_comp.hpp"
 #include "../../sandbox/systems/examplesystem.hpp"
+namespace legion { using namespace core; }
 namespace legion::core
 {
     template<>
-    L_NODISCARD reflector make_reflector<legion::core::example_comp>(legion::core::example_comp& obj)
+    L_NODISCARD reflector make_reflector<::example_comp>(::example_comp& obj)
     {
         reflector refl;
-        refl.typeId = typeHash<legion::core::example_comp>();
-        refl.typeName = "legion::core::example_comp";
+        refl.typeId = typeHash<::example_comp>();
+        refl.typeName = "::example_comp";
         {
             static const reflectable_attribute reflectable_attr{};
             refl.attributes.push_back(std::cref(reflectable_attr));
@@ -24,12 +25,12 @@ namespace legion::core
         return refl;
     }
     template<>
-    L_NODISCARD const reflector make_reflector<const legion::core::example_comp>(const legion::core::example_comp& obj)
+    L_NODISCARD const reflector make_reflector<const ::example_comp>(const ::example_comp& obj)
     {
         ptr_type address = reinterpret_cast<ptr_type>(std::addressof(obj));
         reflector refl;
-        refl.typeId = typeHash<legion::core::example_comp>();
-        refl.typeName = "legion::core::example_comp";
+        refl.typeId = typeHash<::example_comp>();
+        refl.typeName = "::example_comp";
         {
             static const reflectable_attribute reflectable_attr{};
             refl.attributes.push_back(std::cref(reflectable_attr));

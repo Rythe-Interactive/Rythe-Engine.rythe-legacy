@@ -1,5 +1,6 @@
 #include "autogen_reflector_scale.hpp"
 #include "../../core/defaults/defaultcomponents.hpp"
+namespace legion { using namespace core; }
 namespace legion::core
 {
     template<>
