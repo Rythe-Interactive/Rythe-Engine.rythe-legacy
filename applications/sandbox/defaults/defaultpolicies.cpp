@@ -158,6 +158,7 @@ namespace legion::core
             emitter.create_uniform<float>("speed", 2.f);
 
 
+
         if (!emitter.has_buffer<velocity>("velBuffer"))
             emitter.create_buffer<velocity>("velBuffer");
         if (!emitter.has_buffer<position>("posBuffer"))
@@ -168,6 +169,8 @@ namespace legion::core
             emitter.create_buffer<std::vector<id_type>>("spatialGrid");
         if (!emitter.has_buffer<math::vec3>("steeringBuffer"))
             emitter.create_buffer<math::vec3>("steeringBuffer");
+        if (!emitter.has_buffer<math::vec3>("accelBuffer"))
+            emitter.create_buffer<math::vec3>("accelBuffer");
     }
     void locomotion_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
     {
@@ -188,6 +191,7 @@ namespace legion::core
     {
         auto& posBuffer = emitter.get_buffer<position>("posBuffer");
         auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
+        auto& accelBuffer = emitter.get_buffer<math::vec3>("accelBuffer");
         auto& rotBuffer = emitter.get_buffer<rotation>("rotBuffer");
         auto& spatialGrid = emitter.get_buffer<std::vector<id_type>>("spatialGrid");
         auto& visionRadius = emitter.get_uniform<float>("visionRadius");
@@ -202,81 +206,48 @@ namespace legion::core
         {
             auto& pos = posBuffer[idx];
 
-            //Border avoidance
-            auto distanceToMin = math::abs(bnds.min + pos - velBuffer[idx]);
-            auto distanceToMax = math::abs(bnds.max - pos + velBuffer[idx]);
+            ////Border avoidance
+            //if (math::distance(bnds.max.x, pos.x) < bnds.border && velBuffer[idx].x >= 0)
+            //    steering[idx] += math::vec3(-1.f, 0.f, 0.f);
+            //
+            //if (math::distance(bnds.min.x, pos.x) < bnds.border && velBuffer[idx].x < 0)
+            //    steering[idx] += math::vec3(1.f, 0.f, 0.f);
 
-            //X axis
-            if (distanceToMax.x <= bnds.border && velBuffer[idx].x >= 0)
-                if (math::linearRand(0, 2) == 0)
-                    steering[idx] = math::rotateY(steering[idx], math::linearRand(10.f, 15.f) * math::angleBetween(distanceToMax, steering[idx]) < 0 ? 1 : -1.f);
-                else
-                    steering[idx] = math::rotateZ(steering[idx], math::linearRand(10.f, 15.f) * math::angleBetween(distanceToMax, steering[idx]) < 0 ? 1 : -1.f);
+            //if (math::distance(bnds.max.y, pos.y) < bnds.border && velBuffer[idx].y >= 0)
+            //    steering[idx] += math::vec3(0.f, -1.f, 0.f);
 
-            if (distanceToMin.x <= bnds.border && velBuffer[idx].x < 0)
-                if (math::linearRand(0, 2) == 0)
-                    steering[idx] = math::rotateY(steering[idx], math::linearRand(10.f, 15.f) * math::angleBetween(distanceToMin, steering[idx]) < 0 ? 1 : -1.f);
-                else
-                    steering[idx] = math::rotateZ(steering[idx], math::linearRand(10.f, 15.f) * math::angleBetween(distanceToMin, steering[idx]) < 0 ? 1 : -1.f);
+            //if (math::distance(bnds.min.y, pos.y) < bnds.border && velBuffer[idx].y < 0)
+            //    steering[idx] += math::vec3(0.f, 1.f, 0.f);
 
-            //Y axis
-            if (distanceToMax.y <= bnds.border && velBuffer[idx].y >= 0)
-                if (math::linearRand(0, 2) == 0)
-                    steering[idx] = math::rotateX(steering[idx], math::linearRand(10.f, 15.f) * math::angleBetween(distanceToMax, steering[idx]) < 0 ? 1 : -1.f);
-                else
-                    steering[idx] = math::rotateZ(steering[idx], math::linearRand(10.f, 15.f) * math::angleBetween(distanceToMax, steering[idx]) < 0 ? 1 : -1.f);
+            //if (math::distance(bnds.max.z, pos.z) < bnds.border && velBuffer[idx].z >= 0)
+            //    steering[idx] += math::vec3(0.f, 0.f, -1.f);
 
-            if (distanceToMin.y <= bnds.border && velBuffer[idx].y < 0)
-                if (math::linearRand(0, 2) == 0)
-                    steering[idx] = math::rotateX(steering[idx], math::linearRand(10.f, 15.f) * math::angleBetween(distanceToMin, steering[idx]) < 0 ? 1 : -1.f);
-                else
-                    steering[idx] = math::rotateZ(steering[idx], math::linearRand(10.f, 15.f) * math::angleBetween(distanceToMin, steering[idx]) < 0 ? 1 : -1.f);
+            //if (math::distance(bnds.min.z, pos.z) < bnds.border && velBuffer[idx].z < 0)
+            //    steering[idx] += math::vec3(0.f, 0.f, 1.f);
 
-            //Z axis
-            if (distanceToMax.z <= bnds.border && velBuffer[idx].z >= 0)
-                if (math::linearRand(0, 2) == 0)
-                    steering[idx] = math::rotateX(steering[idx], math::linearRand(10.f, 15.f) * math::angleBetween(distanceToMax, steering[idx]) < 0 ? 1 : -1.f);
-                else
-                    steering[idx] = math::rotateY(steering[idx], math::linearRand(10.f, 15.f) * math::angleBetween(distanceToMax, steering[idx]) < 0 ? 1 : -1.f);
-
-            if (distanceToMin.z <= bnds.border && velBuffer[idx].z < 0)
-                if (math::linearRand(0, 2) == 0)
-                    steering[idx] = math::rotateX(steering[idx], math::linearRand(10.f, 15.f) * math::angleBetween(distanceToMin, steering[idx]) < 0 ? 1 : -1.f);
-                else
-                    steering[idx] = math::rotateY(steering[idx], math::linearRand(10.f, 15.f) * math::angleBetween(distanceToMin, steering[idx]) < 0 ? 1 : -1.f);
-
-
-            debug::drawLine(pos, pos + math::normalize(steering[idx]));
-            log::debug(steering[idx]);
+            debug::drawLine(pos, pos + steering[idx]);
 
             //Particle Integration
             velBuffer[idx] += steering[idx] * deltaTime;
             velBuffer[idx] = math::min(velBuffer[idx].xyz(), math::normalize(velBuffer[idx]));
             rotBuffer[idx] = math::quatLookAt(math::normalize(velBuffer[idx]), math::vec3::up);
             pos += velBuffer[idx] * speed * deltaTime;
-            steering[idx] = math::normalize(velBuffer[idx]);
+            steering[idx] = math::vec3(0.f);
 
-            //Moves a boid to the opposite side of the cube if it crosses the boundarys
-            //if (pos.x > bnds.max.x && velBuffer[idx].x >= 0)
-            //    velBuffer[idx].x *= -1;
+            if (pos.x < bnds.min.x)
+                pos.x = bnds.max.x;
+            if (pos.x > bnds.max.x)
+                pos.x = bnds.min.x;
 
-            //if (pos.x < bnds.min.x && velBuffer[idx].x < 0)
-            //    velBuffer[idx].x *= -1;
+            if (pos.y < bnds.min.y)
+                pos.y = bnds.max.y;
+            if (pos.y > bnds.max.y)
+                pos.y = bnds.min.y;
 
-
-            //if (pos.y > bnds.max.y && velBuffer[idx].y >= 0)
-            //    velBuffer[idx].y *= -1;
-
-            //if (pos.y < bnds.min.y && velBuffer[idx].y < 0)
-            //    velBuffer[idx].y *= -1;
-
-
-            //if (pos.z > bnds.max.z && velBuffer[idx].z >= 0)
-            //    velBuffer[idx].z *= -1;
-
-            //if (pos.z < bnds.min.z && velBuffer[idx].z < 0)
-            //    velBuffer[idx].z *= -1;
-
+            if (pos.z < bnds.min.z)
+                pos.z = bnds.max.z;
+            if (pos.z > bnds.max.z)
+                pos.z = bnds.min.z;
 
             //Recalculates the spatial grid
             spatialGrid[idx].clear();
