@@ -304,11 +304,12 @@ void ExampleSystem::setup()
         auto emitter = ent.add_component<particle_emitter>();
         emitter->set_spawn_rate(1);
         emitter->set_spawn_interval(.1f);
-        emitter->resize(100);
+        emitter->resize(1000);
         emitter->localSpace = false;
         emitter->add_policy<locomotion_policy>();
         emitter->pause();
         emitter->add_policy<alignment_policy>();
+        emitter->add_policy<cohesion_policy>();
         emitter->add_policy<seperation_policy>();
         auto model = gfx::ModelCache::create_model("Suzanne",fs::view("assets://models/suzanne.obj"));
         material = gfx::MaterialCache::get_material("slate");
