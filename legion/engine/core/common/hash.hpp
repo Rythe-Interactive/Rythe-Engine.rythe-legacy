@@ -47,12 +47,13 @@ namespace legion::core
             static void onInit();
         };
 
-        OnEngineInit(type_data, &type_data::init);
-        OnEngineShutdown(type_data, &type_data::shutdown);
+        ReportSubSystem(type_data);
 
         template<typename T>
         std::string_view register_name(id_type id)
         {
+            type_data::init();
+
             auto [iterator, emplaced] = type_data::getInstance().id_to_name.emplace(id, std::string(nameOfType<T>()));
             return iterator->second;
         }

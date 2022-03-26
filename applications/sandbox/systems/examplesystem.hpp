@@ -41,6 +41,8 @@ public:
         auto* pipeline = dynamic_cast<gfx::DefaultPipeline*>(gfx::Renderer::getMainPipeline());
         if (pipeline)
             pipeline->attachStage<MouseHover>();
+            
+        auto rootEnt = createEntity("Scene");
 
         app::window& win = ecs::world.get_component<app::window>();
         app::context_guard guard(win);
@@ -49,8 +51,9 @@ public:
 
         auto material = gfx::MaterialCache::create_material("White", fs::view("assets://shaders/color.shs"));
         material.set_param("color", math::colors::white);
+
         /*{
-            auto ent = createEntity("Sun");
+            auto ent = createEntity("Sun", rootEnt);
             ent.add_component(gfx::light::directional(math::color(1, 1, 0.8f), 10.f));
             auto [pos, rot, scal] = ent.add_component<transform>();
             pos = position(0.f, 3.f, 6.f);
@@ -63,7 +66,7 @@ public:
         //        for (int i = 0; i < 20000; i++)
         //#endif
         //        {
-        //            auto ent = createEntity();
+        //            auto ent = createEntity(rootEnt);
         //
         //            auto [pos, rot, scal] = ent.add_component<transform>();
         //            pos = math::sphericalRand(5.f);
@@ -97,7 +100,7 @@ public:
         material.set_param("roughnessTex", rendering::TextureCache::create_texture(fs::view("assets://textures/iron/rustediron-roughness.png")));
 
         {
-            auto ent = createEntity(material.get_name());
+            auto ent = createEntity(material.get_name(), rootEnt);
             ent.add_component<example_comp>();
             auto [pos, rot, scal] = ent.add_component<transform>();
             pos = math::vec3(0.f, 0.f, 0.f);
@@ -115,7 +118,7 @@ public:
         material.set_param(SV_HEIGHTSCALE, 1.f);
 
         {
-            auto ent = createEntity(material.get_name());
+            auto ent = createEntity(material.get_name(), rootEnt);
             ent.add_component<example_comp>();
             auto [pos, rot, scal] = ent.add_component<transform>();
             pos = math::vec3(0.f, 0.f, 4.f);
@@ -133,7 +136,7 @@ public:
         material.set_param(SV_HEIGHTSCALE, 1.f);
 
         {
-            auto ent = createEntity(material.get_name());
+            auto ent = createEntity(material.get_name(), rootEnt);
             ent.add_component<example_comp>();
             auto [pos, rot, scal] = ent.add_component<transform>();
             pos = math::vec3(0.f, 0.f, 8.f);
@@ -165,7 +168,7 @@ public:
         material.set_param("roughnessTex", rendering::TextureCache::create_texture(fs::view("assets://textures/wood/Wood035_1K_Roughness.png")));
 
         {
-            auto ent = createEntity(material.get_name());
+            auto ent = createEntity(material.get_name(), rootEnt);
             ent.add_component<example_comp>();
             auto [pos, rot, scal] = ent.add_component<transform>();
             pos = math::vec3(0.f, 4.f, 0.f);
@@ -183,7 +186,7 @@ public:
         material.set_param(SV_HEIGHTSCALE, 1.f);
 
         {
-            auto ent = createEntity(material.get_name());
+            auto ent = createEntity(material.get_name(), rootEnt);
             ent.add_component<example_comp>();
             auto [pos, rot, scal] = ent.add_component<transform>();
             pos = math::vec3(0.f, 4.f, 4.f);
@@ -213,7 +216,7 @@ public:
         material.set_param("roughnessTex", rendering::TextureCache::create_texture(fs::view("assets://textures/tile/tileRoughness.png")));
 
         {
-            auto ent = createEntity(material.get_name());
+            auto ent = createEntity(material.get_name(), rootEnt);
             ent.add_component<example_comp>();
             auto [pos, rot, scal] = ent.add_component<transform>();
             pos = math::vec3(0.f, 4.f, 8.f);
@@ -231,7 +234,7 @@ public:
         material.set_param(SV_HEIGHTSCALE, 1.f);
 
         {
-            auto ent = createEntity(material.get_name());
+            auto ent = createEntity(material.get_name(), rootEnt);
             ent.add_component<example_comp>();
             auto [pos, rot, scal] = ent.add_component<transform>();
             pos = math::vec3(0.f, 8.f, 0.f);
@@ -264,7 +267,7 @@ public:
         material.set_param("heightScale", 0.1f);
 
         {
-            auto ent = createEntity(material.get_name());
+            auto ent = createEntity(material.get_name(), rootEnt);
             ent.add_component<example_comp>();
             auto [pos, rot, scal] = ent.add_component<transform>();
             pos = math::vec3(0.f, 8.f, 4.f);
@@ -282,7 +285,7 @@ public:
         material.set_param(SV_HEIGHTSCALE, 1.f);
 
         {
-            auto ent = createEntity(material.get_name());
+            auto ent = createEntity(material.get_name(), rootEnt);
             ent.add_component<example_comp>();
             auto [pos, rot, scal] = ent.add_component<transform>();
             pos = math::vec3(0.f, 8.f, 8.f);
@@ -298,6 +301,18 @@ public:
         srl::SerializerRegistry::registerSerializer<rotation>();
         srl::SerializerRegistry::registerSerializer<velocity>();
         srl::SerializerRegistry::registerSerializer<scale>();
+
+        srl::write<srl::yaml>(fs::view("assets://scenes/scene1.yaml"), rootEnt, "scene");
+        srl::write<srl::json>(fs::view("assets://scenes/scene1.json"), rootEnt, "scene");
+        srl::write<srl::bson>(fs::view("assets://scenes/scene1.bson"), rootEnt, "scene");
+
+        //ecs::Registry::destroyEntity(rootEnt);
+
+        auto result4 = srl::load<srl::bson, ecs::entity>(fs::view("assets://scenes/scene1.bson"), "scene");
+
+        srl::write<srl::yaml>(fs::view("assets://scenes/scene2.yaml"), *result4, "scene");
+        srl::write<srl::json>(fs::view("assets://scenes/scene2.json"), *result4, "scene");
+        srl::write<srl::bson>(fs::view("assets://scenes/scene2.bson"), *result4, "scene");
 
         bindToEvent<events::exit, &ExampleSystem::onExit>();
     }

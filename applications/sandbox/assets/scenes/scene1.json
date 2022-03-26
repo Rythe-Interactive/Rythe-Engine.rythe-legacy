@@ -1,113 +1,199 @@
 {
     "scene": {
         "type_name": "legion::core::ecs::entity_data",
-        "name": "Root",
+        "name": "Scene",
         "active": true,
         "children": [
             {
                 "type_name": "legion::core::ecs::entity_data",
-                "name": "7",
+                "name": "iron",
                 "active": true,
-                "children": [
+                "children": [],
+                "components": [
                     {
-                        "type_name": "legion::core::ecs::entity_data",
-                        "name": "8",
-                        "active": true,
-                        "children": [],
-                        "components": [
-                            {
-                                "type_name": "legion::core::example_comp",
-                                "value": 0
-                            },
-                            {
-                                "type_name": "legion::core::velocity"
-                            }
-                        ]
+                        "type_name": "example_comp",
+                        "value": 1
                     },
                     {
-                        "type_name": "legion::core::ecs::entity_data",
-                        "name": "9",
-                        "active": true,
-                        "children": [],
-                        "components": [
-                            {
-                                "type_name": "legion::core::velocity"
-                            }
-                        ]
+                        "type_name": "legion::core::scale"
+                    },
+                    {
+                        "type_name": "legion::core::rotation"
+                    },
+                    {
+                        "type_name": "legion::core::position"
                     }
-                ],
-                "components": []
+                ]
             },
             {
                 "type_name": "legion::core::ecs::entity_data",
-                "name": "10",
+                "name": "rock",
                 "active": true,
-                "children": [
+                "children": [],
+                "components": [
                     {
-                        "type_name": "legion::core::ecs::entity_data",
-                        "name": "11",
-                        "active": true,
-                        "children": [],
-                        "components": [
-                            {
-                                "type_name": "legion::core::example_comp",
-                                "value": 1
-                            },
-                            {
-                                "type_name": "legion::core::rotation"
-                            }
-                        ]
+                        "type_name": "example_comp",
+                        "value": 1
                     },
                     {
-                        "type_name": "legion::core::ecs::entity_data",
-                        "name": "12",
-                        "active": true,
-                        "children": [],
-                        "components": [
-                            {
-                                "type_name": "legion::core::rotation"
-                            }
-                        ]
+                        "type_name": "legion::core::scale"
+                    },
+                    {
+                        "type_name": "legion::core::rotation"
+                    },
+                    {
+                        "type_name": "legion::core::position"
                     }
-                ],
-                "components": []
+                ]
             },
             {
                 "type_name": "legion::core::ecs::entity_data",
-                "name": "13",
+                "name": "copper",
                 "active": true,
-                "children": [
+                "children": [],
+                "components": [
                     {
-                        "type_name": "legion::core::ecs::entity_data",
-                        "name": "14",
-                        "active": true,
-                        "children": [],
-                        "components": [
-                            {
-                                "type_name": "legion::core::example_comp",
-                                "value": 2
-                            }
-                        ]
+                        "type_name": "example_comp",
+                        "value": 1
                     },
                     {
-                        "type_name": "legion::core::ecs::entity_data",
-                        "name": "15",
-                        "active": true,
-                        "children": [],
-                        "components": []
+                        "type_name": "legion::core::scale"
+                    },
+                    {
+                        "type_name": "legion::core::rotation"
+                    },
+                    {
+                        "type_name": "legion::core::position"
                     }
-                ],
-                "components": []
+                ]
+            },
+            {
+                "type_name": "legion::core::ecs::entity_data",
+                "name": "wood",
+                "active": true,
+                "children": [],
+                "components": [
+                    {
+                        "type_name": "example_comp",
+                        "value": 1
+                    },
+                    {
+                        "type_name": "legion::core::scale"
+                    },
+                    {
+                        "type_name": "legion::core::rotation"
+                    },
+                    {
+                        "type_name": "legion::core::position"
+                    }
+                ]
+            },
+            {
+                "type_name": "legion::core::ecs::entity_data",
+                "name": "paint",
+                "active": true,
+                "children": [],
+                "components": [
+                    {
+                        "type_name": "example_comp",
+                        "value": 1
+                    },
+                    {
+                        "type_name": "legion::core::scale"
+                    },
+                    {
+                        "type_name": "legion::core::rotation"
+                    },
+                    {
+                        "type_name": "legion::core::position"
+                    }
+                ]
+            },
+            {
+                "type_name": "legion::core::ecs::entity_data",
+                "name": "tiles",
+                "active": true,
+                "children": [],
+                "components": [
+                    {
+                        "type_name": "example_comp",
+                        "value": 1
+                    },
+                    {
+                        "type_name": "legion::core::scale"
+                    },
+                    {
+                        "type_name": "legion::core::rotation"
+                    },
+                    {
+                        "type_name": "legion::core::position"
+                    }
+                ]
+            },
+            {
+                "type_name": "legion::core::ecs::entity_data",
+                "name": "slate",
+                "active": true,
+                "children": [],
+                "components": [
+                    {
+                        "type_name": "example_comp",
+                        "value": 1
+                    },
+                    {
+                        "type_name": "legion::core::scale"
+                    },
+                    {
+                        "type_name": "legion::core::rotation"
+                    },
+                    {
+                        "type_name": "legion::core::position"
+                    }
+                ]
+            },
+            {
+                "type_name": "legion::core::ecs::entity_data",
+                "name": "bricks",
+                "active": true,
+                "children": [],
+                "components": [
+                    {
+                        "type_name": "example_comp",
+                        "value": 1
+                    },
+                    {
+                        "type_name": "legion::core::scale"
+                    },
+                    {
+                        "type_name": "legion::core::rotation"
+                    },
+                    {
+                        "type_name": "legion::core::position"
+                    }
+                ]
+            },
+            {
+                "type_name": "legion::core::ecs::entity_data",
+                "name": "default",
+                "active": true,
+                "children": [],
+                "components": [
+                    {
+                        "type_name": "example_comp",
+                        "value": 1
+                    },
+                    {
+                        "type_name": "legion::core::scale"
+                    },
+                    {
+                        "type_name": "legion::core::rotation"
+                    },
+                    {
+                        "type_name": "legion::core::position"
+                    }
+                ]
             }
         ],
-        "components": [
-            {
-                "type_name": "legion::core::example_comp",
-                "value": 1
-            },
-            {
-                "type_name": "legion::core::position"
-            }
-        ]
+        "components": []
     }
 }
