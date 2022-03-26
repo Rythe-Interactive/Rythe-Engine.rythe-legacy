@@ -83,8 +83,7 @@
 copy /Y "$(SolutionDir)deps\dll\" "$(OutDir)"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>"$(SolutionDir)tools\RythePreprocessor\net5.0\win-x64\RytheTributary"  -include=..\..\deps\include -ex=deps -ex=glm -ex=autogen
-del /q "$(SolutionDir)include\$(ProjectName)"
+      <Command>del /q "$(SolutionDir)include\$(ProjectName)"
 copy /Y "$(SolutionDir)xcopyexclude" ".\"
 
 xcopy "$(ProjectDir)..\$(ProjectName)" "$(SolutionDir)include\$(ProjectName)\" /i /s /r /exclude:xcopyexclude /y &gt; nul

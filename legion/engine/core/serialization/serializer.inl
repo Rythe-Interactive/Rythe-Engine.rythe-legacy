@@ -286,7 +286,7 @@ namespace legion::core::serialization
                     }
                 }
 
-                ecs::Registry::createComponent(typeId, ent, buffer.data());
+                ecs::Registry::createComponent(typeId, ent, pointer<void>{ buffer.data() });
             }
 
             s_view.end_read(); // Components

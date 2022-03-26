@@ -7,13 +7,11 @@
 #include "../renderstages/mousehover.hpp"
 #include "gui_test.hpp"
 
-namespace legion::core
+
+struct [[lgn::reflectable]] example_comp
 {
-    struct [[lgn::reflectable]] example_comp
-    {
-        int value = 1;
-    };
-}
+    int value = 1;
+};
 
 struct tonemap_action : public lgn::app::input_action<tonemap_action> {};
 struct reload_shaders_action : public lgn::app::input_action<reload_shaders_action> {};
@@ -32,8 +30,6 @@ public:
         using namespace legion;
         log::filter(log::severity_debug);
         log::debug("ExampleSystem setup");
-
-        serialization::SerializationRegistry::register_component<serialization::MyRecord>();
 
         app::InputSystem::createBinding<tonemap_action>(app::inputmap::method::F2);
         app::InputSystem::createBinding<reload_shaders_action>(app::inputmap::method::F3);

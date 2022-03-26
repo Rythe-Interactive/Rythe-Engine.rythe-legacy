@@ -145,7 +145,7 @@ namespace legion::rendering
 
     texture_handle TextureCache::create_texture(const fs::view& file, texture_import_settings settings)
     {
-        return create_texture(file.get_filename(), file, settings);
+        return create_texture(*file.get_filename(), file, settings);
     }
 
     texture_handle TextureCache::create_texture(const std::string& name, math::ivec2 size, texture_import_settings settings)

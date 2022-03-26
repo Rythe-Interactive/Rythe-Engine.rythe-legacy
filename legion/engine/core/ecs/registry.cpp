@@ -155,6 +155,35 @@ namespace legion::core::ecs
         return entity{ &data };
     }
 
+    entity Registry::createEntity(entity parent, const prototype& prot)
+    {
+        if (prot.typeId != typeHash<entity_data>())
+            return entity{ nullptr };
+
+        entity_data data;
+        for (auto& member : prot.members)
+        {
+            if (member.name == "active")
+                data.active = *member.primitive.cast<bool>();
+            else if (member.name == "name")
+                data.name = *member.primitive.cast<std::string>();
+        }
+
+        // Call to create a new blank entity. No need to duplicate this logic.
+        auto ent = createEntity(data.name, parent);
+
+        // Assign entity activity.
+        ent->active = data.active;
+
+        return ent;
+    }
+
+    entity Registry::createEntity(const prototype& prot)
+    {
+        // The world is used as a default parent.
+        return createEntity(world, prot);
+    }
+
     void Registry::destroyEntity(entity target, bool recurse)
     {
         // Remove entity from filters to stop it from updating.
@@ -249,6 +278,33 @@ namespace legion::core::ecs
         FilterRegistry::markComponentAdd(typeId, target);
         // Actually create and return the component.
         return getFamily(typeId)->create_component(target);
+    }
+
+    pointer<void> Registry::createComponent(entity target, const prototype& prot)
+    {
+        instance.m_entityCompositions.at(target).insert(prot.typeId);
+
+        FilterRegistry::markComponentAdd(prot.typeId, target);
+
+        return getFamily(prot.typeId)->create_component(target, prot);
+    }
+
+    pointer<void> Registry::createComponent(entity target, prototype&& prot)
+    {
+        instance.m_entityCompositions.at(target).insert(prot.typeId);
+
+        FilterRegistry::markComponentAdd(prot.typeId, target);
+
+        return getFamily(prot.typeId)->create_component(target, std::move(prot));
+    }
+
+    pointer<void> Registry::createComponent(id_type typeId, entity target, pointer<const void> component)
+    {
+        instance.m_entityCompositions.at(target).insert(typeId);
+
+        FilterRegistry::markComponentAdd(typeId, target);
+
+        return getFamily(typeId)->create_component(target, component);
     }
 
     void Registry::destroyComponent(id_type typeId, entity target)

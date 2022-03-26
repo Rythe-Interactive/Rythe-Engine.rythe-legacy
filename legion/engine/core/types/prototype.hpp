@@ -30,6 +30,7 @@ namespace legion::core
             return *this;
         }
     };
+
     struct primitive_value
     {
         id_type typeId;
@@ -47,6 +48,7 @@ namespace legion::core
             return std::any_cast<T>(&data);
         }
     };
+
     struct member_value
     {
         bool is_object;
@@ -71,6 +73,7 @@ namespace legion::core
             else
                 new (&primitive) primitive_value(other.primitive);
         }
+
         ~member_value()
         {
             if (is_object)

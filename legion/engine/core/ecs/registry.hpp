@@ -115,6 +115,19 @@ namespace legion::core::ecs
 
         L_NODISCARD static entity createEntity(const std::string& name, entity parent);
 
+        /**@brief Creates empty entity with a specific entity as its parent. Entity is serialized from a prototype.
+         *        This function will also create any components or child entities in the prototype structure.
+         * @param parent Entity to assign as the parent of the new entity.
+         * @param prot Prototype to serialize entity from.
+         */
+        static entity createEntity(entity parent, const prototype& prot);
+
+        /**@brief Creates empty entity with the world as its parent. Entity is serialized from a prototype.
+         *        This function will also create any components or child entities in the prototype structure.
+         * @param prot Prototype to serialize entity from.
+         */
+        static entity createEntity(const prototype& prot);
+
         /**@brief Destroys an entity and all its components.
          * @param target Entity to destroy.
          * @param recurse Whether to recursively destroy all the child entities as well. True by default.
@@ -177,7 +190,14 @@ namespace legion::core::ecs
         template<typename ComponentType0, typename ComponentType1, typename... ComponentTypeN>
         static component_ref_tuple<ComponentType0, ComponentType1, ComponentTypeN...> createComponent(entity target, const ComponentType0& value0, const ComponentType1& value1, const ComponentTypeN&... valueN);
 
-        static void* createComponent(id_type typeId, entity target, const void* component);
+        /**@brief Creates a new component of a certain type for a specific entity. Component is serialized from a prototype.
+         * @param target Entity to create the component for.
+         * @param prot Prototype to serialize component from.
+         * @return Reference to the created component.
+         */
+        static pointer<void> createComponent(entity target, const prototype& prot);
+        static pointer<void> createComponent(entity target, prototype&& prot);
+        static pointer<void> createComponent(id_type typeId, entity target, pointer<const void> component);
 
         /**@brief Creates a new component of a certain type for a specific entity.
          * @param typeId Type hash of component type to create.

@@ -12,7 +12,7 @@ namespace legion::core::ecs
     /**@class entity_data
      * @brief Entity specific data, eg: alive, active, children.
      */
-    struct entity_data
+    struct [[reflectable]] entity_data
     {
         // entity state bitfield.
         bool alive : 1; // bool only needs 1 bit.

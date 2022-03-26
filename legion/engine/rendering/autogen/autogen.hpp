@@ -5,8 +5,6 @@
 #endif
 #include "autogen_prototype_camera.hpp"
 #include "autogen_reflector_camera.hpp"
-#include "autogen_prototype_mesh_renderer.hpp"
-#include "autogen_reflector_mesh_renderer.hpp"
 #include "autogen_prototype_light.hpp"
 #include "autogen_reflector_light.hpp"
 

@@ -7,6 +7,7 @@
 namespace legion::core
 {
     struct member_reference;
+
     //a reference to data
     struct reflector
     {
