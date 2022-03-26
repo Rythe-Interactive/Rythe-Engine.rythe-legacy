@@ -2,7 +2,10 @@
 #include <core/core.hpp>
 #include <application/application.hpp>
 #include <rendering/rendering.hpp>
+#include <rendering/debugrendering.hpp>
 #include <audio/audio.hpp>
+#include "../renderstages/mousehover.hpp"
+#include "gui_test.hpp"
 
 struct example_comp
 {
@@ -33,6 +36,10 @@ public:
         bindToEvent<tonemap_action, &ExampleSystem::onTonemapSwitch>();
         bindToEvent<reload_shaders_action, &ExampleSystem::onShaderReload>();
         bindToEvent<switch_skybox_action, &ExampleSystem::onSkyboxSwitch>();
+
+        auto* pipeline = dynamic_cast<gfx::DefaultPipeline*>(gfx::Renderer::getMainPipeline());
+        if (pipeline)
+            pipeline->attachStage<MouseHover>();
 
         app::window& win = ecs::world.get_component<app::window>();
         app::context_guard guard(win);
@@ -360,10 +367,11 @@ public:
     void onSkyboxSwitch(switch_skybox_action& event)
     {
         using namespace legion;
+        using namespace rendering;
         if (event.pressed())
         {
             static size_type idx = 0;
-            static gfx::texture_handle textures[4] = {};
+            static texture_handle textures[4] = {};
             static bool initialized = false;
 
             if (!initialized)
@@ -380,10 +388,15 @@ public:
                 app::context_guard guard(win);
                 if (guard.contextIsValid())
                 {
-                    textures[0] = gfx::TextureCache::create_texture("morning islands", fs::view("assets://textures/HDRI/morning_islands.jpg"));
-                    textures[1] = gfx::TextureCache::create_texture("earth", fs::view("assets://textures/HDRI/earth.png"));
-                    textures[2] = gfx::TextureCache::create_texture("park", fs::view("assets://textures/HDRI/park.jpg"));
-                    textures[3] = gfx::TextureCache::create_texture("atmosphere", fs::view("assets://textures/HDRI/planetatmo.png"));
+                    auto importSettings = texture_import_settings{
+                            texture_type::two_dimensional, true, channel_format::eight_bit, texture_format::rgba_hdr,
+                            texture_components::rgba, true, true, 0, texture_mipmap::linear_mipmap_linear, texture_mipmap::linear,
+                            texture_wrap::edge_clamp,texture_wrap::repeat, texture_wrap::edge_clamp };
+
+                    textures[0] = TextureCache::create_texture("morning islands", fs::view("assets://textures/HDRI/morning_islands.jpg"), importSettings);
+                    textures[1] = TextureCache::create_texture("earth", fs::view("assets://textures/HDRI/earth.png"), importSettings);
+                    textures[2] = TextureCache::create_texture("park", fs::view("assets://textures/HDRI/park.jpg"), importSettings);
+                    textures[3] = TextureCache::create_texture("atmosphere", fs::view("assets://textures/HDRI/planetatmo.png"), importSettings);
                     initialized = true;
                 }
                 else
@@ -391,7 +404,7 @@ public:
             }
 
             idx = (idx + 1) % 4;
-            auto skyboxRenderer = ecs::world.get_component<gfx::skybox_renderer>();
+            auto skyboxRenderer = ecs::world.get_component<skybox_renderer>();
             skyboxRenderer->material.set_param(SV_SKYBOX, textures[idx]);
 
             log::debug("Set skybox to {}", textures[idx].get_texture().name);
@@ -440,6 +453,75 @@ public:
     void update(legion::time::span deltaTime)
     {
         using namespace legion;
+
+        auto hoveredEntityId = MouseHover::getHoveredEntityId();
+        if (hoveredEntityId != invalid_id)
+        {
+            auto ent = ecs::Registry::getEntity(hoveredEntityId);
+
+            if (ent != GuiTestSystem::selected && ent.has_component<transform>())
+            {
+                transform transf = ent.get_component<transform>();
+
+                math::mat4 worldMat = transf.to_world_matrix();
+                math::vec3 min = math::vec3(-0.5f, -0.5f, -0.5f);
+                math::vec3 max = math::vec3(0.5f, 0.5f, 0.5f);
+
+                std::pair<math::vec3, math::vec3> edges[] = {
+                    std::make_pair(min, math::vec3(min.x, min.y, max.z)),
+                    std::make_pair(math::vec3(min.x, min.y, max.z), math::vec3(max.x, min.y, max.z)),
+                    std::make_pair(math::vec3(max.x, min.y, max.z), math::vec3(max.x, min.y, min.z)),
+                    std::make_pair(math::vec3(max.x, min.y, min.z), min),
+
+                    std::make_pair(max, math::vec3(max.x, max.y, min.z)),
+                    std::make_pair(math::vec3(max.x, max.y, min.z), math::vec3(min.x, max.y, min.z)),
+                    std::make_pair(math::vec3(min.x, max.y, min.z), math::vec3(min.x, max.y, max.z)),
+                    std::make_pair(math::vec3(min.x, max.y, max.z), max),
+
+                    std::make_pair(min, math::vec3(min.x, max.y, min.z)),
+                    std::make_pair(math::vec3(min.x, min.y, max.z), math::vec3(min.x, max.y, max.z)),
+                    std::make_pair(math::vec3(max.x, min.y, max.z), math::vec3(max.x, max.y, max.z)),
+                    std::make_pair(math::vec3(max.x, min.y, min.z), math::vec3(max.x, max.y, min.z))
+                };
+
+                for (auto& edge : edges)
+                    debug::drawLine((worldMat * math::vec4(edge.first.x, edge.first.y, edge.first.z, 1.f)).xyz(), (worldMat * math::vec4(edge.second.x, edge.second.y, edge.second.z, 1.f)).xyz(), math::colors::orange);
+            }
+        }
+
+        if (GuiTestSystem::selected != invalid_id)
+        {
+            if (GuiTestSystem::selected.has_component<transform>())
+            {
+                transform transf = GuiTestSystem::selected.get_component<transform>();
+
+                math::mat4 worldMat = transf.to_world_matrix();
+                math::vec3 min = math::vec3(-0.5f, -0.5f, -0.5f);
+                math::vec3 max = math::vec3(0.5f, 0.5f, 0.5f);
+
+                std::pair<math::vec3, math::vec3> edges[] = {
+                    std::make_pair(min, math::vec3(min.x, min.y, max.z)),
+                    std::make_pair(math::vec3(min.x, min.y, max.z), math::vec3(max.x, min.y, max.z)),
+                    std::make_pair(math::vec3(max.x, min.y, max.z), math::vec3(max.x, min.y, min.z)),
+                    std::make_pair(math::vec3(max.x, min.y, min.z), min),
+
+                    std::make_pair(max, math::vec3(max.x, max.y, min.z)),
+                    std::make_pair(math::vec3(max.x, max.y, min.z), math::vec3(min.x, max.y, min.z)),
+                    std::make_pair(math::vec3(min.x, max.y, min.z), math::vec3(min.x, max.y, max.z)),
+                    std::make_pair(math::vec3(min.x, max.y, max.z), max),
+
+                    std::make_pair(min, math::vec3(min.x, max.y, min.z)),
+                    std::make_pair(math::vec3(min.x, min.y, max.z), math::vec3(min.x, max.y, max.z)),
+                    std::make_pair(math::vec3(max.x, min.y, max.z), math::vec3(max.x, max.y, max.z)),
+                    std::make_pair(math::vec3(max.x, min.y, min.z), math::vec3(max.x, max.y, min.z))
+                };
+
+                for (auto& edge : edges)
+                    debug::drawLine((worldMat * math::vec4(edge.first.x, edge.first.y, edge.first.z, 1.f)).xyz(), (worldMat * math::vec4(edge.second.x, edge.second.y, edge.second.z, 1.f)).xyz(), math::colors::green);
+            }
+        }
+
+
         static bool firstFrame = true;
         if (firstFrame)
         {

@@ -14,6 +14,7 @@ in vec3 normal : SV_NORMAL;
 in vec3 tangent : SV_TANGENT;
 in vec4 vertexcolor : SV_COLOR;
 in vec2 uv : SV_TEXCOORD0;
+in uint64_t entityId : SV_ENTITYID;
 in mat4 modelMatrix : SV_MODELMATRIX;
 #endif
 
@@ -46,6 +47,7 @@ io LGN_STDIO
     vec3 tangent;
     vec3 wtangent;
     vec2 uv;
+    flat uint64_t entityId;
     mat4 modelMatrix;
 }
 #if defined(GEOMETRY_SHADER)
@@ -66,6 +68,7 @@ out LGN_STDGEOMFRAG
     vec3 tangent;
     vec3 wtangent;
     vec2 uv;
+    flat uint64_t entityId;
     mat4 modelMatrix;
 } lgn_stdout;
 #endif
@@ -494,6 +497,7 @@ void PropagateStdIO()
     lgn_stdio.tangent = tangent;
     lgn_stdio.wtangent = GetWorldTangent(lgn_stdio.wnormal);
     lgn_stdio.uv = uv;
+    lgn_stdio.entityId = entityId;
     lgn_stdio.modelMatrix = modelMatrix;
 }
 
@@ -507,6 +511,7 @@ void PropagateStdIO(vec3 worldPosition, vec3 worldNormal)
     lgn_stdio.tangent = tangent;
     lgn_stdio.wtangent = GetWorldTangent(lgn_stdio.wnormal);
     lgn_stdio.uv = uv;
+    lgn_stdio.entityId = entityId;
     lgn_stdio.modelMatrix = modelMatrix;
 }
 #elif defined(GEOMETRY_SHADER)
@@ -520,6 +525,7 @@ void PropagateStdIO(int index)
     stdout(tangent) = stdin(index, tangent);
     stdout(wnormal) = stdin(index, wnormal);
     stdout(uv) = stdin(index, uv);
+    stdout(entityId) = stdin(index, entityId);
     stdout(modelMatrix) = stdin(index, modelMatrix);
 }
 #endif

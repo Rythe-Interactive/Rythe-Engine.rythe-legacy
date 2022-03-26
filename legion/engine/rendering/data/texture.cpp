@@ -361,4 +361,17 @@ namespace legion::rendering
         return invalid_texture_handle;
     }
 
+    std::vector<texture_handle> TextureCache::get_all()
+    {
+        std::vector<texture_handle> textures;
+
+        async::readonly_guard guard(m_textureLock);
+        textures.reserve(m_textures.size());
+
+        for (auto [id, texture] : m_textures)
+            textures.push_back(texture_handle{ id });
+
+        return textures;
+    }
+
 }

@@ -477,6 +477,17 @@ namespace legion::core::assets
     }
 
     template<typename AssetType>
+    inline std::vector<asset<AssetType>> AssetCache<AssetType>::getAll()
+    {
+        std::vector<asset_ptr> assets;
+        assets.reserve(instance.m_cache.size());
+        for (auto& [id, asset] : instance.m_cache)
+            assets.emplace_back(&asset, id);
+
+        return assets;
+    }
+
+    template<typename AssetType>
     inline void AssetCache<AssetType>::destroy(const std::string& name)
     {
         id_type id = nameHash(name);

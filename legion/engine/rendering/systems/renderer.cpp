@@ -276,6 +276,11 @@ namespace legion::rendering
             glDebugMessageCallbackARB(&Renderer::debugCallbackARB, nullptr);
         }
 
+        if (!GLAD_GL_ARB_gpu_shader_int64)
+        {
+            log::error("Could not load extension \"ARB_gpu_shader_int64\" which is required for this renderer.");
+        }
+
         log::info("loaded OpenGL version: {}.{}", GLVersion.major, GLVersion.minor);
 
         glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
@@ -323,10 +328,6 @@ namespace legion::rendering
     {
         m_exiting.store(false, std::memory_order_relaxed);
 
-        bindToEvent<events::exit, &Renderer::onExit>();
-
-        createProcess<&Renderer::render>("Rendering");
-
         {
             log::trace("Waiting on main window.");
 
@@ -350,10 +351,17 @@ namespace legion::rendering
             }
 
             if (!result)
+            {
                 log::error("Failed to initialize context.");
+                return;
+            }
             else
                 setThreadPriority();
         }
+
+        bindToEvent<events::exit, &Renderer::onExit>();
+
+        createProcess<&Renderer::render>("Rendering");
     }
 
     void Renderer::shutdown()

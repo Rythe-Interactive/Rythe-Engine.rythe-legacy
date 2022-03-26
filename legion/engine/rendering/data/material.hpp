@@ -135,9 +135,11 @@ namespace legion::rendering
         }
 
         std::string m_name;
-        id_type m_currentVariant = 0;
+        id_type m_currentVariant = nameHash("default");
         std::unordered_map<id_type, variant_submaterial> m_variants;
     public:
+
+        std::vector<std::reference_wrapper<variant_submaterial>> get_variants();
 
         void reload() { init(m_shader); }
 
@@ -229,12 +231,16 @@ namespace legion::rendering
 
         id_type current_variant() const;
 
+        std::vector<std::reference_wrapper<variant_submaterial>> get_variants();
+
         bool has_variant(id_type variantId) const;
         bool has_variant(const std::string& variant) const;
         void set_variant(id_type variantId);
         void set_variant(const std::string& variant);
 
         L_NODISCARD shader_handle get_shader();
+
+        void destroy();
 
         /**@brief Bind the material to the rendering context and prepare for use.
          */
@@ -286,6 +292,7 @@ namespace legion::rendering
         attribute get_attribute(const std::string& name);
 
         bool operator==(const material_handle& other) const { return id == other.id; }
+        bool operator!=(const material_handle& other) const { return id != other.id; }
     };
 
 
@@ -326,6 +333,9 @@ namespace legion::rendering
         static material_handle get_material(const std::string& name);
 
         static std::pair<async::rw_spinlock&, std::unordered_map<id_type, material>&> get_all_materials();
+
+        static void delete_material(const std::string& name);
+        static void delete_material(id_type id);
     };
 
 #pragma region implementations

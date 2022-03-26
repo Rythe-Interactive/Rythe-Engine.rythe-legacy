@@ -179,7 +179,7 @@ namespace legion::rendering
             GLint infoLogLength;
             glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &infoLogLength);
             const char* errorMessage;
-            if (infoLogLength > 0 && infoLogLength < 1024)
+            if (infoLogLength > 0 && infoLogLength < 65536)
             {
                 char* temp = new char[infoLogLength + 1];
                 glGetShaderInfoLog(shaderId, infoLogLength, nullptr, temp);
@@ -217,7 +217,7 @@ namespace legion::rendering
             }
 
             log::error("Error compiling {} shader:\n\t{}", shaderTypename, errorMessage);
-            if (infoLogLength > 0 && infoLogLength < 1024)
+            if (infoLogLength > 0 && infoLogLength < 65536)
                 delete[] errorMessage; // Delete message.
 
             glDeleteShader(shaderId); // Delete shader.
@@ -430,6 +430,11 @@ namespace legion::rendering
                     glDepthFunc(param);
                 }
                 break;
+                case GL_DEPTH_WRITEMASK:
+                {
+                    glDepthMask(param);
+                }
+                break;
                 case GL_CULL_FACE:
                 {
                     if (param == GL_FALSE)
@@ -444,16 +449,22 @@ namespace legion::rendering
                 break;
                 case GL_BLEND:
                 {
-                    blendSrc = param;
-                    blendDst = param;
+                    if (blendSrc == GL_FALSE)
+                        blendSrc = param;
+                    if (blendDst == GL_FALSE)
+                        blendDst = param;
                 }
+                break;
                 case GL_BLEND_SRC:
                 {
-                    blendSrc = param;
+                    if (blendSrc == GL_FALSE)
+                        blendSrc = param;
                 }
+                break;
                 case GL_BLEND_DST:
                 {
-                    blendDst = param;
+                    if (blendDst == GL_FALSE)
+                        blendDst = param;
                 }
                 break;
                 case GL_DITHER:
@@ -518,7 +529,7 @@ namespace legion::rendering
                 glGetProgramiv(variant.programId, GL_INFO_LOG_LENGTH, &infoLogLength);
 
                 const char* errorMessage;
-                if (infoLogLength > 0 && infoLogLength < 1024)
+                if (infoLogLength > 0 && infoLogLength < 65536)
                 {
                     char* temp = new char[infoLogLength + 1];
                     glGetProgramInfoLog(variant.programId, infoLogLength, nullptr, temp);
@@ -531,7 +542,7 @@ namespace legion::rendering
                 }
 
                 log::error("Error linking invalid shader:\n\t{}", errorMessage);
-                if (infoLogLength > 0 && infoLogLength < 1024)
+                if (infoLogLength > 0 && infoLogLength < 65536)
                     delete[] errorMessage; // Delete message.
 
                 for (auto& id : shaderIds)
@@ -557,7 +568,7 @@ namespace legion::rendering
                 glGetProgramiv(variant.programId, GL_INFO_LOG_LENGTH, &infoLogLength);
 
                 const char* errorMessage;
-                if (infoLogLength > 0 && infoLogLength < 1024)
+                if (infoLogLength > 0 && infoLogLength < 65536)
                 {
                     char* temp = new char[infoLogLength + 1];
                     glGetProgramInfoLog(variant.programId, infoLogLength, nullptr, temp);
@@ -570,7 +581,7 @@ namespace legion::rendering
                 }
 
                 log::error("Error validating invalid shader:\n\t{}", errorMessage);
-                if (infoLogLength > 0 && infoLogLength < 1024)
+                if (infoLogLength > 0 && infoLogLength < 65536)
                     delete[] errorMessage; // Delete message.
 
                 for (auto& shaderId : shaderIds)
@@ -650,11 +661,22 @@ namespace legion::rendering
 
     void ShaderCache::delete_shader(const std::string& name)
     {
-        delete_shader(nameHash(name));
+        log::debug("Destroyed shader {}", name);
+        auto id = nameHash(name);
+
+        async::readonly_guard guard(m_shaderLock);
+        if (m_shaders.contains(id))
+        {
+            shader temp = std::move(m_shaders.at(id));
+            for (auto& [id, variant] : temp.m_variants)
+                glDeleteProgram(variant.programId);
+            m_shaders.erase(id);
+        }
     }
 
     void ShaderCache::delete_shader(id_type id)
     {
+        log::debug("Destroyed shader with id: {}", id);
         async::readonly_guard guard(m_shaderLock);
         if (m_shaders.contains(id))
         {
@@ -783,6 +805,11 @@ namespace legion::rendering
                     glDepthFunc(param);
                 }
                 break;
+                case GL_DEPTH_WRITEMASK:
+                {
+                    glDepthMask(param);
+                }
+                break;
                 case GL_CULL_FACE:
                 {
                     if (param == GL_FALSE)
@@ -797,16 +824,22 @@ namespace legion::rendering
                 break;
                 case GL_BLEND:
                 {
-                    blendSrc = param;
-                    blendDst = param;
+                    if (blendSrc == GL_FALSE)
+                        blendSrc = param;
+                    if (blendDst == GL_FALSE)
+                        blendDst = param;
                 }
+                break;
                 case GL_BLEND_SRC:
                 {
-                    blendSrc = param;
+                    if (blendSrc == GL_FALSE)
+                        blendSrc = param;
                 }
+                break;
                 case GL_BLEND_DST:
                 {
-                    blendDst = param;
+                    if (blendDst == GL_FALSE)
+                        blendDst = param;
                 }
                 break;
                 case GL_DITHER:
@@ -869,7 +902,7 @@ namespace legion::rendering
                 GLint infoLogLength;
                 glGetProgramiv(variant.programId, GL_INFO_LOG_LENGTH, &infoLogLength);
                 const char* errorMessage;
-                if (infoLogLength > 0 && infoLogLength < 1024)
+                if (infoLogLength > 0 && infoLogLength < 65536)
                 {
                     char* temp = new char[infoLogLength + 1];
                     glGetProgramInfoLog(variant.programId, infoLogLength, nullptr, temp);
@@ -882,7 +915,7 @@ namespace legion::rendering
                 }
 
                 log::error("Error linking {} shader:\n\t{}", name, errorMessage);
-                if (infoLogLength > 0 && infoLogLength < 1024)
+                if (infoLogLength > 0 && infoLogLength < 65536)
                     delete[] errorMessage; // Delete message.
 
                 for (auto& id : shaderIds)
@@ -907,7 +940,7 @@ namespace legion::rendering
                 GLint infoLogLength;
                 glGetProgramiv(variant.programId, GL_INFO_LOG_LENGTH, &infoLogLength);
                 const char* errorMessage;
-                if (infoLogLength > 0 && infoLogLength < 1024)
+                if (infoLogLength > 0 && infoLogLength < 65536)
                 {
                     char* temp = new char[infoLogLength + 1];
                     glGetProgramInfoLog(variant.programId, infoLogLength, nullptr, temp);
@@ -920,7 +953,7 @@ namespace legion::rendering
                 }
 
                 log::error("Error validating {} shader:\n\t{}", name, errorMessage);
-                if (infoLogLength > 0 && infoLogLength < 1024)
+                if (infoLogLength > 0 && infoLogLength < 65536)
                     delete[] errorMessage; // Delete message.
 
                 for (auto& shaderId : shaderIds)
@@ -1011,6 +1044,18 @@ namespace legion::rendering
             return invalid_shader_handle;
         else
             return { id };
+    }
+
+    std::vector<shader_handle> ShaderCache::get_all()
+    {
+        std::vector<shader_handle> shaders;
+        async::readonly_guard guard(m_shaderLock);
+        shaders.reserve(m_shaders.size());
+
+        for (auto [id, shader] : m_shaders)
+            shaders.push_back(shader_handle{ id });
+
+        return shaders;
     }
 
     shader_variant& shader_handle::get_variant(id_type variantId)
@@ -1213,6 +1258,11 @@ namespace legion::rendering
                 glDepthFunc(param);
             }
             break;
+            case GL_DEPTH_WRITEMASK:
+            {
+                glDepthMask(param);
+            }
+            break;
             case GL_CULL_FACE:
             {
                 if (param == GL_FALSE)
@@ -1227,16 +1277,22 @@ namespace legion::rendering
             break;
             case GL_BLEND:
             {
-                blendSrc = param;
-                blendDst = param;
+                if (blendSrc == GL_FALSE)
+                    blendSrc = param;
+                if (blendDst == GL_FALSE)
+                    blendDst = param;
             }
+            break;
             case GL_BLEND_SRC:
             {
-                blendSrc = param;
+                if (blendSrc == GL_FALSE)
+                    blendSrc = param;
             }
+            break;
             case GL_BLEND_DST:
             {
-                blendDst = param;
+                if (blendDst == GL_FALSE)
+                    blendDst = param;
             }
             break;
             case GL_DITHER:

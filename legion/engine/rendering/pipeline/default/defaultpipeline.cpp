@@ -8,11 +8,11 @@
 #include <rendering/pipeline/default/stages/debugrenderstage.hpp>
 #include <rendering/pipeline/default/stages/postprocessingstage.hpp>
 #include <rendering/pipeline/default/stages/submitstage.hpp>
+#include <rendering/pipeline/default/stages/skybox.hpp>
 #include <rendering/pipeline/default/postfx/tonemapping.hpp>
 #include <rendering/pipeline/default/postfx/fxaa.hpp>
 #include <rendering/pipeline/default/postfx/bloom.hpp>
 #include <rendering/pipeline/default/postfx/depthoffield.hpp>
-#include <rendering/pipeline/default/postfx/skybox.hpp>
 #include <rendering/data/buffer.hpp>
 
 
@@ -21,6 +21,7 @@ namespace legion::rendering
     void DefaultPipeline::setup(app::window& context)
     {
         attachStage<ClearStage>();
+        attachStage<Skybox>();
         attachStage<FramebufferResizeStage>();
         attachStage<LightBufferStage>();
         attachStage<MeshBatchingStage>();
@@ -30,22 +31,24 @@ namespace legion::rendering
         attachStage<PostProcessingStage>();
         attachStage<SubmitStage>();
 
-        PostProcessingStage::addEffect<Skybox>();
-        PostProcessingStage::addEffect<DepthOfField>(-10);
-        PostProcessingStage::addEffect<Bloom>(-15);
+        PostProcessingStage::addEffect<Bloom>(-10);
+        PostProcessingStage::addEffect<DepthOfField>(-15);
         PostProcessingStage::addEffect<Tonemapping>(-32);
         PostProcessingStage::addEffect<FXAA>(-64);
 
 
         buffer modelMatrixBuffer;
+        buffer entityIdBuffer;
 
         {
             app::context_guard guard(context);
             addFramebuffer("main");
             modelMatrixBuffer = buffer(GL_ARRAY_BUFFER, sizeof(math::mat4) * 1024, nullptr, GL_DYNAMIC_DRAW);
+            entityIdBuffer = buffer(GL_ARRAY_BUFFER, sizeof(id_type) * 1024, nullptr, GL_DYNAMIC_DRAW);
         }
 
         create_meta<buffer>("model matrix buffer", modelMatrixBuffer);
+        create_meta<buffer>("entity id buffer", entityIdBuffer);
     }
 
 }

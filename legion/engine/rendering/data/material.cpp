@@ -193,6 +193,22 @@ namespace legion::rendering
         return std::make_pair(std::ref(m_materialLock), std::ref(m_materials));
     }
 
+    void MaterialCache::delete_material(const std::string& name)
+    {
+        log::debug("Destroyed material {}", name);
+        auto id = nameHash(name);
+
+        async::readwrite_guard guard(MaterialCache::m_materialLock);
+        m_materials.erase(id);
+    }
+
+    void MaterialCache::delete_material(id_type id)
+    {
+        log::debug("Destroyed material with id: {}", id);
+        async::readwrite_guard guard(MaterialCache::m_materialLock);
+        m_materials.erase(id);
+    }
+
     material_handle MaterialCache::get_material(const std::string& name)
     {
         id_type id = nameHash(name);
@@ -223,6 +239,12 @@ namespace legion::rendering
 #endif
 
         return MaterialCache::m_materials.at(id).current_variant();
+    }
+
+    std::vector<std::reference_wrapper<variant_submaterial>> material_handle::get_variants()
+    {
+        async::readonly_guard guard(MaterialCache::m_materialLock);
+        return MaterialCache::m_materials.at(id).get_variants();
     }
 
     bool material_handle::has_variant(id_type variantId) const
@@ -287,6 +309,11 @@ namespace legion::rendering
         return MaterialCache::m_materials.at(id).m_shader;
     }
 
+    void material_handle::destroy()
+    {
+        MaterialCache::delete_material(id);
+    }
+
     void material_handle::bind()
     {
         async::readonly_guard guard(MaterialCache::m_materialLock);
@@ -348,6 +375,16 @@ namespace legion::rendering
         return MaterialCache::m_materials.at(id).m_shader.get_attribute(name);
     }
 
+    std::vector<std::reference_wrapper<variant_submaterial>> material::get_variants()
+    {
+        std::vector<std::reference_wrapper<variant_submaterial>> variants;
+        variants.reserve(m_variants.size());
+        for (auto& [id, variant] : m_variants)
+            variants.push_back(std::ref(variant));
+
+        return variants;
+    }
+
     id_type material::current_variant() const
     {
         return m_currentVariant;
@@ -369,8 +406,13 @@ namespace legion::rendering
         if (!m_shader.has_variant(variantId))
             log::error("Shader {} does not have a variant with id {}", m_shader.get_name(), variantId);
 #endif
-
-        m_currentVariant = variantId;
+        if (variantId == 0)
+        {
+            static id_type defaultId = nameHash("default");
+            m_currentVariant = defaultId;
+        }
+        else
+            m_currentVariant = variantId;
     }
 
     void material::set_variant(const std::string& variant)
