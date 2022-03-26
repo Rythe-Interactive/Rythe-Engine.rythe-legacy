@@ -289,111 +289,21 @@ namespace legion::rendering
 
         for (auto [m, instancesPerMaterial] : *batches)
         {
-            if (m.get_name() == "Test")
-            {
-                for (auto [modelHandle, instances] : instancesPerMaterial)
-                {
-                    material_handle mater;
-
-                    if (modelHandle.id == invalid_id)
-                    {
-                        for (auto& ent : instances.first)
-                            log::warn("Invalid mesh found on entity {}.", ecs::Registry::getEntity(ent)->name);
-
-                        continue;
-                    }
-
-                    const model& mesh = modelHandle.get_model();
-                    for (auto submesh : mesh.submeshes)
-                    {
-                        if (mesh.materials.empty())
-                            mater = m;
-                        else if (submesh.materialIndex == -1)
-                            continue;
-                        else
-                            mater = mesh.materials[submesh.materialIndex];
-
-                        auto currentVariant = mater.current_variant();
-                        auto shader = mater.get_shader();
-                        if (!shader.is_valid() || !shader.has_variant(depthOnlyVariant))
-                            mater = m_defaultDepthOnlyMaterial;
-                        else
-                            mater.set_variant(depthOnlyVariant);
-
-                        auto& shaderState = shader.get_variant(mater.current_variant()).state;
-                        if ((shaderState.count(GL_BLEND) && (shaderState.at(GL_BLEND) != GL_FALSE)) ||
-                            (shaderState.count(GL_BLEND_SRC) && (shaderState.at(GL_BLEND_SRC) != GL_FALSE)) ||
-                            (shaderState.count(GL_BLEND_DST) && (shaderState.at(GL_BLEND_DST) != GL_FALSE)))
-                        {
-                            camInput.bind(mater);
-                            if (mater.has_param<uint>(SV_LIGHTCOUNT))
-                                mater.set_param<uint>(SV_LIGHTCOUNT, *lightCount);
-
-                            if (sceneColor && mater.has_param<texture_handle>(SV_SCENECOLOR))
-                                mater.set_param<texture_handle>(SV_SCENECOLOR, sceneColor);
-
-                            if (sceneNormal && mater.has_param<texture_handle>(SV_SCENENORMAL))
-                                mater.set_param<texture_handle>(SV_SCENENORMAL, sceneNormal);
-
-                            if (scenePosition && mater.has_param<texture_handle>(SV_SCENEPOSITION))
-                                mater.set_param<texture_handle>(SV_SCENEPOSITION, scenePosition);
-
-                            if (hdrOverdraw && mater.has_param<texture_handle>(SV_HDROVERDRAW))
-                                mater.set_param<texture_handle>(SV_HDROVERDRAW, hdrOverdraw);
-
-                            if (sceneDepth && mater.has_param<texture_handle>(SV_SCENEDEPTH))
-                                mater.set_param<texture_handle>(SV_SCENEDEPTH, sceneDepth);
-
-                            if (skyboxTex && mater.has_param<texture_handle>(SV_SKYBOX))
-                                mater.set_param(SV_SKYBOX, skyboxTex);
-
-                            mater.bind();
-
-                            ModelCache::create_model(modelHandle.id);
-
-                            if (!mesh.buffered)
-                                modelHandle.buffer_data(*modelMatrixBuffer, *entityIdBuffer);
-
-                            if (mesh.submeshes.empty())
-                            {
-                                log::warn("Empty mesh found. Model name: {},  Model ID {}", ModelCache::get_model_name(modelHandle.id), modelHandle.get_mesh().id());
-                                continue;
-                            }
-
-                            entityIdBuffer->bufferData(instances.first);
-                            modelMatrixBuffer->bufferData(instances.second);
-
-                            {
-                                mesh.vertexArray.bind();
-                                mesh.indexBuffer.bind();
-                                lightsBuffer->bind();
-                                glDrawElementsInstanced(GL_TRIANGLES, (GLuint)submesh.indexCount, GL_UNSIGNED_INT, (GLvoid*)(submesh.indexOffset * sizeof(uint)), (GLsizei)instances.second.size());
-
-                                lightsBuffer->release();
-                                mesh.indexBuffer.release();
-                                mesh.vertexArray.release();
-                            }
-
-                            mater.release();
-                        }
-
-                        if (mater != m_defaultDepthOnlyMaterial)
-                            mater.set_variant(currentVariant);
-                    }
-                }
-                continue;
-            }
-
             material_handle material = m;
 
             auto currentVariant = material.current_variant();
-            auto shader = material.get_shader();
-            if (!shader.is_valid() || !shader.has_variant(depthOnlyVariant))
+            if (m.get_name() == "Test")
                 material = m_defaultDepthOnlyMaterial;
             else
-                material.set_variant(depthOnlyVariant);
+            {
+                auto shader = material.get_shader();
+                if (!shader.is_valid() || !shader.has_variant(depthOnlyVariant))
+                    material = m_defaultDepthOnlyMaterial;
+                else
+                    material.set_variant(depthOnlyVariant);
+            }
 
-            auto& shaderState = shader.get_variant(material.current_variant()).state;
+            auto& shaderState = material.get_shader().get_variant(material.current_variant()).state;
             if ((shaderState.count(GL_BLEND) && (shaderState.at(GL_BLEND) != GL_FALSE)) ||
                 (shaderState.count(GL_BLEND_SRC) && (shaderState.at(GL_BLEND_SRC) != GL_FALSE)) ||
                 (shaderState.count(GL_BLEND_DST) && (shaderState.at(GL_BLEND_DST) != GL_FALSE)))

@@ -5,6 +5,7 @@
 #include <rendering/debugrendering.hpp>
 #include <audio/audio.hpp>
 #include "../renderstages/mousehover.hpp"
+#include "gui_test.hpp"
 
 struct example_comp
 {
@@ -453,12 +454,12 @@ public:
     {
         using namespace legion;
 
-        auto selectedEntityId = MouseHover::getHoveredEntityId();
-        if (selectedEntityId != invalid_id)
+        auto hoveredEntityId = MouseHover::getHoveredEntityId();
+        if (hoveredEntityId != invalid_id)
         {
-            auto ent = ecs::Registry::getEntity(selectedEntityId);
+            auto ent = ecs::Registry::getEntity(hoveredEntityId);
 
-            if (ent.has_component<transform>())
+            if (ent != GuiTestSystem::selected && ent.has_component<transform>())
             {
                 transform transf = ent.get_component<transform>();
 
@@ -485,6 +486,38 @@ public:
 
                 for (auto& edge : edges)
                     debug::drawLine((worldMat * math::vec4(edge.first.x, edge.first.y, edge.first.z, 1.f)).xyz(), (worldMat * math::vec4(edge.second.x, edge.second.y, edge.second.z, 1.f)).xyz(), math::colors::orange);
+            }
+        }
+
+        if (GuiTestSystem::selected != invalid_id)
+        {
+            if (GuiTestSystem::selected.has_component<transform>())
+            {
+                transform transf = GuiTestSystem::selected.get_component<transform>();
+
+                math::mat4 worldMat = transf.to_world_matrix();
+                math::vec3 min = math::vec3(-0.5f, -0.5f, -0.5f);
+                math::vec3 max = math::vec3(0.5f, 0.5f, 0.5f);
+
+                std::pair<math::vec3, math::vec3> edges[] = {
+                    std::make_pair(min, math::vec3(min.x, min.y, max.z)),
+                    std::make_pair(math::vec3(min.x, min.y, max.z), math::vec3(max.x, min.y, max.z)),
+                    std::make_pair(math::vec3(max.x, min.y, max.z), math::vec3(max.x, min.y, min.z)),
+                    std::make_pair(math::vec3(max.x, min.y, min.z), min),
+
+                    std::make_pair(max, math::vec3(max.x, max.y, min.z)),
+                    std::make_pair(math::vec3(max.x, max.y, min.z), math::vec3(min.x, max.y, min.z)),
+                    std::make_pair(math::vec3(min.x, max.y, min.z), math::vec3(min.x, max.y, max.z)),
+                    std::make_pair(math::vec3(min.x, max.y, max.z), max),
+
+                    std::make_pair(min, math::vec3(min.x, max.y, min.z)),
+                    std::make_pair(math::vec3(min.x, min.y, max.z), math::vec3(min.x, max.y, max.z)),
+                    std::make_pair(math::vec3(max.x, min.y, max.z), math::vec3(max.x, max.y, max.z)),
+                    std::make_pair(math::vec3(max.x, min.y, min.z), math::vec3(max.x, max.y, min.z))
+                };
+
+                for (auto& edge : edges)
+                    debug::drawLine((worldMat * math::vec4(edge.first.x, edge.first.y, edge.first.z, 1.f)).xyz(), (worldMat * math::vec4(edge.second.x, edge.second.y, edge.second.z, 1.f)).xyz(), math::colors::green);
             }
         }
 

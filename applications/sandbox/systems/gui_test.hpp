@@ -40,7 +40,7 @@ namespace legion
         }
 
         ecs::filter<camera, transform> cameraQuery;
-        ecs::entity selected;
+        static ecs::entity selected;
 
         math::mat4 view = math::mat4(1.0f);
         math::mat4 projection = math::mat4(1.0f);
