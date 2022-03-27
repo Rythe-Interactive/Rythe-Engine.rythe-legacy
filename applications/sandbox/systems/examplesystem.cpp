@@ -302,17 +302,17 @@ void ExampleSystem::setup()
         auto ent = createEntity("Boids");
         auto [pos, rot, scal] = ent.add_component<transform>();
         auto emitter = ent.add_component<particle_emitter>();
-        emitter->set_spawn_rate(1);
-        emitter->set_spawn_interval(.1f);
+        emitter->set_spawn_rate(10);
+        emitter->set_spawn_interval(.05f);
         emitter->resize(1000);
         emitter->localSpace = false;
-        emitter->add_policy<locomotion_policy>();
         emitter->pause();
+        emitter->add_policy<locomotion_policy>();
         emitter->add_policy<alignment_policy>();
         emitter->add_policy<cohesion_policy>();
         emitter->add_policy<seperation_policy>();
-        auto model = gfx::ModelCache::create_model("Suzanne",fs::view("assets://models/suzanne.obj"));
-        material = gfx::MaterialCache::get_material("slate");
+        auto model = gfx::ModelCache::create_model("Suzanne", fs::view("assets://models/suzanne.obj"));
+        material = gfx::MaterialCache::get_material("Sun");
         emitter->add_policy<gfx::rendering_policy>(gfx::rendering_policy{ model, material });
     }
 
