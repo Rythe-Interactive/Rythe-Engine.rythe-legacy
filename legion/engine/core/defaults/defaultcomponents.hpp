@@ -6,7 +6,7 @@
 
 namespace legion::core
 {
-    struct [[legion::reflectable]] position : public math::vec3
+    struct [[reflectable]] position : public math::vec3
     {
         position() : math::vec3(0, 0, 0) {}
         position(const position&) = default;
@@ -32,7 +32,7 @@ namespace legion::core
         }
     };
 
-    struct [[legion::reflectable]] rotation : public math::quat
+    struct [[reflectable]] rotation : public math::quat
     {
         rotation() : math::quat(1, 0, 0, 0) {}
         rotation(float _w, float _x, float _y, float _z) : math::quat(_w, _x, _y, _z) {}
@@ -86,7 +86,7 @@ namespace legion::core
         return math::conjugate(math::normalize(math::toQuat(math::lookAt(position, center, up))));
     }
 
-    struct [[legion::reflectable]] scale : public math::vec3
+    struct [[reflectable]] scale : public math::vec3
     {
         scale() : math::vec3(1, 1, 1) {}
         scale(float _x, float _y, float _z) : math::vec3(_x, _y, _z) {}
@@ -147,7 +147,7 @@ namespace legion::core
 
     };
 
-    struct [[legion::reflectable]] velocity : public math::vec3
+    struct [[reflectable]] velocity : public math::vec3
     {
         velocity() : math::vec3(0, 0, 0) {}
         velocity(const velocity&) = default;
@@ -173,7 +173,7 @@ namespace legion::core
         }
     };
 
-    struct mesh_filter
+    struct [[reflectable]] mesh_filter
     {
         assets::asset<mesh> shared_mesh;
 

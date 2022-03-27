@@ -22,6 +22,8 @@ namespace legion::core
 
     };
 
+#define reflectable reflectable_attribute
+
     struct range_attribute : public attribute<range_attribute>
     {
 

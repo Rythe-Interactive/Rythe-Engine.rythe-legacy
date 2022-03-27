@@ -8,14 +8,15 @@
 #include "gui_test.hpp"
 
 
-struct [[lgn::reflectable]] example_comp
+struct [[reflectable]] example_comp
 {
     int value = 1;
 };
 
 struct tonemap_action : public lgn::app::input_action<tonemap_action> {};
-struct reload_shaders_action : public lgn::app::input_action<reload_shaders_action> {};
 struct switch_skybox_action : public lgn::app::input_action<switch_skybox_action> {};
+struct auto_exposure_action : public lgn::app::input_action<auto_exposure_action> {};
+struct reload_shaders_action : public lgn::app::input_action<reload_shaders_action> {};
 
 class ExampleSystem final : public legion::System<ExampleSystem>
 {
@@ -32,11 +33,13 @@ public:
         log::debug("ExampleSystem setup");
 
         app::InputSystem::createBinding<tonemap_action>(app::inputmap::method::F2);
-        app::InputSystem::createBinding<reload_shaders_action>(app::inputmap::method::F3);
-        app::InputSystem::createBinding<switch_skybox_action>(app::inputmap::method::F4);
+        app::InputSystem::createBinding<switch_skybox_action>(app::inputmap::method::F3);
+        app::InputSystem::createBinding<auto_exposure_action>(app::inputmap::method::F4);
+        app::InputSystem::createBinding<reload_shaders_action>(app::inputmap::method::F5);
         bindToEvent<tonemap_action, &ExampleSystem::onTonemapSwitch>();
-        bindToEvent<reload_shaders_action, &ExampleSystem::onShaderReload>();
         bindToEvent<switch_skybox_action, &ExampleSystem::onSkyboxSwitch>();
+        bindToEvent<auto_exposure_action, &ExampleSystem::onAutoExposureSwitch>();
+        bindToEvent<reload_shaders_action, &ExampleSystem::onShaderReload>();
 
         auto* pipeline = dynamic_cast<gfx::DefaultPipeline*>(gfx::Renderer::getMainPipeline());
         if (pipeline)
@@ -325,7 +328,7 @@ public:
     void onShaderReload(reload_shaders_action& event)
     {
         using namespace legion;
-        if (event.pressed())
+        if (event.released())
         {
             auto targetWin = ecs::world.get_component<app::window>();
             if (!targetWin)
@@ -350,12 +353,27 @@ public:
         }
     }
 
+    void onAutoExposureSwitch(auto_exposure_action& event)
+    {
+        using namespace legion;
+        if (event.released())
+        {
+            static float defaultExposure = gfx::Tonemapping::getExposure();
+            bool enabled = !gfx::Tonemapping::autoExposureEnabled();
+            gfx::Tonemapping::enableAutoExposure(enabled);
+            if (!enabled)
+                gfx::Tonemapping::setExposure(defaultExposure);
+
+            log::debug("Auto exposure {}", enabled? "enabled" : "disabled");
+        }
+    }
+    
     void onTonemapSwitch(tonemap_action& event)
     {
         using namespace legion;
-        if (event.pressed())
+        if (event.released())
         {
-            static size_type type = static_cast<size_type>(gfx::tonemapping_type::legion);
+            static size_type type = static_cast<size_type>(gfx::tonemapping_type::aces);
             type = (type + 1) % (static_cast<size_type>(gfx::tonemapping_type::unreal3) + 1);
 
             auto typeEnum = static_cast<gfx::tonemapping_type>(type);
@@ -392,7 +410,7 @@ public:
     {
         using namespace legion;
         using namespace rendering;
-        if (event.pressed())
+        if (event.released())
         {
             static size_type idx = 0;
             static texture_handle textures[4] = {};
@@ -477,6 +495,13 @@ public:
     void update(legion::time::span deltaTime)
     {
         using namespace legion;
+        static float exposure = gfx::Tonemapping::getExposure();
+        auto currentExposure = gfx::Tonemapping::getExposure();
+        if (math::abs(exposure - currentExposure) > 0.1f)
+        {
+            log::debug("Current exposure: {:.1f}", currentExposure);
+            exposure = currentExposure;
+        }
 
         auto hoveredEntityId = MouseHover::getHoveredEntityId();
         if (hoveredEntityId != invalid_id)

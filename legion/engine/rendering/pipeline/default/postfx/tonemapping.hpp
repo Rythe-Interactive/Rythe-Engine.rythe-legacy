@@ -20,7 +20,9 @@ namespace legion::rendering
         static void setAlgorithm(tonemapping_type type) noexcept;
 
         static void enableAutoExposure(bool enable) noexcept;
+        static bool autoExposureEnabled() noexcept;
         static void setExposure(float value) noexcept;
+        static float getExposure() noexcept;
 
         void setup(app::window& context) override;
 
