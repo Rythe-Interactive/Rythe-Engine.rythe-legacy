@@ -9,7 +9,7 @@
 /* in 1  */  #define SV_TEXCOORD1      SV_TEXCOORD0 + 1     
 /* in 2  */  #define SV_TEXCOORD2      SV_TEXCOORD1 + 1     
 /* in 3  */  #define SV_TEXCOORD3      SV_TEXCOORD2 + 1     
-   
+
 /* in 4  */  #define SV_POSITION       SV_TEXCOORD3 + 1
 /* in 5  */  #define SV_COLOR          SV_POSITION + 1
 /* in 6  */  #define SV_NORMAL         SV_COLOR + 1     
@@ -26,6 +26,7 @@
 /* uniform 10  */  #define SV_CAMERA         SV_VIEW
 
 /* buffer  0  */  #define SV_LIGHTS         SV_START
+/* buffer  1  */  #define SV_TEXTURES         SV_START + 1
 /* uniform 15 */  #define SV_LIGHTCOUNT     SV_VIEWPORT + 1
 /* uniform 16 */  #define SV_SKYBOX         SV_LIGHTCOUNT + 1
 
@@ -56,48 +57,49 @@ namespace legion::rendering::detail
         static std::vector<std::string> defines;
         if (defines.empty())
         {
-            defines.push_back("SV_TEXCOORD0=" +    std::to_string(SV_TEXCOORD0));
-            defines.push_back("SV_TEXCOORD1=" +    std::to_string(SV_TEXCOORD1));
-            defines.push_back("SV_TEXCOORD2=" +    std::to_string(SV_TEXCOORD2));
-            defines.push_back("SV_TEXCOORD3=" +    std::to_string(SV_TEXCOORD3));
+            defines.push_back("SV_TEXCOORD0=" + std::to_string(SV_TEXCOORD0));
+            defines.push_back("SV_TEXCOORD1=" + std::to_string(SV_TEXCOORD1));
+            defines.push_back("SV_TEXCOORD2=" + std::to_string(SV_TEXCOORD2));
+            defines.push_back("SV_TEXCOORD3=" + std::to_string(SV_TEXCOORD3));
 
-            defines.push_back("SV_POSITION=" +     std::to_string(SV_POSITION));
-            defines.push_back("SV_COLOR=" +        std::to_string(SV_COLOR));
-            defines.push_back("SV_NORMAL=" +       std::to_string(SV_NORMAL));
-            defines.push_back("SV_TANGENT=" +      std::to_string(SV_TANGENT));
-            defines.push_back("SV_ENTITYID=" +     std::to_string(SV_ENTITYID));
-            defines.push_back("SV_MODELMATRIX=" +  std::to_string(SV_MODELMATRIX));
+            defines.push_back("SV_POSITION=" + std::to_string(SV_POSITION));
+            defines.push_back("SV_COLOR=" + std::to_string(SV_COLOR));
+            defines.push_back("SV_NORMAL=" + std::to_string(SV_NORMAL));
+            defines.push_back("SV_TANGENT=" + std::to_string(SV_TANGENT));
+            defines.push_back("SV_ENTITYID=" + std::to_string(SV_ENTITYID));
+            defines.push_back("SV_MODELMATRIX=" + std::to_string(SV_MODELMATRIX));
 
-            defines.push_back("SV_VIEW=" +         std::to_string(SV_VIEW));
-            defines.push_back("SV_PROJECT=" +      std::to_string(SV_PROJECT));
-            defines.push_back("SV_CAMPOS=" +       std::to_string(SV_CAMPOS));
-            defines.push_back("SV_VIEWDIR=" +      std::to_string(SV_VIEWDIR));
-            defines.push_back("SV_VIEWPORT=" +     std::to_string(SV_VIEWPORT));
+            defines.push_back("SV_VIEW=" + std::to_string(SV_VIEW));
+            defines.push_back("SV_PROJECT=" + std::to_string(SV_PROJECT));
+            defines.push_back("SV_CAMPOS=" + std::to_string(SV_CAMPOS));
+            defines.push_back("SV_VIEWDIR=" + std::to_string(SV_VIEWDIR));
+            defines.push_back("SV_VIEWPORT=" + std::to_string(SV_VIEWPORT));
 
-            defines.push_back("SV_CAMERA=" +       std::to_string(SV_CAMERA));
+            defines.push_back("SV_CAMERA=" + std::to_string(SV_CAMERA));
 
-            defines.push_back("SV_LIGHTS=" +       std::to_string(SV_LIGHTS));
-            defines.push_back("SV_LIGHTCOUNT=" +   std::to_string(SV_LIGHTCOUNT));
-            defines.push_back("SV_SKYBOX=" +       std::to_string(SV_SKYBOX));
+            defines.push_back("SV_LIGHTS=" + std::to_string(SV_LIGHTS));
+            defines.push_back("SV_TEXTURES=" + std::to_string(SV_TEXTURES));
+            defines.push_back("SV_LIGHTCOUNT=" + std::to_string(SV_LIGHTCOUNT));
+            defines.push_back("SV_SKYBOX=" + std::to_string(SV_SKYBOX));
 
-            defines.push_back("SV_SCENECOLOR=" +   std::to_string(SV_SCENECOLOR));
-            defines.push_back("SV_SCENEDEPTH=" +   std::to_string(SV_SCENEDEPTH));
-            defines.push_back("SV_SCENENORMAL=" +  std::to_string(SV_SCENENORMAL));
-            defines.push_back("SV_SCENEPOSITION=" +std::to_string(SV_SCENEPOSITION));
-            defines.push_back("SV_HDROVERDRAW=" +  std::to_string(SV_HDROVERDRAW));
+            defines.push_back("SV_SCENECOLOR=" + std::to_string(SV_SCENECOLOR));
+            defines.push_back("SV_SCENEDEPTH=" + std::to_string(SV_SCENEDEPTH));
+            defines.push_back("SV_SCENENORMAL=" + std::to_string(SV_SCENENORMAL));
+            defines.push_back("SV_SCENEPOSITION=" + std::to_string(SV_SCENEPOSITION));
+            defines.push_back("SV_HDROVERDRAW=" + std::to_string(SV_HDROVERDRAW));
 
-            defines.push_back("SV_ALBEDO=" +       std::to_string(SV_ALBEDO));
+            defines.push_back("SV_ALBEDO=" + std::to_string(SV_ALBEDO));
             defines.push_back("SV_NORMALHEIGHT=" + std::to_string(SV_NORMALHEIGHT));
-            defines.push_back("SV_MRDAO=" +        std::to_string(SV_MRDAO));
-            defines.push_back("SV_EMISSIVE=" +     std::to_string(SV_EMISSIVE));
-            defines.push_back("SV_HEIGHTSCALE=" +  std::to_string(SV_HEIGHTSCALE));
+            defines.push_back("SV_MRDAO=" + std::to_string(SV_MRDAO));
+            defines.push_back("SV_EMISSIVE=" + std::to_string(SV_EMISSIVE));
+            defines.push_back("SV_HEIGHTSCALE=" + std::to_string(SV_HEIGHTSCALE));
 
-            defines.push_back("SV_MATERIAL=" +     std::to_string(SV_MATERIAL));
+            defines.push_back("SV_MATERIAL=" + std::to_string(SV_MATERIAL));
 
 
-            defines.push_back("SV_FRAGMENTOUT=" +    std::to_string(0));
-            defines.push_back("SV_NORMALOUT=" +      std::to_string(1));
-            defines.push_back("SV_POSITIONOUT=" +    std::to_string(2));
+            defines.push_back("SV_FRAGMENTOUT=" + std::to_string(0));
+            defines.push_back("SV_NORMALOUT=" + std::to_string(1));
+            defines.push_back("SV_POSITIONOUT=" + std::to_string(2));
             defines.push_back("SV_HDROVERDRAWOUT=" + std::to_string(3));
         }
 

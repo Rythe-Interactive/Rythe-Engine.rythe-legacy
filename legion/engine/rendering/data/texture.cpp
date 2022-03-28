@@ -107,6 +107,15 @@ namespace legion::rendering
         m_textures.erase(id);
     }
 
+    texture_array TextureCache::create_texture_array(const std::unordered_map<std::string, fs::view>& files, texture_import_settings settings)
+    {
+        texture_array t_array;
+        for (auto& [name, view] : files)
+            t_array.textures.emplace(nameHash(name), create_texture(name, view));
+
+        return t_array;
+    }
+
     texture_handle TextureCache::create_texture(const std::string& name, const fs::view& file, texture_import_settings settings)
     {
         if (m_invalidTexture.id == invalid_id)

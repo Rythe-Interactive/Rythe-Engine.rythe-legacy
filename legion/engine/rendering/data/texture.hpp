@@ -88,6 +88,7 @@ namespace legion::rendering
         std::vector<math::color> pixels;
     };
 
+
     /**@class texture
      * @brief Struct containing all the data needed for rendering.
      */
@@ -123,9 +124,18 @@ namespace legion::rendering
         operator id_type() const { return id; }
     };
 
+    /**@class texture_array
+     * @brief Struct containing a list of textures.
+     */
+    struct texture_array
+    {
+        app::gl_id textureArrayId = invalid_id;
+        std::unordered_map<id_type, texture_handle> textures;
+    };
+
     /**@brief Default invalid texture handle.
      */
-    constexpr texture_handle invalid_texture_handle { invalid_id };
+    constexpr texture_handle invalid_texture_handle{ invalid_id };
 
     /**@class texture_import_settings
      * @brief Data structure to parameterize the texture import process.
@@ -154,6 +164,13 @@ namespace legion::rendering
         texture_components::rgba, true, true, 0, texture_mipmap::linear_mipmap_linear, texture_mipmap::linear,
         texture_wrap::repeat, texture_wrap::repeat, texture_wrap::repeat };
 
+    /**@brief Texture array import settings.
+     */
+    constexpr texture_import_settings texture_array_settings{
+        texture_type::array_2D, true, channel_format::eight_bit, texture_format::rgba_hdr,
+        texture_components::rgba, true, true, 0, texture_mipmap::linear_mipmap_linear, texture_mipmap::linear,
+        texture_wrap::repeat, texture_wrap::repeat, texture_wrap::repeat };
+
     /**@class TextureCache
      * @brief Data cache for loading, storing and managing textures.
      */
@@ -172,6 +189,8 @@ namespace legion::rendering
 
         static void destroy_texture(const std::string& name);
 
+        static texture_array create_texture_array(const std::unordered_map<std::string, fs::view>& files, texture_import_settings settings = texture_array_settings);
+
         /**@brief Create a new texture and load it from a file if a texture with the same name doesn't exist yet.
          * @param name Identifying name for the texture.
          * @param file File to load from.
@@ -181,6 +200,7 @@ namespace legion::rendering
         static texture_handle create_texture(const std::string& name, const fs::view& file, texture_import_settings settings = default_texture_settings);
         static texture_handle create_texture(const fs::view& file, texture_import_settings settings = default_texture_settings);
         static texture_handle create_texture(const std::string& name, math::ivec2 size, texture_import_settings settings = default_texture_settings);
+
 
         /**@brief Create a new texture from an image if a texture with the same name doesn't exist yet.
          * @param name Name of the image and identifying name for the texture.
