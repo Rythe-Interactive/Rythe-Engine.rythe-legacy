@@ -14,8 +14,6 @@ namespace legion::rendering
         auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<id_type>, std::vector<math::mat4>>>>>(batchesId);
         static ecs::filter<particle_emitter> emitterFilter;
 
-        std::vector<std::reference_wrapper<std::pair<std::vector<ecs::entity>, std::vector<math::mat4>>>> batchList;
-
         for (auto& ent : emitterFilter)
         {
             auto& emitter = ent.get_component<particle_emitter>().get();
@@ -71,6 +69,7 @@ namespace legion::rendering
 
             auto& batch = (*batches)[renderer.material][model_handle{ filter.shared_mesh.id() }];
             auto start = batch.second.size();
+            batch.first.push_back(ent->id);
             batch.second.insert(batch.second.end(), emitter.size(), math::mat4());
 
             scale scal;
