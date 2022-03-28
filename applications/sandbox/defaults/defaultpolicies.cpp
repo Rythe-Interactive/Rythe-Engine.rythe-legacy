@@ -7,7 +7,6 @@ namespace legion::core
 #pragma region Example Policy
     void example_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
     {
-        OPTICK_EVENT("[Example Policy] Init");
         static id_type posBufferId = nameHash("posBuffer");
         auto& posBuffer = emitter.has_buffer<position>(posBufferId) ? emitter.get_buffer<position>(posBufferId) : emitter.create_buffer<position>("posBuffer");
 
@@ -34,7 +33,6 @@ namespace legion::core
 
     void orbital_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
     {
-        OPTICK_EVENT("[Orbital Policy] Init");
         static id_type posBufferId = nameHash("posBuffer");
         static id_type velBufferId = nameHash("velBuffer");
         auto& posBuffer = emitter.has_buffer<position>(posBufferId) ? emitter.get_buffer<position>(posBufferId) : emitter.create_buffer<position>("posBuffer");
@@ -52,7 +50,6 @@ namespace legion::core
 
     void orbital_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
     {
-        OPTICK_EVENT("[Orbital Policy] Update");
         static id_type posBufferId = nameHash("posBuffer");
         static id_type velBufferId = nameHash("velBuffer");
         auto& posBuffer = emitter.get_buffer<position>("posBuffer");
@@ -84,7 +81,6 @@ namespace legion::core
 #pragma region Fountain Policy
     void fountain_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
     {
-        OPTICK_EVENT("[Fountain Policy] Init");
         static id_type posBufferId = nameHash("posBuffer");
         static id_type velBufferId = nameHash("velBuffer");
         auto& posBuffer = emitter.has_buffer<position>(posBufferId) ? emitter.get_buffer<position>(posBufferId) : emitter.create_buffer<position>("posBuffer");
@@ -100,7 +96,6 @@ namespace legion::core
 
     void fountain_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
     {
-        OPTICK_EVENT("[Fountain Policy] Update");
         auto& posBuffer = emitter.get_buffer<position>("posBuffer");
         auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
         for (size_type idx = 0; idx < count; idx++)
@@ -114,14 +109,12 @@ namespace legion::core
 #pragma region Scale over Lifetime
     void scale_lifetime_policy::setup(particle_emitter& emitter)
     {
-        OPTICK_EVENT("[Scale over Lifetime] Setup");
         if (!emitter.has_uniform<float>("scaleFactor"))
             emitter.create_uniform<float>("scaleFactor") = .3f;
     }
 
     void scale_lifetime_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
     {
-        OPTICK_EVENT("[Scale over Lifetime] Init");
         static id_type scaleBufferId = nameHash("scaleBuffer");
         auto& scaleBuffer = emitter.has_buffer<scale>(scaleBufferId) ? emitter.get_buffer<scale>(scaleBufferId) : emitter.create_buffer<scale>("scaleBuffer");
         auto& ageBuffer = emitter.get_buffer<life_time>("lifetimeBuffer");
@@ -135,7 +128,6 @@ namespace legion::core
 
     void scale_lifetime_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
     {
-        OPTICK_EVENT("[Scale over Lifetime] Update");
         auto& ageBuffer = emitter.get_buffer<life_time>("lifetimeBuffer");
         auto& scaleBuffer = emitter.get_buffer<scale>("scaleBuffer");
 

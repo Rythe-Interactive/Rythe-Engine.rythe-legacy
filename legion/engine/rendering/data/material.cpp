@@ -212,7 +212,11 @@ namespace legion::rendering
     material_handle MaterialCache::get_material(const std::string& name)
     {
         id_type id = nameHash(name);
+        return get_material(id);
+    }
 
+    material_handle MaterialCache::get_material(id_type materialId)
+    {
         async::readonly_guard guard(MaterialCache::m_materialLock);
 
 #if defined(LEGION_VALIDATE)
@@ -224,8 +228,8 @@ namespace legion::rendering
         }
 #endif
 
-        if (m_materials.count(id))
-            return { id };
+        if (m_materials.count(materialId))
+            return { materialId };
         return invalid_material_handle;
     }
 

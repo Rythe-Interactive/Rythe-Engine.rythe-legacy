@@ -18,7 +18,6 @@ namespace legion::core
     void ParticleSystem::update(time::span deltaTime)
     {
         ecs::filter<particle_emitter> filter;
-        OPTICK_EVENT("[Particle System] Update");
         for (auto& ent : filter)
         {
             auto& emitter = ent.get_component<particle_emitter>().get();
@@ -50,7 +49,6 @@ namespace legion::core
 
     void ParticleSystem::emit(particle_emitter& emitter, size_type count)
     {
-        OPTICK_EVENT("[Particle System] Emit Step");
         auto startCount = emitter.m_particleCount;
         if (emitter.m_particleCount + count >= emitter.m_capacity)
             count = emitter.m_capacity - startCount;
@@ -76,7 +74,6 @@ namespace legion::core
 
     void ParticleSystem::maintenance(particle_emitter& emitter, float deltaTime)
     {
-        OPTICK_EVENT("[Particle System] Maintenance");
         auto& ageBuffer = emitter.get_buffer<life_time>("lifetimeBuffer");
         size_type destroyed = 0;
         size_type activeCount = 0;
@@ -89,13 +86,11 @@ namespace legion::core
         }
         if (emitter.has_uniform<float>("minLifeTime") && emitter.has_uniform<float>("maxLifeTime"))
         {
-            OPTICK_EVENT("[Particle System] Manage Ages");
             for (size_type i = 0; i < activeCount; i++)
             {
                 auto& lifeTime = ageBuffer[i];
                 if (lifeTime.age > lifeTime.max)
                 {
-                    OPTICK_EVENT("[Particle System] Destroy Particle");
                     emitter.set_alive(i, false);
                     destroyed++;
                 }

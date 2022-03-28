@@ -11,14 +11,13 @@ namespace legion::rendering
     void ParticleBatchingStage::render(app::window& context, camera& cam, const camera::camera_input& camInput, time::span deltaTime)
     {
         static id_type batchesId = nameHash("mesh batches");
-        auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<ecs::entity>,std::vector<math::mat4>>>>>(batchesId);
+        auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<id_type>, std::vector<math::mat4>>>>>(batchesId);
         static ecs::filter<particle_emitter> emitterFilter;
 
         std::vector<std::reference_wrapper<std::pair<std::vector<ecs::entity>, std::vector<math::mat4>>>> batchList;
 
         for (auto& ent : emitterFilter)
         {
-            OPTICK_EVENT("[ParticleBatchingStage] Emitter");
             auto& emitter = ent.get_component<particle_emitter>().get();
 
             static id_type posBufferId = nameHash("posBuffer");
@@ -52,12 +51,10 @@ namespace legion::rendering
 
             auto compare = [&](position& a, position& b)
             {
-                OPTICK_EVENT("[ParticleBatchingStage] Compare Lamda");
                 return math::distance2(a, camInput.pos) < math::distance2(b, camInput.pos);
             };
 
             //{
-            //    OPTICK_EVENT("[ParticleBatchingStage] Z Sorting");
             //    for (size_type i = 1; i < emitter.size(); i++)
             //    {
             //        auto j = i;

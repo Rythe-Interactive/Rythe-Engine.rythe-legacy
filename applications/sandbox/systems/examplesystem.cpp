@@ -10,6 +10,10 @@ void ExampleSystem::setup()
     log::filter(log::severity_debug);
     log::debug("ExampleSystem setup");
 
+    auto* pipeline = dynamic_cast<gfx::DefaultPipeline*>(gfx::Renderer::getMainPipeline());
+    if (pipeline)
+        pipeline->attachStage<MouseHover>();
+
     app::window& win = ecs::world.get_component<app::window>();
     app::context_guard guard(win);
 
@@ -278,6 +282,7 @@ void ExampleSystem::setup()
         model = gfx::ModelCache::get_handle("Sphere");
         ent.add_component<gfx::mesh_renderer>(gfx::mesh_renderer(material, model));
         auto orbit = createEntity("orbitRings");
+        orbit.add_component<transform>();
         ent.add_child(orbit);
 
         auto emitter = orbit.add_component<particle_emitter>();
@@ -343,52 +348,46 @@ void ExampleSystem::playEmitter(legion::play_action& action)
     using namespace legion;
     if (action.pressed())
     {
-        ecs::filter<particle_emitter> filter;
-        for (auto ent : filter)
+        if (GuiTestSystem::selected != invalid_id)
         {
-            auto& emitter = ent.get_component<particle_emitter>().get();
+            auto& emitter = GuiTestSystem::selected.get_component<particle_emitter>().get();
             emitter.play();
         }
     }
 }
-
 void ExampleSystem::pauseEmitter(legion::pause_action& action)
 {
     using namespace legion;
     if (action.pressed())
     {
-        ecs::filter<particle_emitter> filter;
-        for (auto ent : filter)
+        if (GuiTestSystem::selected != invalid_id)
         {
-            auto& emitter = ent.get_component<particle_emitter>().get();
+            auto& emitter = GuiTestSystem::selected.get_component<particle_emitter>().get();
             emitter.pause();
         }
     }
 }
-
 void ExampleSystem::stopEmitter(legion::stop_action& action)
 {
     using namespace legion;
     if (action.pressed())
     {
-        ecs::filter<particle_emitter> filter;
-        for (auto ent : filter)
+        if (GuiTestSystem::selected != invalid_id)
         {
-            auto& emitter = ent.get_component<particle_emitter>().get();
+            auto& emitter = GuiTestSystem::selected.get_component<particle_emitter>().get();
             emitter.stop();
         }
     }
 }
-
 void ExampleSystem::changeMaterial(legion::change_mat_action& action)
 {
     using namespace legion;
     if (action.pressed())
     {
         ecs::filter<particle_emitter> filter;
-        for (auto ent : filter)
+        if (GuiTestSystem::selected != invalid_id)
         {
-            auto& emitter = ent.get_component<particle_emitter>().get();
+            auto& emitter = GuiTestSystem::selected.get_component<particle_emitter>().get();
             auto models = gfx::ModelCache::get_all_models();
             auto randModel = gfx::ModelCache::get_handle(models.keys()[std::rand() % models.size()]);
             auto randMesh = randModel.get_mesh();
@@ -405,7 +404,6 @@ void ExampleSystem::changeMaterial(legion::change_mat_action& action)
         }
     }
 }
-
 void ExampleSystem::onShaderReload(legion::reload_shaders_action& event)
 {
     using namespace legion;
@@ -425,10 +423,14 @@ void ExampleSystem::onShaderReload(legion::reload_shaders_action& event)
         {
             gfx::ShaderCache::clear_checked_paths();
             gfx::ShaderCache::reload_shaders();
+
+            auto [lock, materials] = gfx::MaterialCache::get_all_materials();
+            async::readonly_guard materialsGuard(lock);
+            for (auto& [id, mat] : materials)
+                mat.reload();
         }
     }
 }
-
 void ExampleSystem::onTonemapSwitch(legion::tonemap_action& event)
 {
     using namespace legion;
@@ -466,7 +468,6 @@ void ExampleSystem::onTonemapSwitch(legion::tonemap_action& event)
         gfx::Tonemapping::setAlgorithm(typeEnum);
     }
 }
-
 void ExampleSystem::onSkyboxSwitch(legion::switch_skybox_action& event)
 {
     using namespace legion;
