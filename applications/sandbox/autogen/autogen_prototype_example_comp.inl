@@ -10,7 +10,7 @@ namespace legion::core
         prot.typeId = typeHash<::example_comp>();
         prot.typeName = "::example_comp";
         {
-            static const lgn::reflectable_attribute reflectable_attr{};
+            static const ::reflectable_attribute reflectable_attr{};
             prot.attributes.push_back(std::cref(reflectable_attr));
         }
         prot.members = std::vector<member_value>{

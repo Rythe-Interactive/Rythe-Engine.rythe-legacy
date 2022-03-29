@@ -10,7 +10,7 @@ namespace legion::core
         prot.typeId = typeHash<legion::core::velocity>();
         prot.typeName = "legion::core::velocity";
         {
-            static const legion::reflectable_attribute reflectable_attr{};
+            static const ::reflectable_attribute reflectable_attr{};
             prot.attributes.push_back(std::cref(reflectable_attr));
         }
         prot.members = std::vector<member_value>();
