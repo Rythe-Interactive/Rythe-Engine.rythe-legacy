@@ -1,5 +1,5 @@
 #version 450
-
+#state CULL OFF
 generate(vertex, fragment)
 
 #include <stdio.shinc>
@@ -19,6 +19,7 @@ shader(fragment)
     uniform sampler2DArray textures;
     void main(void)
     {
-        SubmitOutput(mix(texture(textures[0], stdio(uv)),texture(textures[1], stdio(uv))));
+        //SubmitOutput(mix(texture(textures, vec3(stdio(uv),0)),texture(textures, vec3(stdio(uv),1)),0.5));
+        SubmitOutput(texture(textures, vec3(stdio(uv),0)));
     }
 }

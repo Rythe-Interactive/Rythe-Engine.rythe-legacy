@@ -2,6 +2,8 @@
 
 #include "../systems/examplesystem.hpp"
 #include "../defaults/defaultpolicies.hpp"
+#include <rendering/data/particlepolicies/renderpolicy.hpp>
+#include <rendering/data/particlepolicies/flipbookpolicy.hpp>
 
 
 void ExampleSystem::setup()
@@ -325,26 +327,43 @@ void ExampleSystem::setup()
         emitter->add_policy<gfx::rendering_policy>(gfx::rendering_policy{ model, material });
     }
 
-    //{
-    //    auto ent = createEntity("Fountain");
-    //    auto [pos, rot, scal] = ent.add_component<transform>();
-    //    pos = position(0, 7, 0);
-    //    auto emitter = ent.add_component<particle_emitter>();
-    //    emitter->set_spawn_rate(10);
-    //    emitter->set_spawn_interval(0.2f);
-    //    emitter->resize(50000);
-    //    emitter->create_uniform<float>("minLifeTime") = 1.f;
-    //    emitter->create_uniform<float>("maxLifeTime") = 2.f;
-    //    emitter->localSpace = false;
+    {
 
-    //    fountain_policy fountain;
-    //    fountain.initForce = 20.f;
-    //    emitter->add_policy<fountain_policy>(fountain);
-    //    emitter->add_policy<scale_lifetime_policy>();
-    //    emitter->add_policy<gfx::rendering_policy>(gfx::rendering_policy{ gfx::ModelCache::create_model("Quad", fs::view("assets://models/billboard.glb")),  gfx::MaterialCache::create_material("Particle", fs::view("assets://shaders/particle.shs")) });
-    //    gfx::MaterialCache::get_material("Particle").set_param("particleColor", math::color(1.f, 1.f, 1.f, 1.f));
-    //    gfx::MaterialCache::get_material("Particle").set_param("fixedSize", false);
-    //}
+        auto parent = createEntity("Parent");
+        parent.add_component<transform>();
+
+        auto ent = createEntity("Fountain");
+        parent.add_child(ent);
+        auto [pos, rot, scal] = ent.add_component<transform>();
+        auto emitter = ent.add_component<particle_emitter>();
+        emitter->set_spawn_rate(100);
+        emitter->set_spawn_interval(0.2f);
+        emitter->resize(10000);
+        //emitter->create_uniform<float>("minLifeTime") = 5.f;
+        //emitter->create_uniform<float>("maxLifeTime") = 2.f;
+        emitter->localSpace = true;
+
+        fountain_policy fountain;
+        fountain.initForce = 20.f;
+        emitter->add_policy<fountain_policy>(fountain);
+        emitter->add_policy<scale_lifetime_policy>();
+        material = gfx::MaterialCache::create_material("AnimParticle", fs::view("assets://shaders/particle.shs"));
+        material.set_param("_texture", gfx::TextureCache::create_texture_array("Explosion",
+            {
+                fs::view("assets://textures/explosion/frame0.png"),
+                fs::view("assets://textures/explosion/frame1.png"),
+                fs::view("assets://textures/explosion/frame2.png"),
+                fs::view("assets://textures/explosion/frame3.png"),
+                fs::view("assets://textures/explosion/frame4.png"),
+                fs::view("assets://textures/explosion/frame5.png"),
+                fs::view("assets://textures/explosion/frame6.png"),
+                fs::view("assets://textures/explosion/frame7.png"),
+                fs::view("assets://textures/explosion/frame8.png"),
+            }));
+        model = gfx::ModelCache::create_model("Billboard", fs::view("assets://models/billboard.glb"));
+        emitter->add_policy<gfx::rendering_policy>(gfx::rendering_policy{ model, material });
+        emitter->add_policy<gfx::flipbook_policy>();
+    }
 
     app::InputSystem::createBinding<play_action>(app::inputmap::method::RIGHT);
     app::InputSystem::createBinding<pause_action>(app::inputmap::method::UP);
@@ -532,5 +551,3 @@ void ExampleSystem::onSkyboxSwitch(legion::switch_skybox_action& event)
         log::debug("Set skybox to {}", textures[idx].get_texture().name);
     }
 }
-
-

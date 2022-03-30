@@ -1,4 +1,5 @@
 #include <rendering/data/texture.hpp>
+#include <stb_image.h>
 
 namespace legion::rendering
 {
@@ -107,13 +108,127 @@ namespace legion::rendering
         m_textures.erase(id);
     }
 
-    texture_array TextureCache::create_texture_array(const std::unordered_map<std::string, fs::view>& files, texture_import_settings settings)
+    texture_handle TextureCache::create_texture_array(const std::string& name, const std::vector<fs::view>& files, texture_import_settings settings)
     {
-        texture_array t_array;
-        for (auto& [name, view] : files)
-            t_array.textures.emplace(nameHash(name), create_texture(name, view));
+        std::vector<assets::asset<image>> loadedImgs;
+        for (auto& file : files)
+        {
+            loadedImgs.push_back(assets::load<image>(file).value());
+        }
 
-        return t_array;
+        auto result = create_texture_array(name, loadedImgs, settings);
+
+        for (auto& img : loadedImgs)
+            img.destroy();
+
+        return result;
+    }
+
+    texture_handle TextureCache::create_texture_array(const std::string& name, const std::vector<assets::asset<image>>& imgs, texture_import_settings settings)
+    {
+        if (m_invalidTexture.id == invalid_id)
+            m_invalidTexture = create_texture("invalid texture", fs::view("engine://resources/invalid/missing"));
+
+        id_type id = nameHash(name);
+        {
+            async::readonly_guard guard(m_textureLock);
+            if (m_textures.contains(id))
+                return { id };
+        }
+
+        texture texture{};
+        texture.type = settings.type;
+
+        auto glTexType = static_cast<GLenum>(settings.type);
+
+        // Allocate and bind the texture.
+        glGenTextures(1, &texture.textureId);
+        glBindTexture(glTexType, texture.textureId);
+
+        // Handle wrapping behavior.
+        glTexParameteri(glTexType, GL_TEXTURE_WRAP_R, static_cast<GLint>(settings.wrapR));
+        glTexParameteri(glTexType, GL_TEXTURE_WRAP_S, static_cast<GLint>(settings.wrapS));
+        glTexParameteri(glTexType, GL_TEXTURE_WRAP_T, static_cast<GLint>(settings.wrapT));
+
+        auto& res = imgs[0]->resolution();
+
+        texture.channels = imgs[0]->components();
+        texture.name = name;
+
+        // Construct the texture using the loaded data.
+        texture.immutable = settings.immutable;
+        if (settings.immutable)
+        {
+            texture.mipCount = settings.mipCount ? settings.mipCount : (settings.generateMipmaps ? math::log2(math::max(res.x, res.y)) : 1);
+            glTexParameteri(glTexType, GL_TEXTURE_MAX_LEVEL, texture.mipCount);
+            glTexStorage3D(
+                glTexType,
+                static_cast<GLint>(texture.mipCount),
+                static_cast<GLint>(settings.intendedFormat),
+                res.x,
+                res.y,
+                imgs.size());
+            for (size_type idx = 0; idx < imgs.size(); idx++)
+            {
+                glTexSubImage3D(
+                    glTexType,
+                    0,
+                    0,
+                    0,
+                    idx,
+                    res.x,
+                    res.y,
+                    1,
+                    components_to_format[static_cast<int>(imgs[idx]->components())],
+                    channels_to_glenum[static_cast<uint>(imgs[idx]->format())],
+                    imgs[idx]->data());
+            }
+        }
+        else
+        {
+            texture.mipCount = settings.generateMipmaps ? math::log2(math::max(res.x, res.y)) : 1;
+            glTexParameteri(glTexType, GL_TEXTURE_MAX_LEVEL, texture.mipCount);
+            glTexImage3D(
+                glTexType,
+                texture.mipCount,
+                static_cast<GLint>(settings.intendedFormat),
+                res.x,
+                res.y,
+                imgs.size(),
+                0,
+                components_to_format[static_cast<int>(settings.components)],
+                channels_to_glenum[static_cast<uint>(settings.fileFormat)],
+                nullptr);
+
+            for (size_type idx = 0; idx < imgs.size(); idx++)
+            {
+                glTexSubImage3D(
+                    glTexType,                                              // target
+                    texture.mipCount,                                   // level
+                    0,                                                            // xoffset
+                    0,                                                            // yoffset
+                    idx,                                                         // zoffset/layer
+                    res.x,                                                      // width
+                    res.y,                                                      // height
+                    1,                                             // depth/layer count
+                    components_to_format[static_cast<int>(imgs[idx]->components())],
+                    channels_to_glenum[static_cast<uint>(imgs[idx]->format())],
+                    imgs[idx]->data());                                             // data
+
+            }
+        }
+
+        glBindTexture(glTexType, 0);
+
+        log::debug("Created texture array from texture collection {}", texture.name);
+
+        {
+            async::readwrite_guard guard(m_textureLock);
+            m_textures.insert(id, std::move(texture));
+            m_textures.at(id).name = name;
+        }
+
+        return { id };
     }
 
     texture_handle TextureCache::create_texture(const std::string& name, const fs::view& file, texture_import_settings settings)

@@ -5,14 +5,23 @@ namespace legion::rendering
 {
     void ParticleBatchingStage::setup(app::window& context)
     {
-
+        create_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<math::mat4>, std::vector<uint>>>>>("particle batches");
     }
 
     void ParticleBatchingStage::render(app::window& context, camera& cam, const camera::camera_input& camInput, time::span deltaTime)
     {
-        static id_type batchesId = nameHash("mesh batches");
-        auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<id_type>, std::vector<math::mat4>>>>>(batchesId);
+        static id_type batchesId = nameHash("particle batches");
+        auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<math::mat4>, std::vector<uint>>>>>(batchesId);
         static ecs::filter<particle_emitter> emitterFilter;
+
+        {
+            for (auto [material, models] : *batches)
+                for (auto [model, batch] : models)
+                {
+                    batch.first.clear();
+                    batch.second.clear();
+                }
+        }
 
         for (auto& ent : emitterFilter)
         {
@@ -23,6 +32,7 @@ namespace legion::rendering
             static id_type rotBufferId = nameHash("rotBuffer");
             static id_type meshFilterId = nameHash("mesh_filter");
             static id_type rendererId = nameHash("renderer");
+            static id_type frameID = nameHash("frameID");
 
             bool hasPosBuffer = emitter.has_buffer<position>(posBufferId);
             bool hasScaleBuffer = emitter.has_buffer<scale>(scaleBufferId);
@@ -68,11 +78,18 @@ namespace legion::rendering
             auto renderer = emitter.get_uniform<mesh_renderer>(rendererId);
 
             auto& batch = (*batches)[renderer.material][model_handle{ filter.shared_mesh.id() }];
-            auto start = batch.second.size();
-            batch.first.push_back(ent->id);
-            batch.second.insert(batch.second.end(), emitter.size(), math::mat4());
+            auto start = batch.first.size();
+            batch.first.insert(batch.first.end(), emitter.size(), math::mat4());
+            if (emitter.has_buffer<uint>(frameID))
+            {
+                for (size_type idx = 0; idx < emitter.size(); idx++)
+                {
+                    auto& frameIDBuffer = emitter.get_buffer<uint>(frameID);
+                    batch.second.push_back(frameIDBuffer[idx]);
+                }
+            }
 
-            scale scal;
+            scale scal{1.0f};
             rotation rot;
             position origin;
             if (emitter.localSpace)
@@ -93,7 +110,7 @@ namespace legion::rendering
                     if (emitter.is_alive(jobId))
                     {
                         math::mat4 localMat = math::compose(hasScaleBuffer ? scaleBuffer[jobId] : scal, hasRotBuffer ? rotBuffer[jobId] : rot, hasPosBuffer ? posBuffer[jobId] : origin);
-                        batch.second[jobId + start] = parentMat * localMat;
+                        batch.first[jobId + start] = parentMat * localMat;
                     }
                 }).wait();
         }

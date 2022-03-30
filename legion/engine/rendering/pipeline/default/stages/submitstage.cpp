@@ -85,7 +85,7 @@ namespace legion::rendering
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
         glEnable(GL_DEPTH_TEST);
-
+        //m_screenShader.release();
         cam.renderTarget.release();
     }
 

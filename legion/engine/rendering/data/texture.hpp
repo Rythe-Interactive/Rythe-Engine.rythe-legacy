@@ -102,6 +102,7 @@ namespace legion::rendering
         texture_type type;
         bool immutable;
         size_type mipCount;
+        size_type depth = 1;
         texture_format format;
         channel_format fileFormat;
 
@@ -122,15 +123,6 @@ namespace legion::rendering
         const texture& get_texture() const;
         bool operator==(const texture_handle& other) const { return id == other.id; }
         operator id_type() const { return id; }
-    };
-
-    /**@class texture_array
-     * @brief Struct containing a list of textures.
-     */
-    struct texture_array
-    {
-        app::gl_id textureArrayId = invalid_id;
-        std::unordered_map<id_type, texture_handle> textures;
     };
 
     /**@brief Default invalid texture handle.
@@ -168,7 +160,7 @@ namespace legion::rendering
      */
     constexpr texture_import_settings texture_array_settings{
         texture_type::array_2D, true, channel_format::eight_bit, texture_format::rgba_hdr,
-        texture_components::rgba, true, true, 0, texture_mipmap::linear_mipmap_linear, texture_mipmap::linear,
+        texture_components::rgba, true, false, 0, texture_mipmap::linear_mipmap_linear, texture_mipmap::linear,
         texture_wrap::repeat, texture_wrap::repeat, texture_wrap::repeat };
 
     /**@class TextureCache
@@ -189,7 +181,8 @@ namespace legion::rendering
 
         static void destroy_texture(const std::string& name);
 
-        static texture_array create_texture_array(const std::unordered_map<std::string, fs::view>& files, texture_import_settings settings = texture_array_settings);
+        static texture_handle create_texture_array(const std::string& name, const std::vector<fs::view>& files, texture_import_settings settings = texture_array_settings);
+        static texture_handle create_texture_array(const std::string& name, const std::vector<assets::asset<image>>& imgs, texture_import_settings settings = texture_array_settings);
 
         /**@brief Create a new texture and load it from a file if a texture with the same name doesn't exist yet.
          * @param name Identifying name for the texture.

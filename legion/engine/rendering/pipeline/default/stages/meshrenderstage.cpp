@@ -20,6 +20,7 @@ namespace legion::rendering
         static id_type lightCountId = nameHash("light count");
         static id_type matricesId = nameHash("model matrix buffer");
         static id_type entityBufferId = nameHash("entity id buffer");
+        static id_type flipbookBufferId = nameHash("flipbook frame buffer");
 
         auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<id_type>, std::vector<math::mat4>>>>>(batchesId);
         if (!batches)
@@ -39,6 +40,10 @@ namespace legion::rendering
 
         buffer* entityIdBuffer = get_meta<buffer>(entityBufferId);
         if (!entityIdBuffer)
+            return;
+
+        buffer* flipbookBuffer = get_meta<buffer>(flipbookBufferId);
+        if (!flipbookBuffer)
             return;
 
         auto* fbo = getFramebuffer(mainId);
@@ -164,7 +169,7 @@ namespace legion::rendering
                         ModelCache::create_model(modelHandle.id);
 
                         if (!mesh.buffered)
-                            modelHandle.buffer_data(*modelMatrixBuffer, *entityIdBuffer);
+                            modelHandle.buffer_data(*modelMatrixBuffer, *entityIdBuffer, *flipbookBuffer);
 
                         if (mesh.submeshes.empty())
                         {
@@ -246,7 +251,7 @@ namespace legion::rendering
                 const model& mesh = modelHandle.get_model();
 
                 if (!mesh.buffered)
-                    modelHandle.buffer_data(*modelMatrixBuffer, *entityIdBuffer);
+                    modelHandle.buffer_data(*modelMatrixBuffer, *entityIdBuffer, *flipbookBuffer);
 
                 if (mesh.submeshes.empty())
                 {

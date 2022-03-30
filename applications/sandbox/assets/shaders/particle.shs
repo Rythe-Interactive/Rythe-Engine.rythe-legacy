@@ -1,5 +1,5 @@
 #version 450
-#state DEPTH_WRITE ON
+#state DEPTH ON
 
 generate(vertex, fragment)
 
@@ -21,20 +21,19 @@ shader(vertex)
         {
             gl_Position = BillboardModelToScreenSpacePosition(position);
         }
-
-        PropagateStdIO((inverse(ViewProjectionMatrix) * gl_Position).xyz, (BillboardModelMatrix() * vec4(-stdin(normal), 0.0)).xyz);
+        PropagateStdIO((inverse(ViewProjectionMatrix) * gl_Position).xyz, (BillboardModelMatrix() * vec4(stdin(normal), 0.0)).xyz);
     }
 }
 
 shader(fragment)
 {
-    uniform float particleRadius;
-    uniform vec4 particleColor;
+    uniform sampler2DArray _texture;
     void main(void)
     {
-        vec4 color = vec4(particleColor.rgb, clamp01(1.0 - (length(stdio(uv) - vec2(0.5))*3.0)));
-        color.a *= SoftParticleAlpha(2.0);
-        if(color.a == 0.0)
+        vec4 color = texture(_texture, vec3(stdio(uv), stdio(frameID)));
+        color.a = stdio(frameID);
+        // color.a *= SoftParticleAlpha(2.0);
+        if(color.a <= 0.0)
             discard;
 
         fragment_color = color;
