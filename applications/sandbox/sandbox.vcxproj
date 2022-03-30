@@ -112,6 +112,7 @@
     <ClCompile Include="source.cpp" />
     <ClCompile Include="systems\gui_test.cpp" />
     <ClCompile Include="systems\diviner_physics_test_system.cpp" />
+    <ClCompile Include="systems\physics_debugging_system.cpp" />
     <ClCompile Include="systems\physx_test_system.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -127,6 +128,7 @@
     <ClInclude Include="systems\gui_test.hpp" />
     <ClInclude Include="systems\mysystem.hpp" />
     <ClInclude Include="systems\diviner_physics_test_system.hpp" />
+    <ClInclude Include="systems\physics_debugging_system.hpp" />
     <ClInclude Include="systems\physx_test_system.hpp" />
     <ClInclude Include="systems\pointcloud_particlesystem.hpp" />
     <ClInclude Include="data\pp_blur.hpp" />
