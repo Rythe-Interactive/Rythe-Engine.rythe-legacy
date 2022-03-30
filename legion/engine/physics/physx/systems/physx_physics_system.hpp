@@ -31,10 +31,7 @@ namespace legion::physics
     private:
 
         float m_accumulation;
-        const size_type m_maxPhysicsStep = 3;
-
-        struct PhysxStatics;
-
+        
         static void* physxGenerateConvexMesh(const std::vector<math::vec3>& vertices);
 
         void lazyInitPhysXVariables();
@@ -59,6 +56,7 @@ namespace legion::physics
         void processRigidbodyComponentEvents(ecs::entity ent, rigidbody& rigidbody, physics_component& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo);
 
         static constexpr float m_timeStep = 0.02f;
+        static constexpr size_type m_maxPhysicsStep = 3;
 
         physx::PxScene* m_physxScene;
         physx::PxMaterial* m_defaultMaterial = nullptr;
@@ -72,5 +70,14 @@ namespace legion::physics
         std::array< rbEventProcessFunc, rigidbody_flag::rb_max> m_rigidbodyComponentActionFuncs;
 
         std::vector<size_type> m_wrapperPendingRemovalID;
+
+        //------------------------------------------------ Debugging Related --------------------------------------------------------------//
+
+        bool m_isContinuousStepActive = true;
+        bool m_isSingleStepContinueAcitve = false;
+
+        void flipPhysicsContinuousState(request_flip_physics_continuous& request) { m_isContinuousStepActive = request.newContinuousState; }
+
+        void activateSingleStepContinue(request_single_physics_tick& request) { m_isSingleStepContinueAcitve = true; }
     };
 };
