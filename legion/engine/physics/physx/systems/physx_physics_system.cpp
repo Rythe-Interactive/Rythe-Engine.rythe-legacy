@@ -230,7 +230,7 @@ namespace legion::physics
             PS::dispatcher = PxDefaultCpuDispatcherCreate(0); //deal with multithreading later on
 
             #ifdef _DEBUG
-            PS::debugger.initializeDebugger(PS::foundation, DebuggerWrapper::transport_mode::file_output);
+            PS::debugger.initializeDebugger(PS::foundation, DebuggerWrapper::transport_mode::none);
             #endif
 
             PxTolerancesScale scale;
