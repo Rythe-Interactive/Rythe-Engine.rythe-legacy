@@ -90,6 +90,9 @@
     <ClCompile Include="physx\data\physx_wrapper_container.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="physics_helpers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="diviner\cube_collider_params.hpp">
@@ -261,6 +264,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="components\physics_component.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="components\physics_enviroment.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="data\physics_enviroment_data.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="physics_helpers.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

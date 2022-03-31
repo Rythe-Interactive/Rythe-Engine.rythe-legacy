@@ -2,6 +2,7 @@
 #include <physx/PxPhysicsAPI.h>
 #include <physics/components/physics_component.hpp>
 #include <physics/components/rigidbody.hpp>
+#include <physics/components/physics_enviroment.hpp>
 #include <physics/events/events.hpp>
 #include <physics/physx/physx_event_process_funcs.hpp>
 
@@ -100,7 +101,7 @@ namespace legion::physics
             {
                 std::string filepath;
                 identifyPhysxDebugOutputFilepath(filepath);
-
+                log::debug("pth {0}", filepath.c_str());
                 m_isDebuggerInit = true;
                 m_pvd = PxCreatePvd(*foundation);
                 m_transport = PxDefaultPvdFileTransportCreate(filepath.c_str());
@@ -169,12 +170,25 @@ namespace legion::physics
         bindEventsToEventProcessors();
 
         bindToEvent<events::component_destruction<physics_component>, &PhysXPhysicsSystem::markPhysicsWrapperPendingRemove>();
+        bindToEvent<request_create_physics_material, &PhysXPhysicsSystem::onRequestCreatePhysicsMaterial>();
 
         PhysicsComponentData::setConvexGeneratorDelegate([this](const std::vector<math::vec3>& vertices)->void*
             {
                 return physxGenerateConvexMesh(vertices);
             });
             
+        
+        PhysicsHelpers::bindDebugRetrieveCheck([this](size_type hash, const char* materialName)->bool
+        {
+            auto iter = m_physicsMaterials.find(hash);
+            if (iter == m_physicsMaterials.end())
+            {
+                log::warn("tried to retrieve material {0}. This material does not exist", materialName);
+                return false;
+            }
+            return true;
+        });
+
         //debugging related
         bindToEvent<request_flip_physics_continuous, &PhysXPhysicsSystem::flipPhysicsContinuousState>();
         bindToEvent<request_single_physics_tick, &PhysXPhysicsSystem::activateSingleStepContinue>();
@@ -187,7 +201,11 @@ namespace legion::physics
         m_physxWrapperContainer.ReleasePhysicsWrappers();
 
         m_physxScene->release();
-        m_defaultMaterial->release();
+
+        for (auto& hashToMaterialPair : m_physicsMaterials)
+        {
+            hashToMaterialPair.second->release();
+        }
         
         PS::selfInstanceCounter--;
 
@@ -252,7 +270,8 @@ namespace legion::physics
         sceneDesc.flags |= PxSceneFlag::eENABLE_ACTIVE_ACTORS;
 
         m_physxScene = PS::physxSDK->createScene(sceneDesc);
-        m_defaultMaterial = PS::physxSDK->createMaterial(0.5f, 0.5f, 0.1f);
+        PxMaterial* m_defaultMaterial = PS::physxSDK->createMaterial(0.5f, 0.5f, 0.6f);
+        m_physicsMaterials.insert({ 0,m_defaultMaterial });
         
         #ifdef LEGION_DEBUG
         m_physxScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
@@ -278,7 +297,14 @@ namespace legion::physics
         m_physicsComponentActionFuncs[physics_component_flag::pc_add_next_convex] = &processAddNextConvex;
 
         m_rigidbodyComponentActionFuncs[rigidbody_flag::rb_velocity] = &processVelocityModification;
+        m_rigidbodyComponentActionFuncs[rigidbody_flag::rb_angular_velocity] = &processAngularVelocityModification;
         m_rigidbodyComponentActionFuncs[rigidbody_flag::rb_mass] = &processMassModification;
+        m_rigidbodyComponentActionFuncs[rigidbody_flag::rb_angular_drag] = &processAngularDragModification;
+        m_rigidbodyComponentActionFuncs[rigidbody_flag::rb_linear_drag] = &processLinearDragModification;
+
+        m_enviromentComponentActionFuncs[physics_enviroment_flag::pe_add_plane] = &processAddInfinitePlane;
+
+        m_colliderActionFuncs[collider_modification_flag::cm_set_new_material] = &processSetPhysicsMaterial;
     }
 
     void PhysXPhysicsSystem::releasePhysXVariables()
@@ -321,6 +347,14 @@ namespace legion::physics
         executePostSimulationActions();
     }
 
+    void PhysXPhysicsSystem::onRequestCreatePhysicsMaterial(request_create_physics_material& physicsMaterialRequest)
+    {
+        physx::PxMaterial* material = PS::physxSDK->createMaterial(physicsMaterialRequest.newStaticFriction,
+            physicsMaterialRequest.newDynamicFriction, physicsMaterialRequest.newRestitution);
+
+        m_physicsMaterials.insert({ physicsMaterialRequest.newMaterialHash, material });
+    }
+
     void PhysXPhysicsSystem::executePreSimulationActions()
     {
         //[1] Identify invalid entities and remove them from pxScene
@@ -331,8 +365,9 @@ namespace legion::physics
 
         m_wrapperPendingRemovalID.clear();
 
-        //[2] Identify new physics components
+        //[2] Identify new physics components and enviroments
         ecs::filter<physics_component> physicsComponentFilter;
+        ecs::filter<physics_enviroment> physicsEnviromentFilter;
 
         for (auto entity : physicsComponentFilter)
         {
@@ -341,6 +376,16 @@ namespace legion::physics
             if (physComp.physicsComponentID == invalid_physics_component)
             {
                 m_physxWrapperContainer.createPhysxWrapper(physComp);
+            }
+        }
+
+        for (auto entity : physicsEnviromentFilter)
+        {
+            auto& physEnv = *entity.get_component<physics_enviroment>();
+
+            if (physEnv.physicsEnviromentID == invalid_physics_enviroment)
+            {
+                m_physxWrapperContainer.createPhysxWrapper(physEnv);
             }
         }
 
@@ -363,15 +408,23 @@ namespace legion::physics
             }
         }
 
-        //[4] Go through events generated by physics_component and rigidbody
+        //[4] Go through events generated by physics_components,rigidbodies, and physics enviroments
         PhysxEnviromentInfo enviromentInfo;
         enviromentInfo.scene = m_physxScene;
-        enviromentInfo.defaultMaterial = m_defaultMaterial;
+        enviromentInfo.defaultMaterial = m_physicsMaterials[defaultPhysicsMaterial];
+        enviromentInfo.physicsMaterials = &m_physicsMaterials;
+        enviromentInfo.defaultRigidbodyDensity = 10.0f;
 
         for (auto entity : physicsComponentFilter)
         {
             auto& physComp = *entity.get_component<physics_component>();
             processPhysicsComponentEvents(entity, physComp, enviromentInfo);
+        }
+
+        for (auto entity : physicsComponentFilter)
+        {
+            auto& physComp = *entity.get_component<physics_component>();
+            processColliderModificationEvents(physComp, enviromentInfo);
         }
 
         for (auto entity : physicsAndRigidbodyComponentFilter)
@@ -380,6 +433,12 @@ namespace legion::physics
             auto& physComp = *entity.get_component<physics_component>();
 
             processRigidbodyComponentEvents(entity, rbComp, physComp, enviromentInfo);
+        }
+
+        for (auto entity : physicsEnviromentFilter)
+        {
+            auto& physEnv = *entity.get_component<physics_enviroment>();
+            processPhysicsEnviromentEvents(entity, physEnv, enviromentInfo);
         }
 
         //[4] Physics Objects transformation may get directly modified by other systems
@@ -410,6 +469,28 @@ namespace legion::physics
             *entity.get_component<position>() = math::vec3(pxPosition.x, pxPosition.y, pxPosition.z);
             *entity.get_component<rotation>() = math::quat(pxRotation.w, pxRotation.x, pxRotation.y, pxRotation.z);
         }
+
+        //[2] Transfer linear and angular velocity changes from PxRigidDynamics to actual entity rigidbody components
+        ecs::filter<physics_component, rigidbody> physicsAndRigidbodyComponentFilter;
+
+        for (ecs::entity ent : physicsAndRigidbodyComponentFilter)
+        {
+            physics_component& phyComp = *ent.get_component<physics_component>();
+            rigidbody& rbComp = *ent.get_component<rigidbody>();
+
+            pointer<PhysxInternalWrapper> physxWrapper =  m_physxWrapperContainer.findWrapperWithID(phyComp.physicsComponentID);
+
+            if (physxWrapper)
+            {
+                PxRigidDynamic* dynamic = static_cast<PxRigidDynamic*>(physxWrapper->physicsActor);
+
+                PxVec3 pxLinear = dynamic->getLinearVelocity();
+                PxVec3 pxAngular = dynamic->getAngularVelocity();
+
+                rbComp.data.setLinearVelocityDirect({ pxLinear.x,pxLinear.y,pxLinear.z });
+                rbComp.data.setAngularVelocityDirect({ pxAngular.x,pxAngular.y,pxAngular.z });
+            }
+        }
     }
     
     void PhysXPhysicsSystem::processPhysicsComponentEvents(ecs::entity ent, physics_component& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo)
@@ -435,7 +516,7 @@ namespace legion::physics
         const PhysxEnviromentInfo& physicsEnviromentInfo)
     {
         size_type physicsComponentID = physicsComponentToProcess.physicsComponentID;
-        auto& eventsGenerated = rigidbody.rigidbodyData.getGeneratedModifyEvents();
+        auto& eventsGenerated = rigidbody.data.getGeneratedModifyEvents();
 
         pointer<PhysxInternalWrapper> wrapperPtr = m_physxWrapperContainer.findWrapperWithID(physicsComponentID);
 
@@ -449,6 +530,44 @@ namespace legion::physics
             }
         }
 
-        rigidbody.rigidbodyData.resetModificationFlags();
+        rigidbody.data.resetModificationFlags();
+    }
+
+    void PhysXPhysicsSystem::processColliderModificationEvents(physics_component& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo)
+    {
+        size_type physicsComponentID = physicsComponentToProcess.physicsComponentID;
+        pointer<PhysxInternalWrapper> wrapperPtr = m_physxWrapperContainer.findWrapperWithID(physicsComponentID);
+
+        const auto& colliderModifyEvents = physicsComponentToProcess.physicsCompData.getGeneratedColliderModifyEvents();
+
+        auto& colliders = physicsComponentToProcess.physicsCompData.getColliders();
+
+        for (const collider_modification_data& modData : colliderModifyEvents)
+        {
+            const ColliderData& collider = colliders[modData.colliderIndex];
+            m_colliderActionFuncs[modData.modificationType].invoke(collider, modData, physicsEnviromentInfo, *wrapperPtr);
+        }
+
+        physicsComponentToProcess.physicsCompData.resetColliderModificationFlags();
+    }
+
+    void PhysXPhysicsSystem::processPhysicsEnviromentEvents(ecs::entity ent, physics_enviroment& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo)
+    {
+        size_type enviromentID = physicsComponentToProcess.physicsEnviromentID;
+        auto& eventsGenerated = physicsComponentToProcess.data.getGeneratedModifyEvents();
+
+        pointer<PhysxInternalWrapper> wrapperPtr = m_physxWrapperContainer.findWrapperWithID(enviromentID);
+
+        if (!wrapperPtr) { return; }
+
+        for (size_type bitPos = 0; bitPos < eventsGenerated.size(); ++bitPos)
+        {
+            if (eventsGenerated.test(bitPos))
+            {
+                m_enviromentComponentActionFuncs[bitPos].invoke(physicsComponentToProcess, physicsEnviromentInfo, *wrapperPtr, ent);
+            }
+        }
+
+        physicsComponentToProcess.data.resetModificationFlags();
     }
 }

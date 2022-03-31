@@ -5,7 +5,7 @@
 
 namespace legion::physics
 {
-    constexpr size_t defaultSceneIndex = 0;
+
 
     void PhysXTestSystem::setup()
     {
@@ -45,7 +45,17 @@ namespace legion::physics
             sun.add_component<transform>(position(10, 10, 10), rotation::lookat(math::vec3(1, 1, -1), math::vec3::zero), scale());
         }
 
+        PhysicsHelpers::createPhysicsMaterial(0.5f, 0.5f, 0.1f, "DefaultNonBouncy");
+        
         setupCubeWorldTestScene();
+        //setupBoxAndStackTestScene();
+
+        //enable player to shoot blocks
+        app::InputSystem::createBinding<ShootPhysXBox>(app::inputmap::method::C);
+        bindToEvent<ShootPhysXBox, &PhysXTestSystem::shootPhysXCubes>();
+
+        app::InputSystem::createBinding<ShootPhysXSphere>(app::inputmap::method::V);
+        bindToEvent<ShootPhysXSphere, &PhysXTestSystem::shootPhysXSphere>();
     }
 
     void PhysXTestSystem::update(legion::time::span deltaTime)
@@ -63,7 +73,10 @@ namespace legion::physics
             }
         }
 
-        suzzaneRainTick(deltaTime);
+        if (m_isRainingSuzanne)
+        {
+            suzzaneRainTick(deltaTime);
+        }
     }
 
     void PhysXTestSystem::setupCubeWorldTestScene()
@@ -106,7 +119,7 @@ namespace legion::physics
             unrotatedBlockPC->physicsCompData.addSphereCollider(0.5f, math::vec3(0, -1, 0));
 
             auto& rb = *unrotatedBlock.add_component<rigidbody>();
-            rb.rigidbodyData.setMass(5.0f);
+            rb.data.setMass(5.0f);
         }
  
         //add default cube on top
@@ -117,15 +130,9 @@ namespace legion::physics
 
             shiftedBlock.add_component<rigidbody>();
         }
-
-        //enable player to shoot blocks
-        app::InputSystem::createBinding<ShootPhysXBox>(app::inputmap::method::C);
-        bindToEvent<ShootPhysXBox, &PhysXTestSystem::shootPhysXCubes>();
-
-        app::InputSystem::createBinding<ShootPhysXSphere>(app::inputmap::method::V);
-        bindToEvent<ShootPhysXSphere, &PhysXTestSystem::shootPhysXSphere>();
-
         //---------------------------------------------- CONVEX TEST -----------------------------------------------------//
+
+        m_isRainingSuzanne = true;
 
         createStaticColliderWall(math::vec3(15, 0, 0), legionLogoMat, math::vec3(10, 1, 10));
 
@@ -155,8 +162,29 @@ namespace legion::physics
 
             suzanne.add_component<rigidbody>();
         }
+    }
 
+    void PhysXTestSystem::setupBoxAndStackTestScene()
+    {
+        float stackZ = -10.0f;
 
+        for (size_t i = 0; i < 20; i++)
+        {
+            createCubeStack(math::vec3(2.0f), 20, math::vec3(0,0, stackZ -= 10.0f));
+        }
+        
+
+        ecs::entity bigSphere = createDefaultMeshEntity(math::vec3(0, 20, 100), sphereH, concreteMat);
+        *bigSphere.add_component<scale>() = math::vec3(5.0f);
+        bigSphere.add_component<physics_component>()->physicsCompData.AddSphereCollider(5.0f, math::vec3());
+
+        auto& rbData = (*bigSphere.add_component<rigidbody>()).data;
+        rbData.setVelocity(math::vec3(0, -25, -100));
+        rbData.setMass(525398.719f);
+        rbData.setAngularDrag(0.5f);
+
+        ecs::entity groundPlane = createEntity();
+        groundPlane.add_component<physics_enviroment>()->data.instantiateInfinitePlane(math::vec3(0,1,0),0.0f);
     }
 
     void PhysXTestSystem::shootPhysXCubes(ShootPhysXBox& action)
@@ -173,7 +201,8 @@ namespace legion::physics
             shiftedBlockPC->physicsCompData.addBoxCollider(math::vec3(1, 1, 1));
 
             rigidbody& rb = *shiftedBlock.add_component<rigidbody>();
-            rb.rigidbodyData.setVelocity(cameraDirection * 20.0f);
+            rb.data.setVelocity(cameraDirection * 20.0f);
+            rb.data.setLinearDrag(0.5f);
         }
 
         self_destruct_component& block = *shiftedBlock.add_component<self_destruct_component>();
@@ -195,7 +224,7 @@ namespace legion::physics
             shiftedBlockPC->physicsCompData.addSphereCollider(0.5f, math::vec3());
 
             rigidbody& rb = *shiftedBlock.add_component<rigidbody>();
-            rb.rigidbodyData.setVelocity(cameraDirection * 20.0f);
+            rb.data.setVelocity(cameraDirection * 20.0f);
         }
 
         self_destruct_component& block = *shiftedBlock.add_component<self_destruct_component>();
@@ -276,6 +305,8 @@ namespace legion::physics
 
     void PhysXTestSystem::suzzaneRainTick(legion::time::span deltaTime)
     {
+        size_type hash = PhysicsHelpers::retrievePhysicsMaterialHash("DefaultNonBouncy");
+
         m_currentInterval += deltaTime;
 
         if (m_currentInterval > m_rainInterval)
@@ -299,9 +330,32 @@ namespace legion::physics
 
             auto& phyComp = *ent.add_component<physics_component>();
             phyComp.physicsCompData.addConvexCollider(verts, math::vec3(), math::identity<math::quat>());
+            phyComp.physicsCompData.getColliders()[0].setMaterialHash(hash);
 
             ent.add_component<rigidbody>();
         }
 
+    }
+    void PhysXTestSystem::createCubeStack(const math::vec3& extents, size_t stackSize, const math::vec3& startPos)
+    {
+        float floatStackSize = static_cast<float>(stackSize);
+
+        for (size_type i = 0; i < stackSize; i++)
+        {
+            for (size_type j = 0; j < floatStackSize - i; j++)
+            {
+                //PxTransform localTm(PxVec3(PxReal(j*2) - PxReal(size-i), PxReal(i*2+1), 0) * halfExtent);
+                
+                math::vec3 offset = math::vec3(j * 2 - (floatStackSize - i), (i * 2) + 1, 0) * (extents * 0.5f);
+
+                auto entity = createDefaultMeshEntity(startPos + offset, cubeH, legionLogoMat);
+                *entity.get_component<scale>() = extents;
+
+                auto& physComp = *entity.add_component<physics_component>();
+                physComp.physicsCompData.AddBoxCollider(extents);
+
+                entity.add_component<rigidbody>();
+            }
+        }
     }
 }

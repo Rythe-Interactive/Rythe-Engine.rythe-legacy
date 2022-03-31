@@ -10,38 +10,72 @@ using namespace physx;
 
 namespace legion::physics
 {
-    void processVelocityModification(rigidbody& rigidbody, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
+    void processAngularDragModification(rigidbody& rigidbody, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
     {
-        const math::vec3& vel = rigidbody.rigidbodyData.getVelocity();
-
+        float angularDrag = rigidbody.data.getAngularDrag();
         PxRigidDynamic* rigid = static_cast<PxRigidDynamic*>(wrapper.physicsActor);
 
+        rigid->setAngularDamping(angularDrag);
+    }
+
+    void processLinearDragModification(rigidbody& rigidbody, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
+    {
+        float linearDrag = rigidbody.data.getLinearDrag();
+        PxRigidDynamic* rigid = static_cast<PxRigidDynamic*>(wrapper.physicsActor);
+
+        rigid->setLinearDamping(linearDrag);
+    }
+
+    void processVelocityModification(rigidbody& rigidbody, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
+    {
+        const math::vec3& vel = rigidbody.data.getVelocity();
+
+        PxRigidDynamic* rigid = static_cast<PxRigidDynamic*>(wrapper.physicsActor);
+        
         PxVec3 pxVelocity(vel.x, vel.y, vel.z);
         rigid->setLinearVelocity(pxVelocity);
     }
 
-    void processMassModification(rigidbody& rigidbody, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
+    void processAngularVelocityModification(rigidbody& rigidbody, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
     {
-        float mass = rigidbody.rigidbodyData.getMass();
+        const math::vec3& angularVel = rigidbody.data.getAngularVelocity();
 
         PxRigidDynamic* rigid = static_cast<PxRigidDynamic*>(wrapper.physicsActor);
-        rigid->setMass(mass);
+
+        PxVec3 pxAng(angularVel.x, angularVel.y, angularVel.z);
+        rigid->setAngularVelocity(pxAng);
     }
-    
+
+    void processMassModification(rigidbody& rigidbody, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
+    {
+        float newMass = rigidbody.data.getMass();
+        float density = rigidbody.data.getDensity();
+
+        PxRigidDynamic* rigid = static_cast<PxRigidDynamic*>(wrapper.physicsActor);
+        float oldMass = rigid->getMass();
+
+        float newDensity = density * (newMass / oldMass);
+        PxRigidBodyExt::updateMassAndInertia(*rigid, newDensity);
+
+        float finalMass = rigid->getMass();
+        rigidbody.data.setDensityDirect(newDensity);
+    }
+
     void processAddNextBox(physics_component& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
     {
         PhysicsComponentData& data = physicsComponent.physicsCompData;
 
-        for (ConvexColliderData& convexCollider : data.getConvexData())
+        for (ColliderData& collider : data.getColliders())
         {
-            if (convexCollider.isRegisteredOfType(collider_type::box)) { continue; }
+            if (collider.isRegisteredOrNotOfType(collider_type::box)) { continue; }
+            collider.setRegistered(true);
 
-            convexCollider.setRegistered(true);
+            BoxColliderData& box = collider.getColliderAsBox();
 
             PxTransform localTransform;
-            calculateLocalColliderTransform(localTransform, convexCollider);
+            calculateLocalColliderTransform(localTransform, collider);
 
-            const math::vec3& extents = convexCollider.getBoxExtents();
+            const math::vec3& extents = box.getBoxExtents();
 
             instantiateNextCollider<PxBoxGeometry,const PxVec3&>(getSDK(), wrapper, localTransform, sceneInfo, PxVec3(extents.x, extents.y, extents.z));
         }
@@ -51,18 +85,19 @@ namespace legion::physics
     {
         PhysicsComponentData& data = physicsComponent.physicsCompData;
 
-        for (ConvexColliderData& convexCollider : data.getConvexData())
+        for (ColliderData& collider : data.getColliders())
         {
-            if (convexCollider.isRegisteredOfType(collider_type::box)) { continue; }
-
-            convexCollider.setRegistered(true);
+            if (collider.isRegisteredOrNotOfType(collider_type::box)) { continue; }
+            collider.setRegistered(true);
+            
+            BoxColliderData& box = collider.getColliderAsBox();
 
             PxTransform transform;
             PxTransform localTransform;
 
-            calculateGlobalAndLocalTransforms(localTransform, transform, convexCollider, entity);
+            calculateGlobalAndLocalTransforms(localTransform, transform, collider, entity);
 
-            const math::vec3& extents = convexCollider.getBoxExtents();
+            const math::vec3& extents = box.getBoxExtents();
 
             switch (wrapper.bodyType)
             {
@@ -86,18 +121,17 @@ namespace legion::physics
     {
         PhysicsComponentData& data = physicsComponent.physicsCompData;
 
-        for (SphereColliderData& sphereCollider : data.getSphereData())
+        for (ColliderData& collider : data.getColliders())
         {
-            if (sphereCollider.isRegisteredOfType(collider_type::sphere)) { continue; }
-
-            sphereCollider.setRegistered(true);
+            if (collider.isRegisteredOrNotOfType(collider_type::sphere)) { continue; }
+            collider.setRegistered(true);
 
             PxTransform transform;
             PxTransform localTransform;
 
-            calculateGlobalAndLocalTransforms(localTransform, transform, sphereCollider, entity);
+            calculateGlobalAndLocalTransforms(localTransform, transform, collider, entity);
 
-            float radius = sphereCollider.getRadius();
+            float radius = collider.getColliderAsSphere().getRadius();
 
             switch (wrapper.bodyType)
             {
@@ -119,16 +153,15 @@ namespace legion::physics
     {
         PhysicsComponentData& data = physicsComponent.physicsCompData;
 
-        for (SphereColliderData& sphereCollider : data.getSphereData())
+        for (ColliderData& collider : data.getColliders())
         {
-            if (sphereCollider.isRegisteredOfType(collider_type::sphere)) { continue; }
-
-            sphereCollider.setRegistered(true);
+            if (collider.isRegisteredOrNotOfType(collider_type::sphere)) { continue; }
+            collider.setRegistered(true);
 
             PxTransform localTransform;
-            calculateLocalColliderTransform(localTransform, sphereCollider);
+            calculateLocalColliderTransform(localTransform, collider);
 
-            float radius = sphereCollider.getRadius();
+            float radius = collider.getColliderAsSphere().getRadius();
 
             instantiateNextCollider<PxSphereGeometry, float&>(getSDK(), wrapper, localTransform, sceneInfo, radius);
         }
@@ -138,17 +171,17 @@ namespace legion::physics
     {
         PhysicsComponentData& data = physicsComponent.physicsCompData;
 
-        for (ConvexColliderData& convex : data.getConvexData())
+        for (ColliderData& collider : data.getColliders())
         {
-            if (convex.isRegisteredOfType(collider_type::quickhull_convex)) { continue; }
-
-            convex.setRegistered(true);
+            if (collider.isRegisteredOrNotOfType(collider_type::quickhull_convex)) { continue; }
+            collider.setRegistered(true);
 
             PxTransform transform;
             PxTransform localTransform;
 
-            calculateGlobalAndLocalTransforms(localTransform, transform, convex, entity);
+            calculateGlobalAndLocalTransforms(localTransform, transform, collider, entity);
 
+            ConvexColliderData& convex = collider.getColliderAsConvex();
             PxConvexMesh* convexMesh = static_cast<PxConvexMesh*>(convex.getConvexPtr());
 
             switch (wrapper.bodyType)
@@ -169,17 +202,53 @@ namespace legion::physics
     {
         PhysicsComponentData& data = physicsComponent.physicsCompData;
 
-        for (ConvexColliderData& convex : data.getConvexData())
+        for (ColliderData& collider : data.getColliders())
         {
-            if (!convex.isRegisteredOfType(collider_type::quickhull_convex)) { continue; }
-
-            convex.setRegistered(true);
+            if (!collider.isRegisteredOrNotOfType(collider_type::quickhull_convex)) { continue; }
+            collider.setRegistered(true);
 
             PxTransform localTransform;
-            calculateLocalColliderTransform(localTransform, convex);
+            calculateLocalColliderTransform(localTransform, collider);
 
+            ConvexColliderData& convex = collider.getColliderAsConvex();
             PxConvexMesh* convexMesh = static_cast<PxConvexMesh*>(convex.getConvexPtr());
+
             instantiateNextCollider<PxConvexMeshGeometry, PxConvexMesh*&>(getSDK(), wrapper, localTransform, sceneInfo, convexMesh);
         }
+    }
+
+    void processSetPhysicsMaterial(const ColliderData& collider, const collider_modification_data& modData, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper)
+    {
+        PxRigidActor* rigid = static_cast<PxRigidActor*>(wrapper.physicsActor);
+
+        PxShape* shapes; PxU32 shapeCount = rigid->getNbShapes();
+        rigid->getShapes(&shapes, shapeCount);
+
+        PxMaterial* newMaterial = sceneInfo.defaultMaterial;
+
+        size_type materialHash = modData.data.newMaterial;
+        auto iter = sceneInfo.physicsMaterials->find(materialHash);
+
+        if (iter != sceneInfo.physicsMaterials->end())
+        {
+            newMaterial = iter->second;
+        }
+        else
+        {
+            log::warn("Failed to assign physics material!, default material has been set");
+        }
+
+        shapes[collider.getColliderIndex()].setMaterials(&newMaterial, 1);
+    }
+
+    void processAddInfinitePlane(physics_enviroment& physicsEnviroment, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
+    {
+        const math::vec3& normal = physicsEnviroment.data.getInfinitePlaneNormal();
+        float distToPlane = physicsEnviroment.data.getInfinitePlaneDistanceToOrigin();
+
+        wrapper.physicsActor = PxCreatePlane(*getSDK(), PxPlane(normal.x, normal.y, normal.z, distToPlane), *sceneInfo.defaultMaterial);
+        wrapper.physicsActor->userData = entity.data;
+
+        sceneInfo.scene->addActor(*wrapper.physicsActor);
     }
 }
