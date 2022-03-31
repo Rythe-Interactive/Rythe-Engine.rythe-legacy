@@ -262,6 +262,13 @@ namespace legion::physics
         m_physxScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES, 1.0f);
         m_physxScene->setVisualizationParameter(PxVisualizationParameter::eBODY_MASS_AXES, 1.0f);
         #endif
+
+        PxPvdSceneClient* pvdClient = m_physxScene->getScenePvdClient();
+        if (pvdClient)
+        {
+            pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
+            pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
+        }
     }
 
     void PhysXPhysicsSystem::bindEventsToEventProcessors()
