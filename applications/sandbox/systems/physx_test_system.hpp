@@ -27,6 +27,8 @@ namespace legion::physics
         //wide block, 1 normal cube on the center, 1 rotated default cube on top of it
         void setupCubeWorldTestScene();
 
+        void setupBoxAndStackTestScene();
+
         //------------------------ Rigidbody Shooter -------------------------------------------//
 
         void shootPhysXCubes(ShootPhysXBox& action);
@@ -48,6 +50,9 @@ namespace legion::physics
             math::quat rot = math::quat(1,0,0,0));
 
         void suzzaneRainTick(legion::time::span deltaTime);
+
+        void createCubeStack(const math::vec3& extents, size_t stackSize, const math::vec3& startPos);
+
 
         //--------------------------- Rendering Variables ---------------------------------------//
 

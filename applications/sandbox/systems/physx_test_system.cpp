@@ -45,7 +45,8 @@ namespace legion::physics
             sun.add_component<transform>(position(10, 10, 10), rotation::lookat(math::vec3(1, 1, -1), math::vec3::zero), scale());
         }
 
-        setupCubeWorldTestScene();
+        //setupCubeWorldTestScene();
+        setupBoxAndStackTestScene();
     }
 
     void PhysXTestSystem::update(legion::time::span deltaTime)
@@ -155,8 +156,16 @@ namespace legion::physics
 
             suzanne.add_component<rigidbody>();
         }
+    }
 
+    void PhysXTestSystem::setupBoxAndStackTestScene()
+    {
+        createCubeStack(math::vec3(2.0f), 5, math::vec3(0));
 
+        ecs::entity bigSphere = createDefaultMeshEntity(math::vec3(0, 20, 100), sphereH, concreteMat);
+        *bigSphere.add_component<scale>() = math::vec3(5.0f);
+        bigSphere.add_component<physics_component>()->physicsCompData.AddSphereCollider(2.5f, math::vec3());
+        bigSphere.add_component<rigidbody>()->rigidbodyData.setVelocity(math::vec3(0, -25, -100));
     }
 
     void PhysXTestSystem::shootPhysXCubes(ShootPhysXBox& action)
@@ -303,5 +312,26 @@ namespace legion::physics
             ent.add_component<rigidbody>();
         }
 
+    }
+    void PhysXTestSystem::createCubeStack(const math::vec3& extents, size_t stackSize, const math::vec3& startPos)
+    {
+        float floatStackSize = static_cast<float>(stackSize);
+
+        for (size_type i = 0; i < stackSize; i++)
+        {
+            for (size_type j = 0; j < floatStackSize - i; j++)
+            {
+                //PxTransform localTm(PxVec3(PxReal(j*2) - PxReal(size-i), PxReal(i*2+1), 0) * halfExtent);
+                
+                math::vec3 offset = math::vec3(j * 2 - (floatStackSize - i), (i * 2) + 1, 0) * (extents * 0.5f);
+                log::debug("offset {0}", math::to_string(offset));
+
+                auto entity = createDefaultMeshEntity(startPos + offset, cubeH, legionLogoMat);
+                *entity.get_component<scale>() = extents;
+
+                auto physComp = *entity.add_component<physics_component>();
+                physComp.physicsCompData.AddBoxCollider(extents);
+            }
+        }
     }
 }
