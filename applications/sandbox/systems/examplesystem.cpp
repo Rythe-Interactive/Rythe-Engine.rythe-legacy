@@ -18,6 +18,7 @@ void ExampleSystem::setup()
     app::context_guard guard(win);
 
     auto model = gfx::ModelCache::create_model("Sphere", fs::view("assets://models/sphere.obj"));
+    gfx::ModelCache::create_model("ParticleGizmo", fs::view("assets://models/sphere.obj"));
 
     auto material = gfx::MaterialCache::create_material("White", fs::view("assets://shaders/color.shs"));
     material.set_param("color", math::colors::white);
@@ -274,30 +275,53 @@ void ExampleSystem::setup()
         ent.add_component(gfx::light::point(math::color(1.f, 215.f / 255.f, 0.f), 10.f, 50.f));
     }
 
+    ////Orbits
+    //{
+    //    auto ent = createEntity("Saturn");
+    //    auto [pos, rot, scal] = ent.add_component<transform>();
+    //    scal = scale(5.f, 5.f, 5.f);
+    //    material = gfx::MaterialCache::get_material("bog");
+    //    model = gfx::ModelCache::get_handle("Sphere");
+    //    ent.add_component<gfx::mesh_renderer>(gfx::mesh_renderer(material, model));
+    //    auto orbit = createEntity("orbitRings");
+    //    ent.add_child(orbit);
+
+    //    auto emitter = orbit.add_component<particle_emitter>();
+    //    emitter->set_spawn_rate(100);
+    //    emitter->set_spawn_interval(0.2f);
+    //    emitter->resize(10000);
+    //    emitter->localSpace = true;
+
+    //    emitter->add_policy<example_policy>();
+    //    orbital_policy orbital;
+    //    orbital.C_MASS = 100.f;
+    //    orbital.G_FORCE = .1f;
+    //    emitter->add_policy<orbital_policy>(orbital);
+    //    emitter->add_policy<scale_lifetime_policy>();
+    //    material = gfx::MaterialCache::get_material("slate");
+    //    emitter->add_policy<gfx::rendering_policy>(gfx::rendering_policy{ model, material });
+    //}
+
+    //Boids
     {
-        auto ent = createEntity("Saturn");
+        auto ent = createEntity("Boids");
         auto [pos, rot, scal] = ent.add_component<transform>();
-        scal = scale(5.f, 5.f, 5.f);
-        material = gfx::MaterialCache::get_material("bog");
-        model = gfx::ModelCache::get_handle("Sphere");
+        material = gfx::MaterialCache::get_material("White");
+        model = gfx::ModelCache::get_handle("ParticleGizmo");
         ent.add_component<gfx::mesh_renderer>(gfx::mesh_renderer(material, model));
-        auto orbit = createEntity("orbitRings");
-        orbit.add_component<transform>();
-        ent.add_child(orbit);
 
-        auto emitter = orbit.add_component<particle_emitter>();
-        emitter->set_spawn_rate(100);
-        emitter->set_spawn_interval(0.2f);
-        emitter->resize(10000);
-        emitter->localSpace = true;
-
-        emitter->add_policy<example_policy>();
-        orbital_policy orbital;
-        orbital.C_MASS = 100.f;
-        orbital.G_FORCE = .1f;
-        emitter->add_policy<orbital_policy>(orbital);
-        emitter->add_policy<scale_lifetime_policy>();
-        material = gfx::MaterialCache::get_material("slate");
+        auto emitter = ent.add_component<particle_emitter>();
+        emitter->set_spawn_rate(10);
+        emitter->set_spawn_interval(.05f);
+        emitter->resize(1000);
+        emitter->localSpace = false;
+        emitter->pause();
+        emitter->add_policy<locomotion_policy>();
+        emitter->add_policy<alignment_policy>();
+        emitter->add_policy<cohesion_policy>();
+        emitter->add_policy<seperation_policy>();
+        auto model = gfx::ModelCache::create_model("Suzanne", fs::view("assets://models/suzanne.obj"));
+        material = gfx::MaterialCache::get_material("Sun");
         emitter->add_policy<gfx::rendering_policy>(gfx::rendering_policy{ model, material });
     }
 
@@ -355,6 +379,7 @@ void ExampleSystem::playEmitter(legion::play_action& action)
         }
     }
 }
+
 void ExampleSystem::pauseEmitter(legion::pause_action& action)
 {
     using namespace legion;
@@ -367,6 +392,7 @@ void ExampleSystem::pauseEmitter(legion::pause_action& action)
         }
     }
 }
+
 void ExampleSystem::stopEmitter(legion::stop_action& action)
 {
     using namespace legion;
@@ -379,12 +405,12 @@ void ExampleSystem::stopEmitter(legion::stop_action& action)
         }
     }
 }
+
 void ExampleSystem::changeMaterial(legion::change_mat_action& action)
 {
     using namespace legion;
     if (action.pressed())
     {
-        ecs::filter<particle_emitter> filter;
         if (GuiTestSystem::selected != invalid_id)
         {
             auto& emitter = GuiTestSystem::selected.get_component<particle_emitter>().get();
@@ -404,6 +430,7 @@ void ExampleSystem::changeMaterial(legion::change_mat_action& action)
         }
     }
 }
+
 void ExampleSystem::onShaderReload(legion::reload_shaders_action& event)
 {
     using namespace legion;
@@ -423,14 +450,10 @@ void ExampleSystem::onShaderReload(legion::reload_shaders_action& event)
         {
             gfx::ShaderCache::clear_checked_paths();
             gfx::ShaderCache::reload_shaders();
-
-            auto [lock, materials] = gfx::MaterialCache::get_all_materials();
-            async::readonly_guard materialsGuard(lock);
-            for (auto& [id, mat] : materials)
-                mat.reload();
         }
     }
 }
+
 void ExampleSystem::onTonemapSwitch(legion::tonemap_action& event)
 {
     using namespace legion;
@@ -468,6 +491,7 @@ void ExampleSystem::onTonemapSwitch(legion::tonemap_action& event)
         gfx::Tonemapping::setAlgorithm(typeEnum);
     }
 }
+
 void ExampleSystem::onSkyboxSwitch(legion::switch_skybox_action& event)
 {
     using namespace legion;

@@ -74,6 +74,8 @@ namespace legion::core
 
     void ParticleSystem::maintenance(particle_emitter& emitter, float deltaTime)
     {
+        if (emitter.m_particleCount == 0)
+            return;
         auto& ageBuffer = emitter.get_buffer<life_time>("lifetimeBuffer");
         size_type destroyed = 0;
         size_type activeCount = 0;

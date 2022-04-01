@@ -125,4 +125,6 @@ applications/sandbox/imgui.ini
 **/**_ref/*
 docs/venv
 **/__pycache__/**
+tools/RythePreprocessor/net5.0
+tools/RythePreprocessor/Output.txt
 **/imgui.ini

@@ -42,6 +42,7 @@
     <ClCompile Include="data\loaders\gltfmeshloader.cpp" />
     <ClCompile Include="time\main_clock.cpp" />
     <ClCompile Include="defaults\coremodule.cpp" />
+    <ClCompile Include="particles\particlebuffer.cpp" />
     <ClCompile Include="particles\particlesystem.cpp" />
     <ClCompile Include="particles\particleemitter.cpp" />
   </ItemGroup>
