@@ -37,7 +37,7 @@ shader(fragment)
     uniform sampler2DArray _texture;
     void main(void)
     {
-        vec4 color = texture(_texture, vec3(stdio(uv), float(stdio(frameID))));
+        vec4 color = pow(texture(_texture, vec3(stdio(uv), float(stdio(frameID)))),vec4(vec3(2.2),1.0));
         color.a *= SoftParticleAlpha(2.0);
         if(color.a <= epsilon)
             discard;

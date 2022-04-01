@@ -7,33 +7,24 @@ namespace legion::rendering
     {
         if (!emitter.has_buffer<scale>("scaleBuffer"))
             emitter.create_buffer<scale>("scaleBuffer");
-        if (!emitter.has_buffer<size_type>("frameID"))
-            emitter.create_buffer<size_type>("frameID");
+        if (!emitter.has_buffer<uint>("frameID"))
+            emitter.create_buffer<uint>("frameID", 1);
 
-        if (!emitter.has_uniform<int>("frameCount"))
-            emitter.create_uniform<int>("frameCount");
-    }
-
-    void flipbook_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
-    {
+        if (!emitter.has_uniform<uint>("frameCount"))
+            emitter.create_uniform<uint>("frameCount");
     }
 
     void flipbook_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
     {
-        auto& frameIDBuffer = emitter.get_buffer<size_type>("frameID");
+        auto& frameIDBuffer = emitter.get_buffer<uint>("frameID");
         auto& ageBuffer = emitter.get_buffer<life_time>("lifetimeBuffer");
-        auto& frameCount = emitter.get_uniform<int>("frameCount");
+        auto& frameCount = emitter.get_uniform<uint>("frameCount");
 
         for (size_type idx = 0; idx < count; idx++)
         {
             auto& lifeTime = ageBuffer[idx];
-            frameIDBuffer[idx] = math::clamp(static_cast<int>(lifeTime.age / lifeTime.max) * frameCount, 0, frameCount - 1);
+            frameIDBuffer[idx] = math::clamp(static_cast<uint>(((lifeTime.age / lifeTime.max) * frameCount) + 0.5f), 0u, frameCount - 1);
         }
 
     }
-
-    void flipbook_policy::onDestroy(particle_emitter& emitter, size_type start, size_type end)
-    {
-    }
-
 }

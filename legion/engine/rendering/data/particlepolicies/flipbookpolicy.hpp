@@ -14,8 +14,6 @@ namespace legion::rendering
         ~flipbook_policy() = default;
 
         virtual void setup(particle_emitter& emitter) override;
-        virtual void onInit(particle_emitter& emitter, size_type start, size_type end) override;
         virtual void onUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
-        virtual void onDestroy(particle_emitter& emitter, size_type start, size_type end) override;
     };
 }

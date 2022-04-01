@@ -66,16 +66,15 @@ namespace legion::rendering
             for (size_type i = 0; i < emitter.size(); i++)
                 particleIds[i] = i;
 
-            //This is commented out because we will be using it again at some point, but rn it is causing the rapid animation bug with particles
-            //for (size_type i = 1; i < emitter.size(); i++)
-            //{
-            //    auto j = i;
-            //    while (j > 0 && compare(posBuffer[particleIds[j - 1]], posBuffer[particleIds[j]]))
-            //    {
-            //        std::swap(particleIds[j], particleIds[j - 1]);
-            //        j--;
-            //    }
-            //}
+            for (size_type i = 1; i < emitter.size(); i++)
+            {
+                auto j = i;
+                while (j > 0 && compare(posBuffer[particleIds[j - 1]], posBuffer[particleIds[j]]))
+                {
+                    std::swap(particleIds[j], particleIds[j - 1]);
+                    j--;
+                }
+            }
 
             auto filter = emitter.get_uniform<mesh_filter>(meshFilterId);
             auto renderer = emitter.get_uniform<mesh_renderer>(rendererId);
@@ -83,9 +82,9 @@ namespace legion::rendering
             auto& batch = (*batches)[renderer.material][model_handle{ filter.shared_mesh.id() }];
             auto start = batch.first.size();
             batch.first.insert(batch.first.end(), emitter.size(), math::mat4());
-            if (emitter.has_buffer<size_type>(frameID))
+            if (emitter.has_buffer<uint>(frameID))
             {
-                auto& frameIDBuffer = emitter.get_buffer<size_type>(frameID);
+                auto& frameIDBuffer = emitter.get_buffer<uint>(frameID);
                 for (size_type i = 0; i < emitter.size(); i++)
                 {
                     id_type particleId = particleIds[i];

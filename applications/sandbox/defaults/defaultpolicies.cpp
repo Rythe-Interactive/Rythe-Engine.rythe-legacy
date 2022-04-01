@@ -87,8 +87,8 @@ namespace legion::core
 
         for (size_type idx = start; idx < end; idx++)
         {
-            auto randpoint = math::diskRand(2.f);
-            posBuffer[idx] = math::vec3(randpoint.x, math::linearRand(0.f, 1.f), randpoint.y);
+            auto randpoint = math::diskRand(.2f);
+            posBuffer[idx] = math::vec3(randpoint.x, math::linearRand(0.f, 0.8f), randpoint.y);
             auto direction = math::vec3::up /*+ math::normalize(math::vec3(math::linearRand(-1.f, 1.f), 0.f, math::linearRand(-1.f, 1.f)))*/;
             velBuffer[idx] = direction * initForce;
         }
@@ -96,13 +96,13 @@ namespace legion::core
 
     void fountain_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
     {
-        //auto& posBuffer = emitter.get_buffer<position>("posBuffer");
-        //auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
-        //for (size_type idx = 0; idx < count; idx++)
-        //{
-        //    posBuffer[idx] += velBuffer[idx] * deltaTime;
-        //    velBuffer[idx] += math::vec3(0.f, 0.f, 0.f) * deltaTime;
-        //}
+        auto& posBuffer = emitter.get_buffer<position>("posBuffer");
+        auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
+        for (size_type idx = 0; idx < count; idx++)
+        {
+            posBuffer[idx] += velBuffer[idx] * deltaTime;
+            velBuffer[idx] += math::vec3(0.f, -0.10f, 0.f) * deltaTime;
+        }
     }
 #pragma endregion
 #pragma region Scale over Lifetime
@@ -136,7 +136,7 @@ namespace legion::core
         {
             for (size_type idx = 0; idx < count; idx++)
             {
-                //scaleBuffer[idx] = scale(scaleFactor - ((ageBuffer[idx].age / ageBuffer[idx].max) * scaleFactor));
+                scaleBuffer[idx] = scale(scaleFactor - ((ageBuffer[idx].age / ageBuffer[idx].max) * scaleFactor));
             }
         }
     }
