@@ -404,4 +404,9 @@ namespace legion::core
     {
         return m_data.data();
     }
+
+    const byte* image::data() const noexcept
+    {
+        return m_data.data();
+    }
 }
