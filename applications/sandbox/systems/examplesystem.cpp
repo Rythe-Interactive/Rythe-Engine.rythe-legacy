@@ -304,28 +304,7 @@ void ExampleSystem::setup()
     //    emitter->add_policy<gfx::rendering_policy>(gfx::rendering_policy{ model, material });
     //}
 
-    //Boids
-    {
-        auto ent = createEntity("Boids");
-        auto [pos, rot, scal] = ent.add_component<transform>();
-        material = gfx::MaterialCache::get_material("White");
-        model = gfx::ModelCache::get_handle("ParticleGizmo");
-        ent.add_component<gfx::mesh_renderer>(gfx::mesh_renderer(material, model));
 
-        auto emitter = ent.add_component<particle_emitter>();
-        emitter->set_spawn_rate(10);
-        emitter->set_spawn_interval(.05f);
-        emitter->resize(1000);
-        emitter->localSpace = false;
-        emitter->pause();
-        emitter->add_policy<locomotion_policy>();
-        emitter->add_policy<alignment_policy>();
-        emitter->add_policy<cohesion_policy>();
-        emitter->add_policy<seperation_policy>();
-        auto model = gfx::ModelCache::create_model("Suzanne", fs::view("assets://models/suzanne.obj"));
-        material = gfx::MaterialCache::get_material("Sun");
-        emitter->add_policy<gfx::rendering_policy>(gfx::rendering_policy{ model, material });
-    }
     //    auto orbit = createEntity("orbitRings");
     //    orbit.add_component<transform>();
     //    ent.add_child(orbit);
@@ -361,26 +340,27 @@ void ExampleSystem::setup()
     //    emitter->add_policy<gfx::flipbook_policy>();
     //}
 
+        //Boids
     {
-
-        //auto parent = createEntity("Parent");
-        //parent.add_component<transform>();
-
-        auto ent = createEntity("Fountain");
+        auto ent = createEntity("Boids");
         auto [pos, rot, scal] = ent.add_component<transform>();
-        auto emitter = ent.add_component<particle_emitter>();
-        emitter->set_spawn_rate(9);
-        emitter->set_spawn_interval(.05f);
-        emitter->resize(900);
-        emitter->create_uniform<float>("minLifeTime") = 1.0f;
-        emitter->create_uniform<float>("maxLifeTime") = 5.0f;
-        emitter->create_uniform<int>("frameCount") = 8;
-        emitter->localSpace = true;
+        material = gfx::MaterialCache::get_material("White");
+        model = gfx::ModelCache::get_handle("ParticleGizmo");
+        ent.add_component<gfx::mesh_renderer>(gfx::mesh_renderer(material, model));
 
-        fountain_policy fountain;
-        fountain.initForce = 0.0f;
-        emitter->add_policy<fountain_policy>(fountain);
-        emitter->add_policy<scale_lifetime_policy>();
+        auto emitter = ent.add_component<particle_emitter>();
+        emitter->set_spawn_rate(10);
+        emitter->set_spawn_interval(.05f);
+        emitter->create_uniform<float>("minLifeTime") = 1.f;
+        emitter->create_uniform<float>("maxLifeTime") = 1.f;
+        emitter->create_uniform<int>("frameCount", 9.f);
+        emitter->resize(1000);
+        emitter->localSpace = false;
+        emitter->pause();
+        emitter->add_policy<locomotion_policy>();
+        emitter->add_policy<alignment_policy>();
+        emitter->add_policy<cohesion_policy>();
+        emitter->add_policy<seperation_policy>();
         material = gfx::MaterialCache::create_material("AnimParticle", fs::view("assets://shaders/particle.shs"));
         auto textureArray = gfx::TextureCache::create_texture_array("Explosion",
             {
@@ -401,6 +381,48 @@ void ExampleSystem::setup()
         model = gfx::ModelCache::create_model("Billboard", fs::view("assets://models/billboard.glb"));
         emitter->add_policy<gfx::rendering_policy>(gfx::rendering_policy{ model, material });
         emitter->add_policy<gfx::flipbook_policy>();
+    }
+
+    {
+
+        //auto parent = createEntity("Parent");
+        //parent.add_component<transform>();
+
+        //auto ent = createEntity("Fountain");
+        //auto [pos, rot, scal] = ent.add_component<transform>();
+        //auto emitter = ent.add_component<particle_emitter>();
+        //emitter->set_spawn_rate(9);
+        //emitter->set_spawn_interval(.05f);
+        //emitter->resize(900);
+        //emitter->create_uniform<float>("minLifeTime") = 1.0f;
+        //emitter->create_uniform<float>("maxLifeTime") = 5.0f;
+        //emitter->create_uniform<int>("frameCount") = 8;
+        //emitter->localSpace = true;
+
+        //fountain_policy fountain;
+        //fountain.initForce = 0.0f;
+        //emitter->add_policy<fountain_policy>(fountain);
+        //emitter->add_policy<scale_lifetime_policy>();
+        //material = gfx::MaterialCache::create_material("AnimParticle", fs::view("assets://shaders/particle.shs"));
+        //auto textureArray = gfx::TextureCache::create_texture_array("Explosion",
+        //    {
+        //        fs::view("assets://textures/explosion/frame0.png"),
+        //        fs::view("assets://textures/explosion/frame1.png"),
+        //        fs::view("assets://textures/explosion/frame2.png"),
+        //        fs::view("assets://textures/explosion/frame3.png"),
+        //        fs::view("assets://textures/explosion/frame4.png"),
+        //        fs::view("assets://textures/explosion/frame5.png"),
+        //        fs::view("assets://textures/explosion/frame6.png"),
+        //        fs::view("assets://textures/explosion/frame7.png"),
+        //        fs::view("assets://textures/explosion/frame8.png"),
+        //    });
+        //material.set_param("_texture", textureArray);
+        //material.set_variant("depth_only");
+        //material.set_param("_texture", textureArray);
+        //material.set_variant("default");
+        //model = gfx::ModelCache::create_model("Billboard", fs::view("assets://models/billboard.glb"));
+        //emitter->add_policy<gfx::rendering_policy>(gfx::rendering_policy{ model, material });
+        //emitter->add_policy<gfx::flipbook_policy>();
     }
 
     app::InputSystem::createBinding<play_action>(app::inputmap::method::RIGHT);

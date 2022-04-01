@@ -136,7 +136,7 @@ namespace legion::core
         {
             for (size_type idx = 0; idx < count; idx++)
             {
-                scaleBuffer[idx] = scale(scaleFactor - ((ageBuffer[idx].age / ageBuffer[idx].max) * scaleFactor));
+                //scaleBuffer[idx] = scale(scaleFactor - ((ageBuffer[idx].age / ageBuffer[idx].max) * scaleFactor));
             }
         }
     }

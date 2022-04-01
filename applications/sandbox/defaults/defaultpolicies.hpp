@@ -56,6 +56,9 @@ namespace legion::core
         ~color_lifetime_policy() = default;
 
         virtual void setup(particle_emitter& emitter) override;
+        virtual void onUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
+    };
+
     struct bounds
     {
         position min;
