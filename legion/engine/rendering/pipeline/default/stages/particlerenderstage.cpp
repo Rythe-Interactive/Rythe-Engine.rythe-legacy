@@ -9,7 +9,11 @@ namespace legion::rendering
 {
     void ParticleRenderStage::setup(app::window& context)
     {
+        app::context_guard guard(context);
+        if (!guard.contextIsValid())
+            return;
 
+        m_defaultDepthOnlyMaterial = MaterialCache::create_material("depth only", fs::view("engine://shaders/depthonly.shs"));
     }
 
     void ParticleRenderStage::render(app::window& context, camera& cam, const camera::camera_input& camInput, time::span deltaTime)
@@ -23,8 +27,9 @@ namespace legion::rendering
         static id_type matricesId = nameHash("model matrix buffer");
         static id_type entityBufferId = nameHash("entity id buffer");
         static id_type flipbookBufferId = nameHash("flipbook frame buffer");
+        static id_type depthOnlyVariant = nameHash("depth_only");
 
-        auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<math::mat4>, std::vector<uint>>>>>(batchesId);
+        auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<math::mat4>, std::vector<size_type>>>>>(batchesId);
         if (!batches)
             return;
 
@@ -104,17 +109,11 @@ namespace legion::rendering
 
         fbo->bind();
 
+
+
+
         for (auto [material, instancesPerMaterial] : *batches)
         {
-            auto& shaderState = material.get_shader().get_variant(material.current_variant()).state;
-            if ((shaderState.count(GL_BLEND) && (shaderState.at(GL_BLEND) != GL_FALSE)) ||
-                (shaderState.count(GL_BLEND_SRC) && (shaderState.at(GL_BLEND_SRC) != GL_FALSE)) ||
-                (shaderState.count(GL_BLEND_DST) && (shaderState.at(GL_BLEND_DST) != GL_FALSE)))
-            {
-                continue;
-            }
-
-            auto materialName = material.get_name();
 
             camInput.bind(material);
             if (material.has_param<uint>(SV_LIGHTCOUNT))
@@ -181,11 +180,96 @@ namespace legion::rendering
 
             material.release();
         }
+
+        for (auto [m, instancesPerMaterial] : *batches)
+        {
+
+            material_handle material = m;
+
+            auto currentVariant = material.current_variant();
+            if (m.get_name() == "Test")
+                material = m_defaultDepthOnlyMaterial;
+            else
+            {
+                auto shader = material.get_shader();
+                if (!shader.is_valid() || !shader.has_variant(depthOnlyVariant))
+                    material = m_defaultDepthOnlyMaterial;
+                else
+                    material.set_variant(depthOnlyVariant);
+            }
+
+            camInput.bind(material);
+            if (material.has_param<uint>(SV_LIGHTCOUNT))
+                material.set_param<uint>(SV_LIGHTCOUNT, *lightCount);
+
+            if (sceneColor && material.has_param<texture_handle>(SV_SCENECOLOR))
+                material.set_param<texture_handle>(SV_SCENECOLOR, sceneColor);
+
+            if (sceneNormal && material.has_param<texture_handle>(SV_SCENENORMAL))
+                material.set_param<texture_handle>(SV_SCENENORMAL, sceneNormal);
+
+            if (scenePosition && material.has_param<texture_handle>(SV_SCENEPOSITION))
+                material.set_param<texture_handle>(SV_SCENEPOSITION, scenePosition);
+
+            if (hdrOverdraw && material.has_param<texture_handle>(SV_HDROVERDRAW))
+                material.set_param<texture_handle>(SV_HDROVERDRAW, hdrOverdraw);
+
+            if (sceneDepth && material.has_param<texture_handle>(SV_SCENEDEPTH))
+                material.set_param<texture_handle>(SV_SCENEDEPTH, sceneDepth);
+
+            if (skyboxTex && material.has_param<texture_handle>(SV_SKYBOX))
+                material.set_param(SV_SKYBOX, skyboxTex);
+
+            material.bind();
+
+            for (auto [modelHandle, instances] : instancesPerMaterial)
+            {
+                if (modelHandle.id == invalid_id)
+                {
+                    log::warn("Invalid mesh found in particle emitter");
+                    continue;
+                }
+
+                ModelCache::create_model(modelHandle.id);
+                auto modelName = ModelCache::get_model_name(modelHandle.id);
+
+                const model& mesh = modelHandle.get_model();
+
+                if (!mesh.buffered)//Binds the modelMatrixBuffer to the modelHandles data
+                    modelHandle.buffer_data(*modelMatrixBuffer, *entityIdBuffer, *flipbookBuffer);
+
+                if (mesh.submeshes.empty())
+                {
+                    log::warn("Empty mesh found. Model name: {},  Model ID {}", modelName, modelHandle.get_mesh().id());
+                    continue;
+                }
+
+                modelMatrixBuffer->bufferData(instances.first);
+                flipbookBuffer->bufferData(instances.second);
+
+                {
+                    mesh.vertexArray.bind();
+                    mesh.indexBuffer.bind();
+                    lightsBuffer->bind();
+                    for (auto submesh : mesh.submeshes)
+                    {
+                        glDrawElementsInstanced(GL_TRIANGLES, (GLuint)submesh.indexCount, GL_UNSIGNED_INT, (GLvoid*)(submesh.indexOffset * sizeof(uint)), (GLsizei)instances.first.size());
+                    }
+                    lightsBuffer->release();
+                    mesh.indexBuffer.release();
+                    mesh.vertexArray.release();
+                }
+            }
+            material.release();
+            if (material != m_defaultDepthOnlyMaterial)
+                material.set_variant(currentVariant);
+        }
+
         fbo->release();
     }
 
     priority_type ParticleRenderStage::priority()
     {
-        return opaque_priority;
+        return default_priority;
     }
 }

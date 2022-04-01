@@ -14,9 +14,10 @@
 /* in 5  */  #define SV_COLOR          SV_POSITION + 1
 /* in 6  */  #define SV_NORMAL         SV_COLOR + 1     
 /* in 7  */  #define SV_TANGENT        SV_NORMAL + 1      
-/* in 8  */  #define SV_ENTITYID       SV_TANGENT + 1      
-/* in 9  */  #define SV_MODELMATRIX    SV_ENTITYID + 1
-/* in 9  */  #define SV_FRAMEID         SV_MODELMATRIX+ 1
+/* in 8  */  #define SV_ENTITYID       SV_TANGENT + 1
+/* in 9  */  #define SV_FRAMEID         SV_ENTITYID+ 1
+/* in 10  */  #define SV_MODELMATRIX    SV_FRAMEID + 1
+
 
 /* uniform 10  */  #define SV_VIEW           SV_MODELMATRIX + 1
 /* uniform 11 */  #define SV_PROJECT        SV_VIEW + 1
@@ -67,8 +68,8 @@ namespace legion::rendering::detail
             defines.push_back("SV_NORMAL=" + std::to_string(SV_NORMAL));
             defines.push_back("SV_TANGENT=" + std::to_string(SV_TANGENT));
             defines.push_back("SV_ENTITYID=" + std::to_string(SV_ENTITYID));
-            defines.push_back("SV_MODELMATRIX=" + std::to_string(SV_MODELMATRIX));
             defines.push_back("SV_FRAMEID=" + std::to_string(SV_FRAMEID));
+            defines.push_back("SV_MODELMATRIX=" + std::to_string(SV_MODELMATRIX));
 
             defines.push_back("SV_VIEW=" + std::to_string(SV_VIEW));
             defines.push_back("SV_PROJECT=" + std::to_string(SV_PROJECT));

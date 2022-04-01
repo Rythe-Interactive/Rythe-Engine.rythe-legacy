@@ -136,6 +136,12 @@ namespace legion::rendering
                 return { id };
         }
 
+        if (!settings.immutable)
+        {
+            log::error("We do not support mutable texture arrays.");
+            return invalid_texture_handle;
+        }
+
         texture texture{};
         texture.type = settings.type;
 
@@ -145,77 +151,34 @@ namespace legion::rendering
         glGenTextures(1, &texture.textureId);
         glBindTexture(glTexType, texture.textureId);
 
+        glTexParameteri(glTexType, GL_TEXTURE_MIN_FILTER, static_cast<GLint>(settings.min));
+        glTexParameteri(glTexType, GL_TEXTURE_MAG_FILTER, static_cast<GLint>(settings.mag));
+        glTexParameteri(glTexType, GL_TEXTURE_BASE_LEVEL, 0);
+
         // Handle wrapping behavior.
         glTexParameteri(glTexType, GL_TEXTURE_WRAP_R, static_cast<GLint>(settings.wrapR));
         glTexParameteri(glTexType, GL_TEXTURE_WRAP_S, static_cast<GLint>(settings.wrapS));
         glTexParameteri(glTexType, GL_TEXTURE_WRAP_T, static_cast<GLint>(settings.wrapT));
 
-        auto& res = imgs[0]->resolution();
-
         texture.channels = imgs[0]->components();
+        texture.fileFormat = imgs[0]->format();
         texture.name = name;
 
-        // Construct the texture using the loaded data.
-        texture.immutable = settings.immutable;
-        if (settings.immutable)
+        glTexStorage3D(glTexType,
+            1,
+            static_cast<GLint>(settings.intendedFormat),
+            imgs[0]->resolution().x, imgs[0]->resolution().y, imgs.size());
+
+        for (size_type idx = 0; idx < imgs.size(); idx++)
         {
-            texture.mipCount = settings.mipCount ? settings.mipCount : (settings.generateMipmaps ? math::log2(math::max(res.x, res.y)) : 1);
-            glTexParameteri(glTexType, GL_TEXTURE_MAX_LEVEL, texture.mipCount);
-            glTexStorage3D(
-                glTexType,
-                static_cast<GLint>(texture.mipCount),
-                static_cast<GLint>(settings.intendedFormat),
-                res.x,
-                res.y,
-                imgs.size());
-            for (size_type idx = 0; idx < imgs.size(); idx++)
-            {
-                glTexSubImage3D(
-                    glTexType,
-                    0,
-                    0,
-                    0,
-                    idx,
-                    res.x,
-                    res.y,
-                    1,
-                    components_to_format[static_cast<int>(imgs[idx]->components())],
-                    channels_to_glenum[static_cast<uint>(imgs[idx]->format())],
-                    imgs[idx]->data());
-            }
-        }
-        else
-        {
-            texture.mipCount = settings.generateMipmaps ? math::log2(math::max(res.x, res.y)) : 1;
-            glTexParameteri(glTexType, GL_TEXTURE_MAX_LEVEL, texture.mipCount);
-            glTexImage3D(
-                glTexType,
-                texture.mipCount,
-                static_cast<GLint>(settings.intendedFormat),
-                res.x,
-                res.y,
-                imgs.size(),
+            auto res = imgs[idx]->resolution();
+            glTexSubImage3D(glTexType,
                 0,
-                components_to_format[static_cast<int>(settings.components)],
-                channels_to_glenum[static_cast<uint>(settings.fileFormat)],
-                nullptr);
-
-            for (size_type idx = 0; idx < imgs.size(); idx++)
-            {
-                glTexSubImage3D(
-                    glTexType,                                              // target
-                    texture.mipCount,                                   // level
-                    0,                                                            // xoffset
-                    0,                                                            // yoffset
-                    idx,                                                         // zoffset/layer
-                    res.x,                                                      // width
-                    res.y,                                                      // height
-                    1,                                             // depth/layer count
-                    components_to_format[static_cast<int>(imgs[idx]->components())],
-                    channels_to_glenum[static_cast<uint>(imgs[idx]->format())],
-                    imgs[idx]->data());                                             // data
-
-            }
+                0, 0, idx,
+                res.x, res.y, 1,
+                components_to_format[static_cast<int>(texture.channels)],
+                channels_to_glenum[static_cast<uint>(texture.fileFormat)],
+                imgs[idx]->data());
         }
 
         glBindTexture(glTexType, 0);

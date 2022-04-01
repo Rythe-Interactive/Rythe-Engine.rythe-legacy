@@ -5,13 +5,13 @@ namespace legion::rendering
 {
     void ParticleBatchingStage::setup(app::window& context)
     {
-        create_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<math::mat4>, std::vector<uint>>>>>("particle batches");
+        create_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<math::mat4>, std::vector<size_type>>>>>("particle batches");
     }
 
     void ParticleBatchingStage::render(app::window& context, camera& cam, const camera::camera_input& camInput, time::span deltaTime)
     {
         static id_type batchesId = nameHash("particle batches");
-        auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<math::mat4>, std::vector<uint>>>>>(batchesId);
+        auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<math::mat4>, std::vector<size_type>>>>>(batchesId);
         static ecs::filter<particle_emitter> emitterFilter;
 
         {
@@ -62,17 +62,21 @@ namespace legion::rendering
                 return math::distance2(a, camInput.pos) < math::distance2(b, camInput.pos);
             };
 
+            std::vector<id_type> particleIds(emitter.size());
+            for (size_type i = 0; i < emitter.size(); i++)
+                particleIds[i] = i;
+
+
+            //for (size_type i = 1; i < emitter.size(); i++)
             //{
-            //    for (size_type i = 1; i < emitter.size(); i++)
+            //    auto j = i;
+            //    while (j > 0 && compare(posBuffer[particleIds[j - 1]], posBuffer[particleIds[j]]))
             //    {
-            //        auto j = i;
-            //        while (j > 0 && compare(posBuffer[j - 1], posBuffer[j]))
-            //        {
-            //            emitter.swap(j, j - 1);
-            //            j--;
-            //        }
+            //        std::swap(particleIds[j], particleIds[j - 1]);
+            //        j--;
             //    }
             //}
+
 
             auto filter = emitter.get_uniform<mesh_filter>(meshFilterId);
             auto renderer = emitter.get_uniform<mesh_renderer>(rendererId);
@@ -80,16 +84,21 @@ namespace legion::rendering
             auto& batch = (*batches)[renderer.material][model_handle{ filter.shared_mesh.id() }];
             auto start = batch.first.size();
             batch.first.insert(batch.first.end(), emitter.size(), math::mat4());
-            if (emitter.has_buffer<uint>(frameID))
+            if (emitter.has_buffer<size_type>(frameID))
             {
-                for (size_type idx = 0; idx < emitter.size(); idx++)
+                auto& frameIDBuffer = emitter.get_buffer<size_type>(frameID);
+                for (size_type i = 0; i < emitter.size(); i++)
                 {
-                    auto& frameIDBuffer = emitter.get_buffer<uint>(frameID);
-                    batch.second.push_back(frameIDBuffer[idx]);
+                    id_type particleId = particleIds[i];
+                    batch.second.push_back(frameIDBuffer[particleId]);
                 }
             }
+            else
+            {
+                batch.second.insert(batch.second.end(), emitter.size(), 0);
+            }
 
-            scale scal{1.0f};
+            scale scal{ 1.0f };
             rotation rot;
             position origin;
             if (emitter.localSpace)
@@ -107,9 +116,10 @@ namespace legion::rendering
 
             queueJobs(emitter.size(), [&](id_type jobId)
                 {
-                    if (emitter.is_alive(jobId))
+                    id_type particleId = particleIds[jobId];
+                    if (emitter.is_alive(particleId))
                     {
-                        math::mat4 localMat = math::compose(hasScaleBuffer ? scaleBuffer[jobId] : scal, hasRotBuffer ? rotBuffer[jobId] : rot, hasPosBuffer ? posBuffer[jobId] : origin);
+                        math::mat4 localMat = math::compose(hasScaleBuffer ? scaleBuffer[particleId] : scal, hasRotBuffer ? rotBuffer[particleId] : rot, hasPosBuffer ? posBuffer[particleId] : origin);
                         batch.first[jobId + start] = parentMat * localMat;
                     }
                 }).wait();
