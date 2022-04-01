@@ -10,16 +10,10 @@ namespace legion::core
         prot.typeId = typeHash<::example_comp>();
         prot.typeName = "::example_comp";
         {
-            static const ::reflectable_attribute reflectable_attr{};
+            static const reflectable_attribute reflectable_attr{};
             prot.attributes.push_back(std::cref(reflectable_attr));
         }
-        prot.members = std::vector<member_value>{
-        member_value
-        {
-            "value",
-            primitive_value {typeHash<int>(),std::make_any<int>(obj.value)}
-        }
-        };
+        prot.members.emplace("value", member_value("value", primitive_value{typeHash<int>(), std::make_any<int>(obj.value)}));
         return prot;
     }
 }

@@ -10,11 +10,9 @@ namespace legion::core
         refl.typeId = typeHash<legion::rendering::light>();
         refl.typeName = "legion::rendering::light";
         {
-            static const reflectable_attribute reflectable_attr{};
+            static const legion::reflectable_attribute reflectable_attr{};
             refl.attributes.push_back(std::cref(reflectable_attr));
         }
-        refl.members = std::vector<member_reference>
-        ();
         refl.data = std::addressof(obj);
         return refl;
     }
@@ -26,11 +24,9 @@ namespace legion::core
         refl.typeId = typeHash<legion::rendering::light>();
         refl.typeName = "legion::rendering::light";
         {
-            static const reflectable_attribute reflectable_attr{};
+            static const legion::reflectable_attribute reflectable_attr{};
             refl.attributes.push_back(std::cref(reflectable_attr));
         }
-        refl.members = std::vector<member_reference>
-        ();
         refl.data = reinterpret_cast<void*>(address);
         return refl;
     }

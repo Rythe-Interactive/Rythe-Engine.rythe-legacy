@@ -5,6 +5,7 @@
 #include <core/types/attributes.hpp>
 
 #include <any>
+#include <unordered_map>
 
 namespace legion::core
 {
@@ -12,13 +13,15 @@ namespace legion::core
     //a copy of data
     struct prototype
     {
+        using member_container = std::unordered_map<std::string_view, member_value>;
+        using attribute_container = std::vector<std::reference_wrapper<const attribute_base>>;
         id_type typeId;
         std::string_view typeName;
-        std::vector<member_value> members;
-        std::vector<std::reference_wrapper<const attribute_base>> attributes;
+        member_container members;
+        attribute_container attributes;
 
         prototype() = default;
-        prototype(id_type id, std::string_view name, std::vector<member_value> _members) : typeId(id), typeName(name), members(_members) {}
+        prototype(id_type id, std::string_view name, const member_container& _members) : typeId(id), typeName(name), members(_members) {}
         prototype(const prototype& prot) : typeId(prot.typeId), typeName(prot.typeName), members(prot.members) {}
 
         prototype& operator=(const prototype& rhs)
@@ -62,8 +65,8 @@ namespace legion::core
         };
 
         member_value() : is_object(false), name(""), primitive() {}
-        member_value(std::string_view _name, primitive_value _primitive) : is_object(false), name(_name), primitive(_primitive) {}
-        member_value(std::string_view _name, prototype prot) : is_object(true), name(_name), object(prot) {}
+        member_value(std::string_view _name, const primitive_value& _primitive) : is_object(false), name(_name), primitive(_primitive) {}
+        member_value(std::string_view _name, const prototype& prot) : is_object(true), name(_name), object(prot) {}
         member_value(const member_value& other)
         {
             is_object = other.is_object;

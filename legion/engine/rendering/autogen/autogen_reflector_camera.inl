@@ -10,41 +10,15 @@ namespace legion::core
         refl.typeId = typeHash<legion::rendering::camera>();
         refl.typeName = "legion::rendering::camera";
         {
-            static const reflectable_attribute reflectable_attr{};
+            static const legion::reflectable_attribute reflectable_attr{};
             refl.attributes.push_back(std::cref(reflectable_attr));
         }
-        refl.members = std::vector<member_reference>
-        {
-        member_reference
-        {
-            "fov",
-            primitive_reference {typeHash<float>(), &obj.fov}
-        }
-        ,
-        member_reference
-        {
-            "nearz",
-            primitive_reference {typeHash<float>(), &obj.nearz}
-        }
-        ,
-        member_reference
-        {
-            "farz",
-            primitive_reference {typeHash<float>(), &obj.farz}
-        }
-        };
-        {
-            auto nested_refl = make_reflector(obj.targetWindow);
-            refl.members.emplace_back("targetWindow",nested_refl);
-        }
-        {
-            auto nested_refl = make_reflector(obj.renderTarget);
-            refl.members.emplace_back("renderTarget",nested_refl);
-        }
-        {
-            auto nested_refl = make_reflector(obj.clearColor);
-            refl.members.emplace_back("clearColor",nested_refl);
-        }
+        refl.members.emplace("fov", member_reference("fov", primitive_reference{typeHash<float>(), &obj.fov}));
+        refl.members.emplace("nearz", member_reference("nearz", primitive_reference{typeHash<float>(), &obj.nearz}));
+        refl.members.emplace("farz", member_reference("farz", primitive_reference{typeHash<float>(), &obj.farz}));
+        refl.members.emplace("targetWindow", member_reference("targetWindow", reflector(typeHash<decltype(obj.targetWindow)>(), nameOfType<decltype(obj.targetWindow)>(), reflector::member_container(), std::addressof(obj.targetWindow))));
+        refl.members.emplace("renderTarget", member_reference("renderTarget", reflector(typeHash<decltype(obj.renderTarget)>(), nameOfType<decltype(obj.renderTarget)>(), reflector::member_container(), std::addressof(obj.renderTarget))));
+        refl.members.emplace("clearColor", member_reference("clearColor", reflector(typeHash<decltype(obj.clearColor)>(), nameOfType<decltype(obj.clearColor)>(), reflector::member_container(), std::addressof(obj.clearColor))));
         refl.data = std::addressof(obj);
         return refl;
     }
@@ -56,41 +30,15 @@ namespace legion::core
         refl.typeId = typeHash<legion::rendering::camera>();
         refl.typeName = "legion::rendering::camera";
         {
-            static const reflectable_attribute reflectable_attr{};
+            static const legion::reflectable_attribute reflectable_attr{};
             refl.attributes.push_back(std::cref(reflectable_attr));
         }
-        refl.members = std::vector<member_reference>
-        {
-        member_reference
-        {
-            "fov",
-            primitive_reference {typeHash<float>(), &obj.fov}
-        }
-        ,
-        member_reference
-        {
-            "nearz",
-            primitive_reference {typeHash<float>(), &obj.nearz}
-        }
-        ,
-        member_reference
-        {
-            "farz",
-            primitive_reference {typeHash<float>(), &obj.farz}
-        }
-        };
-        {
-            auto nested_refl = make_reflector(obj.targetWindow);
-            refl.members.emplace_back("targetWindow",nested_refl);
-        }
-        {
-            auto nested_refl = make_reflector(obj.renderTarget);
-            refl.members.emplace_back("renderTarget",nested_refl);
-        }
-        {
-            auto nested_refl = make_reflector(obj.clearColor);
-            refl.members.emplace_back("clearColor",nested_refl);
-        }
+        refl.members.emplace("fov", member_reference("fov", primitive_reference{typeHash<float>(), &obj.fov}));
+        refl.members.emplace("nearz", member_reference("nearz", primitive_reference{typeHash<float>(), &obj.nearz}));
+        refl.members.emplace("farz", member_reference("farz", primitive_reference{typeHash<float>(), &obj.farz}));
+        refl.members.emplace("targetWindow", member_reference("targetWindow", reflector(typeHash<decltype(obj.targetWindow)>(), nameOfType<decltype(obj.targetWindow)>(), reflector::member_container(), std::addressof(obj.targetWindow))));
+        refl.members.emplace("renderTarget", member_reference("renderTarget", reflector(typeHash<decltype(obj.renderTarget)>(), nameOfType<decltype(obj.renderTarget)>(), reflector::member_container(), std::addressof(obj.renderTarget))));
+        refl.members.emplace("clearColor", member_reference("clearColor", reflector(typeHash<decltype(obj.clearColor)>(), nameOfType<decltype(obj.clearColor)>(), reflector::member_container(), std::addressof(obj.clearColor))));
         refl.data = reinterpret_cast<void*>(address);
         return refl;
     }

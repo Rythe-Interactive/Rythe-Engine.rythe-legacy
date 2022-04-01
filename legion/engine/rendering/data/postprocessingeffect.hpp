@@ -8,7 +8,7 @@
 
 #include <rendering/data/screen_quad.hpp>
 
-#include <rendering/pipeline/base/pipelinebase.hpp>
+#include <rendering/pipeline/base/pipeline.hpp>
 
 namespace legion::rendering
 {

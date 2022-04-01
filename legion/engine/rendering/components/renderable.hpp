@@ -4,7 +4,7 @@
 
 namespace legion::rendering
 {
-    struct [[reflectable]] skybox_renderer
+    struct skybox_renderer
     {
         material_handle material = invalid_material_handle;
 
@@ -12,7 +12,7 @@ namespace legion::rendering
         explicit skybox_renderer(const material_handle& src) { material = src; }
     };
 
-    struct [[reflectable]] mesh_renderer
+    struct mesh_renderer
     {
     private:
         model_handle m_tempHandle = invalid_model_handle;

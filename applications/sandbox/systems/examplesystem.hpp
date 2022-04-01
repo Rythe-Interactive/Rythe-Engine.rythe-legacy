@@ -44,7 +44,7 @@ public:
         auto* pipeline = dynamic_cast<gfx::DefaultPipeline*>(gfx::Renderer::getMainPipeline());
         if (pipeline)
             pipeline->attachStage<MouseHover>();
-            
+
         auto rootEnt = createEntity("Scene");
 
         app::window& win = ecs::world.get_component<app::window>();
@@ -52,16 +52,13 @@ public:
 
         auto model = gfx::ModelCache::create_model("Sphere", fs::view("assets://models/sphere.obj"));
 
-        auto material = gfx::MaterialCache::create_material("White", fs::view("assets://shaders/color.shs"));
-        material.set_param("color", math::colors::white);
-
-        /*{
-            auto ent = createEntity("Sun", rootEnt);
-            ent.add_component(gfx::light::directional(math::color(1, 1, 0.8f), 10.f));
-            auto [pos, rot, scal] = ent.add_component<transform>();
-            pos = position(0.f, 3.f, 6.f);
-            rot = rotation::lookat(math::vec3::zero, math::vec3(1.f, -1.f, 0.1f));
-        }*/
+        //{
+        //    auto ent = createEntity("Sun", rootEnt);
+        //    ent.add_component(gfx::light::directional(math::color(1, 1, 0.8f), 10.f));
+        //    auto [pos, rot, scal] = ent.add_component<transform>();
+        //    pos = position(0.f, 3.f, 6.f);
+        //    rot = rotation::lookat(math::vec3::zero, math::vec3(1.f, -1.f, 0.1f));
+        //}
 
         //#if defined(LEGION_DEBUG)
         //        for (int i = 0; i < 2000; i++)
@@ -79,7 +76,7 @@ public:
         //            ent.add_component(gfx::mesh_renderer(material, model));
         //        }
 
-        material = gfx::MaterialCache::create_material("iron", fs::view("engine://shaders/default_lit.shs"));
+        auto material = gfx::MaterialCache::create_material("iron", fs::view("engine://shaders/default_lit.shs"));
 
         material.set_param("alphaCutoff", 0.5f);
         material.set_param("useAlbedoTex", true);
@@ -316,7 +313,7 @@ public:
         srl::write<srl::yaml>(fs::view("assets://scenes/scene2.yaml"), *result4, "scene");
         srl::write<srl::json>(fs::view("assets://scenes/scene2.json"), *result4, "scene");
         srl::write<srl::bson>(fs::view("assets://scenes/scene2.bson"), *result4, "scene");
-
+ 
         bindToEvent<events::exit, &ExampleSystem::onExit>();
     }
 
@@ -495,6 +492,9 @@ public:
     void update(legion::time::span deltaTime)
     {
         using namespace legion;
+
+        debug::drawLine(math::vec3(), math::vec3(0.099f, 0.f, -0.995f), math::colors::blue);
+
         static float exposure = gfx::Tonemapping::getExposure();
         auto currentExposure = gfx::Tonemapping::getExposure();
         if (math::abs(exposure - currentExposure) > 0.1f)
@@ -534,7 +534,7 @@ public:
                 };
 
                 for (auto& edge : edges)
-                    debug::drawLine((worldMat * math::vec4(edge.first.x, edge.first.y, edge.first.z, 1.f)).xyz(), (worldMat * math::vec4(edge.second.x, edge.second.y, edge.second.z, 1.f)).xyz(), math::colors::orange);
+                    debug::drawLine((worldMat * math::vec4(edge.first.x, edge.first.y, edge.first.z, 1.f)).xyz(), (worldMat * math::vec4(edge.second.x, edge.second.y, edge.second.z, 1.f)).xyz(), math::colors::orange, 10.f);
             }
         }
 
@@ -566,7 +566,7 @@ public:
                 };
 
                 for (auto& edge : edges)
-                    debug::drawLine((worldMat * math::vec4(edge.first.x, edge.first.y, edge.first.z, 1.f)).xyz(), (worldMat * math::vec4(edge.second.x, edge.second.y, edge.second.z, 1.f)).xyz(), math::colors::green);
+                    debug::drawLine((worldMat * math::vec4(edge.first.x, edge.first.y, edge.first.z, 1.f)).xyz(), (worldMat * math::vec4(edge.second.x, edge.second.y, edge.second.z, 1.f)).xyz(), math::colors::green, 10.f);
             }
         }
 

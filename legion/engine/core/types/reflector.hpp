@@ -4,6 +4,8 @@
 #include <core/types/primitives.hpp>
 #include <core/types/attributes.hpp>
 
+#include <unordered_map>
+
 namespace legion::core
 {
     struct member_reference;
@@ -11,17 +13,19 @@ namespace legion::core
     //a reference to data
     struct reflector
     {
+        using member_container = std::unordered_map<std::string_view, member_reference>;
+        using attribute_container = std::vector<std::reference_wrapper<const attribute_base>>;
         id_type typeId;
         std::string_view typeName;
-        std::vector<member_reference> members;
-        std::vector<std::reference_wrapper<const attribute_base>> attributes;
+        member_container members;
+        attribute_container attributes;
         void* data;
 
         reflector() = default;
-        reflector(id_type id, std::string_view name, std::vector<member_reference> _members, void* _adress)
+        reflector(id_type id, std::string_view name, const member_container& _members, void* _adress)
             : typeId(id), typeName(name), members(_members), data(_adress) {}
 
-        reflector(id_type id, std::string_view name, std::vector<member_reference> _members, const void* _adress)
+        reflector(id_type id, std::string_view name, const member_container& _members, const void* _adress)
             : typeId(id), typeName(name), members(_members)
         {
             ptr_type adress = reinterpret_cast<ptr_type>(_adress);
@@ -84,8 +88,8 @@ namespace legion::core
         };
 
         member_reference() noexcept : is_object(false), name(""), primitive() {}
-        member_reference(std::string_view _name, primitive_reference _primitive) noexcept : is_object(false), name(_name), primitive(_primitive) {}
-        member_reference(std::string_view _name, reflector refl) : is_object(true), name(_name), object(refl) {}
+        member_reference(std::string_view _name, const primitive_reference& _primitive) noexcept : is_object(false), name(_name), primitive(_primitive) {}
+        member_reference(std::string_view _name, const reflector& refl) : is_object(true), name(_name), object(refl) {}
         member_reference(const member_reference& other)
         {
             is_object = other.is_object;

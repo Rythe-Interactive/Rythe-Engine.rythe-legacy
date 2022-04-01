@@ -13,36 +13,11 @@ namespace legion::core
             static const reflectable_attribute reflectable_attr{};
             refl.attributes.push_back(std::cref(reflectable_attr));
         }
-        refl.members = std::vector<member_reference>
-        {
-        member_reference
-        {
-            "attenuation",
-            primitive_reference {typeHash<float>(), &obj.attenuation}
-        }
-        ,
-        member_reference
-        {
-            "intensity",
-            primitive_reference {typeHash<float>(), &obj.intensity}
-        }
-        ,
-        member_reference
-        {
-            "falloff",
-            primitive_reference {typeHash<float>(), &obj.falloff}
-        }
-        ,
-        member_reference
-        {
-            "angle",
-            primitive_reference {typeHash<float>(), &obj.angle}
-        }
-        };
-        {
-            auto nested_refl = make_reflector(obj.color);
-            refl.members.emplace_back("color",nested_refl);
-        }
+        refl.members.emplace("attenuation", member_reference("attenuation", primitive_reference{typeHash<float>(), &obj.attenuation}));
+        refl.members.emplace("intensity", member_reference("intensity", primitive_reference{typeHash<float>(), &obj.intensity}));
+        refl.members.emplace("falloff", member_reference("falloff", primitive_reference{typeHash<float>(), &obj.falloff}));
+        refl.members.emplace("angle", member_reference("angle", primitive_reference{typeHash<float>(), &obj.angle}));
+        refl.members.emplace("color", member_reference("color", reflector(typeHash<decltype(obj.color)>(), nameOfType<decltype(obj.color)>(), reflector::member_container(), std::addressof(obj.color))));
         refl.data = std::addressof(obj);
         return refl;
     }
@@ -57,36 +32,11 @@ namespace legion::core
             static const reflectable_attribute reflectable_attr{};
             refl.attributes.push_back(std::cref(reflectable_attr));
         }
-        refl.members = std::vector<member_reference>
-        {
-        member_reference
-        {
-            "attenuation",
-            primitive_reference {typeHash<float>(), &obj.attenuation}
-        }
-        ,
-        member_reference
-        {
-            "intensity",
-            primitive_reference {typeHash<float>(), &obj.intensity}
-        }
-        ,
-        member_reference
-        {
-            "falloff",
-            primitive_reference {typeHash<float>(), &obj.falloff}
-        }
-        ,
-        member_reference
-        {
-            "angle",
-            primitive_reference {typeHash<float>(), &obj.angle}
-        }
-        };
-        {
-            auto nested_refl = make_reflector(obj.color);
-            refl.members.emplace_back("color",nested_refl);
-        }
+        refl.members.emplace("attenuation", member_reference("attenuation", primitive_reference{typeHash<float>(), &obj.attenuation}));
+        refl.members.emplace("intensity", member_reference("intensity", primitive_reference{typeHash<float>(), &obj.intensity}));
+        refl.members.emplace("falloff", member_reference("falloff", primitive_reference{typeHash<float>(), &obj.falloff}));
+        refl.members.emplace("angle", member_reference("angle", primitive_reference{typeHash<float>(), &obj.angle}));
+        refl.members.emplace("color", member_reference("color", reflector(typeHash<decltype(obj.color)>(), nameOfType<decltype(obj.color)>(), reflector::member_container(), std::addressof(obj.color))));
         refl.data = reinterpret_cast<void*>(address);
         return refl;
     }

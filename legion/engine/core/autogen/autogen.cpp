@@ -1,7 +1,4 @@
 #include "autogen.hpp"
-#pragma once
-#include "autogen_prototype_entity_data.inl"
-#include "autogen_reflector_entity_data.inl"
 #include "autogen_prototype_position.inl"
 #include "autogen_reflector_position.inl"
 #include "autogen_prototype_rotation.inl"

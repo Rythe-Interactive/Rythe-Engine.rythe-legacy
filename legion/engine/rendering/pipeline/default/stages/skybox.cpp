@@ -1,4 +1,5 @@
 #include <rendering/pipeline/default/stages/skybox.hpp>
+#include <rendering/pipeline/base/pipeline.hpp>
 #include <rendering/components/renderable.hpp>
 #include <rendering/util/bindings.hpp>
 

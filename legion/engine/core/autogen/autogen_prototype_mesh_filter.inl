@@ -10,14 +10,10 @@ namespace legion::core
         prot.typeId = typeHash<legion::core::mesh_filter>();
         prot.typeName = "legion::core::mesh_filter";
         {
-            static const ::reflectable_attribute reflectable_attr{};
+            static const reflectable_attribute reflectable_attr{};
             prot.attributes.push_back(std::cref(reflectable_attr));
         }
-        prot.members = std::vector<member_value>();
-        {
-            auto nested_prot = make_prototype(obj.shared_mesh);
-            prot.members.emplace_back("shared_mesh",nested_prot);
-        }
+        prot.members.emplace("shared_mesh", member_value("shared_mesh", prototype(typeHash<decltype(obj.shared_mesh)>(), nameOfType<decltype(obj.shared_mesh)>(), prototype::member_container())));
         return prot;
     }
 }

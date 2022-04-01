@@ -13,7 +13,6 @@ namespace legion::core
             static const legion::reflectable_attribute reflectable_attr{};
             prot.attributes.push_back(std::cref(reflectable_attr));
         }
-        prot.members = std::vector<member_value>();
         return prot;
     }
 }

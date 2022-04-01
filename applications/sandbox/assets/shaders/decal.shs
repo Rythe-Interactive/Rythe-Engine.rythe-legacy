@@ -4,6 +4,13 @@
 
 generate(vertex, fragment)
 
+variant(depth only)
+{
+    #define DEPTH_ONLY
+    #state BLEND TRANSPARENT
+}
+
+
 #include<stdio.shinc>
 #include<math_ext.shinc>
 #include <lighting.shinc>
@@ -37,15 +44,18 @@ shader(fragment)
         if(max(abs(localScenePos.x), max(abs(localScenePos.y), abs(localScenePos.z))) > 0.5)
             discard;
 
-        // Get camera for lighting.
-        Camera camera = GetCamera();
-
         // Get the world normal from the gbuffer
         vec3 worldNormal = SceneNormal();
 
         // If the worldNormal is 0 then something doesn't like to be messed with.
         if(worldNormal == vec3(0.0))
             discard;
+
+#if defined(DEPTH_ONLY)
+        fragment_color = vec4(0.0);
+#else
+        // Get camera for lighting.
+        Camera camera = GetCamera();
 
         // Calculate world tangent.
         vec3 worldTangent = (stdin(modelMatrix) * vec4(1, 0, 0, 1)).xyz;
@@ -62,5 +72,6 @@ shader(fragment)
 
         // Submit output values to gbuffers.
         SubmitOutput(vec4(lighting, material.albedo.a), worldNormal, worldScenePos, material.emissive);
+#endif
     }
 }
