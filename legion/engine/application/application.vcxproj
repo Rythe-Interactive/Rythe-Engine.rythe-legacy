@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="autogen\autogen.cpp" />
     <ClCompile Include="context\contexthelper.cpp" />
     <ClCompile Include="context\detail\glad\glad.c" />
     <ClCompile Include="input\inputsystem.cpp" />
@@ -19,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.hpp" />
+    <ClInclude Include="autogen\autogen.hpp" />
     <ClInclude Include="context\contexthelper.hpp" />
     <ClInclude Include="context\detail\glad\glad.h" />
     <ClInclude Include="context\detail\KHR\khrplatform.h" />

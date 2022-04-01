@@ -58,6 +58,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="autogen\autogen.hpp" />
+    <ClInclude Include="autogen\override\prototype_light.hpp" />
+    <ClInclude Include="autogen\override\reflector_light.hpp" />
     <ClInclude Include="components\camera.hpp" />
     <ClInclude Include="components\light.hpp" />
     <ClInclude Include="components\point.hpp" />
@@ -105,6 +107,8 @@
     <ClInclude Include="util\settings.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="autogen\override\prototype_light.inl" />
+    <None Include="autogen\override\reflector_light.inl" />
     <None Include="data\buffer.inl" />
     <None Include="pipeline\base\pipeline.inl" />
     <None Include="pipeline\base\renderstage.inl" />

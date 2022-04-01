@@ -345,17 +345,17 @@ namespace legion::core::serialization
             s_view.start_object(std::string(name));
             s_view.serialize<std::string>("type_name", nameOfType<serializable_type>());
 
-            for (auto& var : refl.members)
+            for (auto& [name, var] : refl.members)
             {
                 if (var.is_object)
                 {
                     auto _serializer = SerializerRegistry::getSerializer(var.object.typeId);
-                    auto result = _serializer->serialize(var.object.data, s_view, var.name);
+                    auto result = _serializer->serialize(var.object.data, s_view, name);
                     EndObjectPropagate(result, warnings, s_view);
                 }
                 else
                 {
-                    if (!s_view.serialize(std::string(var.name), var.primitive.data, var.primitive.typeId))
+                    if (!s_view.serialize(std::string(name), var.primitive.data, var.primitive.typeId))
                     {
                         s_view.end_object();
                         return { legion_fs_error("Type was not a primitive serializable type."), warnings };
@@ -409,17 +409,17 @@ namespace legion::core::serialization
                 }
             }
 
-            for (auto& var : refl.members)
+            for (auto& [name, var] : refl.members)
             {
                 if (var.is_object)
                 {
                     auto _serializer = SerializerRegistry::getSerializer(var.object.typeId);
-                    auto result = _serializer->deserialize(var.object.data, s_view, var.name);
+                    auto result = _serializer->deserialize(var.object.data, s_view, name);
                     EndReadPropagate(result, warnings, s_view);
                 }
                 else
                 {
-                    auto result = s_view.deserialize(std::string(var.name), var.primitive.data, var.primitive.typeId);
+                    auto result = s_view.deserialize(std::string(name), var.primitive.data, var.primitive.typeId);
                     EndReadPropagate(result, warnings, s_view);
                 }
             }

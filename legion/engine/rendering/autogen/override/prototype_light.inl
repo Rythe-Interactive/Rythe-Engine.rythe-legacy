@@ -1,5 +1,5 @@
-#include "autogen_prototype_light.hpp"
-#include "../../rendering/components/light.hpp"
+#include "prototype_light.hpp"
+#include "../../../rendering/components/light.hpp"
 namespace legion { using namespace core; }
 namespace legion::core
 {
@@ -13,6 +13,7 @@ namespace legion::core
             static const legion::reflectable_attribute reflectable_attr{};
             prot.attributes.push_back(std::cref(reflectable_attr));
         }
+        prot.members.emplace("m_lightData", member_value("m_lightData", make_prototype(obj.m_lightData)));
         return prot;
     }
 }

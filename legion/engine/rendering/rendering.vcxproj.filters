@@ -93,11 +93,15 @@
     <ClInclude Include="autogen\autogen.hpp" />
     <ClInclude Include="pipeline\default\stages\skybox.hpp" />
     <ClInclude Include="pipeline\default\stages\transparencyrenderstage.hpp" />
+    <ClInclude Include="autogen\override\reflector_light.hpp" />
+    <ClInclude Include="autogen\override\prototype_light.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\buffer.inl" />
     <None Include="pipeline\base\pipeline.inl" />
     <None Include="pipeline\base\renderstage.inl" />
     <None Include="systems\renderer.inl" />
+    <None Include="autogen\override\reflector_light.inl" />
+    <None Include="autogen\override\prototype_light.inl" />
   </ItemGroup>
 </Project>

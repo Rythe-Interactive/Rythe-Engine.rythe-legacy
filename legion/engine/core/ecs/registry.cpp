@@ -161,13 +161,8 @@ namespace legion::core::ecs
             return entity{ nullptr };
 
         entity_data data;
-        for (auto& member : prot.members)
-        {
-            if (member.name == "active")
-                data.active = *member.primitive.cast<bool>();
-            else if (member.name == "name")
-                data.name = *member.primitive.cast<std::string>();
-        }
+        data.active = *prot.members.at("active").primitive.cast<bool>();
+        data.name = *prot.members.at("name").primitive.cast<std::string>();
 
         // Call to create a new blank entity. No need to duplicate this logic.
         auto ent = createEntity(data.name, parent);

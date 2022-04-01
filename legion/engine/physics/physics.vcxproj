@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="autogen\autogen.cpp" />
     <ClCompile Include="diviner\broadphasecollisionalgorithms\broadphaseuniformgrid.cpp" />
     <ClCompile Include="diviner\broadphasecollisionalgorithms\broadphaseuniformgridnocaching.cpp" />
     <ClCompile Include="diviner\colliders\convexcollider.cpp" />
@@ -29,6 +30,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="autogen\autogen.hpp" />
     <ClInclude Include="diviner\broadphasecollisionalgorithms\broadphasebruteforce.hpp" />
     <ClInclude Include="diviner\broadphasecollisionalgorithms\broadphasecollisionalgorithm.hpp" />
     <ClInclude Include="diviner\broadphasecollisionalgorithms\broadphaseuniformgrid.hpp" />

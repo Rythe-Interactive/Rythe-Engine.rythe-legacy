@@ -11,11 +11,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="autogen\autogen.cpp" />
     <ClCompile Include="data\audio_segment.cpp" />
     <ClCompile Include="data\importers\audio_importers.cpp" />
     <ClCompile Include="systems\audiosystem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="autogen\autogen.hpp" />
     <ClInclude Include="components\audio_listener.hpp" />
     <ClInclude Include="components\audio_source.hpp" />
     <ClInclude Include="data\audio_segment.hpp" />

@@ -1,5 +1,5 @@
-#include "autogen_reflector_position.hpp"
-#include "../../core/defaults/defaultcomponents.hpp"
+#include "reflector_position.hpp"
+#include "../../../core/defaults/defaultcomponents.hpp"
 namespace legion { using namespace core; }
 namespace legion::core
 {
@@ -13,6 +13,9 @@ namespace legion::core
             static const reflectable_attribute reflectable_attr{};
             refl.attributes.push_back(std::cref(reflectable_attr));
         }
+        refl.members.emplace("x", member_reference("x", primitive_reference{ typeHash<float>(), &obj.x }));
+        refl.members.emplace("y", member_reference("y", primitive_reference{ typeHash<float>(), &obj.y }));
+        refl.members.emplace("z", member_reference("z", primitive_reference{ typeHash<float>(), &obj.z }));
         refl.data = std::addressof(obj);
         return refl;
     }
@@ -27,6 +30,10 @@ namespace legion::core
             static const reflectable_attribute reflectable_attr{};
             refl.attributes.push_back(std::cref(reflectable_attr));
         }
+        refl.members.emplace("x", member_reference("x", primitive_reference{ typeHash<float>(), &obj.x }));
+        refl.members.emplace("y", member_reference("y", primitive_reference{ typeHash<float>(), &obj.y }));
+        refl.members.emplace("z", member_reference("z", primitive_reference{ typeHash<float>(), &obj.z }));
+
         refl.data = reinterpret_cast<void*>(address);
         return refl;
     }

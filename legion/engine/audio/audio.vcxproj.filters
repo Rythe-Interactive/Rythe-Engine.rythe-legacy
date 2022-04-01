@@ -24,6 +24,9 @@
     <ClCompile Include="data\importers\audio_importers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="autogen\autogen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="systems\audiosystem.hpp">
@@ -45,6 +48,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="data\importers\audio_importers.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="autogen\autogen.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

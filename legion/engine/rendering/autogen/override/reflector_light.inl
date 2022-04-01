@@ -1,5 +1,5 @@
-#include "autogen_reflector_light.hpp"
-#include "../../rendering/components/light.hpp"
+#include "reflector_light.hpp"
+#include "../../../rendering/components/light.hpp"
 namespace legion { using namespace core; }
 namespace legion::core
 {
@@ -13,6 +13,7 @@ namespace legion::core
             static const legion::reflectable_attribute reflectable_attr{};
             refl.attributes.push_back(std::cref(reflectable_attr));
         }
+        refl.members.emplace("m_lightData", member_reference("m_lightData", make_reflector(obj.m_lightData)));
         refl.data = std::addressof(obj);
         return refl;
     }
@@ -27,6 +28,7 @@ namespace legion::core
             static const legion::reflectable_attribute reflectable_attr{};
             refl.attributes.push_back(std::cref(reflectable_attr));
         }
+        refl.members.emplace("m_lightData", member_reference("m_lightData", make_reflector(obj.m_lightData)));
         refl.data = reinterpret_cast<void*>(address);
         return refl;
     }

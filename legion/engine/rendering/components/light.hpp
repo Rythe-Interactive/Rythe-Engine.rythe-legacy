@@ -26,8 +26,12 @@ namespace legion::rendering
         };
     }
 
-    struct [[legion::reflectable]] light
+    struct light
     {
+        template<typename T>
+        friend prototype legion::core::make_prototype(const T&);
+        template<typename T>
+        friend auto legion::core::make_reflector(T&)->std::conditional_t<std::is_const_v<T>, const reflector, reflector>;
     private:
         static uint m_lastidx;
     public:

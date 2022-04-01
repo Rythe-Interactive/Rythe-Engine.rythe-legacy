@@ -15,10 +15,12 @@ namespace legion::core
     {
         using member_container = std::unordered_map<std::string_view, member_reference>;
         using attribute_container = std::vector<std::reference_wrapper<const attribute_base>>;
+
         id_type typeId;
         std::string_view typeName;
         member_container members;
         attribute_container attributes;
+
         void* data;
 
         reflector() = default;
