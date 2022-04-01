@@ -39,7 +39,7 @@ shader(fragment)
     {
         vec4 color = texture(_texture, vec3(stdio(uv), float(stdio(frameID))));
         color.a *= SoftParticleAlpha(2.0);
-        if(color.a <= 0.0)
+        if(color.a <= epsilon)
             discard;
 
         #if defined(DEPTH_ONLY)

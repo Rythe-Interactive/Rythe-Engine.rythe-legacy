@@ -29,7 +29,7 @@ namespace legion::rendering
         static id_type flipbookBufferId = nameHash("flipbook frame buffer");
         static id_type depthOnlyVariant = nameHash("depth_only");
 
-        auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<math::mat4>, std::vector<size_type>>>>>(batchesId);
+        auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<math::mat4>, std::vector<uint>>>>>(batchesId);
         if (!batches)
             return;
 
@@ -109,11 +109,11 @@ namespace legion::rendering
 
         fbo->bind();
 
-
-
-
         for (auto [material, instancesPerMaterial] : *batches)
         {
+            auto shader = material.get_shader();
+            if (!shader.is_valid() || !shader.has_variant(material.current_variant()))
+                material = invalid_material_handle;
 
             camInput.bind(material);
             if (material.has_param<uint>(SV_LIGHTCOUNT))
@@ -187,16 +187,11 @@ namespace legion::rendering
             material_handle material = m;
 
             auto currentVariant = material.current_variant();
-            if (m.get_name() == "Test")
+            auto shader = material.get_shader();
+            if (!shader.is_valid() || !shader.has_variant(depthOnlyVariant))
                 material = m_defaultDepthOnlyMaterial;
             else
-            {
-                auto shader = material.get_shader();
-                if (!shader.is_valid() || !shader.has_variant(depthOnlyVariant))
-                    material = m_defaultDepthOnlyMaterial;
-                else
-                    material.set_variant(depthOnlyVariant);
-            }
+                material.set_variant(depthOnlyVariant);
 
             camInput.bind(material);
             if (material.has_param<uint>(SV_LIGHTCOUNT))

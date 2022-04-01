@@ -27,7 +27,7 @@ namespace legion::rendering
         for (size_type idx = 0; idx < count; idx++)
         {
             auto& lifeTime = ageBuffer[idx];
-            frameIDBuffer[idx] = (lifeTime.age / lifeTime.max) * frameCount;
+            frameIDBuffer[idx] = math::clamp(static_cast<int>(lifeTime.age / lifeTime.max) * frameCount, 0, frameCount - 1);
         }
 
     }

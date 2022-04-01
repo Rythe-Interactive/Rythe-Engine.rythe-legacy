@@ -1,5 +1,4 @@
 #include <rendering/data/texture.hpp>
-#include <stb_image.h>
 
 namespace legion::rendering
 {
@@ -112,9 +111,7 @@ namespace legion::rendering
     {
         std::vector<assets::asset<image>> loadedImgs;
         for (auto& file : files)
-        {
             loadedImgs.push_back(assets::load<image>(file).value());
-        }
 
         auto result = create_texture_array(name, loadedImgs, settings);
 

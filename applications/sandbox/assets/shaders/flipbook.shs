@@ -16,10 +16,9 @@ shader(vertex)
 
 shader(fragment)
 {
-    uniform sampler2DArray textures;
+    uniform sampler2DArray _textures;
     void main(void)
     {
-        //SubmitOutput(mix(texture(textures, vec3(stdio(uv),0)),texture(textures, vec3(stdio(uv),1)),0.5));
-        SubmitOutput(texture(textures, vec3(stdio(uv),0)));
+        SubmitOutput(texture(_textures, vec3(stdio(uv),float(frameID))));
     }
 }

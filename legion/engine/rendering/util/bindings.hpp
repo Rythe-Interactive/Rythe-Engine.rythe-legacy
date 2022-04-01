@@ -63,7 +63,7 @@ namespace legion::rendering::detail
             defines.push_back("SV_TEXCOORD2=" + std::to_string(SV_TEXCOORD2));
             defines.push_back("SV_TEXCOORD3=" + std::to_string(SV_TEXCOORD3));
 
-            defines.push_back("SV_POSITION=" + std::to_string(SV_POSITION));
+            defines.push_back("SV_POSITION=" +   std::to_string(SV_POSITION));
             defines.push_back("SV_COLOR=" + std::to_string(SV_COLOR));
             defines.push_back("SV_NORMAL=" + std::to_string(SV_NORMAL));
             defines.push_back("SV_TANGENT=" + std::to_string(SV_TANGENT));

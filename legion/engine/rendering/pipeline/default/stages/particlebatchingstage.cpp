@@ -5,13 +5,13 @@ namespace legion::rendering
 {
     void ParticleBatchingStage::setup(app::window& context)
     {
-        create_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<math::mat4>, std::vector<size_type>>>>>("particle batches");
+        create_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<math::mat4>, std::vector<uint>>>>>("particle batches");
     }
 
     void ParticleBatchingStage::render(app::window& context, camera& cam, const camera::camera_input& camInput, time::span deltaTime)
     {
         static id_type batchesId = nameHash("particle batches");
-        auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<math::mat4>, std::vector<size_type>>>>>(batchesId);
+        auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<math::mat4>, std::vector<uint>>>>>(batchesId);
         static ecs::filter<particle_emitter> emitterFilter;
 
         {
@@ -66,7 +66,7 @@ namespace legion::rendering
             for (size_type i = 0; i < emitter.size(); i++)
                 particleIds[i] = i;
 
-
+            //This is commented out because we will be using it again at some point, but rn it is causing the rapid animation bug with particles
             //for (size_type i = 1; i < emitter.size(); i++)
             //{
             //    auto j = i;
@@ -76,7 +76,6 @@ namespace legion::rendering
             //        j--;
             //    }
             //}
-
 
             auto filter = emitter.get_uniform<mesh_filter>(meshFilterId);
             auto renderer = emitter.get_uniform<mesh_renderer>(rendererId);
@@ -112,7 +111,6 @@ namespace legion::rendering
             }
 
             math::mat4 parentMat = math::compose(scal, rot, origin);
-
 
             queueJobs(emitter.size(), [&](id_type jobId)
                 {
