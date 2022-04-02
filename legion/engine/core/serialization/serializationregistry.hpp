@@ -1,7 +1,7 @@
 #pragma once
 #include <core/common/hash.hpp>
 #include <core/containers/pointer.hpp>
-#include <core/serialization/serializer.hpp>
+#include <core/serialization/serializer/serializer.hpp>
 
 #include <map>
 
@@ -21,6 +21,6 @@ namespace legion::core::serialization
     };
 }
 
-#include <core/serialization/serializer.inl>
+#include <core/serialization/serializer/serializer.inl>
 #include <core/serialization/serializationregistry.inl>
 

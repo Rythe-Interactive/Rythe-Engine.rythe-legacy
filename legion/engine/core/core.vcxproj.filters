@@ -425,7 +425,7 @@
     <ClInclude Include="common\string_literal.hpp" />
     <ClInclude Include="ecs\handles\filter.hpp" />
     <ClInclude Include="ecs\filters\filter_info.hpp" />
-    <ClInclude Include="serialization\serializer.hpp" />
+    <ClInclude Include="serialization\serializer\serializer_base.hpp" />
     <ClInclude Include="scheduling\scheduling.hpp" />
     <ClInclude Include="scheduling\clock.hpp" />
     <ClInclude Include="containers\delegate.hpp" />
@@ -472,6 +472,12 @@
     <ClInclude Include="autogen\override\reflector_rotation.hpp" />
     <ClInclude Include="autogen\override\reflector_scale.hpp" />
     <ClInclude Include="autogen\override\reflector_velocity.hpp" />
+    <ClInclude Include="serialization\util\container_util.hpp" />
+    <ClInclude Include="serialization\util\util.hpp" />
+    <ClInclude Include="serialization\util\entity_util.hpp" />
+    <ClInclude Include="serialization\serializer\serializer.hpp" />
+    <ClInclude Include="serialization\serializer\entity_serializer.hpp" />
+    <ClInclude Include="serialization\serializer\asset_serializer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="platform\cpp.hint" />
@@ -636,7 +642,7 @@
     <None Include="data\image.inl" />
     <None Include="engine\enginesubsystem.inl" />
     <None Include="engine\module.inl" />
-    <None Include="serialization\serializer.inl" />
+    <None Include="serialization\serializer\serializer_base.inl" />
     <None Include="serialization\serializationregistry.inl" />
     <None Include="serialization\serializer_views\serializer_view.inl" />
     <None Include="serialization\serialization.inl" />
@@ -648,5 +654,8 @@
     <None Include="autogen\override\reflector_rotation.inl" />
     <None Include="autogen\override\reflector_scale.inl" />
     <None Include="autogen\override\reflector_velocity.inl" />
+    <None Include="serialization\serializer\serializer.inl" />
+    <None Include="serialization\serializer\entity_serializer.inl" />
+    <None Include="serialization\serializer\asset_serializer.inl" />
   </ItemGroup>
 </Project>

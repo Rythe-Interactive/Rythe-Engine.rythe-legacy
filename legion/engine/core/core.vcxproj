@@ -211,6 +211,9 @@ del /q ".\xcopyexclude" </Command>
     <ClInclude Include="scheduling\scheduler.hpp" />
     <ClInclude Include="scheduling\scheduling.hpp" />
     <ClInclude Include="serialization\serialization.hpp" />
+    <ClInclude Include="serialization\serializer\asset_serializer.hpp" />
+    <ClInclude Include="serialization\serializer\entity_serializer.hpp" />
+    <ClInclude Include="serialization\serializer\serializer.hpp" />
     <ClInclude Include="serialization\serializer_views\bson.hpp" />
     <ClInclude Include="serialization\serializer_views\bson_view.hpp" />
     <ClInclude Include="serialization\serializer_views\json.hpp" />
@@ -538,9 +541,12 @@ del /q ".\xcopyexclude" </Command>
     <ClInclude Include="scenemanagement\scene.hpp" />
     <ClInclude Include="scenemanagement\scenemanager.hpp" />
     <ClInclude Include="serialization\serializationregistry.hpp" />
-    <ClInclude Include="serialization\serializer.hpp" />
+    <ClInclude Include="serialization\serializer\serializer_base.hpp" />
     <ClInclude Include="serialization\serializer_views\serializer_view.hpp" />
     <ClInclude Include="serialization\serializer_views\yaml.hpp" />
+    <ClInclude Include="serialization\util\container_util.hpp" />
+    <ClInclude Include="serialization\util\entity_util.hpp" />
+    <ClInclude Include="serialization\util\util.hpp" />
     <ClInclude Include="time\main_clock.hpp" />
     <ClInclude Include="time\utils.hpp" />
     <ClInclude Include="types\attributes.hpp" />
@@ -774,9 +780,12 @@ del /q ".\xcopyexclude" </Command>
     <None Include="scheduling\processchain.inl" />
     <None Include="scheduling\scheduler.inl" />
     <None Include="serialization\serialization.inl" />
+    <None Include="serialization\serializer\asset_serializer.inl" />
+    <None Include="serialization\serializer\entity_serializer.inl" />
+    <None Include="serialization\serializer\serializer.inl" />
     <None Include="time\utils.inl" />
     <None Include="serialization\serializationregistry.inl" />
-    <None Include="serialization\serializer.inl" />
+    <None Include="serialization\serializer\serializer_base.inl" />
     <None Include="serialization\serializer_views\serializer_view.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

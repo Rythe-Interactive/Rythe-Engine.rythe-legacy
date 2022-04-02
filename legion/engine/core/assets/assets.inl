@@ -1,5 +1,6 @@
 #include <core/assets/assets.hpp>
 #include <core/scheduling/scheduling.hpp>
+#include "assetcache.hpp"
 #pragma once
 
 namespace legion::core::assets
@@ -34,6 +35,12 @@ namespace legion::core::assets
     }
 
     template<typename AssetType>
+    inline const AssetCache<AssetType>::import_cfg& AssetCache<AssetType>::importSettings(id_type nameHash)
+    {
+        return instance.m_importSettings.at(nameHash);
+    }
+
+    template<typename AssetType>
     inline common::result<asset<AssetType>> AssetCache<AssetType>::retryLoad(id_type previousLoader, id_type nameHash, const std::string& name, const fs::view& file, const AssetCache<AssetType>::import_cfg& settings)
     {
         loader_type* loader = nullptr;
@@ -53,6 +60,7 @@ namespace legion::core::assets
             if (result)
             {
                 instance.m_info.try_emplace(nameHash, detail::asset_info{ name, file.get_virtual_path(), loaderId });
+                instance.m_importSettings.try_emplace(nameHash, settings);
                 return result;
             }
             result.mark_handled();
@@ -83,6 +91,7 @@ namespace legion::core::assets
             if (result)
             {
                 instance.m_info.try_emplace(nameHash, detail::asset_info{ name, file.get_virtual_path(), loaderId });
+                instance.m_importSettings.try_emplace(nameHash, settings);
                 return result;
             }
             result.mark_handled();
@@ -112,6 +121,7 @@ namespace legion::core::assets
             if (result)
             {
                 instance.m_info.try_emplace(nameHash, detail::asset_info{ name, file.get_virtual_path(), loaderId });
+                instance.m_importSettings.try_emplace(nameHash, settings);
                 progress->complete(result);
                 return;
             }
@@ -191,6 +201,7 @@ namespace legion::core::assets
 
         AssetType* ptr = &instance.m_cache.try_emplace(nameHash, AssetType(std::forward<Arguments>(args)...)).first->second;
         instance.m_info.try_emplace(nameHash, detail::asset_info{ name, path, instance.m_loaderIds.at(typeHash<LoaderType>()) });
+        instance.m_importSettings.try_emplace(nameHash, import_cfg{});
         return asset<AssetType>{ ptr, nameHash };
     }
 
@@ -264,6 +275,7 @@ namespace legion::core::assets
             if (result)
             {
                 instance.m_info.try_emplace(nameHash, detail::asset_info{ name, file.get_virtual_path(), loaderId });
+                instance.m_importSettings.try_emplace(nameHash, settings);
                 return result;
             }
 
@@ -390,6 +402,7 @@ namespace legion::core::assets
 
         AssetType* ptr = &(instance.m_cache[nameHash]); // Slightly faster than try_emplace in most cases except for when using libstdc++(GNU) with Clang, with GCC or using libc++(LLVM) with Clang is no issue.
         instance.m_info.try_emplace(nameHash, { name, path, invalid_id });
+        instance.m_importSettings.try_emplace(nameHash, import_cfg{});
         return { ptr, nameHash };
     }
 
@@ -412,6 +425,7 @@ namespace legion::core::assets
 
         AssetType* ptr = &instance.m_cache.try_emplace(nameHash, src).first->second;
         instance.m_info.try_emplace(nameHash, { name, path, invalid_id });
+        instance.m_importSettings.try_emplace(nameHash, import_cfg{});
         return { ptr, nameHash };
     }
 
@@ -437,6 +451,7 @@ namespace legion::core::assets
 
         AssetType* ptr = &instance.m_cache.try_emplace(nameHash, AssetType(std::forward<Arguments>(args)...)).first->second;
         instance.m_info.try_emplace(nameHash, detail::asset_info{ name, path, invalid_id });
+        instance.m_importSettings.try_emplace(nameHash, import_cfg{});
         return { ptr, nameHash };
     }
 
@@ -538,6 +553,12 @@ namespace legion::core::assets
     inline L_ALWAYS_INLINE const std::string& asset<AssetType>::path() const
     {
         return AssetCache<AssetType>::info(m_id).path;
+    }
+
+    template<typename AssetType>
+    inline L_ALWAYS_INLINE const import_settings<AssetType>& asset<AssetType>::import_settings() const
+    {
+        return AssetCache<AssetType>::importSettings(m_id);
     }
 
     template<typename AssetType>

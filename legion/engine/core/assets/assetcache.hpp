@@ -47,6 +47,7 @@ namespace legion::core::assets
     private:
         std::unordered_map<id_type, AssetType> m_cache;
         std::unordered_map<id_type, detail::asset_info> m_info;
+        std::unordered_map<id_type, import_cfg> m_importSettings;
 
         std::vector<std::unique_ptr<loader_type>> m_loaders;
         std::unordered_map<id_type, id_type> m_loaderIds;
@@ -57,6 +58,7 @@ namespace legion::core::assets
         static common::result<asset_ptr> createInternal(id_type nameHash, Args&&... args);
 
         static const detail::asset_info& info(id_type nameHash);
+        static const import_cfg& importSettings(id_type nameHash);
 
         static common::result<asset_ptr> retryLoad(id_type previousLoader, id_type nameHash, const std::string& name, const fs::view& file, const import_cfg& settings);
         static common::result<asset_ptr> retryLoadAsync(id_type previousLoader, id_type nameHash, const std::string& name, const fs::view& file, const import_cfg& settings, progress_type& progress);
