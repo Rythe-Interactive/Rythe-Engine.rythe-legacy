@@ -2,9 +2,7 @@
 #include <core/types/meta.hpp>
 #include <core/types/reflector.hpp>
 #include <core/types/prototype.hpp>
-#include <core/serialization/serializer_views/serializer_view.hpp>
-
-#include <fstream>
+#include <core/serialization/serializer_views/serializer_views.hpp>
 
 namespace legion::core::serialization
 {

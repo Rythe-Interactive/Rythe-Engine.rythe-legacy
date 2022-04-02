@@ -3,7 +3,8 @@
 #include <core/containers/pointer.hpp>
 #include <core/serialization/serializer/serializer.hpp>
 
-#include <map>
+#include <unordered_map>
+#include <memory>
 
 namespace legion::core::serialization
 {

@@ -478,6 +478,8 @@
     <ClInclude Include="serialization\serializer\serializer.hpp" />
     <ClInclude Include="serialization\serializer\entity_serializer.hpp" />
     <ClInclude Include="serialization\serializer\asset_serializer.hpp" />
+    <ClInclude Include="serialization\functionalbinds.hpp" />
+    <ClInclude Include="serialization\serializer_views\serializer_views.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="platform\cpp.hint" />
@@ -645,7 +647,6 @@
     <None Include="serialization\serializer\serializer_base.inl" />
     <None Include="serialization\serializationregistry.inl" />
     <None Include="serialization\serializer_views\serializer_view.inl" />
-    <None Include="serialization\serialization.inl" />
     <None Include="autogen\override\prototype_position.inl" />
     <None Include="autogen\override\prototype_rotation.inl" />
     <None Include="autogen\override\prototype_scale.inl" />
@@ -657,5 +658,6 @@
     <None Include="serialization\serializer\serializer.inl" />
     <None Include="serialization\serializer\entity_serializer.inl" />
     <None Include="serialization\serializer\asset_serializer.inl" />
+    <None Include="serialization\functionalbinds.inl" />
   </ItemGroup>
 </Project>

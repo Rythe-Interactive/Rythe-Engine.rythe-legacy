@@ -35,13 +35,13 @@ namespace legion::core::assets
     }
 
     template<typename AssetType>
-    inline const AssetCache<AssetType>::import_cfg& AssetCache<AssetType>::importSettings(id_type nameHash)
+    inline const typename AssetCache<AssetType>::import_cfg& AssetCache<AssetType>::importSettings(id_type nameHash)
     {
         return instance.m_importSettings.at(nameHash);
     }
 
     template<typename AssetType>
-    inline common::result<asset<AssetType>> AssetCache<AssetType>::retryLoad(id_type previousLoader, id_type nameHash, const std::string& name, const fs::view& file, const AssetCache<AssetType>::import_cfg& settings)
+    inline common::result<asset<AssetType>> AssetCache<AssetType>::retryLoad(id_type previousLoader, id_type nameHash, const std::string& name, const fs::view& file, const typename AssetCache<AssetType>::import_cfg& settings)
     {
         loader_type* loader = nullptr;
         size_type loaderId;

@@ -210,6 +210,7 @@ del /q ".\xcopyexclude" </Command>
     <ClInclude Include="scheduling\processchain.hpp" />
     <ClInclude Include="scheduling\scheduler.hpp" />
     <ClInclude Include="scheduling\scheduling.hpp" />
+    <ClInclude Include="serialization\functionalbinds.hpp" />
     <ClInclude Include="serialization\serialization.hpp" />
     <ClInclude Include="serialization\serializer\asset_serializer.hpp" />
     <ClInclude Include="serialization\serializer\entity_serializer.hpp" />
@@ -543,6 +544,7 @@ del /q ".\xcopyexclude" </Command>
     <ClInclude Include="serialization\serializationregistry.hpp" />
     <ClInclude Include="serialization\serializer\serializer_base.hpp" />
     <ClInclude Include="serialization\serializer_views\serializer_view.hpp" />
+    <ClInclude Include="serialization\serializer_views\serializer_views.hpp" />
     <ClInclude Include="serialization\serializer_views\yaml.hpp" />
     <ClInclude Include="serialization\util\container_util.hpp" />
     <ClInclude Include="serialization\util\entity_util.hpp" />
@@ -779,7 +781,7 @@ del /q ".\xcopyexclude" </Command>
     <None Include="scheduling\process.inl" />
     <None Include="scheduling\processchain.inl" />
     <None Include="scheduling\scheduler.inl" />
-    <None Include="serialization\serialization.inl" />
+    <None Include="serialization\functionalbinds.inl" />
     <None Include="serialization\serializer\asset_serializer.inl" />
     <None Include="serialization\serializer\entity_serializer.inl" />
     <None Include="serialization\serializer\serializer.inl" />
