@@ -73,6 +73,7 @@ namespace legion::core
         bool operator==(const image& other) const noexcept;
 
         byte* data() noexcept;
+        const byte* data() const noexcept;
 
     private:
         common::result<void> _apply_raw_impl() const;

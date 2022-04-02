@@ -543,7 +543,7 @@ namespace legion::core::assets
     template<typename AssetType>
     inline L_ALWAYS_INLINE void asset<AssetType>::destroy()
     {
-        AssetCache<AssetType>::destoy(m_id);
+        AssetCache<AssetType>::destroy(m_id);
     }
 
     template<typename AssetType>
