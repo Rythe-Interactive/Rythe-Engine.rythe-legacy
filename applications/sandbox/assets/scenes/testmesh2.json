@@ -1,0 +1,11 @@
+{
+    "test_mesh": {
+        "type_name": "legion::core::assets::asset<legion::core::mesh>",
+        "name": "test mesh",
+        "loaded_from_file": true,
+        "path": "assets:\\\\models\\cube.glb",
+        "import_settings": {
+            "type_name": "legion::core::assets::import_settings<legion::core::mesh>"
+        }
+    }
+}

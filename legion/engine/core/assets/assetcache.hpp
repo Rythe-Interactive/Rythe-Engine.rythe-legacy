@@ -9,6 +9,7 @@
 #include <core/async/async_operation.hpp>
 #include <core/engine/engine.hpp>
 #include <core/engine/enginesubsystem.hpp>
+#include <core/types/meta.hpp>
 
 #include <core/assets/asset.hpp>
 #include <core/assets/assetloader.hpp>
@@ -55,7 +56,7 @@ namespace legion::core::assets
         static void onShutdown();
 
         template<typename... Args>
-        static common::result<asset_ptr> createInternal(id_type nameHash, Args&&... args);
+        static asset_ptr createInternal(id_type nameHash, Args&&... args);
 
         static const detail::asset_info& info(id_type nameHash);
         static const import_cfg& importSettings(id_type nameHash);
@@ -94,14 +95,8 @@ namespace legion::core::assets
         static async::async_operation<common::result<asset_ptr>> loadAsync(id_type nameHash, const std::string& name, const fs::view& file);
         static async::async_operation<common::result<asset_ptr>> loadAsync(id_type nameHash, const std::string& name, const fs::view& file, const import_cfg& settings);
 
-        static asset_ptr create(const std::string& name);
-        static asset_ptr create(id_type nameHash, const std::string& name);
-        static asset_ptr create(id_type nameHash, const std::string& name, const std::string& path);
-
-        static asset_ptr create(const std::string& name, const AssetType& src);
-        static asset_ptr create(id_type nameHash, const std::string& name, const AssetType& src);
-        static asset_ptr create(id_type nameHash, const std::string& name, const std::string& path, const AssetType& src);
-
+        template<typename... Arguments, ::std::enable_if_t<element_at_is_same_as_v<0, ::std::string, remove_cvr_t<Arguments>...>, bool> = true>
+        static asset_ptr create(id_type nameHash, Arguments&&... args);
         template<typename... Arguments>
         static asset_ptr create(const std::string& name, Arguments&&... args);
         template<typename... Arguments>

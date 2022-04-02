@@ -13,11 +13,15 @@ namespace legion::core
             static const reflectable_attribute reflectable_attr{};
             prot.attributes.push_back(std::cref(reflectable_attr));
         }
-        prot.members.emplace("attenuation", member_value("attenuation", primitive_value{typeHash<float>(), std::make_any<float>(obj.attenuation)}));
-        prot.members.emplace("intensity", member_value("intensity", primitive_value{typeHash<float>(), std::make_any<float>(obj.intensity)}));
-        prot.members.emplace("falloff", member_value("falloff", primitive_value{typeHash<float>(), std::make_any<float>(obj.falloff)}));
-        prot.members.emplace("angle", member_value("angle", primitive_value{typeHash<float>(), std::make_any<float>(obj.angle)}));
-        prot.members.emplace("color", member_value("color", prototype(typeHash<decltype(obj.color)>(), nameOfType<decltype(obj.color)>(), prototype::member_container())));
+        prot.members.emplace("type", member_value("type", primitive_value{typeHash(obj.type), std::any(obj.type)}));
+        prot.members.emplace("attenuation", member_value("attenuation", primitive_value{typeHash(obj.attenuation), std::any(obj.attenuation)}));
+        prot.members.emplace("intensity", member_value("intensity", primitive_value{typeHash(obj.intensity), std::any(obj.intensity)}));
+        prot.members.emplace("index", member_value("index", primitive_value{typeHash(obj.index), std::any(obj.index)}));
+        prot.members.emplace("direction", member_value("direction", make_prototype(obj.direction)));
+        prot.members.emplace("falloff", member_value("falloff", primitive_value{typeHash(obj.falloff), std::any(obj.falloff)}));
+        prot.members.emplace("position", member_value("position", make_prototype(obj.position)));
+        prot.members.emplace("angle", member_value("angle", primitive_value{typeHash(obj.angle), std::any(obj.angle)}));
+        prot.members.emplace("color", member_value("color", make_prototype(obj.color)));
         return prot;
     }
 }

@@ -251,7 +251,28 @@ namespace legion::core
         static constexpr bool value = type::value;
     };
 
-
     template<class T, typename... Args>
     inline constexpr bool is_brace_constructible_v = is_brace_constructible<T, Args...>::value;
+
+
+    template<size_type I, typename Check, typename...>
+    struct element_at_is_same_as;
+
+    template<size_type I, typename Check, typename Type, typename... Types>
+    struct element_at_is_same_as<I, Check, Type, Types...> : element_at_is_same_as<I-1, Check, Type, Types...> {};
+
+    template<typename Check, typename Type, typename... Types>
+    struct element_at_is_same_as<0, Check, Type, Types...>
+    {
+        static constexpr bool value = ::std::is_same_v<Check, Type>;
+    };
+
+    template<size_type I, typename Check>
+    struct element_at_is_same_as<I, Check>
+    {
+        static constexpr bool value = false;
+    };
+
+    template<size_type I, typename Check, typename... Types>
+    inline constexpr bool element_at_is_same_as_v = element_at_is_same_as<I, Check, Types...>::value;
 }

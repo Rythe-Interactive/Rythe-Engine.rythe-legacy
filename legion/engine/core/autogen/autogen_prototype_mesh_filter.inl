@@ -13,7 +13,7 @@ namespace legion::core
             static const reflectable_attribute reflectable_attr{};
             prot.attributes.push_back(std::cref(reflectable_attr));
         }
-        prot.members.emplace("shared_mesh", member_value("shared_mesh", prototype(typeHash<decltype(obj.shared_mesh)>(), nameOfType<decltype(obj.shared_mesh)>(), prototype::member_container())));
+        prot.members.emplace("shared_mesh", member_value("shared_mesh", make_prototype(obj.shared_mesh)));
         return prot;
     }
 }

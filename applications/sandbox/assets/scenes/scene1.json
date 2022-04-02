@@ -15,13 +15,23 @@
                         "value": 1
                     },
                     {
-                        "type_name": "legion::core::scale"
+                        "type_name": "legion::core::scale",
+                        "x": 3.0,
+                        "y": 3.0,
+                        "z": 3.0
                     },
                     {
-                        "type_name": "legion::core::rotation"
+                        "type_name": "legion::core::rotation",
+                        "x": 0.0,
+                        "y": 0.7071067690849304,
+                        "z": 0.0,
+                        "w": 0.7071067690849304
                     },
                     {
-                        "type_name": "legion::core::position"
+                        "type_name": "legion::core::position",
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
                     }
                 ]
             },
@@ -36,13 +46,23 @@
                         "value": 1
                     },
                     {
-                        "type_name": "legion::core::scale"
+                        "type_name": "legion::core::scale",
+                        "x": 3.0,
+                        "y": 3.0,
+                        "z": 3.0
                     },
                     {
-                        "type_name": "legion::core::rotation"
+                        "type_name": "legion::core::rotation",
+                        "x": 0.0,
+                        "y": 0.7071067690849304,
+                        "z": 0.0,
+                        "w": 0.7071067690849304
                     },
                     {
-                        "type_name": "legion::core::position"
+                        "type_name": "legion::core::position",
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 4.0
                     }
                 ]
             },
@@ -57,13 +77,23 @@
                         "value": 1
                     },
                     {
-                        "type_name": "legion::core::scale"
+                        "type_name": "legion::core::scale",
+                        "x": 3.0,
+                        "y": 3.0,
+                        "z": 3.0
                     },
                     {
-                        "type_name": "legion::core::rotation"
+                        "type_name": "legion::core::rotation",
+                        "x": 0.0,
+                        "y": 0.7071067690849304,
+                        "z": 0.0,
+                        "w": 0.7071067690849304
                     },
                     {
-                        "type_name": "legion::core::position"
+                        "type_name": "legion::core::position",
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 8.0
                     }
                 ]
             },
@@ -78,13 +108,23 @@
                         "value": 1
                     },
                     {
-                        "type_name": "legion::core::scale"
+                        "type_name": "legion::core::scale",
+                        "x": 3.0,
+                        "y": 3.0,
+                        "z": 3.0
                     },
                     {
-                        "type_name": "legion::core::rotation"
+                        "type_name": "legion::core::rotation",
+                        "x": 0.0,
+                        "y": 0.7071067690849304,
+                        "z": 0.0,
+                        "w": 0.7071067690849304
                     },
                     {
-                        "type_name": "legion::core::position"
+                        "type_name": "legion::core::position",
+                        "x": 0.0,
+                        "y": 4.0,
+                        "z": 0.0
                     }
                 ]
             },
@@ -99,13 +139,23 @@
                         "value": 1
                     },
                     {
-                        "type_name": "legion::core::scale"
+                        "type_name": "legion::core::scale",
+                        "x": 3.0,
+                        "y": 3.0,
+                        "z": 3.0
                     },
                     {
-                        "type_name": "legion::core::rotation"
+                        "type_name": "legion::core::rotation",
+                        "x": 0.0,
+                        "y": 0.7071067690849304,
+                        "z": 0.0,
+                        "w": 0.7071067690849304
                     },
                     {
-                        "type_name": "legion::core::position"
+                        "type_name": "legion::core::position",
+                        "x": 0.0,
+                        "y": 4.0,
+                        "z": 4.0
                     }
                 ]
             },
@@ -120,13 +170,23 @@
                         "value": 1
                     },
                     {
-                        "type_name": "legion::core::scale"
+                        "type_name": "legion::core::scale",
+                        "x": 3.0,
+                        "y": 3.0,
+                        "z": 3.0
                     },
                     {
-                        "type_name": "legion::core::rotation"
+                        "type_name": "legion::core::rotation",
+                        "x": 0.0,
+                        "y": 0.7071067690849304,
+                        "z": 0.0,
+                        "w": 0.7071067690849304
                     },
                     {
-                        "type_name": "legion::core::position"
+                        "type_name": "legion::core::position",
+                        "x": 0.0,
+                        "y": 4.0,
+                        "z": 8.0
                     }
                 ]
             },
@@ -141,13 +201,23 @@
                         "value": 1
                     },
                     {
-                        "type_name": "legion::core::scale"
+                        "type_name": "legion::core::scale",
+                        "x": 3.0,
+                        "y": 3.0,
+                        "z": 3.0
                     },
                     {
-                        "type_name": "legion::core::rotation"
+                        "type_name": "legion::core::rotation",
+                        "x": 0.0,
+                        "y": 0.7071067690849304,
+                        "z": 0.0,
+                        "w": 0.7071067690849304
                     },
                     {
-                        "type_name": "legion::core::position"
+                        "type_name": "legion::core::position",
+                        "x": 0.0,
+                        "y": 8.0,
+                        "z": 0.0
                     }
                 ]
             },
@@ -162,13 +232,23 @@
                         "value": 1
                     },
                     {
-                        "type_name": "legion::core::scale"
+                        "type_name": "legion::core::scale",
+                        "x": 3.0,
+                        "y": 3.0,
+                        "z": 3.0
                     },
                     {
-                        "type_name": "legion::core::rotation"
+                        "type_name": "legion::core::rotation",
+                        "x": 0.0,
+                        "y": 0.7071067690849304,
+                        "z": 0.0,
+                        "w": 0.7071067690849304
                     },
                     {
-                        "type_name": "legion::core::position"
+                        "type_name": "legion::core::position",
+                        "x": 0.0,
+                        "y": 8.0,
+                        "z": 4.0
                     }
                 ]
             },
@@ -183,13 +263,23 @@
                         "value": 1
                     },
                     {
-                        "type_name": "legion::core::scale"
+                        "type_name": "legion::core::scale",
+                        "x": 3.0,
+                        "y": 3.0,
+                        "z": 3.0
                     },
                     {
-                        "type_name": "legion::core::rotation"
+                        "type_name": "legion::core::rotation",
+                        "x": 0.0,
+                        "y": 0.7071067690849304,
+                        "z": 0.0,
+                        "w": 0.7071067690849304
                     },
                     {
-                        "type_name": "legion::core::position"
+                        "type_name": "legion::core::position",
+                        "x": 0.0,
+                        "y": 8.0,
+                        "z": 8.0
                     }
                 ]
             }

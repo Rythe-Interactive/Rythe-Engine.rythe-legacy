@@ -106,7 +106,14 @@ namespace legion::core
 
     template<typename T>
     L_NODISCARD extern prototype make_prototype(const T& obj);
+
+    template<typename T>
+    L_NODISCARD prototype make_prototype(const T& obj)
+    {
+        return prototype(typeHash(obj), nameOfType(obj), prototype::member_container());
+    }
 }
+
 #if !defined(L_AUTOGENACTIVE)
 #include <core/autogen/autogen.hpp>
 #endif

@@ -13,7 +13,7 @@ namespace legion::core
             static const reflectable_attribute reflectable_attr{};
             refl.attributes.push_back(std::cref(reflectable_attr));
         }
-        refl.members.emplace("value", member_reference("value", primitive_reference{typeHash<int>(), &obj.value}));
+        refl.members.emplace("value", member_reference("value", primitive_reference{typeHash(obj.value), &obj.value}));
         refl.data = std::addressof(obj);
         return refl;
     }
@@ -28,7 +28,7 @@ namespace legion::core
             static const reflectable_attribute reflectable_attr{};
             refl.attributes.push_back(std::cref(reflectable_attr));
         }
-        refl.members.emplace("value", member_reference("value", primitive_reference{typeHash<int>(), &obj.value}));
+        refl.members.emplace("value", member_reference("value", primitive_reference{typeHash(obj.value), &obj.value}));
         refl.data = reinterpret_cast<void*>(address);
         return refl;
     }

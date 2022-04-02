@@ -13,7 +13,7 @@ namespace legion::core
             static const reflectable_attribute reflectable_attr{};
             refl.attributes.push_back(std::cref(reflectable_attr));
         }
-        refl.members.emplace("shared_mesh", member_reference("shared_mesh", reflector(typeHash<decltype(obj.shared_mesh)>(), nameOfType<decltype(obj.shared_mesh)>(), reflector::member_container(), std::addressof(obj.shared_mesh))));
+        refl.members.emplace("shared_mesh", member_reference("shared_mesh", make_reflector(obj.shared_mesh)));
         refl.data = std::addressof(obj);
         return refl;
     }
@@ -28,7 +28,7 @@ namespace legion::core
             static const reflectable_attribute reflectable_attr{};
             refl.attributes.push_back(std::cref(reflectable_attr));
         }
-        refl.members.emplace("shared_mesh", member_reference("shared_mesh", reflector(typeHash<decltype(obj.shared_mesh)>(), nameOfType<decltype(obj.shared_mesh)>(), reflector::member_container(), std::addressof(obj.shared_mesh))));
+        refl.members.emplace("shared_mesh", member_reference("shared_mesh", make_reflector(obj.shared_mesh)));
         refl.data = reinterpret_cast<void*>(address);
         return refl;
     }

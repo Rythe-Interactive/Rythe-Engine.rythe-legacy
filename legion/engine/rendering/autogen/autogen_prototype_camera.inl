@@ -13,12 +13,12 @@ namespace legion::core
             static const legion::reflectable_attribute reflectable_attr{};
             prot.attributes.push_back(std::cref(reflectable_attr));
         }
-        prot.members.emplace("fov", member_value("fov", primitive_value{typeHash<float>(), std::make_any<float>(obj.fov)}));
-        prot.members.emplace("nearz", member_value("nearz", primitive_value{typeHash<float>(), std::make_any<float>(obj.nearz)}));
-        prot.members.emplace("farz", member_value("farz", primitive_value{typeHash<float>(), std::make_any<float>(obj.farz)}));
-        prot.members.emplace("targetWindow", member_value("targetWindow", prototype(typeHash<decltype(obj.targetWindow)>(), nameOfType<decltype(obj.targetWindow)>(), prototype::member_container())));
-        prot.members.emplace("renderTarget", member_value("renderTarget", prototype(typeHash<decltype(obj.renderTarget)>(), nameOfType<decltype(obj.renderTarget)>(), prototype::member_container())));
-        prot.members.emplace("clearColor", member_value("clearColor", prototype(typeHash<decltype(obj.clearColor)>(), nameOfType<decltype(obj.clearColor)>(), prototype::member_container())));
+        prot.members.emplace("targetWindow", member_value("targetWindow", make_prototype(obj.targetWindow)));
+        prot.members.emplace("renderTarget", member_value("renderTarget", make_prototype(obj.renderTarget)));
+        prot.members.emplace("clearColor", member_value("clearColor", make_prototype(obj.clearColor)));
+        prot.members.emplace("fov", member_value("fov", primitive_value{typeHash(obj.fov), std::any(obj.fov)}));
+        prot.members.emplace("nearz", member_value("nearz", primitive_value{typeHash(obj.nearz), std::any(obj.nearz)}));
+        prot.members.emplace("farz", member_value("farz", primitive_value{typeHash(obj.farz), std::any(obj.farz)}));
         return prot;
     }
 }

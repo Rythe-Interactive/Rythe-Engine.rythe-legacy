@@ -40,7 +40,7 @@ namespace legion::core::serialization
             }
             else
             {
-                warnings.push_back("Could not find existing serializer for " + nameOfType<assets::import_settings<AssetType>>());
+                warnings.push_back("Could not find existing serializer for " + std::string(nameOfType<assets::import_settings<AssetType>>()));
             }
         }
         else
@@ -51,7 +51,7 @@ namespace legion::core::serialization
             auto _serializer = SerializerRegistry::getSerializer(typeId);
             if (!_serializer)
             {
-                warnings.push_back("Could not find existing serializer for " + nameOfType<AssetType>());
+                warnings.push_back("Could not find existing serializer for " + std::string(nameOfType<AssetType>()));
                 view.end_object();
                 return { common::success, warnings };
             }
@@ -85,12 +85,12 @@ namespace legion::core::serialization
             }
         }
 
-        std::string name;
+        std::string assetName;
 
         {
             auto result = view.deserialize<std::string>("name");
             EndReadPropagate(result, warnings, view);
-            name = *result;
+            assetName = *result;
         }
 
         bool loadedFromFile;
@@ -116,7 +116,7 @@ namespace legion::core::serialization
 
             byte_vec buffer{};
             buffer.resize(sizeof(assets::import_settings<AssetType>));
-            assets::import_settings<AssetType> settingsPtr = reinterpret_cast<assets::import_settings<AssetType>*>(buffer.data());
+            auto settingsPtr = reinterpret_cast<assets::import_settings<AssetType>*>(buffer.data());
             {
                 auto result = _serializer->deserialize(settingsPtr, view, "import_settings");
 
@@ -130,8 +130,15 @@ namespace legion::core::serialization
             }
 
             {
-                auto result = assets::load<AssetType>(name, fs::view(path), *settingsPtr);
-                EndReadPropagate(result, warnings, view);
+                auto result = assets::load<AssetType>(assetName, fs::view(path), *settingsPtr);
+
+                warnings.insert(warnings.end(), result.warnings().begin(), result.warnings().end());
+                if (result.has_error())
+                {
+                    view.end_read();
+                    auto& error = result.error();
+                    return { fs_error(error.what(), error.file(), error.line(), error.func()), warnings};
+                }
 
                 new(target) assets::asset<AssetType>(*result);
             }
@@ -143,9 +150,9 @@ namespace legion::core::serialization
 
             if (!_serializer)
             {
-                warnings.push_back("Could not find existing serializer for " + nameOfType<AssetType>());
+                warnings.push_back("Could not find existing serializer for " + std::string(nameOfType<AssetType>()));
 
-                new(target) assets::asset<AssetType>(assets::create<AssetType>(name));
+                new(target) assets::asset<AssetType>(assets::create<AssetType>(assetName));
 
                 view.end_read();
                 return { common::success, warnings };
@@ -159,7 +166,7 @@ namespace legion::core::serialization
                 EndReadPropagate(result, warnings, view);
             }
 
-            new(target) assets::asset<AssetType>(assets::create<AssetType>(name), *assetPtr);
+            new(target) assets::asset<AssetType>(assets::create<AssetType>(assetName, *assetPtr));
         }
 
         view.end_read(); // Object

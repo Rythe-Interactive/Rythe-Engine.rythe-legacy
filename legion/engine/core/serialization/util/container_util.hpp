@@ -54,7 +54,7 @@ namespace legion::core::serialization::util
                 if (!_serializer)
                 {
                     s_view.end_container();
-                    return { legion_fs_error(std::string("Could not find existing serializer for ") + nameOfType<value_type>()), warnings };
+                    return { legion_fs_error("Could not find existing serializer for " + std::string(nameOfType<value_type>())), warnings };
                 }
 
                 auto result = _serializer->serialize(&(*it), s_view, "");
@@ -125,7 +125,7 @@ namespace legion::core::serialization::util
                 if (!_serializer)
                 {
                     s_view.end_read();
-                    return { legion_fs_error(std::string("Could not find existing serializer for ") + nameOfType<value_type>()), warnings };
+                    return { legion_fs_error("Could not find existing serializer for " + std::string(nameOfType<value_type>())), warnings };
                 }
 
                 auto result = _serializer->deserialize(buffer, s_view, "");

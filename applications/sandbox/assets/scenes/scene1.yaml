@@ -12,8 +12,18 @@ scene:
                 -   type_name: example_comp
                     value: 1
                 -   type_name: legion::core::scale
+                    x:  3
+                    y:  3
+                    z:  3
                 -   type_name: legion::core::rotation
+                    x:  0
+                    y:  0.707106769
+                    z:  0
+                    w:  0.707106769
                 -   type_name: legion::core::position
+                    x:  0
+                    y:  0
+                    z:  0
         -   type_name: legion::core::ecs::entity_data
             name: rock
             active: true
@@ -23,8 +33,18 @@ scene:
                 -   type_name: example_comp
                     value: 1
                 -   type_name: legion::core::scale
+                    x:  3
+                    y:  3
+                    z:  3
                 -   type_name: legion::core::rotation
+                    x:  0
+                    y:  0.707106769
+                    z:  0
+                    w:  0.707106769
                 -   type_name: legion::core::position
+                    x:  0
+                    y:  0
+                    z:  4
         -   type_name: legion::core::ecs::entity_data
             name: copper
             active: true
@@ -34,8 +54,18 @@ scene:
                 -   type_name: example_comp
                     value: 1
                 -   type_name: legion::core::scale
+                    x:  3
+                    y:  3
+                    z:  3
                 -   type_name: legion::core::rotation
+                    x:  0
+                    y:  0.707106769
+                    z:  0
+                    w:  0.707106769
                 -   type_name: legion::core::position
+                    x:  0
+                    y:  0
+                    z:  8
         -   type_name: legion::core::ecs::entity_data
             name: wood
             active: true
@@ -45,8 +75,18 @@ scene:
                 -   type_name: example_comp
                     value: 1
                 -   type_name: legion::core::scale
+                    x:  3
+                    y:  3
+                    z:  3
                 -   type_name: legion::core::rotation
+                    x:  0
+                    y:  0.707106769
+                    z:  0
+                    w:  0.707106769
                 -   type_name: legion::core::position
+                    x:  0
+                    y:  4
+                    z:  0
         -   type_name: legion::core::ecs::entity_data
             name: paint
             active: true
@@ -56,8 +96,18 @@ scene:
                 -   type_name: example_comp
                     value: 1
                 -   type_name: legion::core::scale
+                    x:  3
+                    y:  3
+                    z:  3
                 -   type_name: legion::core::rotation
+                    x:  0
+                    y:  0.707106769
+                    z:  0
+                    w:  0.707106769
                 -   type_name: legion::core::position
+                    x:  0
+                    y:  4
+                    z:  4
         -   type_name: legion::core::ecs::entity_data
             name: tiles
             active: true
@@ -67,8 +117,18 @@ scene:
                 -   type_name: example_comp
                     value: 1
                 -   type_name: legion::core::scale
+                    x:  3
+                    y:  3
+                    z:  3
                 -   type_name: legion::core::rotation
+                    x:  0
+                    y:  0.707106769
+                    z:  0
+                    w:  0.707106769
                 -   type_name: legion::core::position
+                    x:  0
+                    y:  4
+                    z:  8
         -   type_name: legion::core::ecs::entity_data
             name: slate
             active: true
@@ -78,8 +138,18 @@ scene:
                 -   type_name: example_comp
                     value: 1
                 -   type_name: legion::core::scale
+                    x:  3
+                    y:  3
+                    z:  3
                 -   type_name: legion::core::rotation
+                    x:  0
+                    y:  0.707106769
+                    z:  0
+                    w:  0.707106769
                 -   type_name: legion::core::position
+                    x:  0
+                    y:  8
+                    z:  0
         -   type_name: legion::core::ecs::entity_data
             name: bricks
             active: true
@@ -89,8 +159,18 @@ scene:
                 -   type_name: example_comp
                     value: 1
                 -   type_name: legion::core::scale
+                    x:  3
+                    y:  3
+                    z:  3
                 -   type_name: legion::core::rotation
+                    x:  0
+                    y:  0.707106769
+                    z:  0
+                    w:  0.707106769
                 -   type_name: legion::core::position
+                    x:  0
+                    y:  8
+                    z:  4
         -   type_name: legion::core::ecs::entity_data
             name: default
             active: true
@@ -100,7 +180,17 @@ scene:
                 -   type_name: example_comp
                     value: 1
                 -   type_name: legion::core::scale
+                    x:  3
+                    y:  3
+                    z:  3
                 -   type_name: legion::core::rotation
+                    x:  0
+                    y:  0.707106769
+                    z:  0
+                    w:  0.707106769
                 -   type_name: legion::core::position
+                    x:  0
+                    y:  8
+                    z:  8
     components:
         []

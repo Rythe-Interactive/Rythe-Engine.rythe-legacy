@@ -5,3 +5,7 @@
 #include "autogen_reflector_light_data.inl"
 #include "autogen_prototype_camera.inl"
 #include "autogen_reflector_camera.inl"
+#include "autogen_prototype_skybox_renderer.inl"
+#include "autogen_reflector_skybox_renderer.inl"
+#include "autogen_prototype_mesh_renderer.inl"
+#include "autogen_reflector_mesh_renderer.inl"

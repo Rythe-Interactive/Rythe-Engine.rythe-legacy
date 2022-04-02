@@ -301,6 +301,23 @@ public:
         srl::SerializerRegistry::registerSerializer<rotation>();
         srl::SerializerRegistry::registerSerializer<velocity>();
         srl::SerializerRegistry::registerSerializer<scale>();
+        srl::SerializerRegistry::registerSerializer<assets::import_settings<mesh>>();
+        srl::SerializerRegistry::registerSerializer<sub_mesh>();
+        srl::SerializerRegistry::registerSerializer<mesh>();
+        srl::SerializerRegistry::registerSerializer<assets::asset<mesh>>();
+        srl::SerializerRegistry::registerSerializer<material_data>();
+
+        auto loadedMesh = *assets::load<mesh>("test mesh", fs::view("assets://models/cube.glb"));
+
+        srl::write<srl::yaml>(fs::view("assets://scenes/testmesh1.yaml"), loadedMesh, "test_mesh");
+        srl::write<srl::json>(fs::view("assets://scenes/testmesh1.json"), loadedMesh, "test_mesh");
+        srl::write<srl::bson>(fs::view("assets://scenes/testmesh1.bson"), loadedMesh, "test_mesh");
+
+        auto resultMesh = srl::load<srl::bson, assets::asset<mesh>>(fs::view("assets://scenes/testmesh1.bson"), "test_mesh");
+
+        srl::write<srl::yaml>(fs::view("assets://scenes/testmesh2.yaml"), *resultMesh, "test_mesh");
+        srl::write<srl::json>(fs::view("assets://scenes/testmesh2.json"), *resultMesh, "test_mesh");
+        srl::write<srl::bson>(fs::view("assets://scenes/testmesh2.bson"), *resultMesh, "test_mesh");
 
         srl::write<srl::yaml>(fs::view("assets://scenes/scene1.yaml"), rootEnt, "scene");
         srl::write<srl::json>(fs::view("assets://scenes/scene1.json"), rootEnt, "scene");

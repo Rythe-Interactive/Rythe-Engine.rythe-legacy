@@ -16,7 +16,7 @@ namespace legion::core
         Blend
     };
 
-    struct material_data
+    struct [[reflectable]] material_data
     {
         std::string name;
 
@@ -50,7 +50,7 @@ namespace legion::core
     /**@class sub_mesh
      * @brief Encapsulation of a sub-mesh with the offsets and sizes of the sub-mesh within the main mesh data.
      */
-    struct sub_mesh
+    struct [[reflectable]] sub_mesh
     {
         std::string name;
         size_type indexCount;
@@ -61,7 +61,7 @@ namespace legion::core
     /**@class mesh
      * @brief Raw mesh representation.
      */
-    struct mesh
+    struct [[reflectable]] mesh
     {
         std::vector<math::vec3> vertices;
         std::vector<math::color> colors;
