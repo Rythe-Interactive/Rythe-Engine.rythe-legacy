@@ -50,6 +50,15 @@ namespace legion::core
         virtual void onUpdate(particle_emitter & emitter, float deltaTime, size_type count) override;
     };
 
+    struct color_lifetime_policy : public particle_policy<color_lifetime_policy>
+    {
+        NO_DTOR_RULE5_NOEXCEPT(color_lifetime_policy);
+        ~color_lifetime_policy() = default;
+
+        virtual void setup(particle_emitter& emitter) override;
+        virtual void onUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
+    };
+
     struct bounds
     {
         position min;

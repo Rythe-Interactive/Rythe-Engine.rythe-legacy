@@ -6,6 +6,8 @@ namespace legion::rendering
     {
         switch (type)
         {
+        case GL_SAMPLER_2D_ARRAY:
+            return new material_parameter<texture_handle>(name, location);
         case GL_SAMPLER_2D:
             return new material_parameter<texture_handle>(name, location);
         case GL_FLOAT:
@@ -65,6 +67,8 @@ namespace legion::rendering
     {
         switch (type)
         {
+        case GL_SAMPLER_2D_ARRAY:
+            return typeHash<texture_handle>();
         case GL_SAMPLER_2D:
             return typeHash<texture_handle>();
         case GL_FLOAT:

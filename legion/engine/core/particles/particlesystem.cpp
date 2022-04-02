@@ -79,20 +79,21 @@ namespace legion::core
         auto& ageBuffer = emitter.get_buffer<life_time>("lifetimeBuffer");
         size_type destroyed = 0;
         size_type activeCount = 0;
-        for (activeCount = 0; activeCount < emitter.m_particleCount; activeCount++)
-        {
-            if (!emitter.is_alive(activeCount))
-                break;
-
-            ageBuffer[activeCount].age += deltaTime;
-        }
         if (emitter.has_uniform<float>("minLifeTime") && emitter.has_uniform<float>("maxLifeTime"))
         {
+            for (activeCount = 0; activeCount < emitter.m_particleCount; activeCount++)
+            {
+                if (!emitter.is_alive(activeCount))
+                    break;
+
+                ageBuffer[activeCount].age += deltaTime;
+            }
             for (size_type i = 0; i < activeCount; i++)
             {
                 auto& lifeTime = ageBuffer[i];
                 if (lifeTime.age > lifeTime.max)
                 {
+                    lifeTime.age = 0;
                     emitter.set_alive(i, false);
                     destroyed++;
                 }
