@@ -2,6 +2,8 @@
 #include <rendering/pipeline/default/stages/clearstage.hpp>
 #include <rendering/pipeline/default/stages/framebufferresizestage.hpp>
 #include <rendering/pipeline/default/stages/lightbufferstage.hpp>
+#include <rendering/pipeline/default/stages/particlebatchingstage.hpp>
+#include <rendering/pipeline/default/stages/particlerenderstage.hpp>
 #include <rendering/pipeline/default/stages/meshbatchingstage.hpp>
 #include <rendering/pipeline/default/stages/meshrenderstage.hpp>
 #include <rendering/pipeline/default/stages/transparencyrenderstage.hpp>
@@ -26,6 +28,8 @@ namespace legion::rendering
         attachStage<LightBufferStage>();
         attachStage<MeshBatchingStage>();
         attachStage<MeshRenderStage>();
+        attachStage<ParticleBatchingStage>();
+        attachStage<ParticleRenderStage>();
         attachStage<TransparencyRenderStage>();
         attachStage<DebugRenderStage>();
         attachStage<PostProcessingStage>();
@@ -39,16 +43,19 @@ namespace legion::rendering
 
         buffer modelMatrixBuffer;
         buffer entityIdBuffer;
+        buffer flipbookBuffer;
 
         {
             app::context_guard guard(context);
             addFramebuffer("main");
             modelMatrixBuffer = buffer(GL_ARRAY_BUFFER, sizeof(math::mat4) * 1024, nullptr, GL_DYNAMIC_DRAW);
             entityIdBuffer = buffer(GL_ARRAY_BUFFER, sizeof(id_type) * 1024, nullptr, GL_DYNAMIC_DRAW);
+            flipbookBuffer = buffer(GL_ARRAY_BUFFER, sizeof(uint) * 1024, nullptr, GL_DYNAMIC_DRAW);
         }
 
         create_meta<buffer>("model matrix buffer", modelMatrixBuffer);
         create_meta<buffer>("entity id buffer", entityIdBuffer);
+        create_meta<buffer>("flipbook frame buffer", flipbookBuffer);
     }
 
 }

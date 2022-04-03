@@ -18,6 +18,7 @@
 #include <core/events/events.hpp>
 #include <core/entry/entry_point.hpp>
 #include <core/engine/engine.hpp>
+#include <core/particles/particles.hpp>
 
 #include <core/filesystem/filesystem.hpp>
 #include <core/assets/assets.hpp>

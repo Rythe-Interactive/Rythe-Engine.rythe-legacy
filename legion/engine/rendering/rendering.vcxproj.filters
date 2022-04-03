@@ -42,6 +42,11 @@
     <ClCompile Include="pipeline\default\stages\debugrenderstage.cpp" />
     <ClCompile Include="pipeline\default\postfx\bloom.cpp" />
     <ClCompile Include="pipeline\default\postfx\depthoffield.cpp" />
+    <ClCompile Include="pipeline\default\stages\particlebatchingstage.cpp" />
+    <ClCompile Include="data\particlepolicies\renderpolicy.cpp" />
+    <ClCompile Include="pipeline\default\stages\particlerenderingstage.cpp" />
+    <ClCompile Include="pipeline\default\stages\particlerenderstage.cpp" />
+    <ClCompile Include="data\particlepolicies\flipbookpolicy.cpp" />
     <ClCompile Include="pipeline\default\stages\skybox.cpp" />
     <ClCompile Include="autogen\autogen.cpp" />
     <ClCompile Include="pipeline\default\stages\transparencyrenderstage.cpp" />
@@ -91,6 +96,11 @@
     <ClInclude Include="components\point.hpp" />
     <ClInclude Include="pipeline\default\postfx\bloom.hpp" />
     <ClInclude Include="pipeline\default\postfx\depthoffield.hpp" />
+    <ClInclude Include="pipeline\default\stages\particlebatchingstage.hpp" />
+    <ClInclude Include="data\particlepolicies\renderpolicy.hpp" />
+    <ClInclude Include="pipeline\default\stages\particlerenderingstage.hpp" />
+    <ClInclude Include="pipeline\default\stages\particlerenderstage.hpp" />
+    <ClInclude Include="data\particlepolicies\flipbookpolicy.hpp" />
     <ClInclude Include="autogen\autogen.hpp" />
     <ClInclude Include="pipeline\default\stages\skybox.hpp" />
     <ClInclude Include="pipeline\default\stages\transparencyrenderstage.hpp" />

@@ -30,6 +30,34 @@ namespace legion::core
             z = src.z;
             return *this;
         }
+        position& operator+=(const position& src)
+        {
+            x += src.x;
+            y += src.y;
+            z += src.z;
+            return *this;
+        };
+        position& operator+=(position&& src)
+        {
+            x += src.x;
+            y += src.y;
+            z += src.z;
+            return *this;
+        }
+        position& operator-=(const position& src)
+        {
+            x -= src.x;
+            y -= src.y;
+            z -= src.z;
+            return *this;
+        };
+        position& operator-=(position&& src)
+        {
+            x -= src.x;
+            y -= src.y;
+            z -= src.z;
+            return *this;
+        }
     };
 
     struct rotation : public math::quat
@@ -144,7 +172,6 @@ namespace legion::core
             auto [position, rotation, scale] = values();
             return math::compose(scale, rotation, position);
         }
-
     };
 
     struct velocity : public math::vec3
@@ -169,6 +196,34 @@ namespace legion::core
             x = src.x;
             y = src.y;
             z = src.z;
+            return *this;
+        }
+        velocity& operator+=(const velocity& src)
+        {
+            x += src.x;
+            y += src.y;
+            z += src.z;
+            return *this;
+        }
+        velocity& operator+=(velocity&& src)
+        {
+            x += src.x;
+            y += src.y;
+            z += src.z;
+            return *this;
+        }
+        velocity& operator-=(const velocity& src)
+        {
+            x -= src.x;
+            y -= src.y;
+            z -= src.z;
+            return *this;
+        }
+        velocity& operator-=(velocity&& src)
+        {
+            x -= src.x;
+            y -= src.y;
+            z -= src.z;
             return *this;
         }
     };

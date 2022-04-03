@@ -6,6 +6,8 @@ namespace legion::rendering
     {
         switch (type)
         {
+        case GL_SAMPLER_2D_ARRAY:
+            return new material_parameter<texture_handle>(name, location);
         case GL_SAMPLER_2D:
             return new material_parameter<texture_handle>(name, location);
         case GL_FLOAT:
@@ -65,6 +67,8 @@ namespace legion::rendering
     {
         switch (type)
         {
+        case GL_SAMPLER_2D_ARRAY:
+            return typeHash<texture_handle>();
         case GL_SAMPLER_2D:
             return typeHash<texture_handle>();
         case GL_FLOAT:
@@ -212,7 +216,11 @@ namespace legion::rendering
     material_handle MaterialCache::get_material(const std::string& name)
     {
         id_type id = nameHash(name);
+        return get_material(id);
+    }
 
+    material_handle MaterialCache::get_material(id_type materialId)
+    {
         async::readonly_guard guard(MaterialCache::m_materialLock);
 
 #if defined(LEGION_VALIDATE)
@@ -224,8 +232,8 @@ namespace legion::rendering
         }
 #endif
 
-        if (m_materials.count(id))
-            return { id };
+        if (m_materials.count(materialId))
+            return { materialId };
         return invalid_material_handle;
     }
 

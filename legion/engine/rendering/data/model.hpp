@@ -43,7 +43,7 @@ namespace legion::rendering
         
         bool operator==(const model_handle& other) const { return id == other.id; }
         bool is_buffered() const;
-        void buffer_data(const buffer& matrixBuffer, const buffer& entityBuffer) const;
+        void buffer_data(const buffer& matrixBuffer, const buffer& entityBuffer, const buffer& flipbookBuffer) const;
         void overwrite_buffer(buffer& newBuffer, uint bufferID, bool perInstance = false) const;
 
         assets::asset<mesh> get_mesh() const;
@@ -69,7 +69,7 @@ namespace legion::rendering
         static std::string get_model_name(id_type id);
 
         static void overwrite_buffer(id_type id, buffer& newBuffer, uint bufferID, bool perInstance = false);
-        static void buffer_model(id_type id, const buffer& matrixBuffer, const buffer& entityBuffer);
+        static void buffer_model(id_type id, const buffer& matrixBuffer, const buffer& entityBuffer, const buffer& flipbookBuffer);
         static model_handle create_model(const std::string& name, const fs::view& file, assets::import_settings<mesh> settings = {});
         static model_handle create_model(const std::string& name);
         static model_handle create_model(const std::string& name, id_type meshId);
@@ -78,6 +78,7 @@ namespace legion::rendering
         static model_handle create_model(assets::asset<mesh> mesh);
         static model_handle get_handle(const std::string& name);
         static model_handle get_handle(id_type id);
+        static sparse_map<id_type, model> get_all_models();
         static assets::asset<mesh> get_mesh(const std::string& name);
         static assets::asset<mesh> get_mesh(id_type id);
 

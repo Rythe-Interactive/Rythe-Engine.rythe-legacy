@@ -18,6 +18,8 @@
     <ClCompile Include="data\importers\texture_importers.cpp" />
     <ClCompile Include="data\material.cpp" />
     <ClCompile Include="data\model.cpp" />
+    <ClCompile Include="data\particlepolicies\flipbookpolicy.cpp" />
+    <ClCompile Include="data\particlepolicies\renderpolicy.cpp" />
     <ClCompile Include="data\postprocessingeffect.cpp" />
     <ClCompile Include="data\renderbuffer.cpp" />
     <ClCompile Include="data\serializers\material_serializer.cpp" />
@@ -42,6 +44,7 @@
     <ClCompile Include="pipeline\default\defaultpipeline.cpp" />
     <ClCompile Include="pipeline\default\postfx\bloom.cpp" />
     <ClCompile Include="pipeline\default\postfx\fxaa.cpp" />
+    <ClCompile Include="pipeline\default\stages\particlerenderstage.cpp" />
     <ClCompile Include="pipeline\default\stages\skybox.cpp" />
     <ClCompile Include="pipeline\default\postfx\tonemapping.cpp" />
     <ClCompile Include="pipeline\default\stages\clearstage.cpp" />
@@ -50,6 +53,7 @@
     <ClCompile Include="pipeline\default\stages\lightbufferstage.cpp" />
     <ClCompile Include="pipeline\default\stages\meshbatchingstage.cpp" />
     <ClCompile Include="pipeline\default\stages\meshrenderstage.cpp" />
+    <ClCompile Include="pipeline\default\stages\particlebatchingstage.cpp" />
     <ClCompile Include="pipeline\default\stages\submitstage.cpp" />
     <ClCompile Include="pipeline\default\stages\transparencyrenderstage.cpp" />
     <ClCompile Include="pipeline\gui\stages\imguirenderstage.cpp" />
@@ -65,6 +69,8 @@
     <ClInclude Include="components\light.hpp" />
     <ClInclude Include="components\point.hpp" />
     <ClInclude Include="components\pointcloud_renderable.hpp" />
+    <ClInclude Include="data\particlepolicies\flipbookpolicy.hpp" />
+    <ClInclude Include="data\particlepolicies\renderpolicy.hpp" />
     <ClInclude Include="data\postprocessingeffect.hpp" />
     <ClInclude Include="data\screen_quad.hpp" />
     <ClInclude Include="data\serializers\material_serializer.hpp" />
@@ -72,9 +78,11 @@
     <ClInclude Include="pipeline\base\pipeline.hpp" />
     <ClInclude Include="pipeline\default\postfx\fxaa.hpp" />
     <ClInclude Include="pipeline\default\postfx\bloom.hpp" />
+    <ClInclude Include="pipeline\default\stages\particlerenderstage.hpp" />
     <ClInclude Include="pipeline\default\stages\skybox.hpp" />
     <ClInclude Include="pipeline\default\postfx\tonemapping.hpp" />
     <ClInclude Include="pipeline\default\stages\debugrenderstage.hpp" />
+    <ClInclude Include="pipeline\default\stages\particlebatchingstage.hpp" />
     <ClInclude Include="pipeline\default\stages\postprocessingstage.hpp" />
     <ClInclude Include="pipeline\default\stages\transparencyrenderstage.hpp" />
     <ClInclude Include="pipeline\gui\stages\imguirenderstage.hpp" />
