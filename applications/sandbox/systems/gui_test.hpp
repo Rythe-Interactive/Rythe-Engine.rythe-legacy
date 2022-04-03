@@ -149,7 +149,7 @@ namespace legion
                 {
                     ImGui::SameLine();
                     if (ImGui::Button("Add child"))
-                        createEntity(handle);
+                        L_MAYBEUNUSED auto ent = createEntity(handle);
 
                     for (auto child : handle)
                         BuildTree(child);
@@ -402,9 +402,6 @@ namespace legion
 
             if (browser.showFileDialog("Save entity", imgui::filebrowser::ImGuiFileBrowser::DialogMode::SAVE, ImVec2(0, 0), ".yaml,.json,.bson"))
             {
-                app::window& win = ecs::world.get_component<app::window>();
-                app::context_guard guard(win);
-
                 if (browser.ext == ".yaml")
                     srl::write<srl::yaml>(fs::view(browser.selected_path), selected, "scene");
                 else if (browser.ext == ".json")
@@ -415,9 +412,6 @@ namespace legion
 
             if (browser.showFileDialog("Load entity", imgui::filebrowser::ImGuiFileBrowser::DialogMode::OPEN, ImVec2(0, 0), ".yaml,.json,.bson"))
             {
-                app::window& win = ecs::world.get_component<app::window>();
-                app::context_guard guard(win);
-
                 ecs::entity loadedEntity;
                 if (browser.ext == ".yaml")
                     loadedEntity = *srl::load<srl::yaml, ecs::entity>(fs::view(browser.selected_path), "scene");

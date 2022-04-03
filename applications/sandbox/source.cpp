@@ -10,7 +10,6 @@
 #include <rendering/rendering.hpp>
 #include <audio/audio.hpp>
 #include <physics/physics.hpp>
-#include "autogen/autogen.hpp"
 
 #include "module/examplemodule.hpp"
 
