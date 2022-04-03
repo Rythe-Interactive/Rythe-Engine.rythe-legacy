@@ -146,7 +146,7 @@ namespace legion::core::serialization::util
             {
                 s_view.end_read(); // Components
                 s_view.end_read(); // Object
-                return { legion_fs_error("Could not find existing serializer for " + compName), warnings};
+                return { legion_fs_error("Could not find existing serializer for " + compName), warnings };
             }
 
             byte_vec buffer{};
@@ -164,6 +164,9 @@ namespace legion::core::serialization::util
                     return { result.error(), warnings };
                 }
             }
+
+            if (ecs::Registry::hasComponent(typeId, ent))
+                ecs::Registry::destroyComponent(typeId, ent);
 
             ecs::Registry::createComponent(typeId, ent, pointer<void>{ buffer.data() });
         }

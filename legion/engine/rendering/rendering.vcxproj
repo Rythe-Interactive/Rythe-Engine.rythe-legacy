@@ -20,6 +20,7 @@
     <ClCompile Include="data\model.cpp" />
     <ClCompile Include="data\postprocessingeffect.cpp" />
     <ClCompile Include="data\renderbuffer.cpp" />
+    <ClCompile Include="data\serializers\material_serializer.cpp" />
     <ClCompile Include="data\shader.cpp" />
     <ClCompile Include="data\texture.cpp" />
     <ClCompile Include="pipeline\default\postfx\depthoffield.cpp" />
@@ -66,6 +67,7 @@
     <ClInclude Include="components\pointcloud_renderable.hpp" />
     <ClInclude Include="data\postprocessingeffect.hpp" />
     <ClInclude Include="data\screen_quad.hpp" />
+    <ClInclude Include="data\serializers\material_serializer.hpp" />
     <ClInclude Include="pipeline\default\postfx\depthoffield.hpp" />
     <ClInclude Include="pipeline\base\pipeline.hpp" />
     <ClInclude Include="pipeline\default\postfx\fxaa.hpp" />

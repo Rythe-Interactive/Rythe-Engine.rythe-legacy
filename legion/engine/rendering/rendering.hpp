@@ -11,6 +11,7 @@
 #include <rendering/data/vertexarray.hpp>
 #include <rendering/data/material.hpp>
 #include <rendering/data/postprocessingeffect.hpp>
+#include <rendering/autogen/autogen.hpp>
 
 namespace legion
 {

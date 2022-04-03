@@ -62,34 +62,6 @@ namespace legion
 
             //gui code goes here
             ImGuiStage::addGuiRender<GuiTestSystem, &GuiTestSystem::onGUI>(this);
-
-            app::window& window = ecs::world.get_component<app::window>();
-
-            model_handle cubeModel;
-            material_handle decalMaterial;
-
-            {
-                application::context_guard guard(window);
-
-                cubeModel = ModelCache::create_model("cube", "assets://models/Cube.obj"_view);
-                decalMaterial = MaterialCache::create_material("decal", "assets://shaders/decal.shs"_view);
-                decalMaterial.set_param(SV_ALBEDO, TextureCache::create_texture("engine://resources/default/albedo"_view));
-                decalMaterial.set_param(SV_NORMALHEIGHT, TextureCache::create_texture("engine://resources/default/normalHeight"_view));
-                decalMaterial.set_param(SV_MRDAO, TextureCache::create_texture("engine://resources/default/MRDAo"_view));
-                decalMaterial.set_param(SV_EMISSIVE, TextureCache::create_texture("engine://resources/default/emissive"_view));
-                decalMaterial.set_param(SV_HEIGHTSCALE, 0.f);
-            }
-
-            auto decalEntity = createEntity("Decal");
-
-            position pos(5.f, 0.f, 5.f);
-            scale scal(3.f, 2.f, 3.f);
-            rotation rot = angleAxis(math::quarter_pi<float>(), math::vec3::up);
-            model = compose(scal, rot, pos);
-
-            decalEntity.add_component<transform>(pos, rot, scal);
-            decalEntity.add_component(gfx::mesh_renderer(decalMaterial, cubeModel));
-
         }
 
         // BuildTree creates a rudimentary Entity View, as entities do currently not have the ability to be named
@@ -97,7 +69,7 @@ namespace legion
         // In how the Scene is currently structured, it will also try to show the names of the components of the
         // entities, which makes identifying them easier
         //
-        bool BuildTree(ecs::entity handle)
+        void BuildTree(ecs::entity handle)
         {
             static ecs::entity selectedForNameEdit;
             static char buffer[512];
@@ -158,11 +130,11 @@ namespace legion
                     {
                         handle.destroy();
                         ImGui::TreePop();
-                        return false;
+                        return;
                     }
                 }
 
-                if (selected != handle)
+                if (!selected.valid() || selected != handle)
                 {
                     ImGui::SameLine();
                     if (ImGui::Button("Select"))
@@ -177,22 +149,10 @@ namespace legion
                 {
                     ImGui::SameLine();
                     if (ImGui::Button("Add child"))
-                    {
-                        (void)createEntity(handle);
-                    }
+                        createEntity(handle);
 
-                    std::vector<ecs::entity> toErase;
                     for (auto child : handle)
-                    {
-                        if (!BuildTree(child))
-                            toErase.push_back(child);
-                    }
-
-                    if (toErase.size())
-                    {
-                        for (auto child : toErase)
-                            handle.remove_child(child);
-                    }
+                        BuildTree(child);
 
                     ImGui::TreePop();
                 }
@@ -210,7 +170,6 @@ namespace legion
 
                 ImGui::TreePop();
             }
-            return true;
         }
 
         void DisplayFileHandling()
@@ -218,23 +177,24 @@ namespace legion
             bool loadTexture = false;
             bool loadModel = false;
             bool loadMaterial = false;
+            bool saveEntity = false;
+            bool loadEntity = false;
 
             static char buffer[512];
             static shader_handle shader;
             static bool createdNewShader = false;
             static material_handle material;
+            static bool childToSelected = false;
 
             if (ImGui::BeginMainMenuBar())
             {
                 if (ImGui::BeginMenu("File"))
                 {
-                    if (ImGui::MenuItem("New Texture"))
-                        loadTexture = true;
+                    loadTexture = ImGui::MenuItem("New texture");
 
-                    if (ImGui::MenuItem("New Model"))
-                        loadModel = true;
-                    
-                    if (ImGui::MenuItem("New Material"))
+                    loadModel = ImGui::MenuItem("New model");
+
+                    if (ImGui::MenuItem("New material"))
                     {
                         memset(buffer, '\0', 512);
                         shader = invalid_shader_handle;
@@ -242,6 +202,25 @@ namespace legion
                         createdNewShader = false;
                         loadMaterial = true;
                     }
+
+                    saveEntity = ImGui::MenuItem("Save selected entity");
+
+                    if (ImGui::BeginMenu("Load entity"))
+                    {
+                        if (ImGui::MenuItem("Child to world"))
+                        {
+                            loadEntity = true;
+                            childToSelected = false;
+                        }
+
+                        if (ImGui::MenuItem("Child to selected"))
+                        {
+                            loadEntity = true;
+                            childToSelected = true;
+                        }
+                        ImGui::EndMenu();
+                    }
+
 
                     //if (ImGui::BeginMenu("Save Scene"))
                     //{
@@ -278,15 +257,21 @@ namespace legion
             }
 
             if (loadTexture)
-                ImGui::OpenPopup("Load Texture");
+                ImGui::OpenPopup("Load texture");
 
             if (loadModel)
-                ImGui::OpenPopup("Load Model");
+                ImGui::OpenPopup("Load model");
 
             if (loadMaterial)
-                ImGui::OpenPopup("New Material");
+                ImGui::OpenPopup("New material");
 
-            if (ImGui::BeginPopupModal("New Material"))
+            if (saveEntity)
+                ImGui::OpenPopup("Save entity");
+
+            if (loadEntity)
+                ImGui::OpenPopup("Load entity");
+
+            if (ImGui::BeginPopupModal("New material"))
             {
                 ImGui::Text("Material name:");
                 ImGui::SameLine();
@@ -303,12 +288,12 @@ namespace legion
                 ImGui::InputText("##shader", shaderName.data(), shaderName.size(), ImGuiInputTextFlags_ReadOnly);
                 ImGui::SameLine();
 
-                if (ImGui::Button("Load Shader"))
+                if (ImGui::Button("Load shader"))
                 {
-                    ImGui::OpenPopup("Load Shader");
+                    ImGui::OpenPopup("Load shader");
                 }
 
-                if (browser.showFileDialog("Load Shader", imgui::filebrowser::ImGuiFileBrowser::DialogMode::OPEN))
+                if (browser.showFileDialog("Load shader", imgui::filebrowser::ImGuiFileBrowser::DialogMode::OPEN))
                 {
                     if (ShaderCache::has_shader(browser.selected_fn))
                     {
@@ -405,14 +390,46 @@ namespace legion
                 ImGui::EndPopup();
             }
 
-            if (browser.showFileDialog("Load Texture", imgui::filebrowser::ImGuiFileBrowser::DialogMode::OPEN))
+            if (browser.showFileDialog("Load texture", imgui::filebrowser::ImGuiFileBrowser::DialogMode::OPEN))
             {
                 TextureCache::create_texture(browser.selected_fn, fs::view(browser.selected_path));
             }
 
-            if (browser.showFileDialog("Load Model", imgui::filebrowser::ImGuiFileBrowser::DialogMode::OPEN))
+            if (browser.showFileDialog("Load model", imgui::filebrowser::ImGuiFileBrowser::DialogMode::OPEN))
             {
                 ModelCache::create_model(browser.selected_fn, fs::view(browser.selected_path));
+            }
+
+            if (browser.showFileDialog("Save entity", imgui::filebrowser::ImGuiFileBrowser::DialogMode::SAVE, ImVec2(0, 0), ".yaml,.json,.bson"))
+            {
+                app::window& win = ecs::world.get_component<app::window>();
+                app::context_guard guard(win);
+
+                if (browser.ext == ".yaml")
+                    srl::write<srl::yaml>(fs::view(browser.selected_path), selected, "scene");
+                else if (browser.ext == ".json")
+                    srl::write<srl::json>(fs::view(browser.selected_path), selected, "scene");
+                else if (browser.ext == ".bson")
+                    srl::write<srl::bson>(fs::view(browser.selected_path), selected, "scene");
+            }
+
+            if (browser.showFileDialog("Load entity", imgui::filebrowser::ImGuiFileBrowser::DialogMode::OPEN, ImVec2(0, 0), ".yaml,.json,.bson"))
+            {
+                app::window& win = ecs::world.get_component<app::window>();
+                app::context_guard guard(win);
+
+                ecs::entity loadedEntity;
+                if (browser.ext == ".yaml")
+                    loadedEntity = *srl::load<srl::yaml, ecs::entity>(fs::view(browser.selected_path), "scene");
+                else if (browser.ext == ".json")
+                    loadedEntity = *srl::load<srl::json, ecs::entity>(fs::view(browser.selected_path), "scene");
+                else if (browser.ext == ".bson")
+                    loadedEntity = *srl::load<srl::bson, ecs::entity>(fs::view(browser.selected_path), "scene");
+
+                if (childToSelected)
+                {
+                    selected.add_child(loadedEntity);
+                }
             }
         }
 
@@ -519,7 +536,7 @@ namespace legion
                     return true;
                 }
             }
-            else if(type == typeHash<float>())
+            else if (type == typeHash<float>())
             {
                 float value = material.get_param<float>(name);
                 if (DisplayValue(label.c_str(), value))

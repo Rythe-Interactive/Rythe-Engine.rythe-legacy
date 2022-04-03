@@ -31,7 +31,7 @@ namespace legion::rendering
         material_handle material = invalid_material_handle;
     };
 
-    struct [[reflectable]] mesh_renderable : public ecs::archetype<mesh_filter, mesh_renderer>
+    struct mesh_renderable : public ecs::archetype<mesh_filter, mesh_renderer>
     {
         using base = ecs::archetype<mesh_filter, mesh_renderer>;
 

@@ -51,19 +51,19 @@ layout(std140, binding = SV_LIGHTS) readonly buffer LightsBuffer
 
 uniform uint lgn_light_count : SV_LIGHTCOUNT;
 
-uniform sampler2D lgn_skybox_tex : SV_SKYBOX;
+uniform sampler2D skybox_tex : SV_SKYBOX;
 
 #if !defined(NO_MATH_EXT) || defined(MATH_EXT)
 #include <math_ext.shinc>
 
 int SkyboxMipLevels()
 {
-    return textureQueryLevels(lgn_skybox_tex);
+    return textureQueryLevels(skybox_tex);
 }
 
 vec2 SkyboxTexelSize(int mip)
 {
-    return vec2(1.0) / textureSize(lgn_skybox_tex, mip);
+    return vec2(1.0) / textureSize(skybox_tex, mip);
 }
 
 vec2 SkyboxUV(vec3 direction)
@@ -74,22 +74,22 @@ vec2 SkyboxUV(vec3 direction)
 
 vec4 SampleSkyboxLod(vec3 direction, float Lod)
 {
-    return textureLod(lgn_skybox_tex, SkyboxUV(direction), Lod);
+    return textureLod(skybox_tex, SkyboxUV(direction), Lod);
 }
 
 vec4 SampleSkyboxLod(vec2 uv, float Lod)
 {
-    return textureLod(lgn_skybox_tex, uv, Lod);
+    return textureLod(skybox_tex, uv, Lod);
 }
 
 vec4 SampleSkybox(vec3 direction)
 {
-    return texture(lgn_skybox_tex, SkyboxUV(direction));
+    return texture(skybox_tex, SkyboxUV(direction));
 }
 
 vec4 SampleSkybox(vec2 uv)
 {
-    return texture(lgn_skybox_tex, uv);
+    return texture(skybox_tex, uv);
 }
 #endif
 

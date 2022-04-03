@@ -11,10 +11,6 @@
                 "children": [],
                 "components": [
                     {
-                        "type_name": "example_comp",
-                        "value": 1
-                    },
-                    {
                         "type_name": "legion::core::scale",
                         "x": 3.0,
                         "y": 3.0,
@@ -32,6 +28,181 @@
                         "x": 0.0,
                         "y": 0.0,
                         "z": 0.0
+                    },
+                    {
+                        "type_name": "legion::rendering::mesh_renderer",
+                        "material": {
+                            "type_name": "legion::rendering::material_handle",
+                            "name": "iron",
+                            "shader": "engine:\\\\shaders\\default_lit.shs",
+                            "variant": "default",
+                            "params": [
+                                {
+                                    "type_name": "legion::core::math::vec<4,float,0>",
+                                    "name": "albedoColor",
+                                    "value": {
+                                        "x": 0.0,
+                                        "y": 0.0,
+                                        "z": 0.0,
+                                        "w": 0.0
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "albedoTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\iron\\rustediron-albedo-2048.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "roughnessTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\iron\\rustediron-roughness.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "float",
+                                    "name": "alphaCutoff",
+                                    "value": 0.5
+                                },
+                                {
+                                    "type_name": "legion::core::math::vec<4,float,0>",
+                                    "name": "emissiveColor",
+                                    "value": {
+                                        "x": 0.0,
+                                        "y": 0.0,
+                                        "z": 0.0,
+                                        "w": 1.0
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "ambientOcclusionTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\iron\\rustediron-ao.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "heightTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\iron\\rustediron-height.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "emissiveTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\invalid\\missing"
+                                    }
+                                },
+                                {
+                                    "type_name": "float",
+                                    "name": "heightScale",
+                                    "value": 1.0
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "metallicRoughness",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\invalid\\missing"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "normalTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\iron\\rustediron-normal.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "metallicTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\iron\\rustediron-metallic.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "float",
+                                    "name": "metallicValue",
+                                    "value": 0.0
+                                },
+                                {
+                                    "type_name": "float",
+                                    "name": "roughnessValue",
+                                    "value": 0.0
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "skybox_tex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\invalid\\missing"
+                                    }
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useAlbedoTex",
+                                    "value": true
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useAmbientOcclusion",
+                                    "value": true
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useEmissiveTex",
+                                    "value": false
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useHeight",
+                                    "value": true
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useMetallicRoughness",
+                                    "value": false
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useMetallicTex",
+                                    "value": true
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useNormal",
+                                    "value": true
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useRoughnessTex",
+                                    "value": true
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type_name": "legion::core::mesh_filter",
+                        "shared_mesh": {
+                            "type_name": "legion::core::assets::asset<legion::core::mesh>",
+                            "name": "Sphere",
+                            "loaded_from_file": true,
+                            "path": "assets:\\\\models\\sphere.obj",
+                            "import_settings": {
+                                "type_name": "legion::core::assets::import_settings<legion::core::mesh>"
+                            }
+                        }
                     }
                 ]
             },
@@ -42,10 +213,6 @@
                 "children": [],
                 "components": [
                     {
-                        "type_name": "example_comp",
-                        "value": 1
-                    },
-                    {
                         "type_name": "legion::core::scale",
                         "x": 3.0,
                         "y": 3.0,
@@ -63,6 +230,79 @@
                         "x": 0.0,
                         "y": 0.0,
                         "z": 4.0
+                    },
+                    {
+                        "type_name": "legion::rendering::mesh_renderer",
+                        "material": {
+                            "type_name": "legion::rendering::material_handle",
+                            "name": "rock",
+                            "shader": "assets:\\\\shaders\\pbr.shs",
+                            "variant": "default",
+                            "params": [
+                                {
+                                    "type_name": "bool",
+                                    "name": "discardExcess",
+                                    "value": false
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "material_input.emissive",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\detailedRock\\Rock020_1K_emissive.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "material_input.normalHeight",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\detailedRock\\Rock020_1K_NormalHeight.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "material_input.albedo",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\detailedRock\\Rock020_1K_Albedo.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "material_input.MRDAo",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\detailedRock\\Rock020_1K_MRDAo.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "float",
+                                    "name": "material_input.heightScale",
+                                    "value": 1.0
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "skybox_tex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\invalid\\missing"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type_name": "legion::core::mesh_filter",
+                        "shared_mesh": {
+                            "type_name": "legion::core::assets::asset<legion::core::mesh>",
+                            "name": "Sphere",
+                            "loaded_from_file": true,
+                            "path": "assets:\\\\models\\sphere.obj",
+                            "import_settings": {
+                                "type_name": "legion::core::assets::import_settings<legion::core::mesh>"
+                            }
+                        }
                     }
                 ]
             },
@@ -73,10 +313,6 @@
                 "children": [],
                 "components": [
                     {
-                        "type_name": "example_comp",
-                        "value": 1
-                    },
-                    {
                         "type_name": "legion::core::scale",
                         "x": 3.0,
                         "y": 3.0,
@@ -94,6 +330,79 @@
                         "x": 0.0,
                         "y": 0.0,
                         "z": 8.0
+                    },
+                    {
+                        "type_name": "legion::rendering::mesh_renderer",
+                        "material": {
+                            "type_name": "legion::rendering::material_handle",
+                            "name": "copper",
+                            "shader": "assets:\\\\shaders\\pbr.shs",
+                            "variant": "default",
+                            "params": [
+                                {
+                                    "type_name": "bool",
+                                    "name": "discardExcess",
+                                    "value": false
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "material_input.emissive",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\copper\\copper-emissive-2048.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "material_input.normalHeight",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\copper\\copper-normalHeight-2048.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "material_input.albedo",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\copper\\copper-albedo-2048.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "material_input.MRDAo",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\copper\\copper-MRDAo-2048.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "float",
+                                    "name": "material_input.heightScale",
+                                    "value": 1.0
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "skybox_tex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\invalid\\missing"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type_name": "legion::core::mesh_filter",
+                        "shared_mesh": {
+                            "type_name": "legion::core::assets::asset<legion::core::mesh>",
+                            "name": "Sphere",
+                            "loaded_from_file": true,
+                            "path": "assets:\\\\models\\sphere.obj",
+                            "import_settings": {
+                                "type_name": "legion::core::assets::import_settings<legion::core::mesh>"
+                            }
+                        }
                     }
                 ]
             },
@@ -104,10 +413,6 @@
                 "children": [],
                 "components": [
                     {
-                        "type_name": "example_comp",
-                        "value": 1
-                    },
-                    {
                         "type_name": "legion::core::scale",
                         "x": 3.0,
                         "y": 3.0,
@@ -125,6 +430,181 @@
                         "x": 0.0,
                         "y": 4.0,
                         "z": 0.0
+                    },
+                    {
+                        "type_name": "legion::rendering::mesh_renderer",
+                        "material": {
+                            "type_name": "legion::rendering::material_handle",
+                            "name": "wood",
+                            "shader": "engine:\\\\shaders\\default_lit.shs",
+                            "variant": "default",
+                            "params": [
+                                {
+                                    "type_name": "legion::core::math::vec<4,float,0>",
+                                    "name": "albedoColor",
+                                    "value": {
+                                        "x": 0.0,
+                                        "y": 0.0,
+                                        "z": 0.0,
+                                        "w": 0.0
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "albedoTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\wood\\WoodColor.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "roughnessTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\wood\\Wood035_1K_Roughness.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "float",
+                                    "name": "alphaCutoff",
+                                    "value": 0.5
+                                },
+                                {
+                                    "type_name": "legion::core::math::vec<4,float,0>",
+                                    "name": "emissiveColor",
+                                    "value": {
+                                        "x": 0.0,
+                                        "y": 0.0,
+                                        "z": 0.0,
+                                        "w": 1.0
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "ambientOcclusionTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\invalid\\missing"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "heightTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\wood\\Wood035_1K_Displacement.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "emissiveTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\invalid\\missing"
+                                    }
+                                },
+                                {
+                                    "type_name": "float",
+                                    "name": "heightScale",
+                                    "value": 1.0
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "metallicRoughness",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\invalid\\missing"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "normalTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\wood\\Wood035_1K_Normal.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "metallicTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\invalid\\missing"
+                                    }
+                                },
+                                {
+                                    "type_name": "float",
+                                    "name": "metallicValue",
+                                    "value": 0.0
+                                },
+                                {
+                                    "type_name": "float",
+                                    "name": "roughnessValue",
+                                    "value": 0.0
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "skybox_tex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\invalid\\missing"
+                                    }
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useAlbedoTex",
+                                    "value": true
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useAmbientOcclusion",
+                                    "value": false
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useEmissiveTex",
+                                    "value": false
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useHeight",
+                                    "value": true
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useMetallicRoughness",
+                                    "value": false
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useMetallicTex",
+                                    "value": false
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useNormal",
+                                    "value": true
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useRoughnessTex",
+                                    "value": true
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type_name": "legion::core::mesh_filter",
+                        "shared_mesh": {
+                            "type_name": "legion::core::assets::asset<legion::core::mesh>",
+                            "name": "Sphere",
+                            "loaded_from_file": true,
+                            "path": "assets:\\\\models\\sphere.obj",
+                            "import_settings": {
+                                "type_name": "legion::core::assets::import_settings<legion::core::mesh>"
+                            }
+                        }
                     }
                 ]
             },
@@ -135,10 +615,6 @@
                 "children": [],
                 "components": [
                     {
-                        "type_name": "example_comp",
-                        "value": 1
-                    },
-                    {
                         "type_name": "legion::core::scale",
                         "x": 3.0,
                         "y": 3.0,
@@ -156,6 +632,79 @@
                         "x": 0.0,
                         "y": 4.0,
                         "z": 4.0
+                    },
+                    {
+                        "type_name": "legion::rendering::mesh_renderer",
+                        "material": {
+                            "type_name": "legion::rendering::material_handle",
+                            "name": "paint",
+                            "shader": "assets:\\\\shaders\\pbr.shs",
+                            "variant": "default",
+                            "params": [
+                                {
+                                    "type_name": "bool",
+                                    "name": "discardExcess",
+                                    "value": false
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "material_input.emissive",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\paint\\paint-peeling-emissive-2048.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "material_input.normalHeight",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\paint\\paint-peeling-normalHeight-2048.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "material_input.albedo",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\paint\\paint-peeling-albedo-2048.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "material_input.MRDAo",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\paint\\paint-peeling-MRDAo-2048.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "float",
+                                    "name": "material_input.heightScale",
+                                    "value": 1.0
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "skybox_tex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\invalid\\missing"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type_name": "legion::core::mesh_filter",
+                        "shared_mesh": {
+                            "type_name": "legion::core::assets::asset<legion::core::mesh>",
+                            "name": "Sphere",
+                            "loaded_from_file": true,
+                            "path": "assets:\\\\models\\sphere.obj",
+                            "import_settings": {
+                                "type_name": "legion::core::assets::import_settings<legion::core::mesh>"
+                            }
+                        }
                     }
                 ]
             },
@@ -165,10 +714,6 @@
                 "active": true,
                 "children": [],
                 "components": [
-                    {
-                        "type_name": "example_comp",
-                        "value": 1
-                    },
                     {
                         "type_name": "legion::core::scale",
                         "x": 3.0,
@@ -187,6 +732,181 @@
                         "x": 0.0,
                         "y": 4.0,
                         "z": 8.0
+                    },
+                    {
+                        "type_name": "legion::rendering::mesh_renderer",
+                        "material": {
+                            "type_name": "legion::rendering::material_handle",
+                            "name": "tiles",
+                            "shader": "engine:\\\\shaders\\default_lit.shs",
+                            "variant": "default",
+                            "params": [
+                                {
+                                    "type_name": "legion::core::math::vec<4,float,0>",
+                                    "name": "albedoColor",
+                                    "value": {
+                                        "x": 0.0,
+                                        "y": 0.0,
+                                        "z": 0.0,
+                                        "w": 0.0
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "albedoTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\tile\\tileColor.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "roughnessTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\tile\\tileRoughness.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "float",
+                                    "name": "alphaCutoff",
+                                    "value": 0.5
+                                },
+                                {
+                                    "type_name": "legion::core::math::vec<4,float,0>",
+                                    "name": "emissiveColor",
+                                    "value": {
+                                        "x": 0.0,
+                                        "y": 0.0,
+                                        "z": 0.0,
+                                        "w": 1.0
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "ambientOcclusionTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\invalid\\missing"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "heightTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\invalid\\missing"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "emissiveTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\invalid\\missing"
+                                    }
+                                },
+                                {
+                                    "type_name": "float",
+                                    "name": "heightScale",
+                                    "value": 0.0
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "metallicRoughness",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\invalid\\missing"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "normalTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\tile\\tileNormal.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "metallicTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\invalid\\missing"
+                                    }
+                                },
+                                {
+                                    "type_name": "float",
+                                    "name": "metallicValue",
+                                    "value": 0.0
+                                },
+                                {
+                                    "type_name": "float",
+                                    "name": "roughnessValue",
+                                    "value": 0.0
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "skybox_tex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\invalid\\missing"
+                                    }
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useAlbedoTex",
+                                    "value": true
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useAmbientOcclusion",
+                                    "value": false
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useEmissiveTex",
+                                    "value": false
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useHeight",
+                                    "value": false
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useMetallicRoughness",
+                                    "value": false
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useMetallicTex",
+                                    "value": false
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useNormal",
+                                    "value": true
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useRoughnessTex",
+                                    "value": true
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type_name": "legion::core::mesh_filter",
+                        "shared_mesh": {
+                            "type_name": "legion::core::assets::asset<legion::core::mesh>",
+                            "name": "Sphere",
+                            "loaded_from_file": true,
+                            "path": "assets:\\\\models\\sphere.obj",
+                            "import_settings": {
+                                "type_name": "legion::core::assets::import_settings<legion::core::mesh>"
+                            }
+                        }
                     }
                 ]
             },
@@ -196,10 +916,6 @@
                 "active": true,
                 "children": [],
                 "components": [
-                    {
-                        "type_name": "example_comp",
-                        "value": 1
-                    },
                     {
                         "type_name": "legion::core::scale",
                         "x": 3.0,
@@ -218,6 +934,79 @@
                         "x": 0.0,
                         "y": 8.0,
                         "z": 0.0
+                    },
+                    {
+                        "type_name": "legion::rendering::mesh_renderer",
+                        "material": {
+                            "type_name": "legion::rendering::material_handle",
+                            "name": "slate",
+                            "shader": "assets:\\\\shaders\\pbr.shs",
+                            "variant": "default",
+                            "params": [
+                                {
+                                    "type_name": "bool",
+                                    "name": "discardExcess",
+                                    "value": false
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "material_input.emissive",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\slate\\slate-emissive-2048.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "material_input.normalHeight",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\slate\\slate-normalHeight-2048.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "material_input.albedo",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\slate\\slate-albedo-2048.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "material_input.MRDAo",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\slate\\slate-MRDAo-2048.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "float",
+                                    "name": "material_input.heightScale",
+                                    "value": 1.0
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "skybox_tex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\invalid\\missing"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type_name": "legion::core::mesh_filter",
+                        "shared_mesh": {
+                            "type_name": "legion::core::assets::asset<legion::core::mesh>",
+                            "name": "Sphere",
+                            "loaded_from_file": true,
+                            "path": "assets:\\\\models\\sphere.obj",
+                            "import_settings": {
+                                "type_name": "legion::core::assets::import_settings<legion::core::mesh>"
+                            }
+                        }
                     }
                 ]
             },
@@ -227,10 +1016,6 @@
                 "active": true,
                 "children": [],
                 "components": [
-                    {
-                        "type_name": "example_comp",
-                        "value": 1
-                    },
                     {
                         "type_name": "legion::core::scale",
                         "x": 3.0,
@@ -249,6 +1034,181 @@
                         "x": 0.0,
                         "y": 8.0,
                         "z": 4.0
+                    },
+                    {
+                        "type_name": "legion::rendering::mesh_renderer",
+                        "material": {
+                            "type_name": "legion::rendering::material_handle",
+                            "name": "bricks",
+                            "shader": "engine:\\\\shaders\\default_lit.shs",
+                            "variant": "default",
+                            "params": [
+                                {
+                                    "type_name": "legion::core::math::vec<4,float,0>",
+                                    "name": "albedoColor",
+                                    "value": {
+                                        "x": 0.0,
+                                        "y": 0.0,
+                                        "z": 0.0,
+                                        "w": 0.0
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "albedoTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\brick\\brickColor.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "roughnessTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\brick\\brickRoughness.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "float",
+                                    "name": "alphaCutoff",
+                                    "value": 0.5
+                                },
+                                {
+                                    "type_name": "legion::core::math::vec<4,float,0>",
+                                    "name": "emissiveColor",
+                                    "value": {
+                                        "x": 0.0,
+                                        "y": 0.0,
+                                        "z": 0.0,
+                                        "w": 1.0
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "ambientOcclusionTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\brick\\brickAO.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "heightTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\brick\\brickDisplacement.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "emissiveTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\invalid\\missing"
+                                    }
+                                },
+                                {
+                                    "type_name": "float",
+                                    "name": "heightScale",
+                                    "value": 0.10000000149011612
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "metallicRoughness",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\invalid\\missing"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "normalTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "assets:\\\\textures\\brick\\brickNormal.png"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "metallicTex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\invalid\\missing"
+                                    }
+                                },
+                                {
+                                    "type_name": "float",
+                                    "name": "metallicValue",
+                                    "value": 0.0
+                                },
+                                {
+                                    "type_name": "float",
+                                    "name": "roughnessValue",
+                                    "value": 0.0
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "skybox_tex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\invalid\\missing"
+                                    }
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useAlbedoTex",
+                                    "value": true
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useAmbientOcclusion",
+                                    "value": true
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useEmissiveTex",
+                                    "value": false
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useHeight",
+                                    "value": true
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useMetallicRoughness",
+                                    "value": false
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useMetallicTex",
+                                    "value": false
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useNormal",
+                                    "value": true
+                                },
+                                {
+                                    "type_name": "bool",
+                                    "name": "useRoughnessTex",
+                                    "value": true
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type_name": "legion::core::mesh_filter",
+                        "shared_mesh": {
+                            "type_name": "legion::core::assets::asset<legion::core::mesh>",
+                            "name": "Sphere",
+                            "loaded_from_file": true,
+                            "path": "assets:\\\\models\\sphere.obj",
+                            "import_settings": {
+                                "type_name": "legion::core::assets::import_settings<legion::core::mesh>"
+                            }
+                        }
                     }
                 ]
             },
@@ -258,10 +1218,6 @@
                 "active": true,
                 "children": [],
                 "components": [
-                    {
-                        "type_name": "example_comp",
-                        "value": 1
-                    },
                     {
                         "type_name": "legion::core::scale",
                         "x": 3.0,
@@ -280,10 +1236,103 @@
                         "x": 0.0,
                         "y": 8.0,
                         "z": 8.0
+                    },
+                    {
+                        "type_name": "legion::rendering::mesh_renderer",
+                        "material": {
+                            "type_name": "legion::rendering::material_handle",
+                            "name": "default",
+                            "shader": "assets:\\\\shaders\\pbr.shs",
+                            "variant": "default",
+                            "params": [
+                                {
+                                    "type_name": "bool",
+                                    "name": "discardExcess",
+                                    "value": false
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "material_input.emissive",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\default\\emissive"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "material_input.normalHeight",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\default\\normalHeight"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "material_input.albedo",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\default\\albedo"
+                                    }
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "material_input.MRDAo",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\default\\MRDAo"
+                                    }
+                                },
+                                {
+                                    "type_name": "float",
+                                    "name": "material_input.heightScale",
+                                    "value": 1.0
+                                },
+                                {
+                                    "type_name": "legion::rendering::texture_handle",
+                                    "name": "skybox_tex",
+                                    "value": {
+                                        "loaded_from_file": true,
+                                        "path": "engine:\\\\resources\\invalid\\missing"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type_name": "legion::core::mesh_filter",
+                        "shared_mesh": {
+                            "type_name": "legion::core::assets::asset<legion::core::mesh>",
+                            "name": "Sphere",
+                            "loaded_from_file": true,
+                            "path": "assets:\\\\models\\sphere.obj",
+                            "import_settings": {
+                                "type_name": "legion::core::assets::import_settings<legion::core::mesh>"
+                            }
+                        }
                     }
                 ]
             }
         ],
-        "components": []
+        "components": [
+            {
+                "type_name": "legion::rendering::skybox_renderer",
+                "material": {
+                    "type_name": "legion::rendering::material_handle",
+                    "name": "skybox",
+                    "shader": "assets:\\\\shaders\\skybox.shs",
+                    "variant": "default",
+                    "params": [
+                        {
+                            "type_name": "legion::rendering::texture_handle",
+                            "name": "skybox_tex",
+                            "value": {
+                                "loaded_from_file": true,
+                                "path": "assets:\\\\textures\\HDRI\\morning_islands.jpg"
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
     }
 }

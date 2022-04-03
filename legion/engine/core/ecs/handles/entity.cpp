@@ -71,6 +71,14 @@ namespace legion::core::ecs
 
     void entity::set_parent(id_type parent)
     {
+#if LEGION_VALIDATION_LEVEL
+        if (!valid())
+        {
+            log::error("Tried to set parent of invalid entity!");
+            return;
+        }
+#endif
+
         if (data->parent)
             data->parent->children.erase(*this);
 
@@ -86,6 +94,14 @@ namespace legion::core::ecs
 
     void entity::set_parent(entity parent)
     {
+#if LEGION_VALIDATION_LEVEL
+        if (!valid())
+        {
+            log::error("Tried to set parent of invalid entity!");
+            return;
+        }
+#endif
+
         if (data->parent)
             data->parent->children.erase(*this);
 
@@ -107,6 +123,13 @@ namespace legion::core::ecs
 
     void entity::add_child(entity child)
     {
+#if LEGION_VALIDATION_LEVEL
+        if (!valid())
+        {
+            log::error("Tried to add child to invalid entity!");
+            return;
+        }
+#endif
         child.set_parent(*this);
     }
 

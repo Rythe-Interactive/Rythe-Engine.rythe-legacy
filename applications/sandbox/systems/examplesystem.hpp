@@ -41,259 +41,6 @@ public:
         bindToEvent<auto_exposure_action, &ExampleSystem::onAutoExposureSwitch>();
         bindToEvent<reload_shaders_action, &ExampleSystem::onShaderReload>();
 
-        auto* pipeline = dynamic_cast<gfx::DefaultPipeline*>(gfx::Renderer::getMainPipeline());
-        if (pipeline)
-            pipeline->attachStage<MouseHover>();
-
-        auto rootEnt = createEntity("Scene");
-
-        app::window& win = ecs::world.get_component<app::window>();
-        app::context_guard guard(win);
-
-        auto model = gfx::ModelCache::create_model("Sphere", fs::view("assets://models/sphere.obj"));
-
-        //{
-        //    auto ent = createEntity("Sun", rootEnt);
-        //    ent.add_component(gfx::light::directional(math::color(1, 1, 0.8f), 10.f));
-        //    auto [pos, rot, scal] = ent.add_component<transform>();
-        //    pos = position(0.f, 3.f, 6.f);
-        //    rot = rotation::lookat(math::vec3::zero, math::vec3(1.f, -1.f, 0.1f));
-        //}
-
-        //#if defined(LEGION_DEBUG)
-        //        for (int i = 0; i < 2000; i++)
-        //#else
-        //        for (int i = 0; i < 20000; i++)
-        //#endif
-        //        {
-        //            auto ent = createEntity(rootEnt);
-        //
-        //            auto [pos, rot, scal] = ent.add_component<transform>();
-        //            pos = math::sphericalRand(5.f);
-        //            scal = scale(0.1f, 0.1f, 0.1f);
-        //
-        //            ent.add_component<example_comp, velocity>();
-        //            ent.add_component(gfx::mesh_renderer(material, model));
-        //        }
-
-        auto material = gfx::MaterialCache::create_material("iron", fs::view("engine://shaders/default_lit.shs"));
-
-        material.set_param("alphaCutoff", 0.5f);
-        material.set_param("useAlbedoTex", true);
-        material.set_param("useRoughnessTex", true);
-        material.set_param("useNormal", true);
-        material.set_param("useAmbientOcclusion", true);
-        material.set_param("useHeight", true);
-        material.set_param("useMetallicTex", true);
-
-        material.set_param("useEmissiveTex", false);
-        material.set_param("useMetallicRoughness", false);
-
-        material.set_param("ambientOcclusionTex", rendering::TextureCache::create_texture(fs::view("assets://textures/iron/rustediron-ao.png")));
-        material.set_param("heightTex", rendering::TextureCache::create_texture(fs::view("assets://textures/iron/rustediron-height.png")));
-        material.set_param("heightScale", 1.f);
-        material.set_param("metallicTex", rendering::TextureCache::create_texture(fs::view("assets://textures/iron/rustediron-metallic.png")));
-        material.set_param("emissiveColor", math::colors::black);
-
-        material.set_param("albedoTex", rendering::TextureCache::create_texture(fs::view("assets://textures/iron/rustediron-albedo-2048.png")));
-        material.set_param("normalTex", rendering::TextureCache::create_texture(fs::view("assets://textures/iron/rustediron-normal.png")));
-        material.set_param("roughnessTex", rendering::TextureCache::create_texture(fs::view("assets://textures/iron/rustediron-roughness.png")));
-
-        {
-            auto ent = createEntity(material.get_name(), rootEnt);
-            ent.add_component<example_comp>();
-            auto [pos, rot, scal] = ent.add_component<transform>();
-            pos = math::vec3(0.f, 0.f, 0.f);
-            scal = math::vec3(3.f);
-            rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
-            ent.add_component(gfx::mesh_renderer(material, model));
-        }
-
-        material = gfx::MaterialCache::create_material("rock", fs::view("assets://shaders/pbr.shs"));
-
-        material.set_param(SV_ALBEDO, rendering::TextureCache::create_texture(fs::view("assets://textures/detailedRock/Rock020_1K_Albedo.png")));
-        material.set_param(SV_NORMALHEIGHT, rendering::TextureCache::create_texture(fs::view("assets://textures/detailedRock/Rock020_1K_NormalHeight.png")));
-        material.set_param(SV_MRDAO, rendering::TextureCache::create_texture(fs::view("assets://textures/detailedRock/Rock020_1K_MRDAo.png")));
-        material.set_param(SV_EMISSIVE, rendering::TextureCache::create_texture(fs::view("assets://textures/detailedRock/Rock020_1K_emissive.png")));
-        material.set_param(SV_HEIGHTSCALE, 1.f);
-
-        {
-            auto ent = createEntity(material.get_name(), rootEnt);
-            ent.add_component<example_comp>();
-            auto [pos, rot, scal] = ent.add_component<transform>();
-            pos = math::vec3(0.f, 0.f, 4.f);
-            rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
-            scal = math::vec3(3.f);
-            ent.add_component(gfx::mesh_renderer(material, model));
-        }
-
-        material = gfx::MaterialCache::create_material("copper", fs::view("assets://shaders/pbr.shs"));
-
-        material.set_param(SV_ALBEDO, rendering::TextureCache::create_texture(fs::view("assets://textures/copper/copper-albedo-2048.png")));
-        material.set_param(SV_NORMALHEIGHT, rendering::TextureCache::create_texture(fs::view("assets://textures/copper/copper-normalHeight-2048.png")));
-        material.set_param(SV_MRDAO, rendering::TextureCache::create_texture(fs::view("assets://textures/copper/copper-MRDAo-2048.png")));
-        material.set_param(SV_EMISSIVE, rendering::TextureCache::create_texture(fs::view("assets://textures/copper/copper-emissive-2048.png")));
-        material.set_param(SV_HEIGHTSCALE, 1.f);
-
-        {
-            auto ent = createEntity(material.get_name(), rootEnt);
-            ent.add_component<example_comp>();
-            auto [pos, rot, scal] = ent.add_component<transform>();
-            pos = math::vec3(0.f, 0.f, 8.f);
-            rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
-            scal = math::vec3(3.f);
-            ent.add_component(gfx::mesh_renderer(material, model));
-        }
-
-        material = gfx::MaterialCache::create_material("wood", fs::view("engine://shaders/default_lit.shs"));
-
-        material.set_param("alphaCutoff", 0.5f);
-        material.set_param("useAlbedoTex", true);
-        material.set_param("useRoughnessTex", true);
-        material.set_param("useNormal", true);
-        material.set_param("useHeight", true);
-
-        material.set_param("useAmbientOcclusion", false);
-        material.set_param("useMetallicTex", false);
-        material.set_param("useEmissiveTex", false);
-        material.set_param("useMetallicRoughness", false);
-
-        material.set_param("heightTex", rendering::TextureCache::create_texture(fs::view("assets://textures/wood/Wood035_1K_Displacement.png")));
-        material.set_param("heightScale", 1.f);
-        material.set_param("metallicValue", 0.f);
-        material.set_param("emissiveColor", math::colors::black);
-
-        material.set_param("albedoTex", rendering::TextureCache::create_texture(fs::view("assets://textures/wood/WoodColor.png")));
-        material.set_param("normalTex", rendering::TextureCache::create_texture(fs::view("assets://textures/wood/Wood035_1K_Normal.png")));
-        material.set_param("roughnessTex", rendering::TextureCache::create_texture(fs::view("assets://textures/wood/Wood035_1K_Roughness.png")));
-
-        {
-            auto ent = createEntity(material.get_name(), rootEnt);
-            ent.add_component<example_comp>();
-            auto [pos, rot, scal] = ent.add_component<transform>();
-            pos = math::vec3(0.f, 4.f, 0.f);
-            rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
-            scal = math::vec3(3.f);
-            ent.add_component(gfx::mesh_renderer(material, model));
-        }
-
-        material = gfx::MaterialCache::create_material("paint", fs::view("assets://shaders/pbr.shs"));
-
-        material.set_param(SV_ALBEDO, rendering::TextureCache::create_texture(fs::view("assets://textures/paint/paint-peeling-albedo-2048.png")));
-        material.set_param(SV_NORMALHEIGHT, rendering::TextureCache::create_texture(fs::view("assets://textures/paint/paint-peeling-normalHeight-2048.png")));
-        material.set_param(SV_MRDAO, rendering::TextureCache::create_texture(fs::view("assets://textures/paint/paint-peeling-MRDAo-2048.png")));
-        material.set_param(SV_EMISSIVE, rendering::TextureCache::create_texture(fs::view("assets://textures/paint/paint-peeling-emissive-2048.png")));
-        material.set_param(SV_HEIGHTSCALE, 1.f);
-
-        {
-            auto ent = createEntity(material.get_name(), rootEnt);
-            ent.add_component<example_comp>();
-            auto [pos, rot, scal] = ent.add_component<transform>();
-            pos = math::vec3(0.f, 4.f, 4.f);
-            rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
-            scal = math::vec3(3.f);
-            ent.add_component(gfx::mesh_renderer(material, model));
-        }
-
-        material = gfx::MaterialCache::create_material("tiles", fs::view("engine://shaders/default_lit.shs"));
-
-        material.set_param("alphaCutoff", 0.5f);
-        material.set_param("useAlbedoTex", true);
-        material.set_param("useRoughnessTex", true);
-        material.set_param("useNormal", true);
-
-        material.set_param("useMetallicTex", false);
-        material.set_param("useHeight", false);
-        material.set_param("useAmbientOcclusion", false);
-        material.set_param("useEmissiveTex", false);
-        material.set_param("useMetallicRoughness", false);
-
-        material.set_param("metallicValue", 0.f);
-        material.set_param("emissiveColor", math::colors::black);
-
-        material.set_param("albedoTex", rendering::TextureCache::create_texture(fs::view("assets://textures/tile/tileColor.png")));
-        material.set_param("normalTex", rendering::TextureCache::create_texture(fs::view("assets://textures/tile/tileNormal.png")));
-        material.set_param("roughnessTex", rendering::TextureCache::create_texture(fs::view("assets://textures/tile/tileRoughness.png")));
-
-        {
-            auto ent = createEntity(material.get_name(), rootEnt);
-            ent.add_component<example_comp>();
-            auto [pos, rot, scal] = ent.add_component<transform>();
-            pos = math::vec3(0.f, 4.f, 8.f);
-            rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
-            scal = math::vec3(3.f);
-            ent.add_component(gfx::mesh_renderer(material, model));
-        }
-
-        material = gfx::MaterialCache::create_material("slate", fs::view("assets://shaders/pbr.shs"));
-
-        material.set_param(SV_ALBEDO, rendering::TextureCache::create_texture(fs::view("assets://textures/slate/slate-albedo-2048.png")));
-        material.set_param(SV_NORMALHEIGHT, rendering::TextureCache::create_texture(fs::view("assets://textures/slate/slate-normalHeight-2048.png")));
-        material.set_param(SV_MRDAO, rendering::TextureCache::create_texture(fs::view("assets://textures/slate/slate-MRDAo-2048.png")));
-        material.set_param(SV_EMISSIVE, rendering::TextureCache::create_texture(fs::view("assets://textures/slate/slate-emissive-2048.png")));
-        material.set_param(SV_HEIGHTSCALE, 1.f);
-
-        {
-            auto ent = createEntity(material.get_name(), rootEnt);
-            ent.add_component<example_comp>();
-            auto [pos, rot, scal] = ent.add_component<transform>();
-            pos = math::vec3(0.f, 8.f, 0.f);
-            rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
-            scal = math::vec3(3.f);
-            ent.add_component(gfx::mesh_renderer(material, model));
-        }
-
-        material = gfx::MaterialCache::create_material("bricks", fs::view("engine://shaders/default_lit.shs"));
-
-        material.set_param("alphaCutoff", 0.5f);
-        material.set_param("useAlbedoTex", true);
-        material.set_param("useRoughnessTex", true);
-        material.set_param("useNormal", true);
-        material.set_param("useHeight", true);
-        material.set_param("useAmbientOcclusion", true);
-
-        material.set_param("useMetallicTex", false);
-        material.set_param("useEmissiveTex", false);
-        material.set_param("useMetallicRoughness", false);
-
-        material.set_param("metallicValue", 0.f);
-        material.set_param("emissiveColor", math::colors::black);
-
-        material.set_param("albedoTex", rendering::TextureCache::create_texture(fs::view("assets://textures/brick/brickColor.png")));
-        material.set_param("roughnessTex", rendering::TextureCache::create_texture(fs::view("assets://textures/brick/brickRoughness.png")));
-        material.set_param("normalTex", rendering::TextureCache::create_texture(fs::view("assets://textures/brick/brickNormal.png")));
-        material.set_param("ambientOcclusionTex", rendering::TextureCache::create_texture(fs::view("assets://textures/brick/brickAO.png")));
-        material.set_param("heightTex", rendering::TextureCache::create_texture(fs::view("assets://textures/brick/brickDisplacement.png")));
-        material.set_param("heightScale", 0.1f);
-
-        {
-            auto ent = createEntity(material.get_name(), rootEnt);
-            ent.add_component<example_comp>();
-            auto [pos, rot, scal] = ent.add_component<transform>();
-            pos = math::vec3(0.f, 8.f, 4.f);
-            rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
-            scal = math::vec3(3.f);
-            ent.add_component(gfx::mesh_renderer(material, model));
-        }
-
-        material = gfx::MaterialCache::create_material("default", fs::view("assets://shaders/pbr.shs"));
-
-        material.set_param(SV_ALBEDO, rendering::TextureCache::create_texture(fs::view("engine://resources/default/albedo")));
-        material.set_param(SV_NORMALHEIGHT, rendering::TextureCache::create_texture(fs::view("engine://resources/default/normalHeight")));
-        material.set_param(SV_MRDAO, rendering::TextureCache::create_texture(fs::view("engine://resources/default/MRDAo")));
-        material.set_param(SV_EMISSIVE, rendering::TextureCache::create_texture(fs::view("engine://resources/default/emissive")));
-        material.set_param(SV_HEIGHTSCALE, 1.f);
-
-        {
-            auto ent = createEntity(material.get_name(), rootEnt);
-            ent.add_component<example_comp>();
-            auto [pos, rot, scal] = ent.add_component<transform>();
-            pos = math::vec3(0.f, 8.f, 8.f);
-            rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
-            scal = math::vec3(3.f);
-            ent.add_component(gfx::mesh_renderer(material, model));
-        }
-
         //Serialization Test
         srl::SerializerRegistry::registerSerializer<example_comp>();
         srl::SerializerRegistry::registerSerializer<ecs::entity>();
@@ -306,30 +53,247 @@ public:
         srl::SerializerRegistry::registerSerializer<mesh>();
         srl::SerializerRegistry::registerSerializer<assets::asset<mesh>>();
         srl::SerializerRegistry::registerSerializer<material_data>();
+        srl::SerializerRegistry::registerSerializer<mesh_filter>();
 
-        auto loadedMesh = *assets::load<mesh>("test mesh", fs::view("assets://models/cube.glb"));
+        auto* pipeline = dynamic_cast<gfx::DefaultPipeline*>(gfx::Renderer::getMainPipeline());
+        if (pipeline)
+            pipeline->attachStage<MouseHover>();
 
-        srl::write<srl::yaml>(fs::view("assets://scenes/testmesh1.yaml"), loadedMesh, "test_mesh");
-        srl::write<srl::json>(fs::view("assets://scenes/testmesh1.json"), loadedMesh, "test_mesh");
-        srl::write<srl::bson>(fs::view("assets://scenes/testmesh1.bson"), loadedMesh, "test_mesh");
+        app::window& win = ecs::world.get_component<app::window>();
+        app::context_guard guard(win);
 
-        auto resultMesh = srl::load<srl::bson, assets::asset<mesh>>(fs::view("assets://scenes/testmesh1.bson"), "test_mesh");
+        {
+            //auto rootEnt = createEntity("Scene");
 
-        srl::write<srl::yaml>(fs::view("assets://scenes/testmesh2.yaml"), *resultMesh, "test_mesh");
-        srl::write<srl::json>(fs::view("assets://scenes/testmesh2.json"), *resultMesh, "test_mesh");
-        srl::write<srl::bson>(fs::view("assets://scenes/testmesh2.bson"), *resultMesh, "test_mesh");
+            //auto skyboxMat = rendering::MaterialCache::create_material("skybox", "assets://shaders/skybox.shs"_view);
+            //skyboxMat.set_param(SV_SKYBOX, TextureCache::create_texture("morning islands", fs::view("assets://textures/HDRI/morning_islands.jpg"),
+            //    texture_import_settings
+            //    {
+            //        texture_type::two_dimensional, true, channel_format::eight_bit, texture_format::rgba_hdr,
+            //        texture_components::rgba, true, true, 0, texture_mipmap::linear_mipmap_linear, texture_mipmap::linear,
+            //        texture_wrap::edge_clamp, texture_wrap::repeat, texture_wrap::edge_clamp
+            //    }));
+            //rootEnt.add_component(gfx::skybox_renderer{ skyboxMat });
 
-        srl::write<srl::yaml>(fs::view("assets://scenes/scene1.yaml"), rootEnt, "scene");
-        srl::write<srl::json>(fs::view("assets://scenes/scene1.json"), rootEnt, "scene");
-        srl::write<srl::bson>(fs::view("assets://scenes/scene1.bson"), rootEnt, "scene");
+            //auto model = gfx::ModelCache::create_model("Sphere", fs::view("assets://models/sphere.obj"));
 
-        //ecs::Registry::destroyEntity(rootEnt);
+            //auto material = gfx::MaterialCache::create_material("iron", fs::view("engine://shaders/default_lit.shs"));
 
-        auto result4 = srl::load<srl::bson, ecs::entity>(fs::view("assets://scenes/scene1.bson"), "scene");
+            //material.set_param("alphaCutoff", 0.5f);
+            //material.set_param("useAlbedoTex", true);
+            //material.set_param("useRoughnessTex", true);
+            //material.set_param("useNormal", true);
+            //material.set_param("useAmbientOcclusion", true);
+            //material.set_param("useHeight", true);
+            //material.set_param("useMetallicTex", true);
 
-        srl::write<srl::yaml>(fs::view("assets://scenes/scene2.yaml"), *result4, "scene");
-        srl::write<srl::json>(fs::view("assets://scenes/scene2.json"), *result4, "scene");
-        srl::write<srl::bson>(fs::view("assets://scenes/scene2.bson"), *result4, "scene");
+            //material.set_param("useEmissiveTex", false);
+            //material.set_param("useMetallicRoughness", false);
+
+            //material.set_param("ambientOcclusionTex", rendering::TextureCache::create_texture(fs::view("assets://textures/iron/rustediron-ao.png")));
+            //material.set_param("heightTex", rendering::TextureCache::create_texture(fs::view("assets://textures/iron/rustediron-height.png")));
+            //material.set_param("heightScale", 1.f);
+            //material.set_param("metallicTex", rendering::TextureCache::create_texture(fs::view("assets://textures/iron/rustediron-metallic.png")));
+            //material.set_param("emissiveColor", math::colors::black);
+
+            //material.set_param("albedoTex", rendering::TextureCache::create_texture(fs::view("assets://textures/iron/rustediron-albedo-2048.png")));
+            //material.set_param("normalTex", rendering::TextureCache::create_texture(fs::view("assets://textures/iron/rustediron-normal.png")));
+            //material.set_param("roughnessTex", rendering::TextureCache::create_texture(fs::view("assets://textures/iron/rustediron-roughness.png")));
+
+            //{
+            //    auto ent = createEntity(material.get_name(), rootEnt);
+            //    auto [pos, rot, scal] = ent.add_component<transform>();
+            //    pos = math::vec3(0.f, 0.f, 0.f);
+            //    scal = math::vec3(3.f);
+            //    rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
+            //    ent.add_component(gfx::mesh_renderer(material, model));
+            //}
+
+            //material = gfx::MaterialCache::create_material("rock", fs::view("assets://shaders/pbr.shs"));
+
+            //material.set_param(SV_ALBEDO, rendering::TextureCache::create_texture(fs::view("assets://textures/detailedRock/Rock020_1K_Albedo.png")));
+            //material.set_param(SV_NORMALHEIGHT, rendering::TextureCache::create_texture(fs::view("assets://textures/detailedRock/Rock020_1K_NormalHeight.png")));
+            //material.set_param(SV_MRDAO, rendering::TextureCache::create_texture(fs::view("assets://textures/detailedRock/Rock020_1K_MRDAo.png")));
+            //material.set_param(SV_EMISSIVE, rendering::TextureCache::create_texture(fs::view("assets://textures/detailedRock/Rock020_1K_emissive.png")));
+            //material.set_param(SV_HEIGHTSCALE, 1.f);
+
+            //{
+            //    auto ent = createEntity(material.get_name(), rootEnt);
+            //    auto [pos, rot, scal] = ent.add_component<transform>();
+            //    pos = math::vec3(0.f, 0.f, 4.f);
+            //    rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
+            //    scal = math::vec3(3.f);
+            //    ent.add_component(gfx::mesh_renderer(material, model));
+            //}
+
+            //material = gfx::MaterialCache::create_material("copper", fs::view("assets://shaders/pbr.shs"));
+
+            //material.set_param(SV_ALBEDO, rendering::TextureCache::create_texture(fs::view("assets://textures/copper/copper-albedo-2048.png")));
+            //material.set_param(SV_NORMALHEIGHT, rendering::TextureCache::create_texture(fs::view("assets://textures/copper/copper-normalHeight-2048.png")));
+            //material.set_param(SV_MRDAO, rendering::TextureCache::create_texture(fs::view("assets://textures/copper/copper-MRDAo-2048.png")));
+            //material.set_param(SV_EMISSIVE, rendering::TextureCache::create_texture(fs::view("assets://textures/copper/copper-emissive-2048.png")));
+            //material.set_param(SV_HEIGHTSCALE, 1.f);
+
+            //{
+            //    auto ent = createEntity(material.get_name(), rootEnt);
+            //    auto [pos, rot, scal] = ent.add_component<transform>();
+            //    pos = math::vec3(0.f, 0.f, 8.f);
+            //    rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
+            //    scal = math::vec3(3.f);
+            //    ent.add_component(gfx::mesh_renderer(material, model));
+            //}
+
+            //material = gfx::MaterialCache::create_material("wood", fs::view("engine://shaders/default_lit.shs"));
+
+            //material.set_param("alphaCutoff", 0.5f);
+            //material.set_param("useAlbedoTex", true);
+            //material.set_param("useRoughnessTex", true);
+            //material.set_param("useNormal", true);
+            //material.set_param("useHeight", true);
+
+            //material.set_param("useAmbientOcclusion", false);
+            //material.set_param("useMetallicTex", false);
+            //material.set_param("useEmissiveTex", false);
+            //material.set_param("useMetallicRoughness", false);
+
+            //material.set_param("heightTex", rendering::TextureCache::create_texture(fs::view("assets://textures/wood/Wood035_1K_Displacement.png")));
+            //material.set_param("heightScale", 1.f);
+            //material.set_param("metallicValue", 0.f);
+            //material.set_param("emissiveColor", math::colors::black);
+
+            //material.set_param("albedoTex", rendering::TextureCache::create_texture(fs::view("assets://textures/wood/WoodColor.png")));
+            //material.set_param("normalTex", rendering::TextureCache::create_texture(fs::view("assets://textures/wood/Wood035_1K_Normal.png")));
+            //material.set_param("roughnessTex", rendering::TextureCache::create_texture(fs::view("assets://textures/wood/Wood035_1K_Roughness.png")));
+
+            //{
+            //    auto ent = createEntity(material.get_name(), rootEnt);
+            //    auto [pos, rot, scal] = ent.add_component<transform>();
+            //    pos = math::vec3(0.f, 4.f, 0.f);
+            //    rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
+            //    scal = math::vec3(3.f);
+            //    ent.add_component(gfx::mesh_renderer(material, model));
+            //}
+
+            //material = gfx::MaterialCache::create_material("paint", fs::view("assets://shaders/pbr.shs"));
+
+            //material.set_param(SV_ALBEDO, rendering::TextureCache::create_texture(fs::view("assets://textures/paint/paint-peeling-albedo-2048.png")));
+            //material.set_param(SV_NORMALHEIGHT, rendering::TextureCache::create_texture(fs::view("assets://textures/paint/paint-peeling-normalHeight-2048.png")));
+            //material.set_param(SV_MRDAO, rendering::TextureCache::create_texture(fs::view("assets://textures/paint/paint-peeling-MRDAo-2048.png")));
+            //material.set_param(SV_EMISSIVE, rendering::TextureCache::create_texture(fs::view("assets://textures/paint/paint-peeling-emissive-2048.png")));
+            //material.set_param(SV_HEIGHTSCALE, 1.f);
+
+            //{
+            //    auto ent = createEntity(material.get_name(), rootEnt);
+            //    auto [pos, rot, scal] = ent.add_component<transform>();
+            //    pos = math::vec3(0.f, 4.f, 4.f);
+            //    rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
+            //    scal = math::vec3(3.f);
+            //    ent.add_component(gfx::mesh_renderer(material, model));
+            //}
+
+            //material = gfx::MaterialCache::create_material("tiles", fs::view("engine://shaders/default_lit.shs"));
+
+            //material.set_param("alphaCutoff", 0.5f);
+            //material.set_param("useAlbedoTex", true);
+            //material.set_param("useRoughnessTex", true);
+            //material.set_param("useNormal", true);
+
+            //material.set_param("useMetallicTex", false);
+            //material.set_param("useHeight", false);
+            //material.set_param("useAmbientOcclusion", false);
+            //material.set_param("useEmissiveTex", false);
+            //material.set_param("useMetallicRoughness", false);
+
+            //material.set_param("metallicValue", 0.f);
+            //material.set_param("emissiveColor", math::colors::black);
+
+            //material.set_param("albedoTex", rendering::TextureCache::create_texture(fs::view("assets://textures/tile/tileColor.png")));
+            //material.set_param("normalTex", rendering::TextureCache::create_texture(fs::view("assets://textures/tile/tileNormal.png")));
+            //material.set_param("roughnessTex", rendering::TextureCache::create_texture(fs::view("assets://textures/tile/tileRoughness.png")));
+
+            //{
+            //    auto ent = createEntity(material.get_name(), rootEnt);
+            //    auto [pos, rot, scal] = ent.add_component<transform>();
+            //    pos = math::vec3(0.f, 4.f, 8.f);
+            //    rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
+            //    scal = math::vec3(3.f);
+            //    ent.add_component(gfx::mesh_renderer(material, model));
+            //}
+
+            //material = gfx::MaterialCache::create_material("slate", fs::view("assets://shaders/pbr.shs"));
+
+            //material.set_param(SV_ALBEDO, rendering::TextureCache::create_texture(fs::view("assets://textures/slate/slate-albedo-2048.png")));
+            //material.set_param(SV_NORMALHEIGHT, rendering::TextureCache::create_texture(fs::view("assets://textures/slate/slate-normalHeight-2048.png")));
+            //material.set_param(SV_MRDAO, rendering::TextureCache::create_texture(fs::view("assets://textures/slate/slate-MRDAo-2048.png")));
+            //material.set_param(SV_EMISSIVE, rendering::TextureCache::create_texture(fs::view("assets://textures/slate/slate-emissive-2048.png")));
+            //material.set_param(SV_HEIGHTSCALE, 1.f);
+
+            //{
+            //    auto ent = createEntity(material.get_name(), rootEnt);
+            //    auto [pos, rot, scal] = ent.add_component<transform>();
+            //    pos = math::vec3(0.f, 8.f, 0.f);
+            //    rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
+            //    scal = math::vec3(3.f);
+            //    ent.add_component(gfx::mesh_renderer(material, model));
+            //}
+
+            //material = gfx::MaterialCache::create_material("bricks", fs::view("engine://shaders/default_lit.shs"));
+
+            //material.set_param("alphaCutoff", 0.5f);
+            //material.set_param("useAlbedoTex", true);
+            //material.set_param("useRoughnessTex", true);
+            //material.set_param("useNormal", true);
+            //material.set_param("useHeight", true);
+            //material.set_param("useAmbientOcclusion", true);
+
+            //material.set_param("useMetallicTex", false);
+            //material.set_param("useEmissiveTex", false);
+            //material.set_param("useMetallicRoughness", false);
+
+            //material.set_param("metallicValue", 0.f);
+            //material.set_param("emissiveColor", math::colors::black);
+
+            //material.set_param("albedoTex", rendering::TextureCache::create_texture(fs::view("assets://textures/brick/brickColor.png")));
+            //material.set_param("roughnessTex", rendering::TextureCache::create_texture(fs::view("assets://textures/brick/brickRoughness.png")));
+            //material.set_param("normalTex", rendering::TextureCache::create_texture(fs::view("assets://textures/brick/brickNormal.png")));
+            //material.set_param("ambientOcclusionTex", rendering::TextureCache::create_texture(fs::view("assets://textures/brick/brickAO.png")));
+            //material.set_param("heightTex", rendering::TextureCache::create_texture(fs::view("assets://textures/brick/brickDisplacement.png")));
+            //material.set_param("heightScale", 0.1f);
+
+            //{
+            //    auto ent = createEntity(material.get_name(), rootEnt);
+            //    auto [pos, rot, scal] = ent.add_component<transform>();
+            //    pos = math::vec3(0.f, 8.f, 4.f);
+            //    rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
+            //    scal = math::vec3(3.f);
+            //    ent.add_component(gfx::mesh_renderer(material, model));
+            //}
+
+            //material = gfx::MaterialCache::create_material("default", fs::view("assets://shaders/pbr.shs"));
+
+            //material.set_param(SV_ALBEDO, rendering::TextureCache::create_texture(fs::view("engine://resources/default/albedo")));
+            //material.set_param(SV_NORMALHEIGHT, rendering::TextureCache::create_texture(fs::view("engine://resources/default/normalHeight")));
+            //material.set_param(SV_MRDAO, rendering::TextureCache::create_texture(fs::view("engine://resources/default/MRDAo")));
+            //material.set_param(SV_EMISSIVE, rendering::TextureCache::create_texture(fs::view("engine://resources/default/emissive")));
+            //material.set_param(SV_HEIGHTSCALE, 1.f);
+
+            //{
+            //    auto ent = createEntity(material.get_name(), rootEnt);
+            //    auto [pos, rot, scal] = ent.add_component<transform>();
+            //    pos = math::vec3(0.f, 8.f, 8.f);
+            //    rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
+            //    scal = math::vec3(3.f);
+            //    ent.add_component(gfx::mesh_renderer(material, model));
+            //}
+
+            //srl::write<srl::yaml>(fs::view("assets://scenes/scene1.yaml"), rootEnt, "scene");
+            //srl::write<srl::json>(fs::view("assets://scenes/scene1.json"), rootEnt, "scene");
+            //srl::write<srl::bson>(fs::view("assets://scenes/scene1.bson"), rootEnt, "scene");
+
+            //ecs::Registry::destroyEntity(rootEnt);
+        }
+
+        srl::load<srl::bson, ecs::entity>(fs::view("assets://scenes/scene1.bson"), "scene");
  
         bindToEvent<events::exit, &ExampleSystem::onExit>();
     }
@@ -509,8 +473,6 @@ public:
     void update(legion::time::span deltaTime)
     {
         using namespace legion;
-
-        debug::drawLine(math::vec3(), math::vec3(0.099f, 0.f, -0.995f), math::colors::blue);
 
         static float exposure = gfx::Tonemapping::getExposure();
         auto currentExposure = gfx::Tonemapping::getExposure();

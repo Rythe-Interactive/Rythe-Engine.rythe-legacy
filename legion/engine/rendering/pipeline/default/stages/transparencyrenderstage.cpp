@@ -96,8 +96,9 @@ namespace legion::rendering
             sceneDepth = std::get<texture_handle>(depthAttachment);
 
         texture_handle skyboxTex;
-        if (ecs::world.has_component<skybox_renderer>())
-            skyboxTex = ecs::world.get_component<skybox_renderer>()->material.get_param<texture_handle>(SV_SKYBOX);
+        ecs::filter<skybox_renderer> filter;
+        if (!filter.empty())
+            skyboxTex = filter[0].get_component<skybox_renderer>()->material.get_param<texture_handle>(SV_SKYBOX);
 
         app::context_guard guard(context);
         if (!guard.contextIsValid())

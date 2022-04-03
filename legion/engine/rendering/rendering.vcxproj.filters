@@ -45,6 +45,7 @@
     <ClCompile Include="pipeline\default\stages\skybox.cpp" />
     <ClCompile Include="autogen\autogen.cpp" />
     <ClCompile Include="pipeline\default\stages\transparencyrenderstage.cpp" />
+    <ClCompile Include="data\serializers\material_serializer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="components\camera.hpp" />
@@ -95,6 +96,7 @@
     <ClInclude Include="pipeline\default\stages\transparencyrenderstage.hpp" />
     <ClInclude Include="autogen\override\reflector_light.hpp" />
     <ClInclude Include="autogen\override\prototype_light.hpp" />
+    <ClInclude Include="data\serializers\material_serializer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\buffer.inl" />

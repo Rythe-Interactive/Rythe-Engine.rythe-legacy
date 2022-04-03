@@ -297,7 +297,7 @@ namespace legion::rendering
         MaterialCache::m_materials.at(id).set_variant(variantId);
     }
 
-    L_NODISCARD shader_handle material_handle::get_shader()
+    L_NODISCARD shader_handle material_handle::get_shader() const
     {
         async::readonly_guard guard(MaterialCache::m_materialLock);
 
@@ -314,7 +314,7 @@ namespace legion::rendering
         MaterialCache::delete_material(id);
     }
 
-    void material_handle::bind()
+    void material_handle::bind() const
     {
         async::readonly_guard guard(MaterialCache::m_materialLock);
 
@@ -345,7 +345,7 @@ namespace legion::rendering
     }
 
 
-    L_NODISCARD const std::unordered_map<id_type, std::unique_ptr<material_parameter_base>>& material_handle::get_params()
+    L_NODISCARD const std::unordered_map<id_type, std::unique_ptr<material_parameter_base>>& material_handle::get_params() const
     {
         async::readonly_guard guard(MaterialCache::m_materialLock);
 
@@ -360,7 +360,7 @@ namespace legion::rendering
         return MaterialCache::m_materials.at(id).get_params();
     }
 
-    attribute material_handle::get_attribute(const std::string& name)
+    attribute material_handle::get_attribute(const std::string& name) const
     {
         async::readonly_guard guard(MaterialCache::m_materialLock);
 

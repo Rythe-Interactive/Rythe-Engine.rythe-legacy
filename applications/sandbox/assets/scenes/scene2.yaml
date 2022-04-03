@@ -11,6 +11,14 @@ scene:
             components:
                 -   type_name: example_comp
                     value: 1
+                -   type_name: legion::core::mesh_filter
+                    shared_mesh:
+                        type_name: legion::core::assets::asset<legion::core::mesh>
+                        name: Sphere
+                        loaded_from_file: true
+                        path: assets:\\models\sphere.obj
+                        import_settings:
+                            type_name: legion::core::assets::import_settings<legion::core::mesh>
                 -   type_name: legion::core::scale
                     x:  3
                     y:  3
@@ -24,6 +32,103 @@ scene:
                     x:  0
                     y:  0
                     z:  0
+                -   type_name: legion::rendering::mesh_renderer
+                    material:
+                        type_name: legion::rendering::material_handle
+                        name: iron
+                        shader: engine:\\shaders\default_lit.shs
+                        variant: default
+                        params:
+                            -   type_name: legion::core::math::vec<4,float,0>
+                                name: "albedoColor\x00"
+                                value:
+                                    x:  0
+                                    y:  0
+                                    z:  0
+                                    w:  0
+                            -   type_name: legion::rendering::texture_handle
+                                name: "albedoTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\iron\rustediron-albedo-2048.png
+                            -   type_name: legion::rendering::texture_handle
+                                name: "roughnessTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\iron\rustediron-roughness.png
+                            -   type_name: float
+                                name: "alphaCutoff\x00"
+                                value: 0.5
+                            -   type_name: legion::core::math::vec<4,float,0>
+                                name: "emissiveColor\x00"
+                                value:
+                                    x:  0
+                                    y:  0
+                                    z:  0
+                                    w:  1
+                            -   type_name: legion::rendering::texture_handle
+                                name: "ambientOcclusionTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\iron\rustediron-ao.png
+                            -   type_name: legion::rendering::texture_handle
+                                name: "heightTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\iron\rustediron-height.png
+                            -   type_name: legion::rendering::texture_handle
+                                name: "emissiveTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: engine:\\resources\invalid\missing
+                            -   type_name: float
+                                name: "heightScale\x00"
+                                value: 1
+                            -   type_name: legion::rendering::texture_handle
+                                name: "metallicRoughness\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: engine:\\resources\invalid\missing
+                            -   type_name: legion::rendering::texture_handle
+                                name: "normalTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\iron\rustediron-normal.png
+                            -   type_name: legion::rendering::texture_handle
+                                name: "metallicTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\iron\rustediron-metallic.png
+                            -   type_name: float
+                                name: "metallicValue\x00"
+                                value: 0
+                            -   type_name: float
+                                name: "roughnessValue\x00"
+                                value: 0
+                            -   type_name: bool
+                                name: "useAlbedoTex\x00"
+                                value: true
+                            -   type_name: bool
+                                name: "useAmbientOcclusion\x00"
+                                value: true
+                            -   type_name: bool
+                                name: "useEmissiveTex\x00"
+                                value: false
+                            -   type_name: bool
+                                name: "useHeight\x00"
+                                value: true
+                            -   type_name: bool
+                                name: "useMetallicRoughness\x00"
+                                value: false
+                            -   type_name: bool
+                                name: "useMetallicTex\x00"
+                                value: true
+                            -   type_name: bool
+                                name: "useNormal\x00"
+                                value: true
+                            -   type_name: bool
+                                name: "useRoughnessTex\x00"
+                                value: true
         -   type_name: legion::core::ecs::entity_data
             name: rock
             active: true
@@ -32,6 +137,14 @@ scene:
             components:
                 -   type_name: example_comp
                     value: 1
+                -   type_name: legion::core::mesh_filter
+                    shared_mesh:
+                        type_name: legion::core::assets::asset<legion::core::mesh>
+                        name: Sphere
+                        loaded_from_file: true
+                        path: assets:\\models\sphere.obj
+                        import_settings:
+                            type_name: legion::core::assets::import_settings<legion::core::mesh>
                 -   type_name: legion::core::scale
                     x:  3
                     y:  3
@@ -45,6 +158,39 @@ scene:
                     x:  0
                     y:  0
                     z:  4
+                -   type_name: legion::rendering::mesh_renderer
+                    material:
+                        type_name: legion::rendering::material_handle
+                        name: rock
+                        shader: assets:\\shaders\pbr.shs
+                        variant: default
+                        params:
+                            -   type_name: bool
+                                name: "discardExcess\x00"
+                                value: false
+                            -   type_name: legion::rendering::texture_handle
+                                name: "material_input.normalHeight\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\detailedRock\Rock020_1K_NormalHeight.png
+                            -   type_name: legion::rendering::texture_handle
+                                name: "material_input.albedo\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\detailedRock\Rock020_1K_Albedo.png
+                            -   type_name: legion::rendering::texture_handle
+                                name: "material_input.MRDAo\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\detailedRock\Rock020_1K_MRDAo.png
+                            -   type_name: legion::rendering::texture_handle
+                                name: "material_input.emissive\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\detailedRock\Rock020_1K_emissive.png
+                            -   type_name: float
+                                name: "material_input.heightScale\x00"
+                                value: 1
         -   type_name: legion::core::ecs::entity_data
             name: copper
             active: true
@@ -53,6 +199,14 @@ scene:
             components:
                 -   type_name: example_comp
                     value: 1
+                -   type_name: legion::core::mesh_filter
+                    shared_mesh:
+                        type_name: legion::core::assets::asset<legion::core::mesh>
+                        name: Sphere
+                        loaded_from_file: true
+                        path: assets:\\models\sphere.obj
+                        import_settings:
+                            type_name: legion::core::assets::import_settings<legion::core::mesh>
                 -   type_name: legion::core::scale
                     x:  3
                     y:  3
@@ -66,6 +220,39 @@ scene:
                     x:  0
                     y:  0
                     z:  8
+                -   type_name: legion::rendering::mesh_renderer
+                    material:
+                        type_name: legion::rendering::material_handle
+                        name: copper
+                        shader: assets:\\shaders\pbr.shs
+                        variant: default
+                        params:
+                            -   type_name: bool
+                                name: "discardExcess\x00"
+                                value: false
+                            -   type_name: legion::rendering::texture_handle
+                                name: "material_input.normalHeight\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\copper\copper-normalHeight-2048.png
+                            -   type_name: legion::rendering::texture_handle
+                                name: "material_input.albedo\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\copper\copper-albedo-2048.png
+                            -   type_name: legion::rendering::texture_handle
+                                name: "material_input.MRDAo\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\copper\copper-MRDAo-2048.png
+                            -   type_name: legion::rendering::texture_handle
+                                name: "material_input.emissive\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\copper\copper-emissive-2048.png
+                            -   type_name: float
+                                name: "material_input.heightScale\x00"
+                                value: 1
         -   type_name: legion::core::ecs::entity_data
             name: wood
             active: true
@@ -74,6 +261,14 @@ scene:
             components:
                 -   type_name: example_comp
                     value: 1
+                -   type_name: legion::core::mesh_filter
+                    shared_mesh:
+                        type_name: legion::core::assets::asset<legion::core::mesh>
+                        name: Sphere
+                        loaded_from_file: true
+                        path: assets:\\models\sphere.obj
+                        import_settings:
+                            type_name: legion::core::assets::import_settings<legion::core::mesh>
                 -   type_name: legion::core::scale
                     x:  3
                     y:  3
@@ -87,6 +282,103 @@ scene:
                     x:  0
                     y:  4
                     z:  0
+                -   type_name: legion::rendering::mesh_renderer
+                    material:
+                        type_name: legion::rendering::material_handle
+                        name: wood
+                        shader: engine:\\shaders\default_lit.shs
+                        variant: default
+                        params:
+                            -   type_name: legion::core::math::vec<4,float,0>
+                                name: "albedoColor\x00"
+                                value:
+                                    x:  0
+                                    y:  0
+                                    z:  0
+                                    w:  0
+                            -   type_name: legion::rendering::texture_handle
+                                name: "albedoTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\wood\WoodColor.png
+                            -   type_name: legion::rendering::texture_handle
+                                name: "roughnessTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\wood\Wood035_1K_Roughness.png
+                            -   type_name: float
+                                name: "alphaCutoff\x00"
+                                value: 0.5
+                            -   type_name: legion::core::math::vec<4,float,0>
+                                name: "emissiveColor\x00"
+                                value:
+                                    x:  0
+                                    y:  0
+                                    z:  0
+                                    w:  1
+                            -   type_name: legion::rendering::texture_handle
+                                name: "ambientOcclusionTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: engine:\\resources\invalid\missing
+                            -   type_name: legion::rendering::texture_handle
+                                name: "heightTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\wood\Wood035_1K_Displacement.png
+                            -   type_name: legion::rendering::texture_handle
+                                name: "emissiveTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: engine:\\resources\invalid\missing
+                            -   type_name: float
+                                name: "heightScale\x00"
+                                value: 1
+                            -   type_name: legion::rendering::texture_handle
+                                name: "metallicRoughness\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: engine:\\resources\invalid\missing
+                            -   type_name: legion::rendering::texture_handle
+                                name: "normalTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\wood\Wood035_1K_Normal.png
+                            -   type_name: legion::rendering::texture_handle
+                                name: "metallicTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: engine:\\resources\invalid\missing
+                            -   type_name: float
+                                name: "metallicValue\x00"
+                                value: 0
+                            -   type_name: float
+                                name: "roughnessValue\x00"
+                                value: 0
+                            -   type_name: bool
+                                name: "useAlbedoTex\x00"
+                                value: true
+                            -   type_name: bool
+                                name: "useAmbientOcclusion\x00"
+                                value: false
+                            -   type_name: bool
+                                name: "useEmissiveTex\x00"
+                                value: false
+                            -   type_name: bool
+                                name: "useHeight\x00"
+                                value: true
+                            -   type_name: bool
+                                name: "useMetallicRoughness\x00"
+                                value: false
+                            -   type_name: bool
+                                name: "useMetallicTex\x00"
+                                value: false
+                            -   type_name: bool
+                                name: "useNormal\x00"
+                                value: true
+                            -   type_name: bool
+                                name: "useRoughnessTex\x00"
+                                value: true
         -   type_name: legion::core::ecs::entity_data
             name: paint
             active: true
@@ -95,6 +387,14 @@ scene:
             components:
                 -   type_name: example_comp
                     value: 1
+                -   type_name: legion::core::mesh_filter
+                    shared_mesh:
+                        type_name: legion::core::assets::asset<legion::core::mesh>
+                        name: Sphere
+                        loaded_from_file: true
+                        path: assets:\\models\sphere.obj
+                        import_settings:
+                            type_name: legion::core::assets::import_settings<legion::core::mesh>
                 -   type_name: legion::core::scale
                     x:  3
                     y:  3
@@ -108,6 +408,39 @@ scene:
                     x:  0
                     y:  4
                     z:  4
+                -   type_name: legion::rendering::mesh_renderer
+                    material:
+                        type_name: legion::rendering::material_handle
+                        name: paint
+                        shader: assets:\\shaders\pbr.shs
+                        variant: default
+                        params:
+                            -   type_name: bool
+                                name: "discardExcess\x00"
+                                value: false
+                            -   type_name: legion::rendering::texture_handle
+                                name: "material_input.normalHeight\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\paint\paint-peeling-normalHeight-2048.png
+                            -   type_name: legion::rendering::texture_handle
+                                name: "material_input.albedo\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\paint\paint-peeling-albedo-2048.png
+                            -   type_name: legion::rendering::texture_handle
+                                name: "material_input.MRDAo\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\paint\paint-peeling-MRDAo-2048.png
+                            -   type_name: legion::rendering::texture_handle
+                                name: "material_input.emissive\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\paint\paint-peeling-emissive-2048.png
+                            -   type_name: float
+                                name: "material_input.heightScale\x00"
+                                value: 1
         -   type_name: legion::core::ecs::entity_data
             name: tiles
             active: true
@@ -116,6 +449,14 @@ scene:
             components:
                 -   type_name: example_comp
                     value: 1
+                -   type_name: legion::core::mesh_filter
+                    shared_mesh:
+                        type_name: legion::core::assets::asset<legion::core::mesh>
+                        name: Sphere
+                        loaded_from_file: true
+                        path: assets:\\models\sphere.obj
+                        import_settings:
+                            type_name: legion::core::assets::import_settings<legion::core::mesh>
                 -   type_name: legion::core::scale
                     x:  3
                     y:  3
@@ -129,6 +470,103 @@ scene:
                     x:  0
                     y:  4
                     z:  8
+                -   type_name: legion::rendering::mesh_renderer
+                    material:
+                        type_name: legion::rendering::material_handle
+                        name: tiles
+                        shader: engine:\\shaders\default_lit.shs
+                        variant: default
+                        params:
+                            -   type_name: legion::core::math::vec<4,float,0>
+                                name: "albedoColor\x00"
+                                value:
+                                    x:  0
+                                    y:  0
+                                    z:  0
+                                    w:  0
+                            -   type_name: legion::rendering::texture_handle
+                                name: "albedoTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\tile\tileColor.png
+                            -   type_name: legion::rendering::texture_handle
+                                name: "roughnessTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\tile\tileRoughness.png
+                            -   type_name: float
+                                name: "alphaCutoff\x00"
+                                value: 0.5
+                            -   type_name: legion::core::math::vec<4,float,0>
+                                name: "emissiveColor\x00"
+                                value:
+                                    x:  0
+                                    y:  0
+                                    z:  0
+                                    w:  1
+                            -   type_name: legion::rendering::texture_handle
+                                name: "ambientOcclusionTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: engine:\\resources\invalid\missing
+                            -   type_name: legion::rendering::texture_handle
+                                name: "heightTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: engine:\\resources\invalid\missing
+                            -   type_name: legion::rendering::texture_handle
+                                name: "emissiveTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: engine:\\resources\invalid\missing
+                            -   type_name: float
+                                name: "heightScale\x00"
+                                value: 0
+                            -   type_name: legion::rendering::texture_handle
+                                name: "metallicRoughness\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: engine:\\resources\invalid\missing
+                            -   type_name: legion::rendering::texture_handle
+                                name: "normalTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\tile\tileNormal.png
+                            -   type_name: legion::rendering::texture_handle
+                                name: "metallicTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: engine:\\resources\invalid\missing
+                            -   type_name: float
+                                name: "metallicValue\x00"
+                                value: 0
+                            -   type_name: float
+                                name: "roughnessValue\x00"
+                                value: 0
+                            -   type_name: bool
+                                name: "useAlbedoTex\x00"
+                                value: true
+                            -   type_name: bool
+                                name: "useAmbientOcclusion\x00"
+                                value: false
+                            -   type_name: bool
+                                name: "useEmissiveTex\x00"
+                                value: false
+                            -   type_name: bool
+                                name: "useHeight\x00"
+                                value: false
+                            -   type_name: bool
+                                name: "useMetallicRoughness\x00"
+                                value: false
+                            -   type_name: bool
+                                name: "useMetallicTex\x00"
+                                value: false
+                            -   type_name: bool
+                                name: "useNormal\x00"
+                                value: true
+                            -   type_name: bool
+                                name: "useRoughnessTex\x00"
+                                value: true
         -   type_name: legion::core::ecs::entity_data
             name: slate
             active: true
@@ -137,6 +575,14 @@ scene:
             components:
                 -   type_name: example_comp
                     value: 1
+                -   type_name: legion::core::mesh_filter
+                    shared_mesh:
+                        type_name: legion::core::assets::asset<legion::core::mesh>
+                        name: Sphere
+                        loaded_from_file: true
+                        path: assets:\\models\sphere.obj
+                        import_settings:
+                            type_name: legion::core::assets::import_settings<legion::core::mesh>
                 -   type_name: legion::core::scale
                     x:  3
                     y:  3
@@ -150,6 +596,39 @@ scene:
                     x:  0
                     y:  8
                     z:  0
+                -   type_name: legion::rendering::mesh_renderer
+                    material:
+                        type_name: legion::rendering::material_handle
+                        name: slate
+                        shader: assets:\\shaders\pbr.shs
+                        variant: default
+                        params:
+                            -   type_name: bool
+                                name: "discardExcess\x00"
+                                value: false
+                            -   type_name: legion::rendering::texture_handle
+                                name: "material_input.normalHeight\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\slate\slate-normalHeight-2048.png
+                            -   type_name: legion::rendering::texture_handle
+                                name: "material_input.albedo\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\slate\slate-albedo-2048.png
+                            -   type_name: legion::rendering::texture_handle
+                                name: "material_input.MRDAo\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\slate\slate-MRDAo-2048.png
+                            -   type_name: legion::rendering::texture_handle
+                                name: "material_input.emissive\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\slate\slate-emissive-2048.png
+                            -   type_name: float
+                                name: "material_input.heightScale\x00"
+                                value: 1
         -   type_name: legion::core::ecs::entity_data
             name: bricks
             active: true
@@ -158,6 +637,14 @@ scene:
             components:
                 -   type_name: example_comp
                     value: 1
+                -   type_name: legion::core::mesh_filter
+                    shared_mesh:
+                        type_name: legion::core::assets::asset<legion::core::mesh>
+                        name: Sphere
+                        loaded_from_file: true
+                        path: assets:\\models\sphere.obj
+                        import_settings:
+                            type_name: legion::core::assets::import_settings<legion::core::mesh>
                 -   type_name: legion::core::scale
                     x:  3
                     y:  3
@@ -171,6 +658,103 @@ scene:
                     x:  0
                     y:  8
                     z:  4
+                -   type_name: legion::rendering::mesh_renderer
+                    material:
+                        type_name: legion::rendering::material_handle
+                        name: bricks
+                        shader: engine:\\shaders\default_lit.shs
+                        variant: default
+                        params:
+                            -   type_name: legion::core::math::vec<4,float,0>
+                                name: "albedoColor\x00"
+                                value:
+                                    x:  0
+                                    y:  0
+                                    z:  0
+                                    w:  0
+                            -   type_name: legion::rendering::texture_handle
+                                name: "albedoTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\brick\brickColor.png
+                            -   type_name: legion::rendering::texture_handle
+                                name: "roughnessTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\brick\brickRoughness.png
+                            -   type_name: float
+                                name: "alphaCutoff\x00"
+                                value: 0.5
+                            -   type_name: legion::core::math::vec<4,float,0>
+                                name: "emissiveColor\x00"
+                                value:
+                                    x:  0
+                                    y:  0
+                                    z:  0
+                                    w:  1
+                            -   type_name: legion::rendering::texture_handle
+                                name: "ambientOcclusionTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\brick\brickAO.png
+                            -   type_name: legion::rendering::texture_handle
+                                name: "heightTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\brick\brickDisplacement.png
+                            -   type_name: legion::rendering::texture_handle
+                                name: "emissiveTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: engine:\\resources\invalid\missing
+                            -   type_name: float
+                                name: "heightScale\x00"
+                                value: 0.100000001
+                            -   type_name: legion::rendering::texture_handle
+                                name: "metallicRoughness\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: engine:\\resources\invalid\missing
+                            -   type_name: legion::rendering::texture_handle
+                                name: "normalTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: assets:\\textures\brick\brickNormal.png
+                            -   type_name: legion::rendering::texture_handle
+                                name: "metallicTex\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: engine:\\resources\invalid\missing
+                            -   type_name: float
+                                name: "metallicValue\x00"
+                                value: 0
+                            -   type_name: float
+                                name: "roughnessValue\x00"
+                                value: 0
+                            -   type_name: bool
+                                name: "useAlbedoTex\x00"
+                                value: true
+                            -   type_name: bool
+                                name: "useAmbientOcclusion\x00"
+                                value: true
+                            -   type_name: bool
+                                name: "useEmissiveTex\x00"
+                                value: false
+                            -   type_name: bool
+                                name: "useHeight\x00"
+                                value: true
+                            -   type_name: bool
+                                name: "useMetallicRoughness\x00"
+                                value: false
+                            -   type_name: bool
+                                name: "useMetallicTex\x00"
+                                value: false
+                            -   type_name: bool
+                                name: "useNormal\x00"
+                                value: true
+                            -   type_name: bool
+                                name: "useRoughnessTex\x00"
+                                value: true
         -   type_name: legion::core::ecs::entity_data
             name: default
             active: true
@@ -179,6 +763,14 @@ scene:
             components:
                 -   type_name: example_comp
                     value: 1
+                -   type_name: legion::core::mesh_filter
+                    shared_mesh:
+                        type_name: legion::core::assets::asset<legion::core::mesh>
+                        name: Sphere
+                        loaded_from_file: true
+                        path: assets:\\models\sphere.obj
+                        import_settings:
+                            type_name: legion::core::assets::import_settings<legion::core::mesh>
                 -   type_name: legion::core::scale
                     x:  3
                     y:  3
@@ -192,5 +784,38 @@ scene:
                     x:  0
                     y:  8
                     z:  8
+                -   type_name: legion::rendering::mesh_renderer
+                    material:
+                        type_name: legion::rendering::material_handle
+                        name: default
+                        shader: assets:\\shaders\pbr.shs
+                        variant: default
+                        params:
+                            -   type_name: bool
+                                name: "discardExcess\x00"
+                                value: false
+                            -   type_name: legion::rendering::texture_handle
+                                name: "material_input.normalHeight\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: engine:\\resources\default\normalHeight
+                            -   type_name: legion::rendering::texture_handle
+                                name: "material_input.albedo\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: engine:\\resources\default\albedo
+                            -   type_name: legion::rendering::texture_handle
+                                name: "material_input.MRDAo\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: engine:\\resources\default\MRDAo
+                            -   type_name: legion::rendering::texture_handle
+                                name: "material_input.emissive\x00"
+                                value:
+                                    loaded_from_file: true
+                                    path: engine:\\resources\default\emissive
+                            -   type_name: float
+                                name: "material_input.heightScale\x00"
+                                value: 1
     components:
         []
