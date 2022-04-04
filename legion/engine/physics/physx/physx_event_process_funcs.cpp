@@ -10,6 +10,14 @@ using namespace physx;
 
 namespace legion::physics
 {
+    void processAngularDragModification(rigidbody& rigidbody, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
+    {
+        float angularDrag = rigidbody.data.getAngularDrag();
+        PxRigidDynamic* rigid = static_cast<PxRigidDynamic*>(wrapper.physicsActor);
+
+        rigid->setAngularDamping(angularDrag);
+    }
+
     void processVelocityModification(rigidbody& rigidbody, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
     {
         const math::vec3& vel = rigidbody.data.getVelocity();

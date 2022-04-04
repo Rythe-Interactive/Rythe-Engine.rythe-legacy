@@ -179,7 +179,8 @@ namespace legion::physics
 
         auto& rbData = (*bigSphere.add_component<rigidbody>()).data;
         rbData.setVelocity(math::vec3(0, -25, -100));
-        rbData.setMass(525398.7f);
+        rbData.setMass(525398.719f);
+        rbData.setAngularDrag(0.5f);
 
         ecs::entity groundPlane = createEntity();
         groundPlane.add_component<physics_enviroment>()->data.instantiateInfinitePlane(math::vec3(0,1,0),0.0f);

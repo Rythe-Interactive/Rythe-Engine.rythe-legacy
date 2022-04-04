@@ -283,6 +283,7 @@ namespace legion::physics
 
         m_rigidbodyComponentActionFuncs[rigidbody_flag::rb_velocity] = &processVelocityModification;
         m_rigidbodyComponentActionFuncs[rigidbody_flag::rb_mass] = &processMassModification;
+        m_rigidbodyComponentActionFuncs[rigidbody_flag::rb_angular_drag] = &processAngularDragModification;
 
         m_enviromentComponentActionFuncs[physics_enviroment_flag::pe_add_plane] = &processAddInfinitePlane;
     }
