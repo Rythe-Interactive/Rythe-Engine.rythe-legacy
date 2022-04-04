@@ -55,6 +55,8 @@ namespace legion::physics
 
         void processRigidbodyComponentEvents(ecs::entity ent, rigidbody& rigidbody, physics_component& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo);
 
+        void processPhysicsEnviromentEvents(ecs::entity ent, physics_enviroment& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo);
+
         static constexpr float m_timeStep = 0.02f;
         static constexpr size_type m_maxPhysicsStep = 3;
 
@@ -66,8 +68,11 @@ namespace legion::physics
         using pcEventProcessFunc = delegate<void(physics_component&,const PhysxEnviromentInfo&, PhysxInternalWrapper&, ecs::entity)>;
         std::array< pcEventProcessFunc, physics_component_flag::pc_max> m_physicsComponentActionFuncs;
 
-        using rbEventProcessFunc = delegate<void(rigidbody& rigidbody,const PhysxEnviromentInfo&, PhysxInternalWrapper&, ecs::entity)>;
+        using rbEventProcessFunc = delegate<void(rigidbody&,const PhysxEnviromentInfo&, PhysxInternalWrapper&, ecs::entity)>;
         std::array< rbEventProcessFunc, rigidbody_flag::rb_max> m_rigidbodyComponentActionFuncs;
+
+        using peEventProcessFunc = delegate<void(physics_enviroment&, const PhysxEnviromentInfo&, PhysxInternalWrapper&, ecs::entity)>;
+        std::array< peEventProcessFunc, physics_enviroment_flag::pe_max> m_enviromentComponentActionFuncs;
 
         std::vector<size_type> m_wrapperPendingRemovalID;
 

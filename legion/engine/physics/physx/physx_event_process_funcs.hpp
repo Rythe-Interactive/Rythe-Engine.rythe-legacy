@@ -3,6 +3,7 @@
 #include <physics/physx/data/physx_wrapper.hpp>
 #include <physics/physx/physx_integration_helpers.hpp>
 #include <physics/components/physics_component.hpp>
+#include <physics/components/physics_enviroment.hpp>
 
 
 namespace physx
@@ -29,4 +30,6 @@ namespace legion::physics
     void processAddFirstConvex(physics_component& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity);
 
     void processAddNextConvex(physics_component& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity);
+
+    void processAddInfinitePlane(physics_enviroment& physicsEnviroment, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity);
 }

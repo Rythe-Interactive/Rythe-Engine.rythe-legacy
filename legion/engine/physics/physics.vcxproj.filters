@@ -218,5 +218,11 @@
     <ClInclude Include="components\physics_component.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="components\physics_enviroment.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="data\physics_enviroment_data.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -5,6 +5,6 @@ namespace legion::physics
 {
     struct rigidbody
     {
-        RigidbodyData rigidbodyData;
+        RigidbodyData data;
     };
 }

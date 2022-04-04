@@ -1,6 +1,7 @@
 #pragma once
 #include <physics/physx/data/physx_wrapper.hpp>
 #include <physics/components/physics_component.hpp>
+#include <physics/components/physics_enviroment.hpp>
 
 namespace legion::physics
 {
@@ -10,6 +11,8 @@ namespace legion::physics
 
         PhysxInternalWrapper& createPhysxWrapper(physics_component& unregisteredPhysXWrapper);
 
+        PhysxInternalWrapper& createPhysxWrapper(physics_enviroment& unregisteredPhysXWrapper);
+
         void PopAndSwapRemoveWrapper(size_type id);
 
         pointer<PhysxInternalWrapper> findWrapperWithID(size_type id);
@@ -17,6 +20,8 @@ namespace legion::physics
         inline void ReleasePhysicsWrappers() { m_physxWrappers.clear(); }
 
     private:
+
+        PhysxInternalWrapper& registerWrapperID(size_type& outID);
 
         sparse_set<size_type> m_wrapperIDSet;
         std::vector<PhysxInternalWrapper> m_physxWrappers;

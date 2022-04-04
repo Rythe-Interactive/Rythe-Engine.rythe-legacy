@@ -32,4 +32,17 @@ namespace legion::physics
         rb_angular_drag,
         rb_max //must always be the last enum
     };
+
+    enum physics_enviroment_flag : size_type
+    {
+        pe_add_plane,
+        pe_max
+    };
+
+    enum class physics_enviroment_object_type
+    {
+        plane,
+        height_field,
+        not_set
+    };
 }

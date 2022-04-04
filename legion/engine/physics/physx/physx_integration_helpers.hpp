@@ -18,6 +18,7 @@ namespace legion::physics
     {
         physx::PxScene* scene = nullptr;
         physx::PxMaterial* defaultMaterial = nullptr;
+        float defaultRigidbodyDensity = 1.0f;
     };
 
     physx::PxPhysics* getSDK();
@@ -33,7 +34,7 @@ namespace legion::physics
 
     template<class PxGeometry, class... GeometryArgs>
     void instantiateDynamicActorWith(physx::PxPhysics* sdk, PhysxInternalWrapper& wrapper, const physx::PxTransform& globalTransform,
-        const physx::PxTransform& localTransform, const PhysxEnviromentInfo& sceneInfo, ecs::entity ent,  GeometryArgs&&... geometryArgs);
+        const physx::PxTransform& localTransform, const PhysxEnviromentInfo& sceneInfo, ecs::entity ent, GeometryArgs&&... geometryArgs);
 
     template<class PxGeometry, class... GeometryArgs>
     void instantiateNextCollider(physx::PxPhysics* sdk, PhysxInternalWrapper& wrapper,

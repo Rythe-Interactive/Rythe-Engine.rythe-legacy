@@ -12,22 +12,30 @@ namespace legion::physics
 {
     void processVelocityModification(rigidbody& rigidbody, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
     {
-        const math::vec3& vel = rigidbody.rigidbodyData.getVelocity();
+        const math::vec3& vel = rigidbody.data.getVelocity();
 
         PxRigidDynamic* rigid = static_cast<PxRigidDynamic*>(wrapper.physicsActor);
-
+        
         PxVec3 pxVelocity(vel.x, vel.y, vel.z);
         rigid->setLinearVelocity(pxVelocity);
     }
 
     void processMassModification(rigidbody& rigidbody, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
     {
-        float mass = rigidbody.rigidbodyData.getMass();
+        float newMass = rigidbody.data.getMass();
+        float density = rigidbody.data.getDensity();
 
         PxRigidDynamic* rigid = static_cast<PxRigidDynamic*>(wrapper.physicsActor);
-        rigid->setMass(mass);
+
+        float oldMass = rigid->getMass();
+
+        float newDensity = density * (newMass / oldMass);
+        PxRigidBodyExt::updateMassAndInertia(*rigid, newDensity);
+
+        float finalMass = rigid->getMass();
+        rigidbody.data.setDensity(newDensity);
     }
-    
+
     void processAddNextBox(physics_component& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
     {
         PhysicsComponentData& data = physicsComponent.physicsCompData;
@@ -171,5 +179,16 @@ namespace legion::physics
             PxConvexMesh* convexMesh = static_cast<PxConvexMesh*>(convex.getConvexPtr());
             instantiateNextCollider<PxConvexMeshGeometry, PxConvexMesh*&>(getSDK(), wrapper, localTransform, sceneInfo, convexMesh);
         }
+    }
+
+    void processAddInfinitePlane(physics_enviroment& physicsEnviroment, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
+    {
+        const math::vec3& normal = physicsEnviroment.data.getInfinitePlaneNormal();
+        float distToPlane = physicsEnviroment.data.getInfinitePlaneDistanceToOrigin();
+
+        wrapper.physicsActor = PxCreatePlane(*getSDK(), PxPlane(normal.x, normal.y, normal.z, distToPlane), *sceneInfo.defaultMaterial);
+        wrapper.physicsActor->userData = entity.data;
+
+        sceneInfo.scene->addActor(*wrapper.physicsActor);
     }
 }
