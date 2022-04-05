@@ -39,7 +39,8 @@ namespace legion::physics
         directoryPath += "\\";
 
         std::time_t t = std::time(0);
-        std::tm* now = std::localtime(&t);
+        std::tm* now = nullptr;
+        localtime_s(now, &t);
 
         //file name is date and time of file creation
         std::string filename;
