@@ -5,7 +5,7 @@
 
 namespace legion::physics
 {
-    constexpr size_t defaultSceneIndex = 0;
+
 
     void PhysXTestSystem::setup()
     {
@@ -45,8 +45,8 @@ namespace legion::physics
             sun.add_component<transform>(position(10, 10, 10), rotation::lookat(math::vec3(1, 1, -1), math::vec3::zero), scale());
         }
 
-        //setupCubeWorldTestScene();
-        setupBoxAndStackTestScene();
+        setupCubeWorldTestScene();
+        //setupBoxAndStackTestScene();
 
         //enable player to shoot blocks
         app::InputSystem::createBinding<ShootPhysXBox>(app::inputmap::method::C);
@@ -69,6 +69,10 @@ namespace legion::physics
             {
                 entity.destroy();
             }
+
+            /*auto& rbComp = *entity.get_component<rigidbody>();
+
+            log::debug("vel {0} , ang {1} ", math::to_string(rbComp.data.getVelocity()), math::to_string(rbComp.data.getAngularVelocity()));*/
         }
 
         if (m_isRainingSuzanne)
@@ -201,6 +205,7 @@ namespace legion::physics
 
             rigidbody& rb = *shiftedBlock.add_component<rigidbody>();
             rb.data.setVelocity(cameraDirection * 20.0f);
+            rb.data.setLinearDrag(0.5f);
         }
 
         self_destruct_component& block = *shiftedBlock.add_component<self_destruct_component>();

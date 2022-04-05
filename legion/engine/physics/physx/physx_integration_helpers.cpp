@@ -58,7 +58,7 @@ namespace legion::physics
         dynamic->userData = ent.data;
         auto& rbData = ( * ent.get_component<rigidbody>() ).data;
 
-        rbData.setDensity(sceneInfo.defaultRigidbodyDensity);
+        rbData.setDensityDirect(sceneInfo.defaultRigidbodyDensity);
 
         if (! rbData.getGeneratedModifyEvents().test(rigidbody_flag::rb_mass))
         {

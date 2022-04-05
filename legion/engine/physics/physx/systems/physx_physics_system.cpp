@@ -39,17 +39,17 @@ namespace legion::physics
         directoryPath += "\\";
 
         std::time_t t = std::time(0);
-        std::tm* now = nullptr;
-        localtime_s(now, &t);
+        std::tm now;
+        localtime_s(&now, &t);
 
         //file name is date and time of file creation
         std::string filename;
-        filename += std::to_string(now->tm_year + 1900) + "-";
-        filename += std::to_string(now->tm_mon + 1) + "-";
-        filename += std::to_string(now->tm_mday)+ "-";
-        filename += std::to_string(now->tm_hour) + "-";
-        filename += std::to_string(now->tm_min) + "-";
-        filename += std::to_string(now->tm_sec);
+        filename += std::to_string(now.tm_year + 1900) + "-";
+        filename += std::to_string(now.tm_mon + 1) + "-";
+        filename += std::to_string(now.tm_mday)+ "-";
+        filename += std::to_string(now.tm_hour) + "-";
+        filename += std::to_string(now.tm_min) + "-";
+        filename += std::to_string(now.tm_sec);
         filename += ".pxd2";
 
         outFileName = directoryPath.string();
@@ -283,8 +283,10 @@ namespace legion::physics
         m_physicsComponentActionFuncs[physics_component_flag::pc_add_next_convex] = &processAddNextConvex;
 
         m_rigidbodyComponentActionFuncs[rigidbody_flag::rb_velocity] = &processVelocityModification;
+        m_rigidbodyComponentActionFuncs[rigidbody_flag::rb_angular_velocity] = &processAngularVelocityModification;
         m_rigidbodyComponentActionFuncs[rigidbody_flag::rb_mass] = &processMassModification;
         m_rigidbodyComponentActionFuncs[rigidbody_flag::rb_angular_drag] = &processAngularDragModification;
+        m_rigidbodyComponentActionFuncs[rigidbody_flag::rb_linear_drag] = &processLinearDragModification;
 
         m_enviromentComponentActionFuncs[physics_enviroment_flag::pe_add_plane] = &processAddInfinitePlane;
     }
@@ -435,6 +437,28 @@ namespace legion::physics
 
             *entity.get_component<position>() = math::vec3(pxPosition.x, pxPosition.y, pxPosition.z);
             *entity.get_component<rotation>() = math::quat(pxRotation.w, pxRotation.x, pxRotation.y, pxRotation.z);
+        }
+
+        //[2] Transfer linear and angular velocity changes from PxRigidDynamics to actual entity rigidbody components
+        ecs::filter<physics_component, rigidbody> physicsAndRigidbodyComponentFilter;
+
+        for (ecs::entity ent : physicsAndRigidbodyComponentFilter)
+        {
+            physics_component& phyComp = *ent.get_component<physics_component>();
+            rigidbody& rbComp = *ent.get_component<rigidbody>();
+
+            pointer<PhysxInternalWrapper> physxWrapper =  m_physxWrapperContainer.findWrapperWithID(phyComp.physicsComponentID);
+
+            if (physxWrapper)
+            {
+                PxRigidDynamic* dynamic = static_cast<PxRigidDynamic*>(physxWrapper->physicsActor);
+
+                PxVec3 pxLinear = dynamic->getLinearVelocity();
+                PxVec3 pxAngular = dynamic->getAngularVelocity();
+
+                rbComp.data.setLinearVelocityDirect({ pxLinear.x,pxLinear.y,pxLinear.z });
+                rbComp.data.setAngularVelocityDirect({ pxAngular.x,pxAngular.y,pxAngular.z });
+            }
         }
     }
     

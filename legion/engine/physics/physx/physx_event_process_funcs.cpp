@@ -18,6 +18,14 @@ namespace legion::physics
         rigid->setAngularDamping(angularDrag);
     }
 
+    void processLinearDragModification(rigidbody& rigidbody, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
+    {
+        float linearDrag = rigidbody.data.getLinearDrag();
+        PxRigidDynamic* rigid = static_cast<PxRigidDynamic*>(wrapper.physicsActor);
+
+        rigid->setLinearDamping(linearDrag);
+    }
+
     void processVelocityModification(rigidbody& rigidbody, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
     {
         const math::vec3& vel = rigidbody.data.getVelocity();
@@ -28,20 +36,29 @@ namespace legion::physics
         rigid->setLinearVelocity(pxVelocity);
     }
 
+    void processAngularVelocityModification(rigidbody& rigidbody, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
+    {
+        const math::vec3& angularVel = rigidbody.data.getAngularVelocity();
+
+        PxRigidDynamic* rigid = static_cast<PxRigidDynamic*>(wrapper.physicsActor);
+
+        PxVec3 pxAng(angularVel.x, angularVel.y, angularVel.z);
+        rigid->setAngularVelocity(pxAng);
+    }
+
     void processMassModification(rigidbody& rigidbody, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
     {
         float newMass = rigidbody.data.getMass();
         float density = rigidbody.data.getDensity();
 
         PxRigidDynamic* rigid = static_cast<PxRigidDynamic*>(wrapper.physicsActor);
-
         float oldMass = rigid->getMass();
 
         float newDensity = density * (newMass / oldMass);
         PxRigidBodyExt::updateMassAndInertia(*rigid, newDensity);
 
         float finalMass = rigid->getMass();
-        rigidbody.data.setDensity(newDensity);
+        rigidbody.data.setDensityDirect(newDensity);
     }
 
     void processAddNextBox(physics_component& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)

@@ -104,9 +104,6 @@ namespace legion::physics
         rendering::model_handle suzzaneH;
         rendering::model_handle teapotH;
 
-        ecs::entity staticToAABBEntLinear, staticToAABBEntRotation, staticToOBBEnt, staticToEdgeEnt;
-
-
         std::vector< ecs::entity> registeredColliderColorDraw;
 
         std::vector<std::vector<ecs::entity>> folowerObjects;

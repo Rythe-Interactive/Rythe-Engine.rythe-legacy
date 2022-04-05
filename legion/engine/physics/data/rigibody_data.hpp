@@ -74,7 +74,15 @@ namespace legion::physics
 
         /** @brief Internal use only. Sets the density of the rigidbody without updating its bitset.
          * The currently active active physics engine should be responsible for setting this value */
-        L_ALWAYS_INLINE void setDensity(float newDensity) noexcept { m_density = newDensity; }
+        L_ALWAYS_INLINE void setDensityDirect(float newDensity) noexcept { m_density = newDensity; }
+
+        /** @brief Internal use only. Sets the density of the rigidbody without updating its bitset.
+         * The currently active active physics engine should be responsible for setting this value */
+        L_ALWAYS_INLINE void setLinearVelocityDirect(const math::vec3& linearVelocity) noexcept { m_velocity = linearVelocity; }
+
+        /** @brief Internal use only. Sets the density of the rigidbody without updating its bitset.
+         * The currently active active physics engine should be responsible for setting this value */
+        L_ALWAYS_INLINE void setAngularVelocityDirect(const math::vec3& angularVelocity) noexcept { m_velocity = angularVelocity; }
 
     private:
 
