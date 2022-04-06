@@ -20,7 +20,7 @@ struct ObjectToFollow
 
 namespace legion::physics
 {
-    class PhysicsTestSystem final : public System<PhysicsTestSystem>
+    class DivinerPhysicsTestSystem final : public System<DivinerPhysicsTestSystem>
     {
     public:
 

@@ -3,7 +3,6 @@
 #include <core/core.hpp>
 #include <physics/diviner/physicsconstants.hpp>
 
-
 namespace legion::physics::diviner
 {
     struct rigidbody

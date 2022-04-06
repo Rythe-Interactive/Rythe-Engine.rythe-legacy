@@ -170,7 +170,8 @@ namespace legion::physics
 
     }
 
-    void PhysicsSystem::constructManifoldsWithPrecursors(ecs::component_container<diviner::rigidbody>& rigidbodies, std::vector<byte>& hasRigidBodies, physics_manifold_precursor& precursorA, physics_manifold_precursor& precursorB,
+    void PhysicsSystem::constructManifoldsWithPrecursors(ecs::component_container<diviner::rigidbody>& rigidbodies, std::vector<byte>& hasRigidBodies,
+        physics_manifold_precursor& precursorA, physics_manifold_precursor& precursorB,
         std::vector<physics_manifold>& manifoldsToSolve, bool isRigidbodyInvolved, bool isTriggerInvolved)
     {
         if (!precursorA.physicsComp || !precursorB.physicsComp) return;

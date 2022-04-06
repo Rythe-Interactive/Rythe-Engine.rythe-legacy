@@ -53,7 +53,7 @@ namespace legion::physics
             ApplyImpulse(tangentNormal1, tangent1Lambda, Ra, Rb);
             ApplyImpulse(tangentNormal2, tangent2Lambda, Ra, Rb);
         }
-
+        
         /* @brief Calculate a certain linear and angular impulse that will resolve the collision
         */
         void resolveContactConstraint(float dt, int i)
