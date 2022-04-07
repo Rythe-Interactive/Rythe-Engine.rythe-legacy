@@ -45,7 +45,10 @@ namespace legion::physics
             sun.add_component<transform>(position(10, 10, 10), rotation::lookat(math::vec3(1, 1, -1), math::vec3::zero), scale());
         }
 
-        PhysicsHelpers::createPhysicsMaterial(0.5f, 0.5f, 0.1f, "DefaultNonBouncy");
+        PhysicsHelpers::createPhysicsMaterial(0.6f, 0.6f, 0.1f, "DefaultNonBouncy");
+        PhysicsHelpers::createPhysicsMaterial(0.3f, 0.3f, 0.0f, "MediumNonBouncy");
+        PhysicsHelpers::createPhysicsMaterial(0.1f, 0.1f, 0.0f, "SlipperyNonBouncy");
+        
         
         setupCubeWorldTestScene();
         //setupBoxAndStackTestScene();
@@ -56,6 +59,9 @@ namespace legion::physics
 
         app::InputSystem::createBinding<ShootPhysXSphere>(app::inputmap::method::V);
         bindToEvent<ShootPhysXSphere, &PhysXTestSystem::shootPhysXSphere>();
+
+        app::InputSystem::createBinding<ShootFrictionAndForceCubes>(app::inputmap::method::B);
+        bindToEvent<ShootFrictionAndForceCubes, &PhysXTestSystem::shootFrictionTest>();
     }
 
     void PhysXTestSystem::update(legion::time::span deltaTime)
@@ -162,6 +168,11 @@ namespace legion::physics
 
             suzanne.add_component<rigidbody>();
         }
+
+        //---------------------------------------------- Friction Test TEST -----------------------------------------------------//
+
+        auto ent = createStaticColliderWall(math::vec3(-15, 0.0f, 10.0f), legionLogoMat, math::vec3(10, 1, 40));
+
     }
 
     void PhysXTestSystem::setupBoxAndStackTestScene()
@@ -173,7 +184,6 @@ namespace legion::physics
             createCubeStack(math::vec3(2.0f), 20, math::vec3(0,0, stackZ -= 10.0f));
         }
         
-
         ecs::entity bigSphere = createDefaultMeshEntity(math::vec3(0, 20, 100), sphereH, concreteMat);
         *bigSphere.add_component<scale>() = math::vec3(5.0f);
         bigSphere.add_component<physics_component>()->physicsCompData.AddSphereCollider(5.0f, math::vec3());
@@ -230,6 +240,45 @@ namespace legion::physics
         self_destruct_component& block = *shiftedBlock.add_component<self_destruct_component>();
 
         block.selfDestructTimer = 5.0f;
+    }
+
+    void PhysXTestSystem::shootFrictionTest(ShootFrictionAndForceCubes& action)
+    {
+        if (!action.value) { return; }
+
+        size_type slip = PhysicsHelpers::retrievePhysicsMaterialHash("SlipperyNonBouncy");
+        size_type medium = PhysicsHelpers::retrievePhysicsMaterialHash("MediumNonBouncy");
+        size_type normal = PhysicsHelpers::retrievePhysicsMaterialHash("DefaultNonBouncy");
+
+        {
+            auto middle = createDefaultMeshEntity(math::vec3(-12, 1.0f, -5.f), cubeH, concreteMat);
+
+            auto& phyComp = *middle.add_component<physics_component>();
+            phyComp.physicsCompData.AddBoxCollider(math::vec3(1.0f));
+            phyComp.physicsCompData.getColliders()[0].setMaterialHash(slip);
+            middle.add_component<rigidbody>()->data.setVelocity(math::vec3(0,0,10.f));
+        }
+
+        {
+            auto middle = createDefaultMeshEntity(math::vec3(-15, 1.0f, -5.f), cubeH, concreteMat);
+
+            auto& phyComp = *middle.add_component<physics_component>();
+            phyComp.physicsCompData.AddBoxCollider(math::vec3(1.0f));
+            phyComp.physicsCompData.getColliders()[0].setMaterialHash(medium);
+
+            middle.add_component<rigidbody>()->data.setVelocity(math::vec3(0, 0, 10.f));
+        }
+
+        {
+            auto middle = createDefaultMeshEntity(math::vec3(-17, 1.0f, -5.f), cubeH, concreteMat);
+
+            auto& phyComp = *middle.add_component<physics_component>();
+            phyComp.physicsCompData.AddBoxCollider(math::vec3(1.0f));
+            phyComp.physicsCompData.getColliders()[0].setMaterialHash(normal);
+
+            middle.add_component<rigidbody>()->data.setVelocity(math::vec3(0, 0, 10.f));
+        }
+        
     }
 
     void PhysXTestSystem::getCameraPositionAndDirection(math::vec3& cameraDirection, math::vec3& cameraPosition)

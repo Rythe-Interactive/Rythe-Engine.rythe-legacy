@@ -7,6 +7,7 @@ namespace lgn = legion;
 
 struct ShootPhysXBox : public lgn::app::input_action<ShootPhysXBox> {};
 struct ShootPhysXSphere : public lgn::app::input_action<ShootPhysXSphere> {};
+struct ShootFrictionAndForceCubes : public lgn::app::input_action<ShootFrictionAndForceCubes> {};
 
 struct self_destruct_component
 {
@@ -35,6 +36,8 @@ namespace legion::physics
         void shootPhysXCubes(ShootPhysXBox& action);
 
         void shootPhysXSphere(ShootPhysXSphere& action);
+
+        void shootFrictionTest(ShootFrictionAndForceCubes& action);
 
         void getCameraPositionAndDirection(math::vec3& cameraDirection, math::vec3& cameraPosition);
 
