@@ -65,16 +65,17 @@ namespace legion::physics
     {
         PhysicsComponentData& data = physicsComponent.physicsCompData;
 
-        for (ConvexColliderData& convexCollider : data.getConvexData())
+        for (ColliderData& collider : data.getColliders())
         {
-            if (convexCollider.isRegisteredOfType(collider_type::box)) { continue; }
+            if (collider.isRegisteredOrNotOfType(collider_type::box)) { continue; }
+            collider.setRegistered(true);
 
-            convexCollider.setRegistered(true);
+            BoxColliderData& box = collider.getColliderAsBox();
 
             PxTransform localTransform;
-            calculateLocalColliderTransform(localTransform, convexCollider);
+            calculateLocalColliderTransform(localTransform, collider);
 
-            const math::vec3& extents = convexCollider.getBoxExtents();
+            const math::vec3& extents = box.getBoxExtents();
 
             instantiateNextCollider<PxBoxGeometry,const PxVec3&>(getSDK(), wrapper, localTransform, sceneInfo, PxVec3(extents.x, extents.y, extents.z));
         }
@@ -84,18 +85,19 @@ namespace legion::physics
     {
         PhysicsComponentData& data = physicsComponent.physicsCompData;
 
-        for (ConvexColliderData& convexCollider : data.getConvexData())
+        for (ColliderData& collider : data.getColliders())
         {
-            if (convexCollider.isRegisteredOfType(collider_type::box)) { continue; }
-
-            convexCollider.setRegistered(true);
+            if (collider.isRegisteredOrNotOfType(collider_type::box)) { continue; }
+            collider.setRegistered(true);
+            
+            BoxColliderData& box = collider.getColliderAsBox();
 
             PxTransform transform;
             PxTransform localTransform;
 
-            calculateGlobalAndLocalTransforms(localTransform, transform, convexCollider, entity);
+            calculateGlobalAndLocalTransforms(localTransform, transform, collider, entity);
 
-            const math::vec3& extents = convexCollider.getBoxExtents();
+            const math::vec3& extents = box.getBoxExtents();
 
             if (wrapper.bodyType == physics_body_type::rigidbody)
             {
@@ -116,18 +118,17 @@ namespace legion::physics
     {
         PhysicsComponentData& data = physicsComponent.physicsCompData;
 
-        for (SphereColliderData& sphereCollider : data.getSphereData())
+        for (ColliderData& collider : data.getColliders())
         {
-            if (sphereCollider.isRegisteredOfType(collider_type::sphere)) { continue; }
-
-            sphereCollider.setRegistered(true);
+            if (collider.isRegisteredOrNotOfType(collider_type::sphere)) { continue; }
+            collider.setRegistered(true);
 
             PxTransform transform;
             PxTransform localTransform;
 
-            calculateGlobalAndLocalTransforms(localTransform, transform, sphereCollider, entity);
+            calculateGlobalAndLocalTransforms(localTransform, transform, collider, entity);
 
-            float radius = sphereCollider.getRadius();
+            float radius = collider.getColliderAsSphere().getRadius();
 
             if (wrapper.bodyType == physics_body_type::rigidbody)
             {
@@ -146,16 +147,15 @@ namespace legion::physics
     {
         PhysicsComponentData& data = physicsComponent.physicsCompData;
 
-        for (SphereColliderData& sphereCollider : data.getSphereData())
+        for (ColliderData& collider : data.getColliders())
         {
-            if (sphereCollider.isRegisteredOfType(collider_type::sphere)) { continue; }
-
-            sphereCollider.setRegistered(true);
+            if (collider.isRegisteredOrNotOfType(collider_type::sphere)) { continue; }
+            collider.setRegistered(true);
 
             PxTransform localTransform;
-            calculateLocalColliderTransform(localTransform, sphereCollider);
+            calculateLocalColliderTransform(localTransform, collider);
 
-            float radius = sphereCollider.getRadius();
+            float radius = collider.getColliderAsSphere().getRadius();
 
             instantiateNextCollider<PxSphereGeometry, float&>(getSDK(), wrapper, localTransform, sceneInfo, radius);
         }
@@ -165,16 +165,17 @@ namespace legion::physics
     {
         PhysicsComponentData& data = physicsComponent.physicsCompData;
 
-        for (ConvexColliderData& convex : data.getConvexData())
+        for (ColliderData& collider : data.getColliders())
         {
-            if (convex.isRegisteredOfType(collider_type::quickhull_convex)) { continue; }
-
-            convex.setRegistered(true);
+            if (collider.isRegisteredOrNotOfType(collider_type::quickhull_convex)) { continue; }
+            collider.setRegistered(true);
 
             PxTransform transform;
             PxTransform localTransform;
 
-            calculateGlobalAndLocalTransforms(localTransform, transform, convex, entity);
+            calculateGlobalAndLocalTransforms(localTransform, transform, collider, entity);
+
+            ConvexColliderData& convex = collider.getColliderAsConvex();
             PxConvexMesh* convexMesh = static_cast<PxConvexMesh*>(convex.getConvexPtr());
 
             if (wrapper.bodyType == physics_body_type::rigidbody)
@@ -192,18 +193,43 @@ namespace legion::physics
     {
         PhysicsComponentData& data = physicsComponent.physicsCompData;
 
-        for (ConvexColliderData& convex : data.getConvexData())
+        for (ColliderData& collider : data.getColliders())
         {
-            if (!convex.isRegisteredOfType(collider_type::quickhull_convex)) { continue; }
-
-            convex.setRegistered(true);
+            if (!collider.isRegisteredOrNotOfType(collider_type::quickhull_convex)) { continue; }
+            collider.setRegistered(true);
 
             PxTransform localTransform;
-            calculateLocalColliderTransform(localTransform, convex);
+            calculateLocalColliderTransform(localTransform, collider);
 
+            ConvexColliderData& convex = collider.getColliderAsConvex();
             PxConvexMesh* convexMesh = static_cast<PxConvexMesh*>(convex.getConvexPtr());
+
             instantiateNextCollider<PxConvexMeshGeometry, PxConvexMesh*&>(getSDK(), wrapper, localTransform, sceneInfo, convexMesh);
         }
+    }
+
+    void processSetPhysicsMaterial(const ColliderData& collider, const collider_modification_data& modData, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper)
+    {
+        PxRigidActor* rigid = static_cast<PxRigidActor*>(wrapper.physicsActor);
+
+        PxShape* shapes; PxU32 shapeCount = rigid->getNbShapes();
+        rigid->getShapes(&shapes, shapeCount);
+
+        PxMaterial* newMaterial = sceneInfo.defaultMaterial;
+
+        size_type materialHash = modData.data.newMaterial;
+        auto iter = sceneInfo.physicsMaterials->find(materialHash);
+
+        if (iter != sceneInfo.physicsMaterials->end())
+        {
+            newMaterial = iter->second;
+        }
+        else
+        {
+            log::warn("Failed to assign physics material!, default material has been set");
+        }
+
+        shapes[collider.getColliderIndex()].setMaterials(&newMaterial, 1);
     }
 
     void processAddInfinitePlane(physics_enviroment& physicsEnviroment, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)

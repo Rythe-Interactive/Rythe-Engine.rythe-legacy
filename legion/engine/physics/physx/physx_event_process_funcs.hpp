@@ -41,6 +41,10 @@ namespace legion::physics
 
     void processAddNextConvex(physics_component& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity);
 
+    //----------------------------------------------------------- Physics Collider -------------------------------------------------------------------------//
+
+    void processSetPhysicsMaterial(const ColliderData& collider, const collider_modification_data& modData, const PhysxEnviromentInfo& sceneInfo,  PhysxInternalWrapper& wrapper);
+
     //----------------------------------------------------------- Physics Enviroment -------------------------------------------------------------------------//
 
     void processAddInfinitePlane(physics_enviroment& physicsEnviroment, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity);

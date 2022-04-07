@@ -45,6 +45,8 @@ namespace legion::physics
             sun.add_component<transform>(position(10, 10, 10), rotation::lookat(math::vec3(1, 1, -1), math::vec3::zero), scale());
         }
 
+        PhysicsHelpers::createPhysicsMaterial(0.5f, 0.5f, 0.1f, "DefaultNonBouncy");
+        
         setupCubeWorldTestScene();
         //setupBoxAndStackTestScene();
 
@@ -69,17 +71,12 @@ namespace legion::physics
             {
                 entity.destroy();
             }
-
-            /*auto& rbComp = *entity.get_component<rigidbody>();
-
-            log::debug("vel {0} , ang {1} ", math::to_string(rbComp.data.getVelocity()), math::to_string(rbComp.data.getAngularVelocity()));*/
         }
 
         if (m_isRainingSuzanne)
         {
             suzzaneRainTick(deltaTime);
         }
-        
     }
 
     void PhysXTestSystem::setupCubeWorldTestScene()
@@ -308,6 +305,8 @@ namespace legion::physics
 
     void PhysXTestSystem::suzzaneRainTick(legion::time::span deltaTime)
     {
+        size_type hash = PhysicsHelpers::retrievePhysicsMaterialHash("DefaultNonBouncy");
+
         m_currentInterval += deltaTime;
 
         if (m_currentInterval > m_rainInterval)
@@ -331,6 +330,7 @@ namespace legion::physics
 
             auto& phyComp = *ent.add_component<physics_component>();
             phyComp.physicsCompData.AddConvexCollider(verts, math::vec3(), math::identity<math::quat>());
+            phyComp.physicsCompData.getColliders()[0].setMaterialHash(hash);
 
             ent.add_component<rigidbody>();
         }

@@ -2,19 +2,15 @@
 
 namespace legion::physics
 {
-    ColliderData::ColliderData(collider_type colliderType, const math::vec3& offset, const math::quat& rotation) noexcept
+    ColliderData::ColliderData(size_type colliderIndex, pointer<std::vector<collider_modification_data>> modificationsRequests, collider_type colliderType,
+        const math::vec3& offset, const math::quat& rotation) noexcept
         :
-        m_rotationOffset(rotation), m_positionOffset(offset), m_isRegistered(false), m_colliderType(colliderType)  { }
+        m_rotationOffset(rotation), m_positionOffset(offset), m_colliderIndex(colliderIndex),
+        m_colliderType(colliderType),  m_modificationsRequests(modificationsRequests),m_isRegistered(false) { }
 
-    ConvexColliderData::ConvexColliderData(const math::vec3& offset, const math::quat& rotation, const math::vec3& boxExtents) noexcept
-        :
-        ColliderData(collider_type::box,offset,rotation), m_boxExtents{ boxExtents } { }
+    BoxColliderData::BoxColliderData( const math::vec3& boxExtents) noexcept : m_boxExtents{ boxExtents } { }
 
-    SphereColliderData::SphereColliderData(const math::vec3& offset, float radius) noexcept
-        :
-        ColliderData(collider_type::sphere, offset, math::identity<math::quat>()), m_radius{radius} { }
+    SphereColliderData::SphereColliderData(float radius) noexcept : m_radius{radius} { }
         
-    ConvexColliderData::ConvexColliderData(const math::vec3& offset, const math::quat& rotation, void* internalConvexColliderStructure)
-        :
-        ColliderData(collider_type::quickhull_convex, offset, rotation), m_internalConvexStructure{ internalConvexColliderStructure } { }
+    ConvexColliderData::ConvexColliderData(void* internalConvexColliderStructure) :  m_internalConvexStructure{ internalConvexColliderStructure } { }
 }

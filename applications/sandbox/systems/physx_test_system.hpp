@@ -1,6 +1,7 @@
 #pragma once
 #include <core/core.hpp>
 #include <rendering/rendering.hpp>
+#include <physics/physics_helpers.hpp>
 
 namespace lgn = legion;
 

@@ -14,6 +14,14 @@ namespace legion::physics
         pc_max //must always be the last enum
     };
 
+    enum collider_modification_flag : size_type
+    {
+        cm_set_new_material = 0ull,
+        cm_set_new_convex_mesh,
+        cm_set_new_box_extents,
+        cm_max //must always be the last enum
+    };
+
     enum class collider_type
     {
         box,
