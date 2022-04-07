@@ -29,14 +29,10 @@ namespace legion::physics
 
         void fixedUpdate(time::time_span<fast_time> deltaTime)
         {
-            OPTICK_EVENT();
-
             ecs::component_container<diviner::rigidbody> rigidbodies;
             std::vector<byte> hasRigidBodies;
 
             {
-                OPTICK_EVENT("Fetching data");
-
                 diviner::rigidbody emptyRigidbody;
                 rigidbodies.resize(manifoldPrecursorQuery.size(), std::ref(emptyRigidbody));
                 hasRigidBodies.resize(manifoldPrecursorQuery.size());
