@@ -437,13 +437,13 @@ namespace legion::application
             mods result = mods::NONE;
 
             if (glfw_mods & GLFW_MOD_ALT)
-                result = static_cast<mods>(result & inputmap::modifier_keys::ALT);
+                result = static_cast<mods>(result | inputmap::modifier_keys::ALT);
 
             if (glfw_mods & GLFW_MOD_SHIFT)
-                result = static_cast<mods>(result & inputmap::modifier_keys::SHIFT);
+                result = static_cast<mods>(result | inputmap::modifier_keys::SHIFT);
 
             if (glfw_mods & GLFW_MOD_CONTROL)
-                result = static_cast<mods>(result & inputmap::modifier_keys::CTRL);
+                result = static_cast<mods>(result | inputmap::modifier_keys::CTRL);
 
             return result;
         }

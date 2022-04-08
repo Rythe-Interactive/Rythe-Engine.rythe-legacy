@@ -1,16 +1,30 @@
 #include <core/assets/assets.hpp>
 #include <core/scheduling/scheduling.hpp>
+#include "assetcache.hpp"
 #pragma once
 
 namespace legion::core::assets
 {
     template<typename AssetType>
     template<typename... Args>
-    inline common::result<asset<AssetType>> AssetCache<AssetType>::createInternal(id_type nameHash, Args && ...args)
+    inline asset<AssetType> AssetCache<AssetType>::createInternal(id_type nameHash, Args&&... args)
     {
         static_assert(std::is_constructible_v<AssetType, Args...>, "Asset type is not constructible with given argument types.");
 
-        AssetType* ptr = &instance.m_cache.try_emplace(nameHash, AssetType(std::forward<Args>(args)...)).first->second;
+        AssetType* ptr;
+        if constexpr (sizeof...(Args) == 0)
+        {
+            ptr = &(instance.m_cache[nameHash]); // Slightly faster than try_emplace in most cases except for when using libstdc++(GNU) with Clang, with GCC or using libc++(LLVM) with Clang is no issue.
+        }
+        else if constexpr (sizeof...(Args) == 1 && element_at_is_same_as_v<0, AssetType, Args...>)
+        {
+            ptr = &instance.m_cache.try_emplace(nameHash, std::forward<Args>(args)...).first->second;
+        }
+        else
+        {
+            ptr = &instance.m_cache.try_emplace(nameHash, AssetType(std::forward<Args>(args)...)).first->second;
+        }
+
         return asset<AssetType>{ ptr, nameHash };
     }
 
@@ -34,7 +48,13 @@ namespace legion::core::assets
     }
 
     template<typename AssetType>
-    inline common::result<asset<AssetType>> AssetCache<AssetType>::retryLoad(id_type previousLoader, id_type nameHash, const std::string& name, const fs::view& file, const AssetCache<AssetType>::import_cfg& settings)
+    inline const typename AssetCache<AssetType>::import_cfg& AssetCache<AssetType>::importSettings(id_type nameHash)
+    {
+        return instance.m_importSettings.at(nameHash);
+    }
+
+    template<typename AssetType>
+    inline common::result<asset<AssetType>> AssetCache<AssetType>::retryLoad(id_type previousLoader, id_type nameHash, const std::string& name, const fs::view& file, const typename AssetCache<AssetType>::import_cfg& settings)
     {
         loader_type* loader = nullptr;
         size_type loaderId;
@@ -53,6 +73,7 @@ namespace legion::core::assets
             if (result)
             {
                 instance.m_info.try_emplace(nameHash, detail::asset_info{ name, file.get_virtual_path(), loaderId });
+                instance.m_importSettings.try_emplace(nameHash, settings);
                 return result;
             }
             result.mark_handled();
@@ -83,6 +104,7 @@ namespace legion::core::assets
             if (result)
             {
                 instance.m_info.try_emplace(nameHash, detail::asset_info{ name, file.get_virtual_path(), loaderId });
+                instance.m_importSettings.try_emplace(nameHash, settings);
                 return result;
             }
             result.mark_handled();
@@ -112,6 +134,7 @@ namespace legion::core::assets
             if (result)
             {
                 instance.m_info.try_emplace(nameHash, detail::asset_info{ name, file.get_virtual_path(), loaderId });
+                instance.m_importSettings.try_emplace(nameHash, settings);
                 progress->complete(result);
                 return;
             }
@@ -191,6 +214,7 @@ namespace legion::core::assets
 
         AssetType* ptr = &instance.m_cache.try_emplace(nameHash, AssetType(std::forward<Arguments>(args)...)).first->second;
         instance.m_info.try_emplace(nameHash, detail::asset_info{ name, path, instance.m_loaderIds.at(typeHash<LoaderType>()) });
+        instance.m_importSettings.try_emplace(nameHash, import_cfg{});
         return asset<AssetType>{ ptr, nameHash };
     }
 
@@ -264,6 +288,7 @@ namespace legion::core::assets
             if (result)
             {
                 instance.m_info.try_emplace(nameHash, detail::asset_info{ name, file.get_virtual_path(), loaderId });
+                instance.m_importSettings.try_emplace(nameHash, settings);
                 return result;
             }
 
@@ -372,61 +397,30 @@ namespace legion::core::assets
     }
 
     template<typename AssetType>
-    inline L_ALWAYS_INLINE asset<AssetType> AssetCache<AssetType>::create(const std::string& name)
+    template<typename... Arguments, ::std::enable_if_t<element_at_is_same_as_v<0, ::std::string, remove_cvr_t<Arguments>...>, bool>>
+    inline L_ALWAYS_INLINE asset<AssetType> AssetCache<AssetType>::create(id_type nameHash, Arguments&&... args)
     {
-        return create(nameHash(name), name, std::string(""));
-    }
-
-    template<typename AssetType>
-    inline L_ALWAYS_INLINE asset<AssetType> AssetCache<AssetType>::create(id_type nameHash, const std::string& name)
-    {
-        return create(nameHash, name, std::string(""));
-    }
-
-    template<typename AssetType>
-    inline asset<AssetType> AssetCache<AssetType>::create(id_type nameHash, const std::string& name, const std::string& path)
-    {
-        static_assert(std::is_default_constructible_v<AssetType>, "Asset type is not default constructible.");
-
-        AssetType* ptr = &(instance.m_cache[nameHash]); // Slightly faster than try_emplace in most cases except for when using libstdc++(GNU) with Clang, with GCC or using libc++(LLVM) with Clang is no issue.
-        instance.m_info.try_emplace(nameHash, { name, path, invalid_id });
-        return { ptr, nameHash };
-    }
-
-    template<typename AssetType>
-    inline L_ALWAYS_INLINE asset<AssetType> AssetCache<AssetType>::create(const std::string& name, const AssetType& src)
-    {
-        return create(nameHash(name), name, std::string(""), src);
-    }
-
-    template<typename AssetType>
-    inline L_ALWAYS_INLINE asset<AssetType> AssetCache<AssetType>::create(id_type nameHash, const std::string& name, const AssetType& src)
-    {
-        return create(nameHash, name, std::string(""), src);
-    }
-
-    template<typename AssetType>
-    inline asset<AssetType> AssetCache<AssetType>::create(id_type nameHash, const std::string& name, const std::string& path, const AssetType& src)
-    {
-        static_assert(std::is_copy_constructible_v<AssetType>, "Asset type is not copy constructible.");
-
-        AssetType* ptr = &instance.m_cache.try_emplace(nameHash, src).first->second;
-        instance.m_info.try_emplace(nameHash, { name, path, invalid_id });
-        return { ptr, nameHash };
+        instance.m_info.try_emplace(nameHash, detail::asset_info{ "", "", invalid_id});
+        instance.m_importSettings.try_emplace(nameHash, import_cfg{});
+        return createInternal(nameHash, ::std::forward<Arguments>(args)...);
     }
 
     template<typename AssetType>
     template<typename... Arguments>
     inline L_ALWAYS_INLINE asset<AssetType> AssetCache<AssetType>::create(const std::string& name, Arguments&&... args)
     {
-        return createWithPath(nameHash(name), name, std::string(""), std::forward<Arguments>(args)...);
+        return create(nameHash(name), name, std::forward<Arguments>(args)...);
     }
 
     template<typename AssetType>
     template<typename... Arguments>
     inline L_ALWAYS_INLINE asset<AssetType> AssetCache<AssetType>::create(id_type nameHash, const std::string& name, Arguments&&... args)
     {
-        return createWithPath(nameHash, name, std::string(""), std::forward<Arguments>(args)...);
+        static_assert(std::is_constructible_v<AssetType, Arguments...>, "Asset type is not constructible with given argument types.");
+
+        instance.m_info.try_emplace(nameHash, detail::asset_info{ name, "", invalid_id });
+        instance.m_importSettings.try_emplace(nameHash, import_cfg{});
+        return createInternal(nameHash, ::std::forward<Arguments>(args)...);
     }
 
     template<typename AssetType>
@@ -435,9 +429,9 @@ namespace legion::core::assets
     {
         static_assert(std::is_constructible_v<AssetType, Arguments...>, "Asset type is not constructible with given argument types.");
 
-        AssetType* ptr = &instance.m_cache.try_emplace(nameHash, AssetType(std::forward<Arguments>(args)...)).first->second;
         instance.m_info.try_emplace(nameHash, detail::asset_info{ name, path, invalid_id });
-        return { ptr, nameHash };
+        instance.m_importSettings.try_emplace(nameHash, import_cfg{});
+        return createInternal(nameHash, ::std::forward<Arguments>(args)...);
     }
 
     template<typename AssetType>
@@ -538,6 +532,12 @@ namespace legion::core::assets
     inline L_ALWAYS_INLINE const std::string& asset<AssetType>::path() const
     {
         return AssetCache<AssetType>::info(m_id).path;
+    }
+
+    template<typename AssetType>
+    inline L_ALWAYS_INLINE const import_settings<AssetType>& asset<AssetType>::import_settings() const
+    {
+        return AssetCache<AssetType>::importSettings(m_id);
     }
 
     template<typename AssetType>

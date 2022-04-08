@@ -8,11 +8,25 @@ namespace legion::core
 {
     template<typename SelfType>
     template <void(SelfType::* func_type)(time::span), size_type charc>
-    inline L_ALWAYS_INLINE id_type System<SelfType>::createProcess(const char(&processChainName)[charc], time::span interval)
+    inline L_ALWAYS_INLINE id_type System<SelfType>::createProcess(const char(&processChainName)[charc])
+    {
+        std::string name = std::string(processChainName) + nameOfType<SelfType>() + std::to_string(time::span::zero()) + std::to_string(force_value_cast<ptr_type>(func_type));
+        id_type id = nameHash(name);
+        std::unique_ptr<schd::Process> process = std::make_unique<schd::Process>(name, id);
+        process->setOperation(delegate<void(time::span)>::from<SelfType, func_type>(reinterpret_cast<SelfType*>(this)));
+        m_processes.emplace(id, std::move(process));
+
+        schd::Scheduler::hookProcess<charc>(processChainName, pointer<schd::Process>{ m_processes[id].get() });
+        return id;
+    }
+
+    template<typename SelfType>
+    template <void(SelfType::* func_type)(time::span), size_type charc>
+    inline L_ALWAYS_INLINE id_type System<SelfType>::createProcess(const char(&processChainName)[charc], time::span interval, size_type maxIterationsPerFrame)
     {
         std::string name = std::string(processChainName) + nameOfType<SelfType>() + std::to_string(interval) + std::to_string(force_value_cast<ptr_type>(func_type));
         id_type id = nameHash(name);
-        std::unique_ptr<schd::Process> process = std::make_unique<schd::Process>(name, id, interval);
+        std::unique_ptr<schd::Process> process = std::make_unique<schd::Process>(name, id, interval, maxIterationsPerFrame);
         process->setOperation(delegate<void(time::span)>::from<SelfType, func_type>(reinterpret_cast<SelfType*>(this)));
         m_processes.emplace(id, std::move(process));
 
