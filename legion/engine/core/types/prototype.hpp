@@ -9,9 +9,9 @@
 
 namespace legion::core
 {
-    struct member_value;
+    struct [[no_reflect]] member_value;
     //a copy of data
-    struct prototype
+    struct [[no_reflect]] prototype
     {
         using member_container = std::unordered_map<std::string_view, member_value>;
         using attribute_container = std::vector<std::reference_wrapper<const attribute_base>>;
@@ -35,7 +35,7 @@ namespace legion::core
         }
     };
 
-    struct primitive_value
+    struct [[no_reflect]] primitive_value
     {
         id_type typeId;
         std::any data;
@@ -53,7 +53,7 @@ namespace legion::core
         }
     };
 
-    struct member_value
+    struct [[no_reflect]] member_value
     {
         bool is_object;
         std::string_view name;
@@ -106,12 +106,6 @@ namespace legion::core
 
     template<typename T>
     L_NODISCARD extern prototype make_prototype(const T& obj);
-
-    template<typename T>
-    L_NODISCARD prototype make_prototype(const T& obj)
-    {
-        return prototype(typeHash(obj), nameOfType(obj), prototype::member_container());
-    }
 }
 
 #if !defined(L_AUTOGENACTIVE)

@@ -21,7 +21,7 @@ namespace legion::core::ecs
     }
 
     template<typename ComponentType, typename... Args>
-    inline L_ALWAYS_INLINE component_pool<ComponentType>* Registry::getFamily(Args&&... args)
+    inline L_ALWAYS_INLINE pointer<component_pool<ComponentType>> Registry::getFamily(Args&&... args)
     {
         id_type typeId = typeHash<ComponentType>();
         auto& families = getFamilies();
@@ -30,10 +30,10 @@ namespace legion::core::ecs
 
         // Allocate and emplace if no item was found.
         auto& [_, componentType] = *(componentTypes().try_emplace(typeId, std::make_unique<component_type<ComponentType>>(std::forward<Args>(args)...)).first);
-        return dynamic_cast<component_pool<ComponentType>*>(families.emplace(
+        return { dynamic_cast<component_pool<ComponentType>*>(families.emplace(
             typeId,
             std::move(componentType->create_pool())
-        ).first->second.get()); // std::pair<iterator, bool>.first --> iterator<std::pair<key, value>>->second --> std::unique_ptr.get() --> component_pool_base*
+        ).first->second.get()) }; // std::pair<iterator, bool>.first --> iterator<std::pair<key, value>>->second --> std::unique_ptr.get() --> component_pool_base*
     }
 
     template<typename ComponentType>
@@ -110,7 +110,7 @@ namespace legion::core::ecs
             // Update filters.
             FilterRegistry::markComponentAdd<ComponentType>(target);
             // Actually create and return the component.
-            return reinterpret_cast<component_pool<ComponentType>*>(getFamily(typeId))->create_component(target, std::forward<ComponentType>(value));
+            return reinterpret_cast<component_pool<ComponentType>*>(getFamily(typeId).ptr)->create_component(target, std::forward<ComponentType>(value));
         }
     }
 
@@ -138,7 +138,7 @@ namespace legion::core::ecs
             // Update filters.
             FilterRegistry::markComponentAdd<ComponentType>(target);
             // Actually create and return the component.
-            return reinterpret_cast<component_pool<ComponentType>*>(getFamily(typeId))->create_component(target, value);
+            return reinterpret_cast<component_pool<ComponentType>*>(getFamily(typeId).ptr)->create_component(target, value);
         }
     }
 

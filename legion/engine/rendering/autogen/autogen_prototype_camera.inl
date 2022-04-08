@@ -13,7 +13,6 @@ namespace legion::core
             static const legion::reflectable_attribute reflectable_attr{};
             prot.attributes.push_back(std::cref(reflectable_attr));
         }
-        prot.members.emplace("targetWindow", member_value("targetWindow", make_prototype(obj.targetWindow)));
         prot.members.emplace("renderTarget", member_value("renderTarget", make_prototype(obj.renderTarget)));
         prot.members.emplace("clearColor", member_value("clearColor", make_prototype(obj.clearColor)));
         prot.members.emplace("fov", member_value("fov", primitive_value{typeHash(obj.fov), std::any(obj.fov)}));

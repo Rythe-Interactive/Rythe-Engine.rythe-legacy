@@ -1,11 +1,8 @@
 #pragma once
 #include <rendering/data/vertexarray.hpp>
 #include <rendering/data/buffer.hpp>
-
-
 #include <rendering/data/framebuffer.hpp>
 #include <rendering/data/shader.hpp>
-
 #include <rendering/data/screen_quad.hpp>
 
 #include <rendering/pipeline/base/pipeline.hpp>
@@ -38,7 +35,6 @@ namespace legion::rendering
         screen_quad m_quad;
     };
 
-    struct framebuffer;
     /**
      * @class PostProcessingEffect
      * @brief A base class for post processing effect.

@@ -7,5 +7,5 @@ namespace legion::rendering
 namespace legion::core
 {
     template<>
-    L_NODISCARD prototype make_prototype<legion::rendering::mesh_renderer>(const legion::rendering::mesh_renderer& obj);
+    L_NODISCARD extern prototype make_prototype<legion::rendering::mesh_renderer>(const legion::rendering::mesh_renderer& obj);
 }

@@ -8,7 +8,7 @@ namespace legion::core
     {
         prototype prot;
         prot.typeId = typeHash<::example_comp>();
-        prot.typeName = "::example_comp";
+        prot.typeName = "example_comp";
         {
             static const reflectable_attribute reflectable_attr{};
             prot.attributes.push_back(std::cref(reflectable_attr));

@@ -7,5 +7,5 @@ namespace legion::core
 namespace legion::core
 {
     template<>
-    L_NODISCARD prototype make_prototype<legion::core::sub_mesh>(const legion::core::sub_mesh& obj);
+    L_NODISCARD extern prototype make_prototype<legion::core::sub_mesh>(const legion::core::sub_mesh& obj);
 }

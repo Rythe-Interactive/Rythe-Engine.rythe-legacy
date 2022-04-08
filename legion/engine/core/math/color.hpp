@@ -11,7 +11,7 @@ namespace legion::core::math
      * @brief Color oriented wrapper around vec4.
      * @ref legion::core::math::vec4
      */
-    struct color : public vec4
+    struct [[no_reflect]] color : public vec4
     {
         color(const vec4& s) : vec4(s) {}
         color(vec4&& s) :vec4(s) {}

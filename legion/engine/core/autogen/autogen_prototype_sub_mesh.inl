@@ -13,7 +13,7 @@ namespace legion::core
             static const reflectable_attribute reflectable_attr{};
             prot.attributes.push_back(std::cref(reflectable_attr));
         }
-        prot.members.emplace("name", member_value("name", make_prototype(obj.name)));
+        prot.members.emplace("name", member_value("name", primitive_value{typeHash(obj.name), std::any(obj.name)}));
         prot.members.emplace("indexCount", member_value("indexCount", primitive_value{typeHash(obj.indexCount), std::any(obj.indexCount)}));
         prot.members.emplace("indexOffset", member_value("indexOffset", primitive_value{typeHash(obj.indexOffset), std::any(obj.indexOffset)}));
         prot.members.emplace("materialIndex", member_value("materialIndex", primitive_value{typeHash(obj.materialIndex), std::any(obj.materialIndex)}));

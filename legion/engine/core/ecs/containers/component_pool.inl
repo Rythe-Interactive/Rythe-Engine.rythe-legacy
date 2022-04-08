@@ -160,6 +160,18 @@ namespace legion::core::ecs
     }
 
     template<typename ComponentType>
+    inline L_ALWAYS_INLINE reflector component_pool<ComponentType>::get_component_reflector(entity target)
+    {
+        return make_reflector(m_components.at(target));
+    }
+
+    template<typename ComponentType>
+    inline L_ALWAYS_INLINE const reflector component_pool<ComponentType>::get_component_reflector(entity target) const
+    {
+        return make_reflector(m_components.at(target));
+    }
+
+    template<typename ComponentType>
     inline L_ALWAYS_INLINE void component_pool<ComponentType>::fill_container(component_container<ComponentType>& container, entity_set& entities)
     {
         container.reserve(entities.size());

@@ -127,7 +127,6 @@
     <ClCompile Include="renderstages\mousehover.cpp" />
     <ClCompile Include="source.cpp" />
     <ClCompile Include="systems\gui_test.cpp" />
-    <ClCompile Include="systems\physics_test_system.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="autogen\autogen.hpp" />

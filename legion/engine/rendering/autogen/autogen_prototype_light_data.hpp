@@ -7,5 +7,5 @@ namespace legion::rendering::detail
 namespace legion::core
 {
     template<>
-    L_NODISCARD prototype make_prototype<legion::rendering::detail::light_data>(const legion::rendering::detail::light_data& obj);
+    L_NODISCARD extern prototype make_prototype<legion::rendering::detail::light_data>(const legion::rendering::detail::light_data& obj);
 }

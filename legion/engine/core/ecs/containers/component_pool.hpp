@@ -3,6 +3,7 @@
 #include <core/types/primitives.hpp>
 #include <core/containers/sparse_map.hpp>
 #include <core/events/events.hpp>
+#include <core/types/reflector.hpp>
 
 #include <core/ecs/containers/component_container.hpp>
 #include <core/ecs/handles/entity.hpp>
@@ -54,6 +55,9 @@ namespace legion::core::ecs
          */
         L_NODISCARD virtual pointer<void> get_component(entity target) LEGION_PURE;
         L_NODISCARD virtual pointer<const void> get_component(entity target) const LEGION_PURE;
+
+        L_NODISCARD virtual reflector get_component_reflector(entity target) LEGION_PURE;
+        L_NODISCARD virtual const reflector get_component_reflector(entity target) const LEGION_PURE;
 
         /**@brief Erase a component attached to a certain entity.
          * @param target Entity ID of the entity the component is attached to.
@@ -109,6 +113,9 @@ namespace legion::core::ecs
          */
         L_NODISCARD virtual pointer<void> get_component(entity target);
         L_NODISCARD virtual pointer<const void> get_component(entity target) const;
+
+        L_NODISCARD virtual reflector get_component_reflector(entity target);
+        L_NODISCARD virtual const reflector get_component_reflector(entity target) const;
 
         /**@brief Erase a component attached to a certain entity.
          * @param target Entity ID of the entity the component is attached to.

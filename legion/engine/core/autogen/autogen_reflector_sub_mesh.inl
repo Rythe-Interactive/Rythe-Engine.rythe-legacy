@@ -13,7 +13,7 @@ namespace legion::core
             static const reflectable_attribute reflectable_attr{};
             refl.attributes.push_back(std::cref(reflectable_attr));
         }
-        refl.members.emplace("name", member_reference("name", make_reflector(obj.name)));
+        refl.members.emplace("name", member_reference("name", primitive_reference{typeHash(obj.name), &obj.name}));
         refl.members.emplace("indexCount", member_reference("indexCount", primitive_reference{typeHash(obj.indexCount), &obj.indexCount}));
         refl.members.emplace("indexOffset", member_reference("indexOffset", primitive_reference{typeHash(obj.indexOffset), &obj.indexOffset}));
         refl.members.emplace("materialIndex", member_reference("materialIndex", primitive_reference{typeHash(obj.materialIndex), &obj.materialIndex}));
@@ -31,7 +31,7 @@ namespace legion::core
             static const reflectable_attribute reflectable_attr{};
             refl.attributes.push_back(std::cref(reflectable_attr));
         }
-        refl.members.emplace("name", member_reference("name", make_reflector(obj.name)));
+        refl.members.emplace("name", member_reference("name", primitive_reference{typeHash(obj.name), &obj.name}));
         refl.members.emplace("indexCount", member_reference("indexCount", primitive_reference{typeHash(obj.indexCount), &obj.indexCount}));
         refl.members.emplace("indexOffset", member_reference("indexOffset", primitive_reference{typeHash(obj.indexOffset), &obj.indexOffset}));
         refl.members.emplace("materialIndex", member_reference("materialIndex", primitive_reference{typeHash(obj.materialIndex), &obj.materialIndex}));

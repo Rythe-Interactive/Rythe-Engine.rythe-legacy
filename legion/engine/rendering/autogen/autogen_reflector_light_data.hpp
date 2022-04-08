@@ -7,7 +7,7 @@ namespace legion::rendering::detail
 namespace legion::core
 {
     template<>
-    L_NODISCARD reflector make_reflector<legion::rendering::detail::light_data>(legion::rendering::detail::light_data& obj);
+    L_NODISCARD extern reflector make_reflector<legion::rendering::detail::light_data>(legion::rendering::detail::light_data& obj);
     template<>
-    L_NODISCARD const reflector make_reflector<const legion::rendering::detail::light_data>(const legion::rendering::detail::light_data& obj);
+    L_NODISCARD extern const reflector make_reflector<const legion::rendering::detail::light_data>(const legion::rendering::detail::light_data& obj);
 }

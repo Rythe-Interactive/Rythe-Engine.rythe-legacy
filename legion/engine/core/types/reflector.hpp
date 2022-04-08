@@ -8,10 +8,10 @@
 
 namespace legion::core
 {
-    struct member_reference;
+    struct [[no_reflect]] member_reference;
 
     //a reference to data
-    struct reflector
+    struct [[no_reflect]] reflector
     {
         using member_container = std::unordered_map<std::string_view, member_reference>;
         using attribute_container = std::vector<std::reference_wrapper<const attribute_base>>;
@@ -47,7 +47,7 @@ namespace legion::core
         }
     };
 
-    struct primitive_reference
+    struct [[no_reflect]] primitive_reference
     {
         id_type typeId;
         void* data = nullptr;
@@ -78,7 +78,7 @@ namespace legion::core
         }
     };
 
-    struct member_reference
+    struct [[no_reflect]] member_reference
     {
         bool is_object;
         std::string_view name;
@@ -129,12 +129,6 @@ namespace legion::core
 
     template<typename T>
     L_NODISCARD extern auto make_reflector(T& obj)->std::conditional_t<std::is_const_v<T>, const reflector, reflector>;
-
-    template<typename T>
-    L_NODISCARD auto make_reflector(T& obj)->std::conditional_t<std::is_const_v<T>, const reflector, reflector>
-    {
-        return reflector(typeHash(obj), nameOfType(obj), reflector::member_container(), &obj);
-    }
 }
 
 #if !defined(L_AUTOGENACTIVE)

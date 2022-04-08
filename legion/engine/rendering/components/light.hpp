@@ -26,7 +26,7 @@ namespace legion::rendering
         };
     }
 
-    struct light
+    struct [[no_reflect]] light
     {
         template<typename T>
         friend prototype legion::core::make_prototype(const T&);

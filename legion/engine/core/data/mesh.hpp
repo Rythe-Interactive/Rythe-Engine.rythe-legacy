@@ -39,8 +39,6 @@ namespace legion::core
         assets::asset<image> heightMap;
     };
 
-    using material_list = std::vector<material_data>;
-
     enum struct winding_order : byte
     {
         clockwise,
@@ -69,7 +67,7 @@ namespace legion::core
         std::vector<math::vec2> uvs;
         std::vector<math::vec3> tangents;
         std::vector<uint> indices;
-        material_list materials;
+        std::vector<material_data> materials;
 
         winding_order windingOrder;
 

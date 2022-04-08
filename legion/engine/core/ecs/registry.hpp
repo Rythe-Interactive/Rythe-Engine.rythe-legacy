@@ -87,14 +87,14 @@ namespace legion::core::ecs
         /**@brief Get a pointer to the family of a certain component type.
          */
         template<typename ComponentType, typename... Args>
-        L_NODISCARD static component_pool<ComponentType>* getFamily(Args&&... args);
+        L_NODISCARD static pointer<component_pool<ComponentType>> getFamily(Args&&... args);
 
         /**@brief Non templated way to get a pointer to the family of a certain component type.
          * @note Will throw an exception if none of the templated functions have been called
          *       before for this component type due to the type not being registered yet.
          * @param typeId Local type hash of the component type.
          */
-        L_NODISCARD static component_pool_base* getFamily(id_type typeId);
+        L_NODISCARD static pointer<component_pool_base> getFamily(id_type typeId);
 
         L_NODISCARD static const std::string& getFamilyName(id_type id);
 
@@ -204,7 +204,7 @@ namespace legion::core::ecs
          * @param target Entity to create the component for.
          * @return Pointer to the created component.
          */
-        static void* createComponent(id_type typeId, entity target);
+        static pointer<void> createComponent(id_type typeId, entity target);
 
         /**@brief Destroys a certain component on a specific entity.
          * @tparam ComponentType Type of the component to destroy.
@@ -256,7 +256,8 @@ namespace legion::core::ecs
          * @param target Entity to get the component from.
          * @return Pointer to the component.
          */
-        L_NODISCARD static void* getComponent(id_type typeId, entity target);
+        L_NODISCARD static pointer<void> getComponent(id_type typeId, entity target);
+        L_NODISCARD static reflector getComponentReflector(id_type typeId, entity target);
     };
 
     ReportSubSystem(Registry);

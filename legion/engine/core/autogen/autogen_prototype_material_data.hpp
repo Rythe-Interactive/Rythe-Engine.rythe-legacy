@@ -7,5 +7,5 @@ namespace legion::core
 namespace legion::core
 {
     template<>
-    L_NODISCARD prototype make_prototype<legion::core::material_data>(const legion::core::material_data& obj);
+    L_NODISCARD extern prototype make_prototype<legion::core::material_data>(const legion::core::material_data& obj);
 }

@@ -22,7 +22,13 @@ namespace legion::core
 
     };
 
+    struct no_reflect_attribute : public attribute<no_reflect_attribute>
+    {
+
+    };
+
 #define reflectable reflectable_attribute
+#define no_reflect no_reflect_attribute
 
     struct range_attribute : public attribute<range_attribute>
     {

@@ -6,7 +6,7 @@
 
 namespace legion::core
 {
-    struct position : public math::vec3
+    struct [[no_reflect]] position : public math::vec3
     {
         position() : math::vec3(0, 0, 0) {}
         position(const position&) = default;
@@ -30,9 +30,37 @@ namespace legion::core
             z = src.z;
             return *this;
         }
+        position& operator+=(const position& src)
+        {
+            x += src.x;
+            y += src.y;
+            z += src.z;
+            return *this;
+        };
+        position& operator+=(position&& src)
+        {
+            x += src.x;
+            y += src.y;
+            z += src.z;
+            return *this;
+        }
+        position& operator-=(const position& src)
+        {
+            x -= src.x;
+            y -= src.y;
+            z -= src.z;
+            return *this;
+        };
+        position& operator-=(position&& src)
+        {
+            x -= src.x;
+            y -= src.y;
+            z -= src.z;
+            return *this;
+        }
     };
 
-    struct rotation : public math::quat
+    struct [[no_reflect]] rotation : public math::quat
     {
         rotation() : math::quat(1, 0, 0, 0) {}
         rotation(float _w, float _x, float _y, float _z) : math::quat(_w, _x, _y, _z) {}
@@ -86,7 +114,7 @@ namespace legion::core
         return math::conjugate(math::normalize(math::toQuat(math::lookAt(position, center, up))));
     }
 
-    struct scale : public math::vec3
+    struct [[no_reflect]] scale : public math::vec3
     {
         scale() : math::vec3(1, 1, 1) {}
         scale(float _x, float _y, float _z) : math::vec3(_x, _y, _z) {}
@@ -144,10 +172,9 @@ namespace legion::core
             auto [position, rotation, scale] = values();
             return math::compose(scale, rotation, position);
         }
-
     };
 
-    struct velocity : public math::vec3
+    struct [[no_reflect]] velocity : public math::vec3
     {
         velocity() : math::vec3(0, 0, 0) {}
         velocity(const velocity&) = default;
@@ -171,9 +198,37 @@ namespace legion::core
             z = src.z;
             return *this;
         }
+        velocity& operator+=(const velocity& src)
+        {
+            x += src.x;
+            y += src.y;
+            z += src.z;
+            return *this;
+        }
+        velocity& operator+=(velocity&& src)
+        {
+            x += src.x;
+            y += src.y;
+            z += src.z;
+            return *this;
+        }
+        velocity& operator-=(const velocity& src)
+        {
+            x -= src.x;
+            y -= src.y;
+            z -= src.z;
+            return *this;
+        }
+        velocity& operator-=(velocity&& src)
+        {
+            x -= src.x;
+            y -= src.y;
+            z -= src.z;
+            return *this;
+        }
     };
 
-    struct [[reflectable]] mesh_filter
+    struct [[no_reflect]] mesh_filter
     {
         assets::asset<mesh> shared_mesh;
 

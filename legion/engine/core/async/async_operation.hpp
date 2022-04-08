@@ -16,7 +16,7 @@
 
 namespace legion::core::async
 {
-    struct async_progress_base
+    struct [[no_reflect]] async_progress_base
     {
     protected:
         const size_type m_size;

@@ -13,7 +13,6 @@ namespace legion::core
             static const legion::reflectable_attribute reflectable_attr{};
             refl.attributes.push_back(std::cref(reflectable_attr));
         }
-        refl.members.emplace("targetWindow", member_reference("targetWindow", make_reflector(obj.targetWindow)));
         refl.members.emplace("renderTarget", member_reference("renderTarget", make_reflector(obj.renderTarget)));
         refl.members.emplace("clearColor", member_reference("clearColor", make_reflector(obj.clearColor)));
         refl.members.emplace("fov", member_reference("fov", primitive_reference{typeHash(obj.fov), &obj.fov}));
@@ -33,7 +32,6 @@ namespace legion::core
             static const legion::reflectable_attribute reflectable_attr{};
             refl.attributes.push_back(std::cref(reflectable_attr));
         }
-        refl.members.emplace("targetWindow", member_reference("targetWindow", make_reflector(obj.targetWindow)));
         refl.members.emplace("renderTarget", member_reference("renderTarget", make_reflector(obj.renderTarget)));
         refl.members.emplace("clearColor", member_reference("clearColor", make_reflector(obj.clearColor)));
         refl.members.emplace("fov", member_reference("fov", primitive_reference{typeHash(obj.fov), &obj.fov}));

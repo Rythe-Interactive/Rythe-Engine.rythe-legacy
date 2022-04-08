@@ -8,7 +8,7 @@ namespace legion::core
     {
         reflector refl;
         refl.typeId = typeHash<::example_comp>();
-        refl.typeName = "::example_comp";
+        refl.typeName = "example_comp";
         {
             static const reflectable_attribute reflectable_attr{};
             refl.attributes.push_back(std::cref(reflectable_attr));
@@ -23,7 +23,7 @@ namespace legion::core
         ptr_type address = reinterpret_cast<ptr_type>(std::addressof(obj));
         reflector refl;
         refl.typeId = typeHash<::example_comp>();
-        refl.typeName = "::example_comp";
+        refl.typeName = "example_comp";
         {
             static const reflectable_attribute reflectable_attr{};
             refl.attributes.push_back(std::cref(reflectable_attr));

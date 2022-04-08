@@ -7,5 +7,5 @@ namespace legion::rendering
 namespace legion::core
 {
     template<>
-    L_NODISCARD prototype make_prototype<legion::rendering::camera>(const legion::rendering::camera& obj);
+    L_NODISCARD extern prototype make_prototype<legion::rendering::camera>(const legion::rendering::camera& obj);
 }
