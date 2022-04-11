@@ -40,25 +40,31 @@ namespace legion::core
         size_type m_particleCount = 0;
         //How many particles can spawn every interval     default: 1
         size_type m_spawnRate = 1;
+        //Total amount of particles ever spawned
+        size_type m_totalParticlesSpawned = 0;
 
         //If enabled the particle system will be paused         default: false
         bool m_pause = false;
+
+        //An enum to define the transformation space that the particles are in
+        Space m_space;
+
         //How much time must pass before you spawn more particles       default: .1f
         float m_spawnInterval = .1f;
         //Regulates the spawnrate to stay consistent over different timesteps
         float m_spawnBuffer = 0.0f;
         //Elapsed time since last spawn interval        default: 0.f
         float m_elapsedTime = 0.f;
-    public:
-        //Should particles be in the emitters space or the world space      default: true
-        bool localSpace = true;
-        //If enabled no particles can die and the emitter will keep spawning them until it reaches the limit        default: false
-        bool particleAging = false;
+        //Target duration time for the emitter      default: 1.f seconds
+        float m_targetTime = 0.f;
 
-    private:
+        //A list of boleans that represent the living status of a particle
         std::vector<bool> m_livingBuffer{};
+        //A list of policies bound to this emitter
         std::vector<std::unique_ptr<particle_policy_base>> m_particlePolicies;
+        //Per particle attributes 
         std::unordered_map<id_type, std::unique_ptr<particle_buffer_base>> m_particleBuffers;
+        //Per emitter attributes
         std::unordered_map<id_type, std::unique_ptr<particle_uniform_base>> m_particleUniforms;
 
     public:
@@ -67,7 +73,7 @@ namespace legion::core
         particle_emitter(const particle_emitter&) = delete;
         ~particle_emitter() = default;
 
-        template<typename bufferType,typename... Args>
+        template<typename bufferType, typename... Args>
         particle_buffer<bufferType>& create_buffer(const std::string_view& name, Args&&... args);
 
         template<typename bufferType>
@@ -80,7 +86,7 @@ namespace legion::core
         template<typename uniformType>
         bool has_buffer(id_type nameId) noexcept;
 
-        template<typename uniformType,typename... Args>
+        template<typename uniformType, typename... Args>
         uniformType& create_uniform(const std::string_view& name, Args&&... args);
 
         template<typename uniformType>
@@ -113,8 +119,15 @@ namespace legion::core
         void set_alive(size_type idx, bool alive);
         //Enables a range of particles
         void set_alive(size_type start, size_type count, bool alive);
+        //Sets the maximum duration a emitter should play
+        void set_emitter_duration(float duration) noexcept;
         //Returns whether the particle is alive or dead
         bool is_alive(size_type idx) const;
+
+        //Checks if the particles are spawned in world space
+        bool in_world_space() const noexcept;
+        //Checks if the particles are spawned in local space
+        bool in_local_space() const noexcept;
 
         //Swaps two particles indecies in every buffer
         void swap(size_type idx1, size_type idx2);

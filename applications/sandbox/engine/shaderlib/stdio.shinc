@@ -15,7 +15,7 @@ in vec3 tangent : SV_TANGENT;
 in vec4 vertexcolor : SV_COLOR;
 in vec2 uv : SV_TEXCOORD0;
 in uint64_t entityId : SV_ENTITYID;
-in uint frameID : SV_FRAMEID;
+in float frameID : SV_FRAMEID;
 in mat4 modelMatrix : SV_MODELMATRIX;
 #endif
 
@@ -49,7 +49,7 @@ io LGN_STDIO
     vec3 wtangent;
     vec2 uv;
     flat uint64_t entityId;
-    flat uint frameID;
+    float frameID;
     mat4 modelMatrix;
 }
 #if defined(GEOMETRY_SHADER)
@@ -71,7 +71,7 @@ out LGN_STDGEOMFRAG
     vec3 wtangent;
     vec2 uv;
     flat uint64_t entityId;
-    flat uint frameID;
+    float frameID;
     mat4 modelMatrix;
 } lgn_stdout;
 #endif

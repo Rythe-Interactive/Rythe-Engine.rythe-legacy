@@ -102,7 +102,7 @@ namespace legion::rendering
         model.vertexArray.setAttribPointer(entityBuffer, SV_ENTITYID, 2, GL_UNSIGNED_INT, false, 0, 0);
         model.vertexArray.setAttribDivisor(SV_ENTITYID, 1);
 
-        model.vertexArray.setAttribPointer(flipbookBuffer, SV_FRAMEID, 1, GL_UNSIGNED_INT, false, 0, 0);
+        model.vertexArray.setAttribPointer(flipbookBuffer, SV_FRAMEID, 1, GL_FLOAT, false, 0, 0);
         model.vertexArray.setAttribDivisor(SV_FRAMEID, 1);
 
         model.vertexArray.setAttribPointer(matrixBuffer, SV_MODELMATRIX + 0, 4, GL_FLOAT, false, sizeof(math::mat4), 0 * sizeof(math::mat4::col_type));

@@ -50,7 +50,7 @@ namespace legion::rendering
             addFramebuffer("main");
             modelMatrixBuffer = buffer(GL_ARRAY_BUFFER, sizeof(math::mat4) * 1024, nullptr, GL_DYNAMIC_DRAW);
             entityIdBuffer = buffer(GL_ARRAY_BUFFER, sizeof(id_type) * 1024, nullptr, GL_DYNAMIC_DRAW);
-            flipbookBuffer = buffer(GL_ARRAY_BUFFER, sizeof(uint) * 1024, nullptr, GL_DYNAMIC_DRAW);
+            flipbookBuffer = buffer(GL_ARRAY_BUFFER, sizeof(float) * 1024, nullptr, GL_DYNAMIC_DRAW);
         }
 
         create_meta<buffer>("model matrix buffer", modelMatrixBuffer);

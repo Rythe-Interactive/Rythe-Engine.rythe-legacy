@@ -400,8 +400,8 @@ void ExampleSystem::setup()
         emitter->resize(900);
         emitter->create_uniform<float>("minLifeTime") = 1.0f;
         emitter->create_uniform<float>("maxLifeTime") = 5.0f;
-        emitter->create_uniform<uint>("frameCount") = 9;
-        emitter->localSpace = true;
+        emitter->create_uniform<int>("frameCount", 9);
+        emitter->set_particle_space(WORLD);
 
         fountain_policy fountain;
         fountain.initForce = 0.5f;
@@ -421,8 +421,10 @@ void ExampleSystem::setup()
                 fs::view("assets://textures/explosion/frame8.png"),
             });
         material.set_param("_texture", textureArray);
+        material.set_param("frameCount", emitter->get_uniform<int>("frameCount"));
         material.set_variant("depth_only");
         material.set_param("_texture", textureArray);
+        material.set_param("frameCount", emitter->get_uniform<int>("frameCount"));
         material.set_variant("default");
         model = gfx::ModelCache::create_model("Billboard", fs::view("assets://models/billboard.glb"));
         emitter->add_policy<gfx::rendering_policy>(gfx::rendering_policy{ model, material });
@@ -457,8 +459,11 @@ void ExampleSystem::playEmitter(legion::play_action& action)
     {
         if (GuiTestSystem::selected != invalid_id)
         {
-            auto& emitter = GuiTestSystem::selected.get_component<particle_emitter>().get();
-            emitter.play();
+            if (GuiTestSystem::selected.has_component<particle_emitter>())
+            {
+                auto& emitter = GuiTestSystem::selected.get_component<particle_emitter>().get();
+                emitter.play();
+            }
         }
     }
 }
@@ -470,8 +475,11 @@ void ExampleSystem::pauseEmitter(legion::pause_action& action)
     {
         if (GuiTestSystem::selected != invalid_id)
         {
-            auto& emitter = GuiTestSystem::selected.get_component<particle_emitter>().get();
-            emitter.pause();
+            if (GuiTestSystem::selected.has_component<particle_emitter>())
+            {
+                auto& emitter = GuiTestSystem::selected.get_component<particle_emitter>().get();
+                emitter.pause();
+            }
         }
     }
 }
@@ -483,8 +491,11 @@ void ExampleSystem::stopEmitter(legion::stop_action& action)
     {
         if (GuiTestSystem::selected != invalid_id)
         {
-            auto& emitter = GuiTestSystem::selected.get_component<particle_emitter>().get();
-            emitter.stop();
+            if (GuiTestSystem::selected.has_component<particle_emitter>())
+            {
+                auto& emitter = GuiTestSystem::selected.get_component<particle_emitter>().get();
+                emitter.stop();
+            }
         }
     }
 }

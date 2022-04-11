@@ -30,7 +30,7 @@ namespace legion::core
 
     void particle_emitter::set_particle_space(Space coordSpace) noexcept
     {
-        localSpace = coordSpace == Space::WORLD;
+        m_space = coordSpace;
     }
 
     void particle_emitter::set_alive(size_type idx, bool alive)
@@ -48,11 +48,26 @@ namespace legion::core
         std::fill_n(m_livingBuffer.begin() + start, count, alive);
     }
 
+    void particle_emitter::set_emitter_duration(float duration) noexcept
+    {
+        m_targetTime = duration;
+    }
+
     bool particle_emitter::is_alive(size_type idx) const
     {
         if (idx < m_livingBuffer.size())
             return m_livingBuffer.at(idx);
         return false;
+    }
+
+    bool particle_emitter::in_world_space() const noexcept
+    {
+        return m_space == Space::WORLD;
+    }
+
+    bool particle_emitter::in_local_space() const noexcept
+    {
+        return m_space == Space::EMITTER;
     }
 
     void particle_emitter::swap(size_type idx1, size_type idx2)

@@ -29,7 +29,7 @@ namespace legion::rendering
         static id_type flipbookBufferId = nameHash("flipbook frame buffer");
         static id_type depthOnlyVariant = nameHash("depth_only");
 
-        auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<math::mat4>, std::vector<uint>>>>>(batchesId);
+        auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<math::mat4>, std::vector<float>>>>>(batchesId);
         if (!batches)
             return;
 
