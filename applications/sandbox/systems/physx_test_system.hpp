@@ -9,6 +9,13 @@ struct ShootPhysXBox : public lgn::app::input_action<ShootPhysXBox> {};
 struct ShootPhysXSphere : public lgn::app::input_action<ShootPhysXSphere> {};
 struct ShootFrictionAndForceCubes : public lgn::app::input_action<ShootFrictionAndForceCubes> {};
 
+struct MoveForward : public lgn::app::input_action<MoveForward> {};
+struct MoveBackward : public lgn::app::input_action<MoveBackward> {};
+
+struct MoveLeft : public lgn::app::input_action<MoveLeft> {};
+struct MoveRight: public lgn::app::input_action<MoveRight> {};
+
+
 struct self_destruct_component
 {
     float selfDestructTimer = 0.0f;
@@ -31,6 +38,8 @@ namespace legion::physics
 
         void setupBoxAndStackTestScene();
 
+        void setupCharacterControllerTestScene();
+
         //------------------------ Rigidbody Shooter -------------------------------------------//
 
         void shootPhysXCubes(ShootPhysXBox& action);
@@ -40,6 +49,45 @@ namespace legion::physics
         void shootFrictionTest(ShootFrictionAndForceCubes& action);
 
         void getCameraPositionAndDirection(math::vec3& cameraDirection, math::vec3& cameraPosition);
+
+
+        //------------------------ Character Controls -------------------------------------------//
+
+        void MoveCharacter(const math::vec3& displacement);
+
+        void onPressForward(MoveForward& action)
+        {
+            if (action.value)
+            {
+                MoveCharacter(math::vec3(0, 0, 1));
+            }
+        }
+
+        void onPresBackward(MoveBackward& action)
+        {
+            if (action.value)
+            {
+                MoveCharacter(math::vec3(0, 0, -1));
+            }
+        }
+
+        void onPressLeft(MoveLeft& action)
+        {
+            if (action.value)
+            {
+                MoveCharacter(math::vec3(1, 0, 0));
+            }
+        }
+
+        void onPressRight(MoveRight& action)
+        {
+            if (action.value)
+            {
+                MoveCharacter(math::vec3(-1, 0, 0));
+            }
+        }
+
+
 
         //-------------------------- Scene Setup Helpers ---------------------------------------//
 
@@ -85,5 +133,7 @@ namespace legion::physics
 
         math::vec3 m_rainStartPos = math::vec3(10,12,-5);
         math::vec3 m_rainExtents = math::vec3(10,0,10);
+
+        ecs::entity m_characterControllerEnt;
     };
 }

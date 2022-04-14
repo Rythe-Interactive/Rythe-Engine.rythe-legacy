@@ -13,6 +13,7 @@ namespace physx
 
 namespace legion::physics
 {
+    class capsule_controller;
     class rigidbody;
 
     //----------------------------------------------------------- Rigidbody -------------------------------------------------------------------------//
@@ -48,4 +49,8 @@ namespace legion::physics
     //----------------------------------------------------------- Physics Enviroment -------------------------------------------------------------------------//
 
     void processAddInfinitePlane(physics_enviroment& physicsEnviroment, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity);
+
+    //----------------------------------------------------------- Capsule Controller -------------------------------------------------------------------------//
+
+    void processCapsuleMoveTo(PhysxCharacterWrapper& characterWrapper, capsule_controller& capsule);
 }

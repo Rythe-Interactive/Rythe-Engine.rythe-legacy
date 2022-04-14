@@ -1,20 +1,25 @@
 #pragma once
 #include <core/core.hpp>
 #include <physics/physx/data/physx_wrapper_container.hpp>
+#include <physics/physx/data/physx_wrapper.hpp>
 #include <physics/physx/physx_integration_helpers.hpp>
 #include <core/containers/delegate.hpp>
 #include <physics/components/rigidbody.hpp>
-#include <physics/physics_helpers.hpp>>
+#include <physics/components/physics_component.hpp>
+#include <physics/physics_helpers.hpp>
 
 namespace physx
 {
     class PxScene;
+    class PxControllerManager;
     class PxPhysics;
     class PxMaterial;
 };
 
 namespace legion::physics
 {
+    class CapsuleControllerData;
+
     class PhysXPhysicsSystem final : public System<PhysXPhysicsSystem>
     {
     public:
@@ -43,16 +48,15 @@ namespace legion::physics
 
         void bindEventsToEventProcessors();
 
-        inline void markPhysicsWrapperPendingRemove(events::component_destruction<physics_component>& event)
-        {
-            m_wrapperPendingRemovalID.push_back(event.entity.get_component<physics_component>()->physicsComponentID);
-        }
-
+        void markPhysicsWrapperPendingRemove(events::component_destruction<physics_component>& event);
+        
         void onRequestCreatePhysicsMaterial(request_create_physics_material& physicsMaterialRequest);
 
         void executePreSimulationActions();
 
         void executePostSimulationActions();
+
+        void instantiateCharacterController(ecs::entity ent,const CapsuleControllerData& capsuleData, PhysxCharacterWrapper& outCharacterWrapper);
 
         void processPhysicsComponentEvents(ecs::entity ent, physics_component& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo);
 
@@ -60,14 +64,18 @@ namespace legion::physics
 
         void processColliderModificationEvents(physics_component& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo);
 
+        void processCapsuleCharacterModificationEvents(capsule_controller& capsule);
+
         void processPhysicsEnviromentEvents(ecs::entity ent, physics_enviroment& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo);
 
         static constexpr float m_timeStep = 0.02f;
         static constexpr size_type m_maxPhysicsStep = 3;
 
-        physx::PxScene* m_physxScene;
+        physx::PxScene* m_physxScene = nullptr;
+        physx::PxControllerManager* m_characterManager = nullptr;
 
-        PhysxWrapperContainer m_physxWrapperContainer;
+        PhysxWrapperContainer<PhysxInternalWrapper> m_physxWrapperContainer;
+        PhysxWrapperContainer<PhysxCharacterWrapper> m_characterContainer;
 
         using pcEventProcessFunc = delegate<void(physics_component&,const PhysxEnviromentInfo&, PhysxInternalWrapper&, ecs::entity)>;
         std::array< pcEventProcessFunc, physics_component_flag::pc_max> m_physicsComponentActionFuncs;
@@ -80,6 +88,9 @@ namespace legion::physics
 
         using cmEventProcessFunc = delegate<void(const ColliderData&, const collider_modification_data&, const PhysxEnviromentInfo&, PhysxInternalWrapper&)>;
         std::array<cmEventProcessFunc, collider_modification_flag::cm_max> m_colliderActionFuncs;
+
+        using ccEventProcessFunc = delegate<void(PhysxCharacterWrapper&, capsule_controller&) > ;
+        std::array<ccEventProcessFunc, capsule_character_flag::cc_max> m_capsuleActionFuncs;
 
         std::vector<size_type> m_wrapperPendingRemovalID;
 

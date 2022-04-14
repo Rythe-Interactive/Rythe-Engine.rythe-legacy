@@ -1,9 +1,9 @@
 #include "physx_physics_system.hpp"
 #include <physx/PxPhysicsAPI.h>
 #include <filesystem>
-#include <physics/components/physics_component.hpp>
 #include <physics/components/rigidbody.hpp>
 #include <physics/components/physics_enviroment.hpp>
+#include <physics/components/capsule_controller.hpp>
 #include <physics/events/events.hpp>
 #include <physics/physx/physx_event_process_funcs.hpp>
 
@@ -203,6 +203,7 @@ namespace legion::physics
         m_physxWrapperContainer.ReleasePhysicsWrappers();
 
         m_physxScene->release();
+        m_characterManager->release();
 
         for (auto& hashToMaterialPair : m_physicsMaterials)
         {
@@ -288,6 +289,8 @@ namespace legion::physics
             pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
             pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
         }
+
+        m_characterManager = PxCreateControllerManager(*m_physxScene);
     }
 
     void PhysXPhysicsSystem::bindEventsToEventProcessors()
@@ -308,6 +311,13 @@ namespace legion::physics
         m_enviromentComponentActionFuncs[physics_enviroment_flag::pe_add_plane] = &processAddInfinitePlane;
 
         m_colliderActionFuncs[collider_modification_flag::cm_set_new_material] = &processSetPhysicsMaterial;
+
+        m_capsuleActionFuncs[capsule_character_flag::cc_move_to] = &processCapsuleMoveTo;
+    }
+
+    void PhysXPhysicsSystem::markPhysicsWrapperPendingRemove(events::component_destruction<physics_component>& event)
+    {
+        m_wrapperPendingRemovalID.push_back(event.entity.get_component<physics_component>()->physicsComponentID);
     }
 
     void PhysXPhysicsSystem::releasePhysXVariables()
@@ -368,9 +378,10 @@ namespace legion::physics
 
         m_wrapperPendingRemovalID.clear();
 
-        //[2] Identify new physics components and enviroments
-        ecs::filter<physics_component> physicsComponentFilter;
-        ecs::filter<physics_enviroment> physicsEnviromentFilter;
+        //[2] Identify new physics components,enviroments, and character controllers
+        ecs::filter<physics_component,position,rotation> physicsComponentFilter;
+        ecs::filter<physics_enviroment, position, rotation> physicsEnviromentFilter;
+        ecs::filter<capsule_controller, position> capsuleCharacterFilter;
 
         for (auto entity : physicsComponentFilter)
         {
@@ -392,8 +403,20 @@ namespace legion::physics
             }
         }
 
+        for (auto entity : capsuleCharacterFilter)
+        {
+            auto& capsule = *entity.get_component<capsule_controller>();
+            math::vec3& entPos = *entity.get_component<position>();
+
+            if (capsule.id == invalid_capsule_controller)
+            {
+                PhysxCharacterWrapper& character = m_characterContainer.createPhysxWrapper(capsule);
+                instantiateCharacterController(entity, capsule.data, character);
+            }
+        }
+
         //[3] Identify new rigidbodies
-        ecs::filter<physics_component,rigidbody> physicsAndRigidbodyComponentFilter;
+        ecs::filter<physics_component,rigidbody, position, rotation> physicsAndRigidbodyComponentFilter;
 
         for (auto entity : physicsAndRigidbodyComponentFilter)
         {
@@ -442,6 +465,12 @@ namespace legion::physics
         {
             auto& physEnv = *entity.get_component<physics_enviroment>();
             processPhysicsEnviromentEvents(entity, physEnv, enviromentInfo);
+        }
+
+        for (auto entity : capsuleCharacterFilter)
+        {
+            auto& capsule = *entity.get_component<capsule_controller>();
+            processCapsuleCharacterModificationEvents(capsule);
         }
 
         //[4] Physics Objects transformation may get directly modified by other systems
@@ -494,6 +523,42 @@ namespace legion::physics
                 rbComp.data.setAngularVelocityDirect({ pxAngular.x,pxAngular.y,pxAngular.z });
             }
         }
+
+        //[3] Transfer capsule controller positions
+        auto& capsules = m_characterContainer.getWrappers();
+
+        for (PhysxCharacterWrapper& characterWrapper : capsules)
+        {
+            PxController* controller = characterWrapper.characterController;
+            ecs::entity entity = { static_cast<ecs::entity_data*>(controller->getUserData()) };
+
+            const PxExtendedVec3& pxVec =  controller->getPosition();
+            *entity.get_component<position>() = math::vec3{ pxVec.x,pxVec.y,pxVec.z };
+        }
+
+    }
+
+    void PhysXPhysicsSystem::instantiateCharacterController(ecs::entity ent, const CapsuleControllerData& capsuleData, PhysxCharacterWrapper& outCharacterWrapper)
+    {
+        const math::vec3& pos = ent.get_component<position>();
+        PxCapsuleControllerDesc desc;
+
+        desc.height = capsuleData.getHeight();
+        desc.radius = capsuleData.getRadius();
+
+        desc.material = m_physicsMaterials[defaultPhysicsMaterial];
+        desc.position = { pos.x, pos.y, pos.z };
+        desc.slopeLimit = 0.0f;
+        desc.contactOffset = 0.1f;
+        desc.stepOffset = 0.1f;
+        desc.invisibleWallHeight = 0.0f;
+        desc.maxJumpHeight = 0.0f;
+        desc.reportCallback = nullptr;
+
+        PxController* controller = m_characterManager->createController(desc);
+        outCharacterWrapper.characterController = controller;
+
+        controller->setUserData(ent.data);
     }
     
     void PhysXPhysicsSystem::processPhysicsComponentEvents(ecs::entity ent, physics_component& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo)
@@ -552,6 +617,24 @@ namespace legion::physics
         }
 
         physicsComponentToProcess.physicsCompData.resetColliderModificationFlags();
+    }
+
+    void PhysXPhysicsSystem::processCapsuleCharacterModificationEvents(capsule_controller& capsule)
+    {
+        pointer<PhysxCharacterWrapper> wrapperPtr = m_characterContainer.findWrapperWithID(capsule.id);
+        if (!wrapperPtr) { return; }
+
+        auto& eventsGenerated = capsule.data.getModificationFlags();
+
+        for (size_type bitPos = 0; bitPos < eventsGenerated.size(); ++bitPos)
+        {
+            if (eventsGenerated.test(bitPos))
+            {
+                m_capsuleActionFuncs[bitPos].invoke(*wrapperPtr, capsule);
+            }
+        }
+
+        capsule.data.resetModificationFlags();
     }
 
     void PhysXPhysicsSystem::processPhysicsEnviromentEvents(ecs::entity ent, physics_enviroment& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo)

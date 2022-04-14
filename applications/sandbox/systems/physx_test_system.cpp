@@ -50,8 +50,9 @@ namespace legion::physics
         PhysicsHelpers::createPhysicsMaterial(0.1f, 0.1f, 0.0f, "SlipperyNonBouncy");
         
         
-        setupCubeWorldTestScene();
+        //setupCubeWorldTestScene();
         //setupBoxAndStackTestScene();
+        setupCharacterControllerTestScene();
 
         //enable player to shoot blocks
         app::InputSystem::createBinding<ShootPhysXBox>(app::inputmap::method::C);
@@ -197,6 +198,45 @@ namespace legion::physics
         groundPlane.add_component<physics_enviroment>()->data.instantiateInfinitePlane(math::vec3(0,1,0),0.0f);
     }
 
+    void PhysXTestSystem::setupCharacterControllerTestScene()
+    {
+        math::quat rotZ90 = math::rotate(math::pi<float>() / 2.0f, math::vec3(0, 0, 1));
+
+        m_characterControllerEnt = createDefaultMeshEntity(math::vec3(0, 2, 0), sphereH, concreteMat);
+
+        CapsuleControllerData& capsule =  m_characterControllerEnt.add_component<capsule_controller>()->data;
+        capsule.setGravity(math::vec3(0.0f, -9.81f, 0.0f));
+        capsule.setHeight(1.0f);
+        capsule.setRadius(1.0f);
+        capsule.setSpeed(5.0f);
+
+        auto ent = createStaticColliderWall(math::vec3(0, 0.0f, 0), legionLogoMat, math::vec3(40, 1, 40));
+
+        auto higherBlock = createStaticColliderWall(math::vec3(20, 1.0f, -10), tileMat, math::vec3(20, 1, 20));
+        auto slighthigherBlock = createStaticColliderWall(math::vec3(20, 0.2f, 10), tileMat, math::vec3(20, 1, 20));
+
+        auto wallOnRight = createStaticColliderWall(math::vec3(-20, 1.0f, 0.0f), tileMat, math::vec3(20, 1, 40));
+        *wallOnRight.get_component<rotation>() = rotZ90;
+
+        auto inclineHeight = createStaticColliderWall(math::vec3(0, 3.0f, 25.0f), tileMat, math::vec3(20, 1, 15));
+        *inclineHeight.get_component<rotation>() = math::rotate(math::pi<float>() / 6.0f, math::vec3(-1, 0, 0));
+
+        createCubeStack(math::vec3(1.0f), 3, math::vec3(0, 0.5f, -15.0f));
+
+        app::InputSystem::createBinding<MoveForward>(app::inputmap::method::T);
+        bindToEvent<MoveForward, &PhysXTestSystem::onPressForward>();
+
+        app::InputSystem::createBinding<MoveLeft>(app::inputmap::method::F);
+        bindToEvent<MoveLeft, &PhysXTestSystem::onPressLeft>();
+
+        app::InputSystem::createBinding<MoveRight>(app::inputmap::method::H);
+        bindToEvent<MoveRight, &PhysXTestSystem::onPressRight>();
+
+        app::InputSystem::createBinding<MoveBackward>(app::inputmap::method::G);
+        bindToEvent<MoveBackward, &PhysXTestSystem::onPresBackward>();
+
+    }
+
     void PhysXTestSystem::shootPhysXCubes(ShootPhysXBox& action)
     {
         if (!action.value) { return; }
@@ -293,6 +333,13 @@ namespace legion::physics
             cameraDirection = rotationCamH.get() * math::vec3(0, 0, 1);
             cameraPosition = positionCamH.get() + cameraDirection;
         }
+    }
+
+    void PhysXTestSystem::MoveCharacter(const math::vec3& displacement)
+    {
+        CapsuleControllerData& data =  m_characterControllerEnt.get_component<capsule_controller>()->data;
+        data.moveToUsingSpeed(math::normalize(displacement));
+
     }
 
     void PhysXTestSystem::initializeLitMaterial(rendering::material_handle& materialToInitialize,

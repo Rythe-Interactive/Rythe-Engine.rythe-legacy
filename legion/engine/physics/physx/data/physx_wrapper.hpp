@@ -4,6 +4,7 @@
 namespace physx
 {
     class PxActor;
+    class PxController;
 }
 
 namespace legion::physics
@@ -32,5 +33,12 @@ namespace legion::physics
         PhysxInternalWrapper& operator= (const PhysxInternalWrapper& other) = delete;
 
         PhysxInternalWrapper(const PhysxInternalWrapper& other) = delete;
+    };
+
+    struct PhysxCharacterWrapper
+    {
+        physx::PxController* characterController = nullptr;
+
+        PhysxCharacterWrapper() noexcept = default;
     };
 }

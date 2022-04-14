@@ -36,7 +36,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="components\capsule_controller.hpp" />
     <ClInclude Include="components\physics_enviroment.hpp" />
+    <ClInclude Include="data\capsule_controller_data.hpp" />
     <ClInclude Include="data\colliders\collider_data.hpp" />
     <ClInclude Include="data\component_flags.hpp" />
     <ClInclude Include="data\physics_component_data.hpp" />
