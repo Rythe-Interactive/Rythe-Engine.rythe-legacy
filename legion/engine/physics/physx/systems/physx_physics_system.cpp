@@ -202,8 +202,8 @@ namespace legion::physics
 
         m_physxWrapperContainer.ReleasePhysicsWrappers();
 
-        m_physxScene->release();
         m_characterManager->release();
+        m_physxScene->release();
 
         for (auto& hashToMaterialPair : m_physicsMaterials)
         {
@@ -380,7 +380,7 @@ namespace legion::physics
 
         //[2] Identify new physics components,enviroments, and character controllers
         ecs::filter<physics_component,position,rotation> physicsComponentFilter;
-        ecs::filter<physics_enviroment, position, rotation> physicsEnviromentFilter;
+        ecs::filter<physics_enviroment> physicsEnviromentFilter;
         ecs::filter<capsule_controller, position> capsuleCharacterFilter;
 
         for (auto entity : physicsComponentFilter)

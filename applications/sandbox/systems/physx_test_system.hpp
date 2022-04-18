@@ -57,15 +57,16 @@ namespace legion::physics
 
         void onPressForward(MoveForward& action)
         {
-            if (action.value)
+            if (action.pressed())
             {
                 MoveCharacter(math::vec3(0, 0, 1));
             }
+            
         }
 
         void onPresBackward(MoveBackward& action)
         {
-            if (action.value)
+            if (action.pressed())
             {
                 MoveCharacter(math::vec3(0, 0, -1));
             }
@@ -73,7 +74,7 @@ namespace legion::physics
 
         void onPressLeft(MoveLeft& action)
         {
-            if (action.value)
+            if (action.pressed())
             {
                 MoveCharacter(math::vec3(1, 0, 0));
             }
@@ -81,7 +82,7 @@ namespace legion::physics
 
         void onPressRight(MoveRight& action)
         {
-            if (action.value)
+            if (action.pressed())
             {
                 MoveCharacter(math::vec3(-1, 0, 0));
             }

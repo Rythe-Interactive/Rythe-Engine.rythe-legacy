@@ -67,6 +67,13 @@ namespace legion::physics
 
     void PhysXTestSystem::update(legion::time::span deltaTime)
     {
+        log::debug("deltaTime {0}", deltaTime);
+
+
+        //log::debug("elapsed time {0}", time::mainClock.now());
+        
+        MoveCharacter(math::vec3(0.02, 0, 0.0f));
+
         ecs::filter<self_destruct_component> destructFilter;
 
         for (auto entity : destructFilter)
@@ -180,7 +187,7 @@ namespace legion::physics
     {
         float stackZ = -10.0f;
 
-        for (size_t i = 0; i < 20; i++)
+        for (size_t i = 0; i < 10; i++)
         {
             createCubeStack(math::vec3(2.0f), 20, math::vec3(0,0, stackZ -= 10.0f));
         }
@@ -202,13 +209,13 @@ namespace legion::physics
     {
         math::quat rotZ90 = math::rotate(math::pi<float>() / 2.0f, math::vec3(0, 0, 1));
 
-        m_characterControllerEnt = createDefaultMeshEntity(math::vec3(0, 2, 0), sphereH, concreteMat);
+        m_characterControllerEnt = createDefaultMeshEntity(math::vec3(0, 3.8f, 40), sphereH, concreteMat);
 
         CapsuleControllerData& capsule =  m_characterControllerEnt.add_component<capsule_controller>()->data;
         capsule.setGravity(math::vec3(0.0f, -9.81f, 0.0f));
-        capsule.setHeight(1.0f);
+        capsule.setHeight(2.0f);
         capsule.setRadius(1.0f);
-        capsule.setSpeed(5.0f);
+        capsule.setSpeed(0.1f);
 
         auto ent = createStaticColliderWall(math::vec3(0, 0.0f, 0), legionLogoMat, math::vec3(40, 1, 40));
 
@@ -337,9 +344,10 @@ namespace legion::physics
 
     void PhysXTestSystem::MoveCharacter(const math::vec3& displacement)
     {
+        if (!m_characterControllerEnt.valid()) return;
         CapsuleControllerData& data =  m_characterControllerEnt.get_component<capsule_controller>()->data;
         data.moveToUsingSpeed(math::normalize(displacement));
-
+        
     }
 
     void PhysXTestSystem::initializeLitMaterial(rendering::material_handle& materialToInitialize,

@@ -250,7 +250,7 @@ namespace legion::physics
         CapsuleControllerData& capsuleData = capsule.data;
 
         const math::vec3& disp = capsuleData.getCurrentDisplacement();
-
+        log::debug("displaced by {0}", math::to_string(disp));
         characterWrapper.characterController->move(PxVec3{ disp.x,disp.y,disp.z }, 0.0f, 0.016f, PxControllerFilters());
         capsuleData.resetDisplacement();
     }
