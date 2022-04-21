@@ -63,16 +63,34 @@ namespace legion::physics
 
         app::InputSystem::createBinding<ShootFrictionAndForceCubes>(app::inputmap::method::B);
         bindToEvent<ShootFrictionAndForceCubes, &PhysXTestSystem::shootFrictionTest>();
+
+        app::InputSystem::createBinding<CharacterJump>(app::inputmap::method::SPACE);
+        bindToEvent<CharacterJump, &PhysXTestSystem::OnCharacterJump>();
     }
 
     void PhysXTestSystem::update(legion::time::span deltaTime)
     {
-        log::debug("deltaTime {0}", deltaTime);
+        float speed = 5.0f * deltaTime;
 
+        if (moveBools[move_dir::forward])
+        {
+            MoveCharacter(math::vec3(0.0f, 0, speed) );
+        }
 
-        //log::debug("elapsed time {0}", time::mainClock.now());
-        
-        MoveCharacter(math::vec3(0.02, 0, 0.0f));
+        if (moveBools[move_dir::backward])
+        {
+            MoveCharacter(math::vec3(0.0f, 0, -speed) );
+        }
+
+        if (moveBools[move_dir::left])
+        {
+            MoveCharacter(math::vec3(-speed, 0,0 ) );
+        }
+
+        if (moveBools[move_dir::right])
+        {
+            MoveCharacter(math::vec3(speed, 0, 0) );
+        }
 
         ecs::filter<self_destruct_component> destructFilter;
 
@@ -209,10 +227,22 @@ namespace legion::physics
     {
         math::quat rotZ90 = math::rotate(math::pi<float>() / 2.0f, math::vec3(0, 0, 1));
 
-        m_characterControllerEnt = createDefaultMeshEntity(math::vec3(0, 3.8f, 40), sphereH, concreteMat);
+        m_characterControllerEnt = createDefaultMeshEntity(math::vec3(0, 3.8f, 0), sphereH, concreteMat);
+        
+        auto& capsuleCont = *m_characterControllerEnt.add_component<capsule_controller>();
+        CapsuleControllerData& capsule = capsuleCont.data;
 
-        CapsuleControllerData& capsule =  m_characterControllerEnt.add_component<capsule_controller>()->data;
-        capsule.setGravity(math::vec3(0.0f, -9.81f, 0.0f));
+        gravity_preset gravity;
+        gravity.gravityValue = math::vec3(0.0f, -0.98f, 0.0f);
+        //gravity.gravityAcc = math::vec3(0.0f);
+        capsule.addPreset(gravity);
+
+        rigidbody_force_feedback force_feedback;
+        force_feedback.forceAmount = 1000.0f;
+        force_feedback.massMaximum = 50.0f;
+
+        capsule.addPreset(force_feedback);
+
         capsule.setHeight(2.0f);
         capsule.setRadius(1.0f);
         capsule.setSpeed(0.1f);
@@ -346,8 +376,19 @@ namespace legion::physics
     {
         if (!m_characterControllerEnt.valid()) return;
         CapsuleControllerData& data =  m_characterControllerEnt.get_component<capsule_controller>()->data;
-        data.moveToUsingSpeed(math::normalize(displacement));
+        data.moveTo(displacement);
         
+    }
+
+    void PhysXTestSystem::OnCharacterJump(CharacterJump& action)
+    {
+        if (!m_characterControllerEnt.valid()) return;
+
+        if (action.value)
+        {
+            CapsuleControllerData& data = m_characterControllerEnt.get_component<capsule_controller>()->data;
+            data.jump(math::vec3(0, 0.30f, 0));
+        }
     }
 
     void PhysXTestSystem::initializeLitMaterial(rendering::material_handle& materialToInitialize,

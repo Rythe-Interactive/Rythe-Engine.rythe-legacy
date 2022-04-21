@@ -250,8 +250,25 @@ namespace legion::physics
         CapsuleControllerData& capsuleData = capsule.data;
 
         const math::vec3& disp = capsuleData.getCurrentDisplacement();
-        log::debug("displaced by {0}", math::to_string(disp));
         characterWrapper.characterController->move(PxVec3{ disp.x,disp.y,disp.z }, 0.0f, 0.016f, PxControllerFilters());
         capsuleData.resetDisplacement();
+    }
+
+    void processGravityPreset(controller_preset& contPreset, PhysxCharacterWrapper& character, const PhysxEnviromentInfo& sceneInfo)
+    {
+        void* voidSpecifics = &contPreset.specifics;
+        gravity_preset* gravityPreset = static_cast<gravity_preset*>(voidSpecifics);
+
+        gravityPreset->gravityAcc += gravityPreset->gravityValue * sceneInfo.timeStep;
+
+        const math::vec3& displacement = gravityPreset->gravityAcc;
+        const PxU32 flag = character.characterController->move(
+            PxVec3(displacement.x, displacement.y, displacement.z), 0.0f, sceneInfo.timeStep, PxControllerFilters());
+
+        if (flag & PxControllerCollisionFlag::eCOLLISION_DOWN)
+        {
+            log::debug("grounded");
+            gravityPreset->gravityAcc = math::vec3(0.0f);
+        }
     }
 }

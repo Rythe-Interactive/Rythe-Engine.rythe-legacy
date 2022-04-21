@@ -15,6 +15,7 @@ struct MoveBackward : public lgn::app::input_action<MoveBackward> {};
 struct MoveLeft : public lgn::app::input_action<MoveLeft> {};
 struct MoveRight: public lgn::app::input_action<MoveRight> {};
 
+struct CharacterJump : public lgn::app::input_action<CharacterJump> {};
 
 struct self_destruct_component
 {
@@ -55,36 +56,61 @@ namespace legion::physics
 
         void MoveCharacter(const math::vec3& displacement);
 
+        void OnCharacterJump(CharacterJump& action);
+
+        enum move_dir : size_type
+        {
+            forward, backward, left, right,max
+        };
+
+        std::array<bool, move_dir::max> moveBools;
+
         void onPressForward(MoveForward& action)
         {
-            if (action.pressed())
+            if (action.value)
             {
-                MoveCharacter(math::vec3(0, 0, 1));
+                moveBools[move_dir::forward] = true;
+            }
+            else
+            {
+                moveBools[move_dir::forward] = false;
             }
             
         }
 
         void onPresBackward(MoveBackward& action)
         {
-            if (action.pressed())
+            if (action.value)
             {
-                MoveCharacter(math::vec3(0, 0, -1));
+                moveBools[move_dir::backward] = true;
+            }
+            else
+            {
+                moveBools[move_dir::backward] = false;
             }
         }
 
         void onPressLeft(MoveLeft& action)
         {
-            if (action.pressed())
+            if (action.value)
             {
-                MoveCharacter(math::vec3(1, 0, 0));
+                moveBools[move_dir::left] = true;
+            }
+            else
+            {
+                moveBools[move_dir::left] = false;
             }
         }
 
         void onPressRight(MoveRight& action)
         {
-            if (action.pressed())
+            if (action.value)
             {
-                MoveCharacter(math::vec3(-1, 0, 0));
+                moveBools[move_dir::right] = true;
+            }
+            else
+            {
+                moveBools[move_dir::right] = false;
             }
         }
 

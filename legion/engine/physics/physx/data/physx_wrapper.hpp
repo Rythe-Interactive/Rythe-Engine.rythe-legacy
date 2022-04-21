@@ -9,6 +9,8 @@ namespace physx
 
 namespace legion::physics
 {
+    class ControllerHitFeedback;
+
     enum class physics_body_type
     {
         none,
@@ -38,7 +40,17 @@ namespace legion::physics
     struct PhysxCharacterWrapper
     {
         physx::PxController* characterController = nullptr;
+        std::unique_ptr<ControllerHitFeedback> controllerFeedback;
 
-        PhysxCharacterWrapper() noexcept = default;
+        PhysxCharacterWrapper();
+        ~PhysxCharacterWrapper();
+
+        PhysxCharacterWrapper& operator= (PhysxCharacterWrapper& other) = delete;
+
+        PhysxCharacterWrapper(PhysxCharacterWrapper& other) = delete;
+
+        PhysxCharacterWrapper& operator= (PhysxCharacterWrapper&& other) noexcept;
+
+        PhysxCharacterWrapper(PhysxCharacterWrapper&& other) noexcept;
     };
 }

@@ -14,12 +14,14 @@ namespace physx
     class PxControllerManager;
     class PxPhysics;
     class PxMaterial;
+    struct PxControllerShapeHit;
 };
 
 namespace legion::physics
 {
     class CapsuleControllerData;
-
+    struct controller_preset;
+   
     class PhysXPhysicsSystem final : public System<PhysXPhysicsSystem>
     {
     public:
@@ -56,6 +58,8 @@ namespace legion::physics
 
         void executePostSimulationActions();
 
+        void executePreTimeStepActions();
+
         void instantiateCharacterController(ecs::entity ent,const CapsuleControllerData& capsuleData, PhysxCharacterWrapper& outCharacterWrapper);
 
         void processPhysicsComponentEvents(ecs::entity ent, physics_component& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo);
@@ -67,6 +71,8 @@ namespace legion::physics
         void processCapsuleCharacterModificationEvents(capsule_controller& capsule);
 
         void processPhysicsEnviromentEvents(ecs::entity ent, physics_enviroment& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo);
+
+        delegate<void(const physx::PxControllerShapeHit&)> initializeDefaultRigidbodyToCharacterResponse(float forceAmount, float massMaximum);
 
         static constexpr float m_timeStep = 0.02f;
         static constexpr size_type m_maxPhysicsStep = 3;
@@ -91,6 +97,9 @@ namespace legion::physics
 
         using ccEventProcessFunc = delegate<void(PhysxCharacterWrapper&, capsule_controller&) > ;
         std::array<ccEventProcessFunc, capsule_character_flag::cc_max> m_capsuleActionFuncs;
+
+        using characterPresetProcessFunc = delegate<void(controller_preset&, PhysxCharacterWrapper&, const PhysxEnviromentInfo&)>;
+        std::unordered_map<size_type,characterPresetProcessFunc> m_hashToPresetProcessFunc;
 
         std::vector<size_type> m_wrapperPendingRemovalID;
 

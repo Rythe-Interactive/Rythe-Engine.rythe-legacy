@@ -236,5 +236,11 @@
     <ClInclude Include="data\capsule_controller_data.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="data\controller_presets.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="physx\data\controller_hit_feedback.inl">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

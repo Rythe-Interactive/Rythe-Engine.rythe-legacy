@@ -7,6 +7,7 @@
 #include <physics/events/events.hpp>
 #include <physics/physx/physx_event_process_funcs.hpp>
 
+#include <physics/physx/data/controller_hit_feedback.inl>
 
 namespace legion::physics
 {
@@ -274,7 +275,7 @@ namespace legion::physics
 
         m_physxScene = PS::physxSDK->createScene(sceneDesc);
         PxMaterial* m_defaultMaterial = PS::physxSDK->createMaterial(0.5f, 0.5f, 0.6f);
-        m_physicsMaterials.insert({ 0,m_defaultMaterial });
+        m_physicsMaterials.insert({ defaultPhysicsMaterial,m_defaultMaterial });
 
 
         #ifdef _DEBUG
@@ -313,6 +314,8 @@ namespace legion::physics
         m_colliderActionFuncs[collider_modification_flag::cm_set_new_material] = &processSetPhysicsMaterial;
 
         m_capsuleActionFuncs[capsule_character_flag::cc_move_to] = &processCapsuleMoveTo;
+
+        m_hashToPresetProcessFunc.insert({ typeHash<gravity_preset>(),&processGravityPreset });
     }
 
     void PhysXPhysicsSystem::markPhysicsWrapperPendingRemove(events::component_destruction<physics_component>& event)
@@ -337,12 +340,16 @@ namespace legion::physics
 
             size_type tickAmount = 0;
 
+            executePreSimulationActions();
+
             while (m_accumulation > m_timeStep && tickAmount < m_maxPhysicsStep)
             {
                 m_accumulation -= m_timeStep;
                 physicsStep();
                 ++tickAmount;
             }
+
+            executePostSimulationActions();
 
             m_isSingleStepContinueAcitve = false;
         }
@@ -352,12 +359,10 @@ namespace legion::physics
 
     void PhysXPhysicsSystem::physicsStep()
     {
-        executePreSimulationActions();
+        executePreTimeStepActions();
 
         m_physxScene->simulate(m_timeStep);
         m_physxScene->fetchResults(true);
-
-        executePostSimulationActions();
     }
 
     void PhysXPhysicsSystem::onRequestCreatePhysicsMaterial(request_create_physics_material& physicsMaterialRequest)
@@ -370,6 +375,7 @@ namespace legion::physics
 
     void PhysXPhysicsSystem::executePreSimulationActions()
     {
+       
         //[1] Identify invalid entities and remove them from pxScene
         for (size_type idToRemove : m_wrapperPendingRemovalID)
         {
@@ -393,6 +399,13 @@ namespace legion::physics
             }
         }
 
+        ecs::filter<capsule_controller, position> capsuleCharacterFilter2;
+        for (auto entity : capsuleCharacterFilter2)
+        {
+            auto& capsule = *entity.get_component<capsule_controller>();
+            math::vec3& entPos = *entity.get_component<position>();
+        }
+
         for (auto entity : physicsEnviromentFilter)
         {
             auto& physEnv = *entity.get_component<physics_enviroment>();
@@ -403,6 +416,7 @@ namespace legion::physics
             }
         }
 
+        auto x = capsuleCharacterFilter.size();
         for (auto entity : capsuleCharacterFilter)
         {
             auto& capsule = *entity.get_component<capsule_controller>();
@@ -440,6 +454,7 @@ namespace legion::physics
         enviromentInfo.defaultMaterial = m_physicsMaterials[defaultPhysicsMaterial];
         enviromentInfo.physicsMaterials = &m_physicsMaterials;
         enviromentInfo.defaultRigidbodyDensity = 10.0f;
+        enviromentInfo.timeStep = m_timeStep;
 
         for (auto entity : physicsComponentFilter)
         {
@@ -473,7 +488,9 @@ namespace legion::physics
             processCapsuleCharacterModificationEvents(capsule);
         }
 
-        //[4] Physics Objects transformation may get directly modified by other systems
+        
+
+        //[6] Physics Objects transformation may get directly modified by other systems
         // Given a list of entities that have been moved, transfer their movements to the respective physics actor
         //TODO identify entities whos transforms have been modified
     }
@@ -538,11 +555,42 @@ namespace legion::physics
 
     }
 
+    void PhysXPhysicsSystem::executePreTimeStepActions()
+    {
+        PhysxEnviromentInfo enviromentInfo;
+        enviromentInfo.scene = m_physxScene;
+        enviromentInfo.defaultMaterial = m_physicsMaterials[defaultPhysicsMaterial];
+        enviromentInfo.physicsMaterials = &m_physicsMaterials;
+        enviromentInfo.defaultRigidbodyDensity = 10.0f;
+        enviromentInfo.timeStep = m_timeStep;
+
+        //[1] Apply Character Controller Presets
+        ecs::filter<capsule_controller, position> capsuleCharacterFilter;
+
+        for (auto entity : capsuleCharacterFilter)
+        {
+            auto& capsule = *entity.get_component<capsule_controller>();
+            pointer<PhysxCharacterWrapper> characterWrapper = m_characterContainer.findWrapperWithID(capsule.id);
+            std::vector<controller_preset>& presets = capsule.data.getControllerPresets();
+
+            for (auto& contPreset : presets)
+            {
+                auto iter = m_hashToPresetProcessFunc.find(contPreset.hash);
+                if (iter != m_hashToPresetProcessFunc.end())
+                {
+                    iter->second.invoke(contPreset, *characterWrapper, enviromentInfo);
+                }
+            }
+        }
+    }
+
     void PhysXPhysicsSystem::instantiateCharacterController(ecs::entity ent, const CapsuleControllerData& capsuleData, PhysxCharacterWrapper& outCharacterWrapper)
     {
         const math::vec3& pos = ent.get_component<position>();
-        PxCapsuleControllerDesc desc;
+        
+        outCharacterWrapper.controllerFeedback =  std::make_unique<ControllerHitFeedback>();
 
+        PxCapsuleControllerDesc desc;
         desc.height = capsuleData.getHeight();
         desc.radius = capsuleData.getRadius();
 
@@ -553,12 +601,57 @@ namespace legion::physics
         desc.stepOffset = 0.1f;
         desc.invisibleWallHeight = 0.0f;
         desc.maxJumpHeight = 0.0f;
-        desc.reportCallback = nullptr;
+        desc.reportCallback = outCharacterWrapper.controllerFeedback.get();
+        desc.behaviorCallback = nullptr;
 
+        //initialize controller hit callbacks based on presets
+        if (auto readOnlyPreset = capsuleData.getReadOnlyPreset<rigidbody_force_feedback>())
+        {
+            outCharacterWrapper.controllerFeedback->
+                setShapeHitDelegate(initializeDefaultRigidbodyToCharacterResponse(readOnlyPreset->forceAmount, readOnlyPreset->massMaximum));
+        }
+
+        //create controller using desc
         PxController* controller = m_characterManager->createController(desc);
         outCharacterWrapper.characterController = controller;
-
         controller->setUserData(ent.data);
+    }
+
+    delegate<void(const PxControllerShapeHit&)> PhysXPhysicsSystem::initializeDefaultRigidbodyToCharacterResponse(float forceAmount, float massMaximum)
+    {
+        float force = forceAmount;
+        float massMax = massMaximum;
+
+        return [force, massMax](const PxControllerShapeHit& hit)
+        {
+            PxRigidDynamic* rigidbody = hit.shape->getActor()->is<PxRigidDynamic>();
+           
+
+            if (rigidbody)
+            {
+                bool bisKinematic = rigidbody->getRigidBodyFlags() & PxRigidBodyFlag::eKINEMATIC;
+                if (bisKinematic) return;
+
+                const PxVec3 upVector = hit.controller->getUpDirection();
+                const PxF32 dp = hit.dir.dot(upVector);
+                log::debug("dot {0} ", dp);
+                if (dp >= 0.0f)
+                {
+                    const PxTransform globalPose = rigidbody->getGlobalPose();
+                    const PxVec3 localPos = globalPose.transformInv(toVec3(hit.worldPos));
+
+                    const PxVec3 globalForcePos = rigidbody->getGlobalPose().transform(localPos);
+
+                    const PxVec3 centerOfMass = globalPose.transform(rigidbody->getCMassLocalPose().p);
+
+                    const PxVec3 forceVector = hit.dir * hit.length * force;
+
+                    const PxVec3 torque = (globalForcePos - centerOfMass).cross(forceVector);
+                    rigidbody->addForce(forceVector, PxForceMode::eACCELERATION, true);
+                    rigidbody->addTorque(torque, PxForceMode::eACCELERATION, true);
+                }
+            }
+        };
     }
     
     void PhysXPhysicsSystem::processPhysicsComponentEvents(ecs::entity ent, physics_component& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo)
