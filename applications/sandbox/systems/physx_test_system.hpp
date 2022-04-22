@@ -130,7 +130,7 @@ namespace legion::physics
 
         void suzzaneRainTick(legion::time::span deltaTime);
 
-        void createCubeStack(const math::vec3& extents, size_t stackSize, const math::vec3& startPos);
+        void createCubeStack(const math::vec3& extents, size_t stackSize, const math::vec3& startPos,int stopAfterStack = -1);
 
 
         //--------------------------- Rendering Variables ---------------------------------------//

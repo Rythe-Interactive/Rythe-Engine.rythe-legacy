@@ -588,7 +588,7 @@ namespace legion::physics
     {
         const math::vec3& pos = ent.get_component<position>();
         
-        outCharacterWrapper.controllerFeedback =  std::make_unique<ControllerHitFeedback>();
+        outCharacterWrapper.controllerFeedback = std::make_unique<ControllerHitFeedback>();
 
         PxCapsuleControllerDesc desc;
         desc.height = capsuleData.getHeight();
@@ -597,9 +597,10 @@ namespace legion::physics
         desc.material = m_physicsMaterials[defaultPhysicsMaterial];
         desc.position = { pos.x, pos.y, pos.z };
         desc.slopeLimit = 0.0f;
-        desc.contactOffset = 0.1f;
-        desc.stepOffset = 0.1f;
+        desc.contactOffset = 0.01f;
+        desc.stepOffset = 0.005f;
         desc.invisibleWallHeight = 0.0f;
+        desc.climbingMode = PxCapsuleClimbingMode::eCONSTRAINED;
         desc.maxJumpHeight = 0.0f;
         desc.reportCallback = outCharacterWrapper.controllerFeedback.get();
         desc.behaviorCallback = nullptr;

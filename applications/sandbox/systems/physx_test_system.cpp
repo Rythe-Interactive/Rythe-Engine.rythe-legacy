@@ -227,7 +227,9 @@ namespace legion::physics
     {
         math::quat rotZ90 = math::rotate(math::pi<float>() / 2.0f, math::vec3(0, 0, 1));
 
-        m_characterControllerEnt = createDefaultMeshEntity(math::vec3(0, 3.8f, 0), sphereH, concreteMat);
+        math::quat rotY30 = math::rotate(math::pi<float>() / 2.0f, math::vec3(0, 0, 1));
+
+        m_characterControllerEnt = createDefaultMeshEntity(math::vec3(3.0f, 3.8f, -15.0f), sphereH, concreteMat);
         
         auto& capsuleCont = *m_characterControllerEnt.add_component<capsule_controller>();
         CapsuleControllerData& capsule = capsuleCont.data;
@@ -247,18 +249,23 @@ namespace legion::physics
         capsule.setRadius(1.0f);
         capsule.setSpeed(0.1f);
 
-        auto ent = createStaticColliderWall(math::vec3(0, 0.0f, 0), legionLogoMat, math::vec3(40, 1, 40));
+        auto ent = createStaticColliderWall(math::vec3(0, 0.0f, 0), legionLogoMat, math::vec3(20, 1, 40));
 
-        auto higherBlock = createStaticColliderWall(math::vec3(20, 1.0f, -10), tileMat, math::vec3(20, 1, 20));
-        auto slighthigherBlock = createStaticColliderWall(math::vec3(20, 0.2f, 10), tileMat, math::vec3(20, 1, 20));
+        auto entFinalWall = createStaticColliderWall(math::vec3(0, 0.0f, 40.0f), legionLogoMat, math::vec3(20, 1, 20));
 
-        auto wallOnRight = createStaticColliderWall(math::vec3(-20, 1.0f, 0.0f), tileMat, math::vec3(20, 1, 40));
-        *wallOnRight.get_component<rotation>() = rotZ90;
+        auto blockRotLeft = createStaticColliderWall(math::vec3(2.5f, 1.0f, 0), legionLogoMat, math::vec3(5, 1, 1));
+        *blockRotLeft.get_component<rotation>() = math::rotate(math::pi<float>() / 6.0f, math::vec3(0, 1, 0));
+
+        auto blockRotRight = createStaticColliderWall(math::vec3(-2.5f, 1.0f, 5.0f), legionLogoMat, math::vec3(5, 1, 1));
+        *blockRotRight.get_component<rotation>() = math::rotate(math::pi<float>() / 6.0f,  math::vec3(0, -1, 0));
+
+        auto blockCenter = createStaticColliderWall(math::vec3(0.0f, 1.0f, 10.0f), legionLogoMat, math::vec3(5, 1, 1));
+        //blockCenter->name = "center";
 
         auto inclineHeight = createStaticColliderWall(math::vec3(0, 3.0f, 25.0f), tileMat, math::vec3(20, 1, 15));
         *inclineHeight.get_component<rotation>() = math::rotate(math::pi<float>() / 6.0f, math::vec3(-1, 0, 0));
 
-        createCubeStack(math::vec3(1.0f), 3, math::vec3(0, 0.5f, -15.0f));
+        createCubeStack(math::vec3(3.0f,1.0f,2.0f), 2, math::vec3(4.75f, 0.5f, -10.0f),1);
 
         app::InputSystem::createBinding<MoveForward>(app::inputmap::method::T);
         bindToEvent<MoveForward, &PhysXTestSystem::onPressForward>();
@@ -355,7 +362,6 @@ namespace legion::physics
 
             middle.add_component<rigidbody>()->data.setVelocity(math::vec3(0, 0, 10.f));
         }
-        
     }
 
     void PhysXTestSystem::getCameraPositionAndDirection(math::vec3& cameraDirection, math::vec3& cameraPosition)
@@ -481,12 +487,14 @@ namespace legion::physics
         }
 
     }
-    void PhysXTestSystem::createCubeStack(const math::vec3& extents, size_t stackSize, const math::vec3& startPos)
+    void PhysXTestSystem::createCubeStack(const math::vec3& extents, size_t stackSize, const math::vec3& startPos, int stopAfterStack)
     {
         float floatStackSize = static_cast<float>(stackSize);
 
         for (size_type i = 0; i < stackSize; i++)
         {
+            if (i == stopAfterStack) { return; }
+
             for (size_type j = 0; j < floatStackSize - i; j++)
             {
                 //PxTransform localTm(PxVec3(PxReal(j*2) - PxReal(size-i), PxReal(i*2+1), 0) * halfExtent);

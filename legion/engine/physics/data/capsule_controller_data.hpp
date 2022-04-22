@@ -104,8 +104,6 @@ namespace legion::physics
             return { nullptr };
         }
 
-
-
         template<class preset>
         pointer<preset> addPreset(preset& presetSpecifics)
         {
