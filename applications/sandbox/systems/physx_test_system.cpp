@@ -49,7 +49,6 @@ namespace legion::physics
         PhysicsHelpers::createPhysicsMaterial(0.3f, 0.3f, 0.0f, "MediumNonBouncy");
         PhysicsHelpers::createPhysicsMaterial(0.1f, 0.1f, 0.0f, "SlipperyNonBouncy");
         
-        
         //setupCubeWorldTestScene();
         //setupBoxAndStackTestScene();
         setupCharacterControllerTestScene();
@@ -229,7 +228,7 @@ namespace legion::physics
 
         math::quat rotY30 = math::rotate(math::pi<float>() / 2.0f, math::vec3(0, 0, 1));
 
-        m_characterControllerEnt = createDefaultMeshEntity(math::vec3(3.0f, 3.8f, -15.0f), sphereH, concreteMat);
+        m_characterControllerEnt = createDefaultMeshEntity(math::vec3(3.0f, 1.8f, -17.0f), sphereH, concreteMat);
         
         auto& capsuleCont = *m_characterControllerEnt.add_component<capsule_controller>();
         CapsuleControllerData& capsule = capsuleCont.data;
@@ -260,7 +259,7 @@ namespace legion::physics
         *blockRotRight.get_component<rotation>() = math::rotate(math::pi<float>() / 6.0f,  math::vec3(0, -1, 0));
 
         auto blockCenter = createStaticColliderWall(math::vec3(0.0f, 1.0f, 10.0f), legionLogoMat, math::vec3(5, 1, 1));
-        //blockCenter->name = "center";
+        blockCenter->name = "center";
 
         auto inclineHeight = createStaticColliderWall(math::vec3(0, 3.0f, 25.0f), tileMat, math::vec3(20, 1, 15));
         *inclineHeight.get_component<rotation>() = math::rotate(math::pi<float>() / 6.0f, math::vec3(-1, 0, 0));
@@ -278,7 +277,6 @@ namespace legion::physics
 
         app::InputSystem::createBinding<MoveBackward>(app::inputmap::method::G);
         bindToEvent<MoveBackward, &PhysXTestSystem::onPresBackward>();
-
     }
 
     void PhysXTestSystem::shootPhysXCubes(ShootPhysXBox& action)
@@ -500,7 +498,7 @@ namespace legion::physics
                 //PxTransform localTm(PxVec3(PxReal(j*2) - PxReal(size-i), PxReal(i*2+1), 0) * halfExtent);
                 
                 math::vec3 offset = math::vec3(j * 2 - (floatStackSize - i), (i * 2) + 1, 0) * (extents * 0.5f);
-
+                log::debug("rb pos {0}", math::to_string(startPos + offset));
                 auto entity = createDefaultMeshEntity(startPos + offset, cubeH, legionLogoMat);
                 *entity.get_component<scale>() = extents;
 

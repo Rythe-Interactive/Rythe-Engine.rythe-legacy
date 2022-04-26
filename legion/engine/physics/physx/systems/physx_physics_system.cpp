@@ -332,18 +332,36 @@ namespace legion::physics
         PS::foundation->release();
     }
 
+    int gTickCount = 0;
+    bool jumpPerformed = false;
+
     void PhysXPhysicsSystem::update(legion::time::span deltaTime)
     {
         if (m_isContinuousStepActive || m_isSingleStepContinueAcitve)
         {
+            ecs::filter<capsule_controller> capsuleFilter;
+            for (ecs::entity ent : capsuleFilter)
+            {
+                auto& capsuleData = ent.get_component<capsule_controller>()->data;
+                capsuleData.moveTo(math::vec3(0, 0, 5) * (float)deltaTime);
+
+                if (gTickCount == 614 && !jumpPerformed)
+                {
+                    jumpPerformed = true;
+                    log::debug("JUMP");
+                    capsuleData.jump(math::vec3(0, 0.30f, 0));
+                }
+            }
+
             m_accumulation += deltaTime;
 
             size_type tickAmount = 0;
 
             executePreSimulationActions();
-
+            log::debug("Current Tick {0}", gTickCount);
             while (m_accumulation > m_timeStep && tickAmount < m_maxPhysicsStep)
             {
+                gTickCount++;
                 m_accumulation -= m_timeStep;
                 physicsStep();
                 ++tickAmount;
@@ -626,7 +644,14 @@ namespace legion::physics
         return [force, massMax](const PxControllerShapeHit& hit)
         {
             PxRigidDynamic* rigidbody = hit.shape->getActor()->is<PxRigidDynamic>();
-           
+            ecs::entity center = { static_cast<ecs::entity_data*>(hit.shape->getActor()->userData) };
+
+            if (center->name == "center")
+            {
+                static int frames = 0;
+                log::debug("reached center for {0}", frames);
+                frames++;
+            }
 
             if (rigidbody)
             {
@@ -635,7 +660,7 @@ namespace legion::physics
 
                 const PxVec3 upVector = hit.controller->getUpDirection();
                 const PxF32 dp = hit.dir.dot(upVector);
-                log::debug("dot {0} ", dp);
+
                 if (dp >= 0.0f)
                 {
                     const PxTransform globalPose = rigidbody->getGlobalPose();
