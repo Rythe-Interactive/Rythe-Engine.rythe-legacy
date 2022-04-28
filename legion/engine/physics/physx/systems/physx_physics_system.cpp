@@ -332,20 +332,24 @@ namespace legion::physics
         PS::foundation->release();
     }
 
-    int gTickCount = 0;
+    float timeTracker = 0.0f;
     bool jumpPerformed = false;
 
     void PhysXPhysicsSystem::update(legion::time::span deltaTime)
     {
+        if (deltaTime > 0.5f) return;
+
         if (m_isContinuousStepActive || m_isSingleStepContinueAcitve)
         {
+            timeTracker += deltaTime;
+
             ecs::filter<capsule_controller> capsuleFilter;
             for (ecs::entity ent : capsuleFilter)
             {
                 auto& capsuleData = ent.get_component<capsule_controller>()->data;
                 capsuleData.moveTo(math::vec3(0, 0, 5) * (float)deltaTime);
 
-                if (gTickCount == 614 && !jumpPerformed)
+                if (timeTracker >= 8.49f && !jumpPerformed)
                 {
                     jumpPerformed = true;
                     log::debug("JUMP");
@@ -358,10 +362,9 @@ namespace legion::physics
             size_type tickAmount = 0;
 
             executePreSimulationActions();
-            log::debug("Current Tick {0}", gTickCount);
+
             while (m_accumulation > m_timeStep && tickAmount < m_maxPhysicsStep)
             {
-                gTickCount++;
                 m_accumulation -= m_timeStep;
                 physicsStep();
                 ++tickAmount;
@@ -616,7 +619,7 @@ namespace legion::physics
         desc.position = { pos.x, pos.y, pos.z };
         desc.slopeLimit = 0.0f;
         desc.contactOffset = 0.01f;
-        desc.stepOffset = 0.005f;
+        desc.stepOffset = 0.05f;
         desc.invisibleWallHeight = 0.0f;
         desc.climbingMode = PxCapsuleClimbingMode::eCONSTRAINED;
         desc.maxJumpHeight = 0.0f;

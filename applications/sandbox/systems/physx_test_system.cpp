@@ -228,14 +228,13 @@ namespace legion::physics
 
         math::quat rotY30 = math::rotate(math::pi<float>() / 2.0f, math::vec3(0, 0, 1));
 
-        m_characterControllerEnt = createDefaultMeshEntity(math::vec3(3.0f, 1.8f, -17.0f), sphereH, concreteMat);
+        m_characterControllerEnt = createDefaultMeshEntity(math::vec3(3, 1.8f, -17.0f), sphereH, concreteMat);
         
         auto& capsuleCont = *m_characterControllerEnt.add_component<capsule_controller>();
         CapsuleControllerData& capsule = capsuleCont.data;
 
         gravity_preset gravity;
         gravity.gravityValue = math::vec3(0.0f, -0.98f, 0.0f);
-        //gravity.gravityAcc = math::vec3(0.0f);
         capsule.addPreset(gravity);
 
         rigidbody_force_feedback force_feedback;
@@ -244,9 +243,8 @@ namespace legion::physics
 
         capsule.addPreset(force_feedback);
 
-        capsule.setHeight(2.0f);
-        capsule.setRadius(1.0f);
-        capsule.setSpeed(0.1f);
+        capsule.setHeight(1.5f);
+        capsule.setRadius(0.45f);
 
         auto ent = createStaticColliderWall(math::vec3(0, 0.0f, 0), legionLogoMat, math::vec3(20, 1, 40));
 
