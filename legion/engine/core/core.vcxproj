@@ -141,6 +141,7 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="common\debugrendering.hpp" />
     <ClInclude Include="common\hash.hpp" />
     <ClInclude Include="common\string_literal.hpp" />
+    <ClInclude Include="compute\compute.hpp" />
     <ClInclude Include="containers\delegate.hpp" />
     <ClInclude Include="async\rw_spinlock.hpp" />
     <ClInclude Include="async\spinlock.hpp" />

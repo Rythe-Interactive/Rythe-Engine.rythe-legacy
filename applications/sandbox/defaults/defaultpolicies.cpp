@@ -2,6 +2,7 @@
 #include <core/particles/particleemitter.hpp>
 #include <core/particles/particlesystem.hpp>
 #include <rendering/debugrendering.hpp>
+#include <core/compute/compute.hpp>
 
 namespace legion::core
 {
@@ -22,6 +23,46 @@ namespace legion::core
             pos.y = math::sin(dist / math::pi<float>()) * 5.f * (pos.x / maxBound);
             posBuffer[idx] = pos;
         }
+    }
+#pragma endregion
+#pragma region Point Cloud Policy
+    void pointcloud_policy::setup(particle_emitter& emitter)
+    {
+        if (!emitter.has_uniform<compute::function>("vadd"))
+            emitter.create_uniform<compute::function>("vadd", fs::view("assets://kernels/vadd_kernel.cl").load_as<compute::function>("vector_add"));
+        if (!emitter.has_buffer<position>("posBuffer"))
+            emitter.create_buffer<position>("posBuffer");
+        if (!emitter.has_buffer<velocity>("velBuffer"))
+            emitter.create_buffer<velocity>("velBuffer");
+
+    }
+    void pointcloud_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
+    {
+        auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
+        for (size_type idx = start; idx < end; idx++)
+        {
+            velBuffer[idx] = math::vec3::up * 2.f;
+        }
+    }
+    void pointcloud_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
+    {
+        using namespace lgn::core;
+        if (count < 1)
+            return;
+
+        auto& posBuffer = emitter.get_buffer<position>("posBuffer");
+        auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
+
+        auto vector_add = emitter.get_uniform<compute::function>("vadd");
+
+        std::vector<position> outPosBuffer;
+        log::debug("Start Compute");
+        auto result = vector_add(1024, static_cast<std::vector<position>>(posBuffer), static_cast<std::vector<velocity>>(velBuffer), compute::out(outPosBuffer));
+        log::debug("End Compute");
+        if (!result.valid())
+            log::error(result);
+        posBuffer.clear();
+        posBuffer.insert(posBuffer.end(), outPosBuffer.begin(), outPosBuffer.end());
     }
 #pragma endregion
 #pragma region Orbital Policy
