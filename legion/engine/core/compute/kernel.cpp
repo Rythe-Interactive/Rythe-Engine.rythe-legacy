@@ -69,7 +69,8 @@ namespace legion::core::compute
         //check clSetKernelArg
         if (ret != CL_SUCCESS)
         {
-            log::error("clSetKernelArg {}", ret);
+            log::error("An error occurred with clSetKernelArg");
+            log::error(" Error Code {}: {}", ret, find_error(ret));
         }
         return *this;
     }
@@ -144,7 +145,10 @@ namespace legion::core::compute
         }
 
         if (ret != CL_SUCCESS)
-            log::error("clEnqueueXXXXBuffer {}", ret);
+        {
+            log::error("An error occurred with clEnqueueXXXXBuffer");
+            log::error(" Error Code {}: {}", ret, find_error(ret));
+        }
 
         return *this;
     }
@@ -196,7 +200,8 @@ namespace legion::core::compute
         //check if the enqueue was successful
         if (ret != CL_SUCCESS)
         {
-            log::error("clEnqueueNDRangeKernel failed: {}", ret);
+            log::error("An error occurred with clEnqueueNDRangeKernel");
+            log::error(" Error Code {}: {}", ret, find_error(ret));
         }
         return *this;
     }
@@ -270,9 +275,11 @@ namespace legion::core::compute
 
     Kernel& Kernel::setKernelArg(void* value, size_type size, cl_uint index)
     {
-        if (clSetKernelArg(m_func, index, size, value) != CL_SUCCESS)
+        auto ret = clSetKernelArg(m_func, index, size, value);
+        if ( ret != CL_SUCCESS)
         {
             log::warn("clSetKernelArg failed for Arg at index {}", index);
+            log::error(" Error Code {}: {}", ret, find_error(ret));
         }
         return *this;
     }
