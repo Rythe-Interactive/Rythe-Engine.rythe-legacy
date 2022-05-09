@@ -347,13 +347,13 @@ namespace legion::physics
             for (ecs::entity ent : capsuleFilter)
             {
                 auto& capsuleData = ent.get_component<capsule_controller>()->data;
-                capsuleData.moveTo(math::vec3(0, 0, 5) * (float)deltaTime);
+                //capsuleData.moveTo(math::vec3(0, 0, 5) * (float)deltaTime);
 
                 if (timeTracker >= 8.49f && !jumpPerformed)
                 {
                     jumpPerformed = true;
                     log::debug("JUMP");
-                    capsuleData.jump(math::vec3(0, 0.30f, 0));
+                    //capsuleData.jump(math::vec3(0, 0.30f, 0));
                 }
             }
 
@@ -635,7 +635,7 @@ namespace legion::physics
 
         //create controller using desc
         PxController* controller = m_characterManager->createController(desc);
-        outCharacterWrapper.characterController = controller;
+        outCharacterWrapper.characterController = controller; 
         controller->setUserData(ent.data);
     }
 
