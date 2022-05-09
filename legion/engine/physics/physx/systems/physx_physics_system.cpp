@@ -416,7 +416,6 @@ namespace legion::physics
             }
         }
 
-        auto x = capsuleCharacterFilter.size();
         for (auto entity : capsuleCharacterFilter)
         {
             auto& capsule = *entity.get_component<capsule_controller>();
@@ -487,8 +486,6 @@ namespace legion::physics
             auto& capsule = *entity.get_component<capsule_controller>();
             processCapsuleCharacterModificationEvents(capsule);
         }
-
-        
 
         //[6] Physics Objects transformation may get directly modified by other systems
         // Given a list of entities that have been moved, transfer their movements to the respective physics actor
@@ -635,7 +632,7 @@ namespace legion::physics
 
                 const PxVec3 upVector = hit.controller->getUpDirection();
                 const PxF32 dp = hit.dir.dot(upVector);
-                log::debug("dot {0} ", dp);
+
                 if (dp >= 0.0f)
                 {
                     const PxTransform globalPose = rigidbody->getGlobalPose();
