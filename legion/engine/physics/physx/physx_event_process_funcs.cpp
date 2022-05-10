@@ -79,7 +79,8 @@ namespace legion::physics
 
             const math::vec3& extents = box.getBoxExtents();
 
-            instantiateNextCollider<PxBoxGeometry,const PxVec3&>(getSDK(), wrapper, localTransform, sceneInfo, PxVec3(extents.x, extents.y, extents.z));
+            instantiateNextCollider<PxBoxGeometry,const PxVec3&>(getSDK(), wrapper, collider,
+                localTransform, sceneInfo, PxVec3(extents.x, extents.y, extents.z));
         }
     }
     
@@ -103,12 +104,12 @@ namespace legion::physics
 
             if (wrapper.bodyType == physics_body_type::rigidbody)
             {
-                instantiateDynamicActorWith<PxBoxGeometry, const PxVec3&>(getSDK(), wrapper, transform,
+                instantiateDynamicActorWith<PxBoxGeometry, const PxVec3&>(getSDK(), wrapper, collider,transform,
                     localTransform, sceneInfo, entity, PxVec3(extents.x, extents.y, extents.z));
             }
             else if (wrapper.bodyType == physics_body_type::static_collider)
             {
-                instantiateStaticActorWith<PxBoxGeometry, const PxVec3&>(getSDK(), wrapper, transform,
+                instantiateStaticActorWith<PxBoxGeometry, const PxVec3&>(getSDK(), wrapper, collider, transform,
                     localTransform, sceneInfo, entity, PxVec3(extents.x, extents.y, extents.z));
             }
                 
@@ -134,11 +135,13 @@ namespace legion::physics
 
             if (wrapper.bodyType == physics_body_type::rigidbody)
             {
-                instantiateDynamicActorWith<PxSphereGeometry,float&>(getSDK(), wrapper, transform, localTransform, sceneInfo, entity, radius);
+                instantiateDynamicActorWith<PxSphereGeometry,float&>(getSDK(), wrapper, collider,
+                    transform, localTransform, sceneInfo, entity, radius);
             }
             else if (wrapper.bodyType == physics_body_type::static_collider)
             {
-                instantiateStaticActorWith<PxSphereGeometry, float&>(getSDK(), wrapper, transform, localTransform, sceneInfo, entity, radius);
+                instantiateStaticActorWith<PxSphereGeometry, float&>(getSDK(), wrapper, collider,
+                    transform, localTransform, sceneInfo, entity, radius);
             }
 
             break;
@@ -159,7 +162,7 @@ namespace legion::physics
 
             float radius = collider.getColliderAsSphere().getRadius();
 
-            instantiateNextCollider<PxSphereGeometry, float&>(getSDK(), wrapper, localTransform, sceneInfo, radius);
+            instantiateNextCollider<PxSphereGeometry, float&>(getSDK(), wrapper, collider,localTransform, sceneInfo, radius);
         }
     }
 
@@ -182,11 +185,13 @@ namespace legion::physics
 
             if (wrapper.bodyType == physics_body_type::rigidbody)
             {
-                instantiateDynamicActorWith<PxConvexMeshGeometry, PxConvexMesh*&>(getSDK(), wrapper, transform, localTransform, sceneInfo, entity, convexMesh);
+                instantiateDynamicActorWith<PxConvexMeshGeometry, PxConvexMesh*&>(getSDK(), wrapper, collider,
+                    transform, localTransform, sceneInfo, entity, convexMesh);
             }
             else if (wrapper.bodyType == physics_body_type::static_collider)
             {
-                instantiateStaticActorWith<PxConvexMeshGeometry, PxConvexMesh*&>(getSDK(), wrapper, transform, localTransform, sceneInfo, entity, convexMesh);
+                instantiateStaticActorWith<PxConvexMeshGeometry, PxConvexMesh*&>(getSDK(), wrapper, collider,
+                    transform, localTransform, sceneInfo, entity, convexMesh);
             }
         }
     }
@@ -206,7 +211,8 @@ namespace legion::physics
             ConvexColliderData& convex = collider.getColliderAsConvex();
             PxConvexMesh* convexMesh = static_cast<PxConvexMesh*>(convex.getConvexPtr());
 
-            instantiateNextCollider<PxConvexMeshGeometry, PxConvexMesh*&>(getSDK(), wrapper, localTransform, sceneInfo, convexMesh);
+            instantiateNextCollider<PxConvexMeshGeometry, PxConvexMesh*&>(getSDK(), wrapper, collider,
+                localTransform, sceneInfo, convexMesh);
         }
     }
 
@@ -239,8 +245,14 @@ namespace legion::physics
         const math::vec3& normal = physicsEnviroment.data.getInfinitePlaneNormal();
         float distToPlane = physicsEnviroment.data.getInfinitePlaneDistanceToOrigin();
 
-        wrapper.physicsActor = PxCreatePlane(*getSDK(), PxPlane(normal.x, normal.y, normal.z, distToPlane), *sceneInfo.defaultMaterial);
+        PxRigidStatic* plane = PxCreatePlane(*getSDK(), PxPlane(normal.x, normal.y, normal.z, distToPlane), *sceneInfo.defaultMaterial);
+
+        wrapper.physicsActor = plane;
         wrapper.physicsActor->userData = entity.data;
+
+        PxShape* planeShape;
+        plane->getShapes(&planeShape, 1);
+        setShapeFilterData(planeShape, physicsEnviroment.data.getCollisionFilter(), physics_object_flag::po_terrain);
 
         sceneInfo.scene->addActor(*wrapper.physicsActor);
     }
@@ -250,7 +262,7 @@ namespace legion::physics
         CapsuleControllerData& capsuleData = capsule.data;
 
         const math::vec3& disp = capsuleData.getCurrentDisplacement();
-        characterWrapper.characterController->move(PxVec3{ disp.x,disp.y,disp.z }, 0.0f, 0.016f, PxControllerFilters());
+        characterWrapper.totalDisplacement += disp;
         capsuleData.resetDisplacement();
     }
 
@@ -260,15 +272,6 @@ namespace legion::physics
         gravity_preset* gravityPreset = static_cast<gravity_preset*>(voidSpecifics);
 
         gravityPreset->gravityAcc += gravityPreset->gravityValue * sceneInfo.timeStep;
-
-        const math::vec3& displacement = gravityPreset->gravityAcc;
-        const PxU32 flag = character.characterController->move(
-            PxVec3(displacement.x, displacement.y, displacement.z), 0.0f, sceneInfo.timeStep, PxControllerFilters());
-
-        if (flag & PxControllerCollisionFlag::eCOLLISION_DOWN)
-        {
-            log::debug("grounded");
-            gravityPreset->gravityAcc = math::vec3(0.0f);
-        }
+        character.totalDisplacement += gravityPreset->gravityAcc;
     }
 }

@@ -115,6 +115,27 @@ namespace legion::physics
 
         L_ALWAYS_INLINE void resetColliderModificationFlags() { m_colliderModificationRequests.clear(); }
 
+        L_ALWAYS_INLINE void setAllColliderReactionToObject(physics_object_flag objectType, physics_object_reaction newReaction)
+        {
+            if (m_colliders.size() == 0) { return; }
+
+            modify_all_collider_reaction modifyAll;
+            modifyAll.typeToModify = objectType;
+            modifyAll.newReaction = newReaction;
+
+            collider_modification_data collider_modification;
+            collider_modification.colliderIndex = 0;
+            collider_modification.data.newColliderReaction = modifyAll;
+            collider_modification.modificationType = collider_modification_flag::cm_set_all_collider_reaction;
+
+            for (ColliderData& collider : m_colliders)
+            {
+                collider.m_collisionFilter.setReactionToObject(objectType, newReaction);
+            }
+
+            m_colliderModificationRequests.push_back(collider_modification);
+        }
+
     private:
 
         L_ALWAYS_INLINE void updateColliderRecords(physics_component_flag firstColliderFlag, physics_component_flag nextColliderFlag) noexcept

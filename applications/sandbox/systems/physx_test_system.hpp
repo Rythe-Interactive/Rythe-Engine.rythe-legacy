@@ -2,6 +2,7 @@
 #include <core/core.hpp>
 #include <rendering/rendering.hpp>
 #include <physics/physics_helpers.hpp>
+#include <physics/events/events.hpp>
 
 namespace lgn = legion;
 
@@ -41,6 +42,8 @@ namespace legion::physics
 
         void setupCharacterControllerTestScene();
 
+        void setupCollisionFilteringScene();
+
         //------------------------ Rigidbody Shooter -------------------------------------------//
 
         void shootPhysXCubes(ShootPhysXBox& action);
@@ -51,6 +54,7 @@ namespace legion::physics
 
         void getCameraPositionAndDirection(math::vec3& cameraDirection, math::vec3& cameraPosition);
 
+        void setupCharacterMoveBindings();
 
         //------------------------ Character Controls -------------------------------------------//
 
@@ -114,7 +118,11 @@ namespace legion::physics
             }
         }
 
+        //--------------------------- Trigger Events -------------------------------------------//
 
+        void triggerEnterEvent(on_trigger_enter& triggerEnter);
+
+        void triggerExitEvent(on_trigger_exit& triggerExit);
 
         //-------------------------- Scene Setup Helpers ---------------------------------------//
 

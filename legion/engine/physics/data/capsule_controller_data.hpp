@@ -2,6 +2,7 @@
 #include <core/core.hpp>
 #include <physics/data/component_flags.hpp>
 #include <physics/data/controller_presets.hpp>
+#include <physics/data/collision_filter.hpp>
 #include <bitset>
 
 namespace legion::physics
@@ -147,6 +148,8 @@ namespace legion::physics
             }
         }
 
+        L_ALWAYS_INLINE CollisionFilter getCollisionFilter() const noexcept { return m_collisionFilter; }
+
     private:
 
         math::vec3 m_currentDisplacement;
@@ -155,6 +158,7 @@ namespace legion::physics
         std::vector<controller_preset> m_presets;
 
         std::bitset<capsule_character_flag::cc_max> m_modificationFlags;
+        CollisionFilter m_collisionFilter;
 
         float m_radius = 1.0f;
         float m_height = 2.0f;;

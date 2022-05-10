@@ -3,6 +3,23 @@
 
 namespace legion::physics
 {
+    enum physics_object_reaction : size_type
+    {
+        reaction_ignore,
+        reaction_overlap,
+        reaction_block,
+        reaction_max
+    };
+
+    enum physics_object_flag : size_type
+    {
+        po_static,
+        po_dynamic,
+        po_character_controller,
+        po_terrain,
+        po_max
+    };
+
     enum physics_component_flag : size_type
     {
         pc_add_first_box = 0ull,
@@ -19,6 +36,7 @@ namespace legion::physics
         cm_set_new_material = 0ull,
         cm_set_new_convex_mesh,
         cm_set_new_box_extents,
+        cm_set_all_collider_reaction,
         cm_max //must always be the last enum
     };
 

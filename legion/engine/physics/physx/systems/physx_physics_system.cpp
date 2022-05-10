@@ -6,8 +6,10 @@
 #include <physics/components/capsule_controller.hpp>
 #include <physics/events/events.hpp>
 #include <physics/physx/physx_event_process_funcs.hpp>
+#include <physics/physx/physx_integration_helpers.hpp>
 
 #include <physics/physx/data/controller_hit_feedback.inl>
+#include <physics/physx/data/collision_filter_shader.inl>
 
 namespace legion::physics
 {
@@ -153,6 +155,7 @@ namespace legion::physics
 
         inline static PxDefaultAllocator defaultAllocator;
         inline static PxDefaultErrorCallback defaultErrorCallback;
+        inline static CustomControllerFilterCallback controllerFilterCallback;
         inline static async::spinlock setupShutdownLock;
     };
 
@@ -269,14 +272,13 @@ namespace legion::physics
         PxSceneDesc sceneDesc(PS::physxSDK->getTolerancesScale());
         sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
         sceneDesc.cpuDispatcher = PS::dispatcher;
-        sceneDesc.filterShader = PxDefaultSimulationFilterShader;
+        sceneDesc.filterShader = filterShader;//PxDefaultSimulationFilterShader;//filterShader;
         sceneDesc.flags |= PxSceneFlag::eENABLE_STABILIZATION;
         sceneDesc.flags |= PxSceneFlag::eENABLE_ACTIVE_ACTORS;
 
         m_physxScene = PS::physxSDK->createScene(sceneDesc);
         PxMaterial* m_defaultMaterial = PS::physxSDK->createMaterial(0.5f, 0.5f, 0.6f);
         m_physicsMaterials.insert({ defaultPhysicsMaterial,m_defaultMaterial });
-
 
         #ifdef _DEBUG
         m_physxScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
@@ -338,15 +340,15 @@ namespace legion::physics
         {
             m_accumulation += deltaTime;
 
-            size_type tickAmount = 0;
+            m_currentSteptickAmount = 0;
 
             executePreSimulationActions();
 
-            while (m_accumulation > m_timeStep && tickAmount < m_maxPhysicsStep)
+            while (m_accumulation > m_timeStep && m_currentSteptickAmount < m_maxPhysicsStep)
             {
                 m_accumulation -= m_timeStep;
                 physicsStep();
-                ++tickAmount;
+                ++m_currentSteptickAmount;
             }
 
             executePostSimulationActions();
@@ -375,7 +377,6 @@ namespace legion::physics
 
     void PhysXPhysicsSystem::executePreSimulationActions()
     {
-       
         //[1] Identify invalid entities and remove them from pxScene
         for (size_type idToRemove : m_wrapperPendingRemovalID)
         {
@@ -544,10 +545,26 @@ namespace legion::physics
         for (PhysxCharacterWrapper& characterWrapper : capsules)
         {
             PxController* controller = characterWrapper.characterController;
+            
+
+            PxVec3 disp{ characterWrapper.totalDisplacement.x,characterWrapper.totalDisplacement.y,characterWrapper.totalDisplacement.z };
+
+            PxShape* controllerShape;
+            controller->getActor()->getShapes(&controllerShape, 1);
+            PxFilterData controllerFilter = controllerShape->getSimulationFilterData();
+
+            PxControllerFilters filter(
+                &controllerFilter, &PhysxStatics::controllerFilterCallback);
+
+            controller->move(disp, 0.0f, m_currentSteptickAmount * m_timeStep, filter);
+
             ecs::entity entity = { static_cast<ecs::entity_data*>(controller->getUserData()) };
+            
 
             const PxExtendedVec3& pxVec =  controller->getPosition();
             *entity.get_component<position>() = math::vec3{ pxVec.x,pxVec.y,pxVec.z };
+
+            characterWrapper.totalDisplacement = math::vec3(0.0f);
         }
 
     }
@@ -613,6 +630,13 @@ namespace legion::physics
         PxController* controller = m_characterManager->createController(desc);
         outCharacterWrapper.characterController = controller;
         controller->setUserData(ent.data);
+
+        PxRigidDynamic* dynamic = controller->getActor();
+
+        PxShape* shape;
+        dynamic->getShapes(&shape, 1);
+
+        setShapeFilterData(shape, capsuleData.getCollisionFilter(), physics_object_flag::po_character_controller);
     }
 
     delegate<void(const PxControllerShapeHit&)> PhysXPhysicsSystem::initializeDefaultRigidbodyToCharacterResponse(float forceAmount, float massMaximum)

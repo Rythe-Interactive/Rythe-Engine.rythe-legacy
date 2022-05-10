@@ -41,6 +41,7 @@ namespace legion::physics
     {
         physx::PxController* characterController = nullptr;
         std::unique_ptr<ControllerHitFeedback> controllerFeedback;
+        math::vec3 totalDisplacement = math::vec3(0.0f);
 
         PhysxCharacterWrapper();
         ~PhysxCharacterWrapper();

@@ -1,6 +1,7 @@
 #pragma once
 #include <core/core.hpp>
 #include <physics/data/component_flags.hpp>
+#include <physics/data/collision_filter.hpp>
 #include <bitset>
 
 namespace legion::physics
@@ -14,6 +15,12 @@ namespace legion::physics
         float restitution;
     };
 
+    struct modify_all_collider_reaction
+    {
+        physics_object_flag typeToModify;
+        physics_object_reaction newReaction;
+    };
+
     struct collider_modification_data
     {
         size_type colliderIndex = std::numeric_limits<size_type>::max();
@@ -21,6 +28,7 @@ namespace legion::physics
 
         union modification
         {
+            modify_all_collider_reaction newColliderReaction;
             math::vec3 newBoxExtents;
             void* newConvexMesh;
             size_type newMaterial;
@@ -71,6 +79,8 @@ namespace legion::physics
     class ColliderData
     {
     public:
+
+        friend class PhysicsComponentData;
 
         ColliderData(size_type colliderIndex,pointer<std::vector<collider_modification_data>> modificationsRequests, collider_type colliderType, const math::vec3& offset, const math::quat& rotation) noexcept;
 
@@ -137,6 +147,7 @@ namespace legion::physics
 
         L_ALWAYS_INLINE size_type getColliderIndex() const noexcept { return m_colliderIndex; }
 
+        L_ALWAYS_INLINE const CollisionFilter& getCollisionFilter() const noexcept { return m_collisionFilter; }
 
     protected:
 
@@ -159,6 +170,8 @@ namespace legion::physics
 
         collider_type m_colliderType = collider_type::not_set;
         pointer<std::vector<collider_modification_data>> m_modificationsRequests;
+
+        CollisionFilter m_collisionFilter;
 
         bool m_isRegistered = false;
     };

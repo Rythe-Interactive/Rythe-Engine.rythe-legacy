@@ -40,6 +40,7 @@
     <ClInclude Include="components\physics_enviroment.hpp" />
     <ClInclude Include="data\capsule_controller_data.hpp" />
     <ClInclude Include="data\colliders\collider_data.hpp" />
+    <ClInclude Include="data\collision_filter.hpp" />
     <ClInclude Include="data\component_flags.hpp" />
     <ClInclude Include="data\controller_presets.hpp" />
     <ClInclude Include="data\physics_component_data.hpp" />
@@ -84,6 +85,7 @@
     <ClInclude Include="diviner\components\rigidbody.hpp" />
     <ClInclude Include="components\physics_component.hpp" />
     <ClInclude Include="physics_helpers.hpp" />
+    <ClInclude Include="physx\data\collision_filter_shader.inl" />
     <ClInclude Include="physx\data\controller_hit_feedback.inl" />
     <ClInclude Include="physx\data\physx_wrapper.hpp" />
     <ClInclude Include="physx\data\physx_wrapper_container.hpp" />

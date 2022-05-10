@@ -77,6 +77,8 @@ namespace legion::physics
         static constexpr float m_timeStep = 0.02f;
         static constexpr size_type m_maxPhysicsStep = 3;
 
+        size_type m_currentSteptickAmount = 0;
+
         physx::PxScene* m_physxScene = nullptr;
         physx::PxControllerManager* m_characterManager = nullptr;
 

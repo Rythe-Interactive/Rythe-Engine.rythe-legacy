@@ -1,5 +1,6 @@
 #pragma once
 #include <physics/data/component_flags.hpp>
+#include <physics/data/collision_filter.hpp>
 #include <bitset>
 
 namespace legion::physics
@@ -32,12 +33,17 @@ namespace legion::physics
         L_ALWAYS_INLINE const math::vec3& getInfinitePlaneNormal() const noexcept { return m_planeNormal; }
 
         L_ALWAYS_INLINE float getInfinitePlaneDistanceToOrigin() const noexcept { return m_distFromOrigin; }
+
+        L_ALWAYS_INLINE CollisionFilter getCollisionFilter() const noexcept { return m_collisionFilter; }
+
     private:
 
         math::vec3 m_planeNormal;
         float m_distFromOrigin;
 
         std::bitset<physics_enviroment_flag::pe_max> m_modificationFlags;
+        CollisionFilter m_collisionFilter;
+
         physics_enviroment_object_type m_objectType = physics_enviroment_object_type::not_set;
     };
 }

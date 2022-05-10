@@ -242,5 +242,11 @@
     <ClInclude Include="physx\data\controller_hit_feedback.inl">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="data\collision_filter.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="physx\data\collision_filter_shader.inl">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

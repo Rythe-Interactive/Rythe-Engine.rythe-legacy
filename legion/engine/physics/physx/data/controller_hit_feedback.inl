@@ -1,5 +1,4 @@
-#pragma once
-#include <physx/PxPhysicsAPI.h>
+
 #include <physics/components/capsule_controller.hpp>
 
 namespace legion::physics

@@ -52,7 +52,8 @@ namespace legion::physics
         
         //setupCubeWorldTestScene();
         //setupBoxAndStackTestScene();
-        setupCharacterControllerTestScene();
+        //setupCharacterControllerTestScene();
+        setupCollisionFilteringScene();
 
         //enable player to shoot blocks
         app::InputSystem::createBinding<ShootPhysXBox>(app::inputmap::method::C);
@@ -267,18 +268,79 @@ namespace legion::physics
 
         createCubeStack(math::vec3(3.0f,1.0f,2.0f), 2, math::vec3(4.75f, 0.5f, -10.0f),1);
 
-        app::InputSystem::createBinding<MoveForward>(app::inputmap::method::T);
-        bindToEvent<MoveForward, &PhysXTestSystem::onPressForward>();
+        setupCharacterMoveBindings();
+    }
 
-        app::InputSystem::createBinding<MoveLeft>(app::inputmap::method::F);
-        bindToEvent<MoveLeft, &PhysXTestSystem::onPressLeft>();
+    void PhysXTestSystem::setupCollisionFilteringScene()
+    {
+        //setup character controller
+        m_characterControllerEnt = createDefaultMeshEntity({ 0,2.0,10 }, sphereH, concreteMat);
 
-        app::InputSystem::createBinding<MoveRight>(app::inputmap::method::H);
-        bindToEvent<MoveRight, &PhysXTestSystem::onPressRight>();
+        auto& capsuleCont = *m_characterControllerEnt.add_component<capsule_controller>();
+        CapsuleControllerData& capsule = capsuleCont.data;
 
-        app::InputSystem::createBinding<MoveBackward>(app::inputmap::method::G);
-        bindToEvent<MoveBackward, &PhysXTestSystem::onPresBackward>();
+        gravity_preset gravity;
+        gravity.gravityValue = math::vec3(0.0f, -0.98f, 0.0f);
+        //gravity.gravityAcc = math::vec3(0.0f);
+        capsule.addPreset(gravity);
 
+        rigidbody_force_feedback force_feedback;
+        force_feedback.forceAmount = 1000.0f;
+        force_feedback.massMaximum = 50.0f;
+
+        capsule.addPreset(force_feedback);
+
+        capsule.setHeight(1.5f);
+        capsule.setRadius(0.45f);
+        capsule.setSpeed(0.1f);
+
+        //setup ground plane
+        auto groundPlane = createEntity();
+        auto& enviromentComp = *groundPlane.add_component<physics_enviroment>();
+        enviromentComp.data.instantiateInfinitePlane(math::vec3(0, 1, 0), 0);
+
+        auto scaleAndAddPhysicsComp = [](ecs::entity ent)->physics_component&
+        {
+            auto& physicsComp = *ent.add_component<physics_component>();
+            physicsComp.physicsCompData.AddBoxCollider({ 5.0f,1.0f,1.0f });
+            *ent.get_component<scale>() = math::vec3{ 5.0f,1.0f,1.0f };
+
+            return physicsComp;
+        };
+
+        //setup invisible wall
+        auto triggerCharacterBlockDynamic = createDefaultMeshEntity({ 0, 0.5f, 0 }, cubeH, concreteMat);
+        physics_component& invisibleWall = scaleAndAddPhysicsComp(triggerCharacterBlockDynamic);
+
+        invisibleWall.physicsCompData.setAllColliderReactionToObject(physics_object_flag::po_character_controller, physics_object_reaction::reaction_overlap);
+
+        //setup trigger wall
+        auto triggerCharacterTriggerDynamic = createDefaultMeshEntity({ 0, 0.5f, -5 }, cubeH, concreteMat);
+        physics_component& triggerWall = scaleAndAddPhysicsComp(triggerCharacterTriggerDynamic);
+
+        triggerWall.physicsCompData.setAllColliderReactionToObject(physics_object_flag::po_character_controller, physics_object_reaction::reaction_overlap);
+        triggerWall.physicsCompData.setAllColliderReactionToObject(physics_object_flag::po_dynamic, physics_object_reaction::reaction_ignore);
+
+        //setup third block
+        auto blockCharacterBlockDynamic = createDefaultMeshEntity({ 0, 0.5f, -10 }, cubeH, concreteMat);
+        physics_component& thirdBlock = scaleAndAddPhysicsComp(blockCharacterBlockDynamic);
+
+
+        //ball to check
+        auto bigBall = createDefaultMeshEntity({ 0, 20.5f, -5 }, sphereH, concreteMat);
+        bigBall.add_component<physics_component>()->physicsCompData.AddSphereCollider(10, { 0,0,0 });
+        
+        *bigBall.get_component<scale>() = math::vec3{ 20, 20, 20 };
+        bigBall.add_component<rigidbody>();
+
+        auto planeCheckBall = createDefaultMeshEntity({ 0, 20.5f, -20 }, sphereH, concreteMat);
+        planeCheckBall.add_component<physics_component>()->physicsCompData.AddSphereCollider(4, { 0,0,0 });
+
+        *planeCheckBall.get_component<scale>() = math::vec3{ 8, 8, 8 };
+        planeCheckBall.add_component<rigidbody>();
+
+
+        setupCharacterMoveBindings();
     }
 
     void PhysXTestSystem::shootPhysXCubes(ShootPhysXBox& action)
@@ -378,6 +440,21 @@ namespace legion::physics
         }
     }
 
+    void PhysXTestSystem::setupCharacterMoveBindings()
+    {
+        app::InputSystem::createBinding<MoveForward>(app::inputmap::method::T);
+        bindToEvent<MoveForward, &PhysXTestSystem::onPressForward>();
+
+        app::InputSystem::createBinding<MoveLeft>(app::inputmap::method::F);
+        bindToEvent<MoveLeft, &PhysXTestSystem::onPressLeft>();
+
+        app::InputSystem::createBinding<MoveRight>(app::inputmap::method::H);
+        bindToEvent<MoveRight, &PhysXTestSystem::onPressRight>();
+
+        app::InputSystem::createBinding<MoveBackward>(app::inputmap::method::G);
+        bindToEvent<MoveBackward, &PhysXTestSystem::onPresBackward>();
+    }
+
     void PhysXTestSystem::MoveCharacter(const math::vec3& displacement)
     {
         if (!m_characterControllerEnt.valid()) return;
@@ -395,6 +472,16 @@ namespace legion::physics
             CapsuleControllerData& data = m_characterControllerEnt.get_component<capsule_controller>()->data;
             data.jump(math::vec3(0, 0.30f, 0));
         }
+    }
+
+    void PhysXTestSystem::triggerEnterEvent(on_trigger_enter& triggerEnter)
+    {
+
+    }
+
+    void PhysXTestSystem::triggerExitEvent(on_trigger_exit& triggerExit)
+    {
+
     }
 
     void PhysXTestSystem::initializeLitMaterial(rendering::material_handle& materialToInitialize,

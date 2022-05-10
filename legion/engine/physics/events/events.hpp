@@ -87,6 +87,27 @@ namespace legion::physics {
         }
     };
 
+    struct collision_info
+    {
+        ecs::entity firstEntity;
+        ecs::entity secondEntity;
+    };
+
+    struct on_trigger_enter : public events::event< on_trigger_enter>
+    {
+        collision_info collision;
+    };
+
+    struct on_trigger_stay : public events::event<on_trigger_stay>
+    {
+        collision_info collision;
+    };
+
+    struct on_trigger_exit : public events::event<on_trigger_exit>
+    {
+        collision_info collision;
+    };
+
     //-------------------------------------------- Debugging Related ---------------------------------------------//
 
     struct request_flip_physics_continuous final : public events::event<request_flip_physics_continuous>
