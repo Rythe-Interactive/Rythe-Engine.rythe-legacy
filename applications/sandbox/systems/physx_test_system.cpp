@@ -328,7 +328,7 @@ namespace legion::physics
 
         //ball to check
         auto bigBall = createDefaultMeshEntity({ 0, 20.5f, -5 }, sphereH, concreteMat);
-        bigBall.add_component<physics_component>()->physicsCompData.AddSphereCollider(10, { 0,0,0 });
+        /*bigBall.add_component<physics_component>()->physicsCompData.AddSphereCollider(10, { 0,0,0 });
         
         *bigBall.get_component<scale>() = math::vec3{ 20, 20, 20 };
         bigBall.add_component<rigidbody>();
@@ -337,7 +337,7 @@ namespace legion::physics
         planeCheckBall.add_component<physics_component>()->physicsCompData.AddSphereCollider(4, { 0,0,0 });
 
         *planeCheckBall.get_component<scale>() = math::vec3{ 8, 8, 8 };
-        planeCheckBall.add_component<rigidbody>();
+        planeCheckBall.add_component<rigidbody>();*/
 
 
         setupCharacterMoveBindings();
