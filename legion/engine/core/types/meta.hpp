@@ -9,6 +9,7 @@
 
 #include <core/platform/platform.hpp>
 #include <core/types/primitives.hpp>
+#include <core/particles/particlebuffer.hpp>
 
 namespace legion::core
 {
@@ -159,6 +160,12 @@ namespace legion::core
     struct is_vector<std::vector<T>>
         : public std::true_type
     {
+    };
+
+    template<class T>
+    struct is_vector<particle_buffer<T>> : public std::true_type
+    {
+
     };
 
     template<template<typename...>typename T, typename U, size_type I, typename... Args>

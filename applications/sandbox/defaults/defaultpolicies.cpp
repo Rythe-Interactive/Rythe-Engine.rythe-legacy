@@ -57,7 +57,7 @@ namespace legion::core
 
         std::vector<position> outPosBuffer;
         log::debug("Start Compute");
-        auto result = vector_add(1024, static_cast<std::vector<position>>(posBuffer), static_cast<std::vector<velocity>>(velBuffer), compute::out(outPosBuffer));
+        auto result = vector_add(1024, compute::in(posBuffer), compute::in(velBuffer), compute::out(outPosBuffer));
         log::debug("End Compute");
         if (!result.valid())
             log::error(result);
