@@ -10,6 +10,7 @@
 
 #include <physics/physx/data/controller_hit_feedback.inl>
 #include <physics/physx/data/collision_filter_shader.inl>
+#include <physics/physx/data/trigger_event_callbacks.inl>
 
 namespace legion::physics
 {
@@ -156,12 +157,14 @@ namespace legion::physics
         inline static PxDefaultAllocator defaultAllocator;
         inline static PxDefaultErrorCallback defaultErrorCallback;
         inline static CustomControllerFilterCallback controllerFilterCallback;
+        inline static CustomSimulationEventCallback simulationEventCallback;
         inline static async::spinlock setupShutdownLock;
     };
 
     using PS = PhysxStatics;
 
     constexpr size_type convexHullVertexLimit = 256;
+    constexpr size_type sweepBufferSize = 50;
 
     physx::PxPhysics* PhysXPhysicsSystem::getSDK()
     {
@@ -273,6 +276,7 @@ namespace legion::physics
         sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
         sceneDesc.cpuDispatcher = PS::dispatcher;
         sceneDesc.filterShader = filterShader;//PxDefaultSimulationFilterShader;//filterShader;
+        sceneDesc.simulationEventCallback = &PS::simulationEventCallback;
         sceneDesc.flags |= PxSceneFlag::eENABLE_STABILIZATION;
         sceneDesc.flags |= PxSceneFlag::eENABLE_ACTIVE_ACTORS;
 
@@ -546,7 +550,6 @@ namespace legion::physics
         {
             PxController* controller = characterWrapper.characterController;
             
-
             PxVec3 disp{ characterWrapper.totalDisplacement.x,characterWrapper.totalDisplacement.y,characterWrapper.totalDisplacement.z };
 
             PxShape* controllerShape;
@@ -556,17 +559,30 @@ namespace legion::physics
             PxControllerFilters filter(
                 &controllerFilter, &PhysxStatics::controllerFilterCallback);
 
-            controller->move(disp, 0.0f, m_currentSteptickAmount * m_timeStep, filter);
+            PxExtendedVec3 positionBeforeMove = controller->getPosition();
+            PxControllerCollisionFlags collisionFlag = controller->move(disp, 0.0f, m_currentSteptickAmount * m_timeStep, filter);
+            PxExtendedVec3 positionAfterMove = controller->getPosition();
 
+            PxVec3 displacement = positionAfterMove - positionBeforeMove;
             ecs::entity entity = { static_cast<ecs::entity_data*>(controller->getUserData()) };
-            
 
-            const PxExtendedVec3& pxVec =  controller->getPosition();
-            *entity.get_component<position>() = math::vec3{ pxVec.x,pxVec.y,pxVec.z };
+            if (!displacement.isZero())
+            {
+                characterControllerSweep(entity, characterWrapper, displacement);
+            }
+           
+            *entity.get_component<position>() = math::vec3{ positionAfterMove.x,positionAfterMove.y,positionAfterMove.z };
 
             characterWrapper.totalDisplacement = math::vec3(0.0f);
-        }
 
+            if (collisionFlag & PxControllerCollisionFlag::eCOLLISION_DOWN)
+            {
+                if (gravity_preset* gravity = entity.get_component<capsule_controller>()->data.getPreset<gravity_preset>())
+                {
+                    gravity->gravityAcc = math::vec3(0.0f);
+                }
+            }
+        }
     }
 
     void PhysXPhysicsSystem::executePreTimeStepActions()
@@ -637,6 +653,25 @@ namespace legion::physics
         dynamic->getShapes(&shape, 1);
 
         setShapeFilterData(shape, capsuleData.getCollisionFilter(), physics_object_flag::po_character_controller);
+    }
+
+    void PhysXPhysicsSystem::characterControllerSweep(ecs::entity characterEnt, PhysxCharacterWrapper& character, const PxVec3& displacement)
+    {
+        PxRigidActor* controllerActor = character.characterController->getActor();
+
+        PxShape* controllerShape;
+        controllerActor->getShapes(&controllerShape, 1);
+
+        PxGeometryHolder geomHolder = controllerShape->getGeometry();
+
+        //PxSweepHit* hits[sweepBufferSize];
+        //std::array<PxSweepHit*, sweepBufferSize> sweepBuffer{};
+        PxSweepHit* sweepBuffer = static_cast<PxSweepHit*>(_alloca(sizeof(PxSweepHit*) * sweepBufferSize));
+        
+        ControllerMoveSweepCallback sweepCallback(character, characterEnt, sweepBuffer, sweepBufferSize);
+
+        m_physxScene->sweep(geomHolder.any(), controllerActor->getGlobalPose(),
+            displacement.getNormalized(), displacement.magnitude(), sweepCallback);
     }
 
     delegate<void(const PxControllerShapeHit&)> PhysXPhysicsSystem::initializeDefaultRigidbodyToCharacterResponse(float forceAmount, float massMaximum)

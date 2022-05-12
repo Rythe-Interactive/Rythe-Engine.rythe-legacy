@@ -10,10 +10,12 @@
 
 namespace physx
 {
+    class PxVec3;
     class PxScene;
     class PxControllerManager;
     class PxPhysics;
     class PxMaterial;
+    class PxController;
     struct PxControllerShapeHit;
 };
 
@@ -61,6 +63,8 @@ namespace legion::physics
         void executePreTimeStepActions();
 
         void instantiateCharacterController(ecs::entity ent,const CapsuleControllerData& capsuleData, PhysxCharacterWrapper& outCharacterWrapper);
+
+        void characterControllerSweep(ecs::entity characterEnt, PhysxCharacterWrapper& character, const physx::PxVec3& displacement);
 
         void processPhysicsComponentEvents(ecs::entity ent, physics_component& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo);
 

@@ -39,6 +39,8 @@ namespace legion::physics
     {
         characterController = other.characterController;
         controllerFeedback = std::move(other.controllerFeedback);
+        totalDisplacement = other.totalDisplacement;
+        actorsCollidedWith = std::move(other.actorsCollidedWith);
 
         other.characterController = nullptr;
 
@@ -46,7 +48,8 @@ namespace legion::physics
     }
 
     PhysxCharacterWrapper::PhysxCharacterWrapper(PhysxCharacterWrapper&& other) noexcept
-        : characterController(other.characterController), controllerFeedback(std::move(other.controllerFeedback))
+        : characterController(other.characterController), controllerFeedback(std::move(other.controllerFeedback)),
+        totalDisplacement(other.totalDisplacement), actorsCollidedWith(std::move(other.actorsCollidedWith))
     {
         other.characterController = nullptr;
     }

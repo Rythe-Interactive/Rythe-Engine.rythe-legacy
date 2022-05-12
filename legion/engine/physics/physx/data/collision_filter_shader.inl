@@ -75,4 +75,55 @@ namespace legion::physics
         }
     };
 
+    class CustomSimulationEventCallback : public PxSimulationEventCallback
+    {
+        virtual void onConstraintBreak(PxConstraintInfo* constraints, PxU32 count) { }
+
+        virtual void onWake(PxActor** actors, PxU32 count) { }
+
+        virtual void onSleep(PxActor** actors, PxU32 count) { }
+
+        virtual void onContact(const PxContactPairHeader& pairHeader, const PxContactPair* pairs, PxU32 nbPairs)
+        {
+            for (PxU32 i = 0; i < nbPairs; i++)
+            {
+                const PxContactPair& cp = pairs[i];
+
+                ecs::entity first = { static_cast<ecs::entity_data*> (cp.shapes[0]->getActor()->userData) };
+                ecs::entity second = { static_cast<ecs::entity_data*> (cp.shapes[1]->getActor()->userData) };
+
+                collision_info info{ first,second };
+
+                //log::debug("contact found between {0} and {1} ", first->name, second->name);
+
+                if (cp.events & PxPairFlag::eNOTIFY_TOUCH_FOUND)
+                {
+                    on_trigger_enter triggerEnter;
+                    triggerEnter.collision = info;
+
+                    events::EventBus::raiseEvent(triggerEnter);
+                }
+
+                if (cp.events & PxPairFlag::eNOTIFY_TOUCH_LOST)
+                {
+                    on_trigger_exit triggerExit;
+                    triggerExit.collision = info;
+
+                    events::EventBus::raiseEvent(triggerExit);
+                }
+
+            }
+
+        }
+
+        virtual void onTrigger(PxTriggerPair* pairs, PxU32 count)
+        {
+
+        }
+
+
+        virtual void onAdvance(const PxRigidBody* const* bodyBuffer, const PxTransform* poseBuffer, const PxU32 count) { }
+    };
+
+
 }

@@ -43,6 +43,8 @@ namespace legion::physics
         std::unique_ptr<ControllerHitFeedback> controllerFeedback;
         math::vec3 totalDisplacement = math::vec3(0.0f);
 
+        std::vector<physx::PxActor*> actorsCollidedWith;
+
         PhysxCharacterWrapper();
         ~PhysxCharacterWrapper();
 

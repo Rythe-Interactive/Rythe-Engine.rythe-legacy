@@ -5,7 +5,8 @@
 
 namespace legion::physics
 {
-
+    static ecs::entity triggerCharacterBlockDynamic;
+    static ecs::entity triggerCharacterTriggerDynamic;
 
     void PhysXTestSystem::setup()
     {
@@ -275,6 +276,7 @@ namespace legion::physics
     {
         //setup character controller
         m_characterControllerEnt = createDefaultMeshEntity({ 0,2.0,10 }, sphereH, concreteMat);
+        m_characterControllerEnt->name = "controller";
 
         auto& capsuleCont = *m_characterControllerEnt.add_component<capsule_controller>();
         CapsuleControllerData& capsule = capsuleCont.data;
@@ -295,7 +297,7 @@ namespace legion::physics
         capsule.setSpeed(0.1f);
 
         //setup ground plane
-        auto groundPlane = createEntity();
+        auto groundPlane = createEntity(); groundPlane->name = "plane";
         auto& enviromentComp = *groundPlane.add_component<physics_enviroment>();
         enviromentComp.data.instantiateInfinitePlane(math::vec3(0, 1, 0), 0);
 
@@ -309,25 +311,25 @@ namespace legion::physics
         };
 
         //setup invisible wall
-        auto triggerCharacterBlockDynamic = createDefaultMeshEntity({ 0, 0.5f, 0 }, cubeH, concreteMat);
+        triggerCharacterBlockDynamic = createDefaultMeshEntity({ 0, 0.5f, 0 }, cubeH, concreteMat); triggerCharacterBlockDynamic->name = "firstWall";
         physics_component& invisibleWall = scaleAndAddPhysicsComp(triggerCharacterBlockDynamic);
 
         invisibleWall.physicsCompData.setAllColliderReactionToObject(physics_object_flag::po_character_controller, physics_object_reaction::reaction_overlap);
 
         //setup trigger wall
-        auto triggerCharacterTriggerDynamic = createDefaultMeshEntity({ 0, 0.5f, -5 }, cubeH, concreteMat);
+        triggerCharacterTriggerDynamic = createDefaultMeshEntity({ 0, 0.5f, -5 }, cubeH, concreteMat); triggerCharacterTriggerDynamic->name = "triggerWall";
         physics_component& triggerWall = scaleAndAddPhysicsComp(triggerCharacterTriggerDynamic);
 
         triggerWall.physicsCompData.setAllColliderReactionToObject(physics_object_flag::po_character_controller, physics_object_reaction::reaction_overlap);
-        triggerWall.physicsCompData.setAllColliderReactionToObject(physics_object_flag::po_dynamic, physics_object_reaction::reaction_ignore);
+        triggerWall.physicsCompData.setAllColliderReactionToObject(physics_object_flag::po_dynamic, physics_object_reaction::reaction_overlap);
 
         //setup third block
-        auto blockCharacterBlockDynamic = createDefaultMeshEntity({ 0, 0.5f, -10 }, cubeH, concreteMat);
+        auto blockCharacterBlockDynamic = createDefaultMeshEntity({ 0, 0.5f, -10 }, cubeH, concreteMat); blockCharacterBlockDynamic->name = "thirdWall";
         physics_component& thirdBlock = scaleAndAddPhysicsComp(blockCharacterBlockDynamic);
 
 
         //ball to check
-        auto bigBall = createDefaultMeshEntity({ 0, 20.5f, -5 }, sphereH, concreteMat);
+        //auto bigBall = createDefaultMeshEntity({ 0, 20.5f, -5 }, sphereH, concreteMat);
         /*bigBall.add_component<physics_component>()->physicsCompData.AddSphereCollider(10, { 0,0,0 });
         
         *bigBall.get_component<scale>() = math::vec3{ 20, 20, 20 };
@@ -341,6 +343,9 @@ namespace legion::physics
 
 
         setupCharacterMoveBindings();
+
+        bindToEvent<on_trigger_enter, &PhysXTestSystem::triggerEnterEvent>();
+        bindToEvent<on_trigger_exit, &PhysXTestSystem::triggerExitEvent>();
     }
 
     void PhysXTestSystem::shootPhysXCubes(ShootPhysXBox& action)
@@ -460,7 +465,6 @@ namespace legion::physics
         if (!m_characterControllerEnt.valid()) return;
         CapsuleControllerData& data =  m_characterControllerEnt.get_component<capsule_controller>()->data;
         data.moveTo(displacement);
-        
     }
 
     void PhysXTestSystem::OnCharacterJump(CharacterJump& action)
@@ -474,8 +478,59 @@ namespace legion::physics
         }
     }
 
+
     void PhysXTestSystem::triggerEnterEvent(on_trigger_enter& triggerEnter)
     {
+        ecs::entity first = triggerEnter.collision.firstEntity;
+        ecs::entity second = triggerEnter.collision.secondEntity;
+
+        log::debug("on trigger enter between entity with name {0} and {1}",
+            first->name, second->name);
+
+        if (first == m_characterControllerEnt && second == triggerCharacterBlockDynamic)
+        {
+            auto left = createDefaultMeshEntity({ -2, 10.f, -5 }, sphereH, concreteMat);
+            left.add_component<physics_component>()->physicsCompData.AddSphereCollider(0.5f,{});
+            left.add_component<rigidbody>();
+
+
+            auto right =createDefaultMeshEntity({ 2, 10.f, -5 }, sphereH, concreteMat);
+            right.add_component<physics_component>()->physicsCompData.AddSphereCollider(0.5f, {});
+            right.add_component<rigidbody>();
+        }
+
+        bool firstHasRB = first.has_component<rigidbody>();
+        bool secondHasRB = second.has_component<rigidbody>();
+
+        static bool firstTimeTrigger = true;
+
+        bool colWithTrigger = first == triggerCharacterTriggerDynamic || second == triggerCharacterTriggerDynamic;
+        bool colWithRB = (firstHasRB || secondHasRB);
+        if (colWithTrigger && colWithRB && firstTimeTrigger)
+        {
+            firstTimeTrigger = false;
+            {
+                auto left = createDefaultMeshEntity({ -2, 10.f, 0 }, sphereH, concreteMat);
+                left.add_component<physics_component>()->physicsCompData.AddSphereCollider(0.5f, {});
+                left.add_component<rigidbody>();
+
+
+                auto right = createDefaultMeshEntity({ 2, 10.f, 0 }, sphereH, concreteMat);
+                right.add_component<physics_component>()->physicsCompData.AddSphereCollider(0.5f, {});
+                right.add_component<rigidbody>();
+            }
+
+            {
+                auto left = createDefaultMeshEntity({ -2, 10.f, -10 }, sphereH, concreteMat);
+                left.add_component<physics_component>()->physicsCompData.AddSphereCollider(0.5f, {});
+                left.add_component<rigidbody>();
+
+
+                auto right = createDefaultMeshEntity({ 2, 10.f, -10 }, sphereH, concreteMat);
+                right.add_component<physics_component>()->physicsCompData.AddSphereCollider(0.5f, {});
+                right.add_component<rigidbody>();
+            }
+        }
 
     }
 

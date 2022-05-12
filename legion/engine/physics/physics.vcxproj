@@ -93,6 +93,9 @@
     <ClInclude Include="physx\physx_integration_helpers.hpp" />
     <ClInclude Include="physx\systems\physx_physics_system.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="physx\data\trigger_event_callbacks.inl" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
