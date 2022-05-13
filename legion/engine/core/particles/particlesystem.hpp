@@ -4,6 +4,7 @@
 #include <core/time/time.hpp>
 #include <core/events/events.hpp>
 #include <core/engine/system.inl>
+#include <core/compute/compute.hpp>
 
 /**
  * @file particlesystem.hpp
@@ -26,6 +27,10 @@ namespace legion::core
     class ParticleSystem final : public System<ParticleSystem>
     {
     public:
+        compute::function emitFunc;
+        compute::function maintainFunc;
+        compute::function movementFunc;
+
         void setup();
         void shutdown();
         void update(time::span deltaTime);

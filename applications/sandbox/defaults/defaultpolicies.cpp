@@ -34,35 +34,28 @@ namespace legion::core
             emitter.create_buffer<position>("posBuffer");
         if (!emitter.has_buffer<velocity>("velBuffer"))
             emitter.create_buffer<velocity>("velBuffer");
-
     }
     void pointcloud_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
     {
         auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
+        auto& posBuffer = emitter.get_buffer<position>("posBuffer");
         for (size_type idx = start; idx < end; idx++)
         {
-            velBuffer[idx] = math::vec3::up * 2.f;
+            posBuffer[idx] = math::sphericalRand(1.f);
+            velBuffer[idx] = math::normalize(posBuffer[idx]);
         }
     }
     void pointcloud_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
     {
-        using namespace lgn::core;
-        if (count < 1)
-            return;
+        //using namespace lgn::core;
+        //if (count < 1)
+        //    return;
 
-        auto& posBuffer = emitter.get_buffer<position>("posBuffer");
-        auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
+        //auto& posBuffer = emitter.get_buffer<position>("posBuffer");
+        //auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
 
-        auto vector_add = emitter.get_uniform<compute::function>("vadd");
-
-        std::vector<position> outPosBuffer;
-        log::debug("Start Compute");
-        auto result = vector_add(1024, compute::in(posBuffer), compute::in(velBuffer), compute::out(outPosBuffer));
-        log::debug("End Compute");
-        if (!result.valid())
-            log::error(result);
-        posBuffer.clear();
-        posBuffer.insert(posBuffer.end(), outPosBuffer.begin(), outPosBuffer.end());
+        //auto vector_add = emitter.get_uniform<compute::function>("vadd");
+        //vector_add(2048, compute::in(posBuffer), compute::in(velBuffer), compute::out(posBuffer));
     }
 #pragma endregion
 #pragma region Orbital Policy

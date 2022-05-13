@@ -45,6 +45,7 @@ namespace legion::core
 
         //If enabled the particle system will be paused         default: false
         bool m_pause = false;
+        bool m_gpu = true;
 
         //An enum to define the transformation space that the particles are in
         Space m_space;

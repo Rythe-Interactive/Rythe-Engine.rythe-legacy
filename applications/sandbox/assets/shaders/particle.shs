@@ -38,16 +38,19 @@ shader(fragment)
     uniform int frameCount;
     void main(void)
     {
-        vec4 color = pow(texture(_texture, vec3(stdio(uv), stdio(frameID))),vec4(vec3(2.2),1.0));
-        color.a *= SoftParticleAlpha(2.0);
-        if(color.a <= epsilon)
-            discard;
-
-        color.a *= 1.0 - (stdio(frameID)/frameCount);
-
         #if defined(DEPTH_ONLY)
             fragment_color = vec4(0.0);
         #else 
+            float frame = stdio(frameID); 
+            vec4 current = texture(_texture, vec3(stdio(uv), frame ));
+            vec4 previous = texture(_texture, vec3(stdio(uv), frame-1.0));
+            vec4 color = pow(mix(current, previous,round(1+frame)-frame), vec4(vec3(2.2),1.0));
+
+            color.a *= SoftParticleAlpha(2.0);
+            if(color.a <= epsilon)
+                discard;
+            color.a *= 1.0 - (frame/frameCount);
+            
             fragment_color = color;
             fragment_normal = vec4(vec3(0.0), 1.0);
             fragment_position = vec4(vec3(0.0), 1.0);

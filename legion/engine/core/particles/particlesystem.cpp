@@ -1,5 +1,9 @@
-#include <core/particles/particles.hpp>
+#include <core/particles/particlepolicy.hpp>
+#include <core/particles/particlebuffer.hpp>
+#include <core/particles/particleemitter.hpp>
+#include <core/particles/particlesystem.hpp>
 #include <core/common/debugrendering.hpp>
+
 
 
 namespace legion::core
@@ -8,6 +12,9 @@ namespace legion::core
     {
         log::debug("ParticleSystem setup");
         bindToEvent<events::component_creation<particle_emitter>, &ParticleSystem::emitter_setup>();
+        emitFunc = fs::view("assets://kernels/particles.cl").load_as<compute::function>("emit");
+        maintainFunc = fs::view("assets://kernels/particles.cl").load_as<compute::function>("maintain");
+        movementFunc = fs::view("assets://kernels/particles.cl").load_as<compute::function>("movement");
     }
 
     void ParticleSystem::shutdown()
@@ -60,9 +67,6 @@ namespace legion::core
         if (emitter.m_particleCount + count >= emitter.m_capacity)
             count = emitter.m_capacity - startCount;
 
-        emitter.set_alive(startCount, count, true);
-        emitter.m_particleCount += count;
-        emitter.m_totalParticlesSpawned += count;
         id_type ageBufferId = nameHash("lifetimeBuffer");
         auto& ageBuffer = emitter.has_buffer<life_time>(ageBufferId) ? emitter.get_buffer<life_time>(ageBufferId) : emitter.create_buffer<life_time>("lifetimeBuffer");
         auto minLifeTime = emitter.has_uniform<float>("minLifeTime") ? emitter.get_uniform<float>("minLifeTime") : 0.f;
@@ -74,6 +78,12 @@ namespace legion::core
             ageBuffer.at(idx).max = math::linearRand(minLifeTime, maxLifeTime);
         }
 
+
+        emitter.set_alive(startCount, count, true);
+
+        emitter.m_particleCount += count;
+        emitter.m_totalParticlesSpawned += count;
+
         for (auto& policy : emitter.m_particlePolicies)
             policy->onInit(emitter, startCount, emitter.m_particleCount);
     }
@@ -84,30 +94,40 @@ namespace legion::core
         if (emitter.m_particleCount == 0)
             return;
         auto& ageBuffer = emitter.get_buffer<life_time>("lifetimeBuffer");
-        size_type destroyed = 0;
-        size_type activeCount = 0;
-        if (emitter.has_uniform<float>("minLifeTime") && emitter.has_uniform<float>("maxLifeTime"))
-        {
-            for (activeCount = 0; activeCount < emitter.m_particleCount; activeCount++)
-            {
-                if (!emitter.is_alive(activeCount))
-                    break;
 
-                ageBuffer[activeCount].age += deltaTime;
-            }
-            for (size_type i = 0; i < activeCount; i++)
+        if (!emitter.m_gpu)
+        {
+            size_type destroyed = 0;
+            size_type activeCount = 0;
+            if (emitter.has_uniform<float>("minLifeTime") && emitter.has_uniform<float>("maxLifeTime"))
             {
-                auto& lifeTime = ageBuffer[i];
-                if (lifeTime.age > lifeTime.max)
+                for (activeCount = 0; activeCount < emitter.m_particleCount; activeCount++)
                 {
-                    lifeTime.age = 0;
-                    emitter.set_alive(i, false);
-                    destroyed++;
+                    if (!emitter.is_alive(activeCount))
+                        break;
+
+                    ageBuffer[activeCount].age += deltaTime;
                 }
+                for (size_type i = 0; i < activeCount; i++)
+                {
+                    auto& lifeTime = ageBuffer[i];
+                    if (lifeTime.age > lifeTime.max)
+                    {
+                        lifeTime.age = 0;
+                        emitter.set_alive(i, false);
+                        destroyed++;
+                    }
+                }
+                auto targetCount = emitter.m_particleCount + destroyed;
+                for (auto& policy : emitter.m_particlePolicies)
+                    policy->onDestroy(emitter, emitter.m_particleCount, targetCount);
             }
-            auto targetCount = emitter.m_particleCount + destroyed;
-            for (auto& policy : emitter.m_particlePolicies)
-                policy->onDestroy(emitter, emitter.m_particleCount, targetCount);
+        }
+        else
+        {
+            auto& velBuffer = emitter.has_buffer<velocity>("velBuffer") ? emitter.get_buffer<velocity>("velBuffer") : emitter.create_buffer<velocity>("velBuffer");
+            auto& posBuffer = emitter.has_buffer<position>("posBuffer") ? emitter.get_buffer<position>("posBuffer") : emitter.create_buffer<position>("posBuffer");
+            movementFunc(2048, compute::in(velBuffer), compute::inout(posBuffer));
         }
 
         for (auto& policy : emitter.m_particlePolicies)
