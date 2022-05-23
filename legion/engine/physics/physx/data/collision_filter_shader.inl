@@ -40,6 +40,7 @@ namespace legion::physics
         else if (lowestReaction == physics_object_reaction::reaction_overlap)
         {
             pairFlags = PxPairFlag::eTRIGGER_DEFAULT;
+            pairFlags |= PxPairFlag::eNOTIFY_TOUCH_PERSISTS;
         }
         else
         {
@@ -94,14 +95,20 @@ namespace legion::physics
 
                 collision_info info{ first,second };
 
-                //log::debug("contact found between {0} and {1} ", first->name, second->name);
-
                 if (cp.events & PxPairFlag::eNOTIFY_TOUCH_FOUND)
                 {
                     on_trigger_enter triggerEnter;
                     triggerEnter.collision = info;
 
                     events::EventBus::raiseEvent(triggerEnter);
+                }
+
+                if (cp.events & PxPairFlag::eNOTIFY_TOUCH_PERSISTS)
+                {
+                    on_trigger_stay triggerStay;
+                    triggerStay.collision = info;
+
+                    events::EventBus::raiseEvent(triggerStay);
                 }
 
                 if (cp.events & PxPairFlag::eNOTIFY_TOUCH_LOST)
@@ -124,6 +131,4 @@ namespace legion::physics
 
         virtual void onAdvance(const PxRigidBody* const* bodyBuffer, const PxTransform* poseBuffer, const PxU32 count) { }
     };
-
-
 }

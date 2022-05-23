@@ -66,6 +66,8 @@ namespace legion::physics
 
         void characterControllerSweep(ecs::entity characterEnt, PhysxCharacterWrapper& character, const physx::PxVec3& displacement);
 
+        void characterControllerOverlap(ecs::entity characterEnt, PhysxCharacterWrapper& character);
+
         void processPhysicsComponentEvents(ecs::entity ent, physics_component& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo);
 
         void processRigidbodyComponentEvents(ecs::entity ent, rigidbody& rigidbody, physics_component& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo);

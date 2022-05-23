@@ -570,6 +570,10 @@ namespace legion::physics
             {
                 characterControllerSweep(entity, characterWrapper, displacement);
             }
+            else
+            {
+                characterControllerOverlap(entity, characterWrapper);
+            }
            
             *entity.get_component<position>() = math::vec3{ positionAfterMove.x,positionAfterMove.y,positionAfterMove.z };
 
@@ -664,14 +668,29 @@ namespace legion::physics
 
         PxGeometryHolder geomHolder = controllerShape->getGeometry();
 
-        //PxSweepHit* hits[sweepBufferSize];
-        //std::array<PxSweepHit*, sweepBufferSize> sweepBuffer{};
         PxSweepHit* sweepBuffer = static_cast<PxSweepHit*>(_alloca(sizeof(PxSweepHit*) * sweepBufferSize));
         
         ControllerMoveSweepCallback sweepCallback(character, characterEnt, sweepBuffer, sweepBufferSize);
 
         m_physxScene->sweep(geomHolder.any(), controllerActor->getGlobalPose(),
             displacement.getNormalized(), displacement.magnitude(), sweepCallback);
+    }
+
+    void PhysXPhysicsSystem::characterControllerOverlap(ecs::entity characterEnt, PhysxCharacterWrapper& character)
+    {
+        PxRigidActor* controllerActor = character.characterController->getActor();
+
+        PxShape* controllerShape;
+        controllerActor->getShapes(&controllerShape, 1);
+
+        PxGeometryHolder geomHolder = controllerShape->getGeometry();
+
+        PxOverlapHit* overlapBuffer = static_cast<PxOverlapHit*>(_alloca(sizeof(PxOverlapHit*) * sweepBufferSize));
+
+        ControllerOverlapCallback overlapCallback(character, characterEnt, overlapBuffer, sweepBufferSize);
+
+        m_physxScene->overlap(geomHolder.any(), controllerActor->getGlobalPose(), overlapCallback);
+
     }
 
     delegate<void(const PxControllerShapeHit&)> PhysXPhysicsSystem::initializeDefaultRigidbodyToCharacterResponse(float forceAmount, float massMaximum)

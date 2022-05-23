@@ -327,21 +327,6 @@ namespace legion::physics
         auto blockCharacterBlockDynamic = createDefaultMeshEntity({ 0, 0.5f, -10 }, cubeH, concreteMat); blockCharacterBlockDynamic->name = "thirdWall";
         physics_component& thirdBlock = scaleAndAddPhysicsComp(blockCharacterBlockDynamic);
 
-
-        //ball to check
-        //auto bigBall = createDefaultMeshEntity({ 0, 20.5f, -5 }, sphereH, concreteMat);
-        /*bigBall.add_component<physics_component>()->physicsCompData.AddSphereCollider(10, { 0,0,0 });
-        
-        *bigBall.get_component<scale>() = math::vec3{ 20, 20, 20 };
-        bigBall.add_component<rigidbody>();
-
-        auto planeCheckBall = createDefaultMeshEntity({ 0, 20.5f, -20 }, sphereH, concreteMat);
-        planeCheckBall.add_component<physics_component>()->physicsCompData.AddSphereCollider(4, { 0,0,0 });
-
-        *planeCheckBall.get_component<scale>() = math::vec3{ 8, 8, 8 };
-        planeCheckBall.add_component<rigidbody>();*/
-
-
         setupCharacterMoveBindings();
 
         bindToEvent<on_trigger_enter, &PhysXTestSystem::triggerEnterEvent>();
@@ -483,9 +468,6 @@ namespace legion::physics
     {
         ecs::entity first = triggerEnter.collision.firstEntity;
         ecs::entity second = triggerEnter.collision.secondEntity;
-
-        log::debug("on trigger enter between entity with name {0} and {1}",
-            first->name, second->name);
 
         if (first == m_characterControllerEnt && second == triggerCharacterBlockDynamic)
         {
