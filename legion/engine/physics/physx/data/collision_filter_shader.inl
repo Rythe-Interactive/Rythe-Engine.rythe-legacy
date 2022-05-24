@@ -55,7 +55,7 @@ namespace legion::physics
         PxQueryHitType::Enum preFilter(
             const PxFilterData& filterData, const PxShape* shape, const PxRigidActor* actor, PxHitFlags& queryFlags)
         {
-            PxFilterData otherData = shape->getQueryFilterData();
+            PxFilterData otherData = shape->getSimulationFilterData();
 
             physics_object_reaction characterControllerToShape = getReaction(filterData.word0, otherData.word3);
             physics_object_reaction shapeToCharacterController = getReaction(otherData.word0, physics_object_flag::po_character_controller);

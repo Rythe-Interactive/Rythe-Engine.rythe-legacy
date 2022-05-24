@@ -32,9 +32,14 @@ namespace legion::physics
         filterData.word1 = objectType;
 
         shape->setSimulationFilterData(filterData);
-        shape->setQueryFilterData(filterData);
-    }
 
+        PxFilterData queryFilterData;
+        //set to max of PxU32 in order to pass the internal AND operator check within PhysX
+        queryFilterData.word0 = std::numeric_limits<PxU32>::max();
+        queryFilterData.word1 = std::numeric_limits<PxU32>::max();
+
+        shape->setQueryFilterData(queryFilterData);
+    }
 
     physx::PxPhysics* getSDK()
     {
