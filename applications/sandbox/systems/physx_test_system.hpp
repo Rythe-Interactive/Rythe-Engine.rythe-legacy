@@ -44,6 +44,8 @@ namespace legion::physics
 
         void setupCollisionFilteringScene();
 
+        void setupSceneQueryScene();
+
         //------------------------ Rigidbody Shooter -------------------------------------------//
 
         void shootPhysXCubes(ShootPhysXBox& action);

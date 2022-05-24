@@ -55,6 +55,7 @@ namespace legion::physics
         //setupBoxAndStackTestScene();
         //setupCharacterControllerTestScene();
         setupCollisionFilteringScene();
+        //setupSceneQueryScene();
 
         //enable player to shoot blocks
         app::InputSystem::createBinding<ShootPhysXBox>(app::inputmap::method::C);
@@ -331,6 +332,58 @@ namespace legion::physics
 
         bindToEvent<on_trigger_enter, &PhysXTestSystem::triggerEnterEvent>();
         bindToEvent<on_trigger_exit, &PhysXTestSystem::triggerExitEvent>();
+    }
+
+    void PhysXTestSystem::setupSceneQueryScene()
+    {
+        //create four walls for raycast
+
+        auto glassWall = createStaticColliderWall(math::vec3(15, 3, 0), legionLogoMat, math::vec3(4.0f, 6.0f, 2.0f));
+        glassWall->name = "glassWall";
+       
+        auto bulletProofWall = createStaticColliderWall(math::vec3(15, 3, -5), legionLogoMat, math::vec3(4.0f, 6.0f, 2.0f));
+        bulletProofWall->name = "bulletProofWall";
+
+        auto brickWall = createStaticColliderWall(math::vec3(15, 3, -10), legionLogoMat, math::vec3(4.0f, 6.0f, 2.0f));
+        brickWall->name = "brickWall";
+
+        auto finalBrickWall = createStaticColliderWall(math::vec3(15, 3, -15), legionLogoMat, math::vec3(4.0f, 6.0f, 2.0f));
+        finalBrickWall->name = "finalBrickWall";
+
+        //create four walls for sweep
+
+        auto glassWallSweep = createStaticColliderWall(math::vec3(30, 6, 0), legionLogoMat, math::vec3(8.0f, 12.0f, 2.0f));
+        glassWallSweep->name = "glassWallSweep";
+
+        auto bulletProofWallSweep = createStaticColliderWall(math::vec3(30, 6, -5), legionLogoMat, math::vec3(8.0f, 12.0f, 2.0f));
+        bulletProofWallSweep->name = "bulletProofWallSweep";
+
+        auto brickWallSweep = createStaticColliderWall(math::vec3(30, 6, -10), legionLogoMat, math::vec3(8.0f, 12.0f, 2.0f));
+        brickWallSweep->name = "brickWallSweep";
+
+        auto finalBrickWallSweep = createStaticColliderWall(math::vec3(30, 6, -15), legionLogoMat, math::vec3(8.0f, 12.0f, 2.0f));
+        finalBrickWallSweep->name = "finalBrickWallSweep";
+
+        //create boxes for overlap
+        auto box1 = createStaticColliderWall(math::vec3(45, 0.5f, 0), legionLogoMat, math::vec3(1.0f, 1.0f, 1.0f));
+        box1->name = "box1";
+
+        auto box2 = createStaticColliderWall(math::vec3(46, 0.5f, 0), legionLogoMat, math::vec3(1.0f, 1.0f, 1.0f));
+        box2->name = "box2";
+
+        auto box3 = createStaticColliderWall(math::vec3(45.5, 1.5f, 0), legionLogoMat, math::vec3(1.0f, 1.0f, 1.0f));
+        box3->name = "box3";
+
+        int u23 = sizeof(std::uint32_t);
+        int sizeType = sizeof(size_type);
+        int shortS = sizeof(short);
+
+        int vec3 = sizeof(math::vec3);
+        int quat = sizeof(math::quat);
+        //int cs = sizeof(specifics);
+        int cf = sizeof(CollisionFilter);
+        int cd = sizeof(ColliderData);
+        
     }
 
     void PhysXTestSystem::shootPhysXCubes(ShootPhysXBox& action)
