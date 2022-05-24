@@ -12,9 +12,6 @@ namespace legion::core
     {
         log::debug("ParticleSystem setup");
         bindToEvent<events::component_creation<particle_emitter>, &ParticleSystem::emitter_setup>();
-        emitFunc = fs::view("assets://kernels/particles.cl").load_as<compute::function>("emit");
-        maintainFunc = fs::view("assets://kernels/particles.cl").load_as<compute::function>("maintain");
-        movementFunc = fs::view("assets://kernels/particles.cl").load_as<compute::function>("movement");
     }
 
     void ParticleSystem::shutdown()
@@ -78,9 +75,7 @@ namespace legion::core
             ageBuffer.at(idx).max = math::linearRand(minLifeTime, maxLifeTime);
         }
 
-
         emitter.set_alive(startCount, count, true);
-
         emitter.m_particleCount += count;
         emitter.m_totalParticlesSpawned += count;
 
@@ -95,39 +90,30 @@ namespace legion::core
             return;
         auto& ageBuffer = emitter.get_buffer<life_time>("lifetimeBuffer");
 
-        if (!emitter.m_gpu)
+        size_type destroyed = 0;
+        size_type activeCount = 0;
+        if (emitter.has_uniform<float>("minLifeTime") && emitter.has_uniform<float>("maxLifeTime"))
         {
-            size_type destroyed = 0;
-            size_type activeCount = 0;
-            if (emitter.has_uniform<float>("minLifeTime") && emitter.has_uniform<float>("maxLifeTime"))
+            for (activeCount = 0; activeCount < emitter.m_particleCount; activeCount++)
             {
-                for (activeCount = 0; activeCount < emitter.m_particleCount; activeCount++)
-                {
-                    if (!emitter.is_alive(activeCount))
-                        break;
+                if (!emitter.is_alive(activeCount))
+                    break;
 
-                    ageBuffer[activeCount].age += deltaTime;
-                }
-                for (size_type i = 0; i < activeCount; i++)
-                {
-                    auto& lifeTime = ageBuffer[i];
-                    if (lifeTime.age > lifeTime.max)
-                    {
-                        lifeTime.age = 0;
-                        emitter.set_alive(i, false);
-                        destroyed++;
-                    }
-                }
-                auto targetCount = emitter.m_particleCount + destroyed;
-                for (auto& policy : emitter.m_particlePolicies)
-                    policy->onDestroy(emitter, emitter.m_particleCount, targetCount);
+                ageBuffer[activeCount].age += deltaTime;
             }
-        }
-        else
-        {
-            auto& velBuffer = emitter.has_buffer<velocity>("velBuffer") ? emitter.get_buffer<velocity>("velBuffer") : emitter.create_buffer<velocity>("velBuffer");
-            auto& posBuffer = emitter.has_buffer<position>("posBuffer") ? emitter.get_buffer<position>("posBuffer") : emitter.create_buffer<position>("posBuffer");
-            movementFunc(2048, compute::in(velBuffer), compute::inout(posBuffer));
+            for (size_type i = 0; i < activeCount; i++)
+            {
+                auto& lifeTime = ageBuffer[i];
+                if (lifeTime.age > lifeTime.max)
+                {
+                    lifeTime.age = 0;
+                    emitter.set_alive(i, false);
+                    destroyed++;
+                }
+            }
+            auto targetCount = emitter.m_particleCount + destroyed;
+            for (auto& policy : emitter.m_particlePolicies)
+                policy->onDestroy(emitter, emitter.m_particleCount, targetCount);
         }
 
         for (auto& policy : emitter.m_particlePolicies)

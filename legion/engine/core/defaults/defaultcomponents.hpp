@@ -60,8 +60,8 @@ namespace legion::core
             z -= src.z;
             return *this;
         }
-        operator cl_float3() const { return cl_float3{ x,y,z }; }
-        operator cl_float3*() const { return nullptr; }
+        operator cl_float3() const { return cl_float3{ x,y,z}; }
+        operator cl_float3* () const { return nullptr; }
     };
 
     struct rotation : public math::quat

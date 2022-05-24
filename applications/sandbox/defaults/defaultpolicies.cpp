@@ -26,36 +26,64 @@ namespace legion::core
     }
 #pragma endregion
 #pragma region Point Cloud Policy
-    void pointcloud_policy::setup(particle_emitter& emitter)
+    void gpu_particle_policy::setup(particle_emitter& emitter)
     {
         if (!emitter.has_uniform<compute::function>("vadd"))
-            emitter.create_uniform<compute::function>("vadd", fs::view("assets://kernels/vadd_kernel.cl").load_as<compute::function>("vector_add"));
+            emitter.create_uniform<compute::function>("vadd", fs::view("assets://kernels/particles.cl").load_as<compute::function>("vector_add"));
+        if (!emitter.has_uniform<compute::function>("initVel"))
+            emitter.create_uniform<compute::function>("initVel", fs::view("assets://kernels/particles.cl").load_as<compute::function>("init_vel"));
+        if (!emitter.has_uniform<compute::function>("initPos"))
+            emitter.create_uniform<compute::function>("initPos", fs::view("assets://kernels/particles.cl").load_as<compute::function>("init_pos"));
+
         if (!emitter.has_buffer<position>("posBuffer"))
             emitter.create_buffer<position>("posBuffer");
         if (!emitter.has_buffer<velocity>("velBuffer"))
             emitter.create_buffer<velocity>("velBuffer");
+        if (!emitter.has_buffer<math::vec4>("computeOut"))
+            emitter.create_buffer<math::vec4>("computeOut");
     }
-    void pointcloud_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
+    void gpu_particle_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
     {
         auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
         auto& posBuffer = emitter.get_buffer<position>("posBuffer");
-        for (size_type idx = start; idx < end; idx++)
-        {
-            posBuffer[idx] = math::sphericalRand(1.f);
-            velBuffer[idx] = math::normalize(posBuffer[idx]);
-        }
+        auto& computeOut = emitter.get_buffer<math::vec4>("computeOut");
+
+        auto count = static_cast<cl_ulong>(end - start);
+        if (count < 1)
+            return;
+
+        auto paddedSize = math::min(((emitter.size() - 1) | 512) + 1, 512ull);
+
+        auto _start = static_cast<cl_ulong>(start);
+
+        auto& init_velocity = emitter.get_uniform<compute::function>("initVel");
+        init_velocity(paddedSize, compute::inout(computeOut), compute::karg(_start, "start"), compute::karg(count, "count"));
+        velBuffer.assign(computeOut.begin(), computeOut.end());
+
+        auto& init_position = emitter.get_uniform<compute::function>("initPos");
+        init_position(paddedSize, compute::inout(computeOut, "A"), compute::karg(_start, "start"), compute::karg(count, "count"));
+        posBuffer.assign(computeOut.begin(), computeOut.end());
     }
-    void pointcloud_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
+    void gpu_particle_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
     {
-        //using namespace lgn::core;
-        //if (count < 1)
-        //    return;
+        using namespace lgn::core;
+        if (count < 1)
+            return;
 
-        //auto& posBuffer = emitter.get_buffer<position>("posBuffer");
-        //auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
+        auto& posBuffer = emitter.get_buffer<position>("posBuffer");
+        auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
+        auto& computeOut = emitter.get_buffer<math::vec4>("computeOut");
 
-        //auto vector_add = emitter.get_uniform<compute::function>("vadd");
-        //vector_add(2048, compute::in(posBuffer), compute::in(velBuffer), compute::out(posBuffer));
+        auto vector_add = emitter.get_uniform<compute::function>("vadd");
+        vector_add(math::min(((count - 1) | 512) + 1, 512ull), compute::in(posBuffer), compute::in(velBuffer), compute::out(computeOut));
+        for (size_type i = 0; i < posBuffer.size(); i++)
+        {
+            //log::debug("Particle Position {}", posBuffer[i]);
+            //log::debug("Particle Velocity {}", velBuffer[i]);
+            log::debug("Particle New Position {}", computeOut[i]);
+            log::debug("");
+        }
+        posBuffer.assign(computeOut.begin(), computeOut.end());
     }
 #pragma endregion
 #pragma region Orbital Policy

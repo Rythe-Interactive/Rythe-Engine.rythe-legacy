@@ -57,24 +57,24 @@ namespace legion::rendering
                 rotBuffer = emitter.get_buffer<rotation>(rotBufferId);
 
 
-            auto compare = [&](position& a, position& b)
-            {
-                return math::distance2(a, camInput.pos) < math::distance2(b, camInput.pos);
-            };
+            //auto compare = [&](position& a, position& b)
+            //{
+            //    return math::distance2(a, camInput.pos) < math::distance2(b, camInput.pos);
+            //};
 
             std::vector<id_type> particleIds(emitter.size());
             for (size_type i = 0; i < emitter.size(); i++)
                 particleIds[i] = i;
 
-            for (size_type i = 1; i < emitter.size(); i++)
-            {
-                auto j = i;
-                while (j > 0 && compare(posBuffer[particleIds[j - 1]], posBuffer[particleIds[j]]))
-                {
-                    std::swap(particleIds[j], particleIds[j - 1]);
-                    j--;
-                }
-            }
+            //for (size_type i = 1; i < emitter.size(); i++)
+            //{
+            //    auto j = i;
+            //    while (j > 0 && compare(posBuffer[particleIds[j - 1]], posBuffer[particleIds[j]]))
+            //    {
+            //        std::swap(particleIds[j], particleIds[j - 1]);
+            //        j--;
+            //    }
+            //}
 
             auto filter = emitter.get_uniform<mesh_filter>(meshFilterId);
             auto renderer = emitter.get_uniform<mesh_renderer>(rendererId);

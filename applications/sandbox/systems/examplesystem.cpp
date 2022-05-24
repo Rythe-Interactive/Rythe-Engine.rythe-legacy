@@ -308,14 +308,14 @@ void ExampleSystem::setup()
     ent.add_component<transform>();
 
     auto emitter = ent.add_component<particle_emitter>();
-    emitter->set_spawn_rate(100);
-    emitter->set_spawn_interval(0.2f);
-    emitter->create_uniform<float>("minLifeTime") = 5.f;
-    emitter->create_uniform<float>("maxLifeTime") = 5.f;
+    emitter->set_spawn_rate(1);
+    emitter->set_spawn_interval(.01f);
+    //emitter->create_uniform<float>("minLifeTime") = 5.f;
+    //emitter->create_uniform<float>("maxLifeTime") = 5.f;
     emitter->create_uniform<int>("frameCount", 9);
-    emitter->resize(10000);
-    emitter->add_policy<scale_lifetime_policy>();
-    emitter->add_policy<pointcloud_policy>();
+    emitter->resize(1000);
+    //emitter->add_policy<scale_lifetime_policy>();
+    emitter->add_policy<gpu_particle_policy>();
     material = gfx::MaterialCache::create_material("AnimParticle", fs::view("assets://shaders/particle.shs"));
     auto textureArray = gfx::TextureCache::create_texture_array("Explosion",
         {
@@ -333,7 +333,7 @@ void ExampleSystem::setup()
     material.set_param("frameCount", emitter->get_uniform<int>("frameCount"));
     model = gfx::ModelCache::create_model("Billboard", fs::view("assets://models/billboard.glb"));
     emitter->add_policy<gfx::rendering_policy>(gfx::rendering_policy{ model, material });
-    emitter->add_policy<gfx::flipbook_policy>();
+    //emitter->add_policy<gfx::flipbook_policy>();
 
     //    emitter->add_policy<example_policy>();
     //    orbital_policy orbital;

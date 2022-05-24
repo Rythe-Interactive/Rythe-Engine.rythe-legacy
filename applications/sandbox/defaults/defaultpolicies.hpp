@@ -15,10 +15,10 @@ namespace legion::core
         virtual void onInit(particle_emitter& emitter, size_type start, size_type end) override;
     };
 
-    struct pointcloud_policy : public particle_policy<pointcloud_policy>
+    struct gpu_particle_policy : public particle_policy<gpu_particle_policy>
     {
-        NO_DTOR_RULE5_NOEXCEPT(pointcloud_policy);
-        ~pointcloud_policy() = default;
+        NO_DTOR_RULE5_NOEXCEPT(gpu_particle_policy);
+        ~gpu_particle_policy() = default;
 
         virtual void setup(particle_emitter& emitter) override;
         virtual void onInit(particle_emitter & emitter, size_type start, size_type end) override;

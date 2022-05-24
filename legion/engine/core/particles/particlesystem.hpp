@@ -27,9 +27,6 @@ namespace legion::core
     class ParticleSystem final : public System<ParticleSystem>
     {
     public:
-        compute::function emitFunc;
-        compute::function maintainFunc;
-        compute::function movementFunc;
 
         void setup();
         void shutdown();

@@ -1,31 +1,27 @@
-struct life_time
-{
-    float age;
-    float max;
-};
+__kernel void vector_add(__global const float3* A, __global const float3* B,__global float3* C) {
 
-__kernel void emit(__global bool* living/*, __global struct life_time* lifeTime, const float minLife, const float maxLife*/)
-{
-    int idx = get_global_id(0);
+	int i = get_global_id(0);
 
-    // struct life_time life;
-    // life.age = 0.0f;
-    // life.max = lifeTime[idx].max;
-    // lifeTime[idx] = life;
-
-    living[idx] = true;
+	// C[i] = (float3)(A[i] + B[i]);
+    C[i] = (float3)(A[i].x,A[i].y,A[i].z);
 }
 
-__kernel void maintain(__global bool* living, __global struct life_time* lifeTime, const float timeStep)
-{
-    int idx = get_global_id(0);
-    lifeTime[idx].age += timeStep;
-    living[idx] = lifeTime[idx].age < lifeTime[idx].max;
+__kernel void init_vel(__global float4* A, const unsigned long start, const unsigned long count) {
+
+	int i = get_global_id(0);
+
+    if(i > count)
+        return;
+
+    A[start+i] = (float4)(0.0,0.0,0.0,0.0);
 }
 
-__kernel void movement(__global const float3* velocity, __global float3* position)
-{
-    int idx = get_global_id(0);
-    float3 newPos = (float3)(position[idx] + velocity[idx] * .02f);
-    position[idx] = newPos;
+__kernel void init_pos(__global float4* A, const unsigned long start, const unsigned long count) {
+
+	int i = get_global_id(0);
+
+    if(i > count)
+        return;
+
+    A[start+i] = (float4)(1.0,0.0,0.0,0.0);
 }
