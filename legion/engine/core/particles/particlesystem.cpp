@@ -22,6 +22,8 @@ namespace legion::core
     void ParticleSystem::update(time::span deltaTime)
     {
         ecs::filter<particle_emitter> filter;
+        core::time::stopwatch watch;
+        watch.start();
         for (auto& ent : filter)
         {
             auto& emitter = ent.get_component<particle_emitter>().get();
@@ -50,6 +52,9 @@ namespace legion::core
 
             maintenance(emitter, deltaTime);
         }
+        watch.end();
+        //log::debug("Particle System elapsed time:  {}ms", watch.elapsed_time().milliseconds());
+        //log::debug("");
     }
 
     void ParticleSystem::emitter_setup(L_MAYBEUNUSED events::component_creation<particle_emitter>& event)

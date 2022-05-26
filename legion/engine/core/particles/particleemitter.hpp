@@ -60,7 +60,7 @@ namespace legion::core
         float m_targetTime = 0.f;
 
         //A list of boleans that represent the living status of a particle
-        std::vector<bool> m_livingBuffer{};
+        std::vector<uint> m_livingBuffer{};
         //A list of policies bound to this emitter
         std::vector<std::unique_ptr<particle_policy_base>> m_particlePolicies;
         //Per particle attributes 
@@ -138,6 +138,7 @@ namespace legion::core
         void resize(size_type size);
         //Returns the maximum particle count
         size_type capacity() const noexcept;
+        std::vector<uint> get_living_buffer() const noexcept;
 
         friend class ParticleSystem;
     };

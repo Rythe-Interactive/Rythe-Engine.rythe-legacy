@@ -72,7 +72,7 @@ namespace legion::core
 
     void particle_emitter::swap(size_type idx1, size_type idx2)
     {
-        m_livingBuffer.swap(m_livingBuffer.at(idx1), m_livingBuffer.at(idx2));
+        std::swap(m_livingBuffer.at(idx1), m_livingBuffer.at(idx2));
 
         for (auto& [id, buffer] : m_particleBuffers)
         {
@@ -96,5 +96,10 @@ namespace legion::core
     size_type particle_emitter::capacity() const noexcept
     {
         return m_capacity;
+    }
+
+    std::vector<uint> particle_emitter::get_living_buffer() const noexcept
+    {
+        return m_livingBuffer;
     }
 }

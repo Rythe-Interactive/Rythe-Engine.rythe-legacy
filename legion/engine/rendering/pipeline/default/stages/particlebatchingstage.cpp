@@ -6,6 +6,8 @@ namespace legion::rendering
     void ParticleBatchingStage::setup(app::window& context)
     {
         create_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<math::mat4>, std::vector<float>>>>>("particle batches");
+        particle_matrix_composer = fs::view("assets://kernels/particles.cl").load_as<compute::function>("particle_matrix_composer");
+        particle_matrix_composer.setLocalSize(16);
     }
 
     void ParticleBatchingStage::render(app::window& context, camera& cam, const camera::camera_input& camInput, time::span deltaTime)
@@ -23,6 +25,8 @@ namespace legion::rendering
                 }
         }
 
+        core::time::stopwatch watch;
+        watch.start();
         for (auto& ent : emitterFilter)
         {
             auto& emitter = ent.get_component<particle_emitter>().get();
@@ -34,7 +38,7 @@ namespace legion::rendering
             static id_type rendererId = nameHash("renderer");
             static id_type frameID = nameHash("frameID");
 
-            bool hasPosBuffer = emitter.has_buffer<position>(posBufferId);
+            bool hasPosBuffer = emitter.has_buffer<math::vec4>(posBufferId);
             bool hasScaleBuffer = emitter.has_buffer<scale>(scaleBufferId);
             bool hasRotBuffer = emitter.has_buffer<rotation>(rotBufferId);
 
@@ -44,17 +48,23 @@ namespace legion::rendering
             if ((!hasPosBuffer && !hasScaleBuffer && !hasRotBuffer) || (!hasMeshFilter || !hasRenderer))
                 continue;
 
-            particle_buffer<position> posBuffer;
+            particle_buffer<math::vec4> posBuffer;
             if (hasPosBuffer)
-                posBuffer = emitter.get_buffer<position>(posBufferId);
+                posBuffer = emitter.get_buffer<math::vec4>(posBufferId);
+            else
+                posBuffer.resize(emitter.capacity());
 
             particle_buffer<scale> scaleBuffer;
             if (hasScaleBuffer)
                 scaleBuffer = emitter.get_buffer<scale>(scaleBufferId);
+            else
+                scaleBuffer.insert(scaleBuffer.end(), emitter.capacity(), scale(1.f));
 
             particle_buffer<rotation> rotBuffer;
             if (hasRotBuffer)
                 rotBuffer = emitter.get_buffer<rotation>(rotBufferId);
+            else
+                rotBuffer.insert(rotBuffer.end(), emitter.capacity(), rotation::lookat(math::vec3(0.f), math::vec3(0.f, 0.f, 1.f)));
 
 
             //auto compare = [&](position& a, position& b)
@@ -96,7 +106,7 @@ namespace legion::rendering
                 batch.second.insert(batch.second.end(), emitter.size(), 0);
             }
 
-            scale scal{ 1.0f };
+            scale scal{ 1.f };
             rotation rot;
             position origin;
             if (emitter.in_local_space())
@@ -111,16 +121,54 @@ namespace legion::rendering
 
             math::mat4 parentMat = math::compose(scal, rot, origin);
 
-            queueJobs(emitter.size(), [&](id_type jobId)
-                {
-                    id_type particleId = particleIds[jobId];
-                    if (emitter.is_alive(particleId))
-                    {
-                        math::mat4 localMat = math::compose(hasScaleBuffer ? scaleBuffer[particleId] : scal, hasRotBuffer ? rotBuffer[particleId] : rot, hasPosBuffer ? posBuffer[particleId] : origin);
-                        batch.first[jobId + start] = parentMat * localMat;
-                    }
-                }).wait();
+            //core::time::stopwatch jobsystemWatch;
+            //jobsystemWatch.start();
+            //queueJobs(emitter.size(), [&](id_type jobId)
+            //    {
+            //        id_type particleId = particleIds[jobId];
+            //        core::time::stopwatch watch2;
+            //        watch2.start();
+            //        if (emitter.is_alive(particleId))
+            //        {
+            //            watch2.end();
+            //            log::debug("Check if particle is alive time:  {}ms", watch2.elapsed_time().milliseconds());
+            //            math::mat4 localMat = math::compose(hasScaleBuffer ? scaleBuffer[particleId] : scal, hasRotBuffer ? rotBuffer[particleId] : rot, hasPosBuffer ? math::vec3(posBuffer[particleId]) : origin);
+            //            batch.first[jobId + start] = parentMat * localMat;
+            //        }
+            //    }).wait();
+            //    jobsystemWatch.end();
+            //log::debug("Job system elapsed time:  {}ms", jobsystemWatch.elapsed_time().milliseconds());
+
+            core::time::stopwatch computeWatch;
+            computeWatch.start();
+            auto paddedSize = math::max(((emitter.size() - 1) | 15) + 1, 16ull);
+            auto livingBuffer = emitter.get_living_buffer();
+            std::vector<math::vec4> xAxis(emitter.capacity());
+            std::vector<math::vec4> yAxis(emitter.capacity());
+            std::vector<math::vec4> zAxis(emitter.capacity());
+            std::vector<math::vec4> translation(emitter.capacity());
+
+            particle_matrix_composer(paddedSize, compute::in(livingBuffer),
+                compute::in(posBuffer), compute::in(rotBuffer), compute::in(scaleBuffer),
+                compute::inout(xAxis), compute::inout(yAxis), compute::inout(zAxis), compute::inout(translation),
+                compute::karg(parentMat[0], "parentX"), compute::karg(parentMat[1], "parentY"), compute::karg(parentMat[2], "parentZ"), compute::karg(parentMat[3], "parentW"));
+
+            for (size_type i = 0; i < emitter.size(); i++)
+            {
+                batch.first[i][0] = xAxis[i];
+                batch.first[i][1] = yAxis[i];
+                batch.first[i][2] = zAxis[i];
+                batch.first[i][3] = translation[i];
+                //xAxis.push_back(std::ref(batch.first[i][0]));
+                //yAxis.push_back(std::ref(batch.first[i][1]));
+                //zAxis.push_back(std::ref(batch.first[i][2]));
+                //translation.push_back(std::ref(batch.first[i][3]));
+            }
+            computeWatch.end();
+            //log::debug("Compute elapsed time:  {}ms", computeWatch.elapsed_time().milliseconds());
         }
+        watch.end();
+        //log::debug("Particle Batching Stage elapsed time:  {}ms", watch.elapsed_time().milliseconds());
     }
 
     priority_type ParticleBatchingStage::priority()

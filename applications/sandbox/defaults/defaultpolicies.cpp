@@ -10,7 +10,7 @@ namespace legion::core
     void example_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
     {
         static id_type posBufferId = nameHash("posBuffer");
-        auto& posBuffer = emitter.has_buffer<position>(posBufferId) ? emitter.get_buffer<position>(posBufferId) : emitter.create_buffer<position>("posBuffer");
+        auto& posBuffer = emitter.has_buffer<math::vec4>(posBufferId) ? emitter.get_buffer<math::vec4>(posBufferId) : emitter.create_buffer<math::vec4>("posBuffer");
 
         for (size_type idx = start; idx < end; idx++)
         {
@@ -18,7 +18,7 @@ namespace legion::core
             baseDir.y = 0;
             int minBound = 5;
             int maxBound = 30;
-            auto pos = math::normalize(baseDir) * minBound + math::normalize(baseDir) * (idx % (maxBound - minBound)) / 2.f;
+            auto pos = math::vec4(math::normalize(baseDir) * minBound + math::normalize(baseDir) * (idx % (maxBound - minBound)) / 2.f, 1);
             auto dist = math::length(pos);
             pos.y = math::sin(dist / math::pi<float>()) * 5.f * (pos.x / maxBound);
             posBuffer[idx] = pos;
@@ -35,34 +35,37 @@ namespace legion::core
         if (!emitter.has_uniform<compute::function>("initPos"))
             emitter.create_uniform<compute::function>("initPos", fs::view("assets://kernels/particles.cl").load_as<compute::function>("init_pos"));
 
-        if (!emitter.has_buffer<position>("posBuffer"))
-            emitter.create_buffer<position>("posBuffer");
-        if (!emitter.has_buffer<velocity>("velBuffer"))
-            emitter.create_buffer<velocity>("velBuffer");
-        if (!emitter.has_buffer<math::vec4>("computeOut"))
-            emitter.create_buffer<math::vec4>("computeOut");
+        auto& init_velocity = emitter.get_uniform<compute::function>("initVel");
+        init_velocity.setLocalSize(16);
+        auto& init_position = emitter.get_uniform<compute::function>("initPos");
+        init_position.setLocalSize(16);
+
+        auto& vector_add = emitter.get_uniform<compute::function>("vadd");
+        vector_add.setLocalSize(16);
+
+        if (!emitter.has_buffer<math::vec4>("posBuffer"))
+            emitter.create_buffer<math::vec4>("posBuffer");
+        if (!emitter.has_buffer<math::vec4>("velBuffer"))
+            emitter.create_buffer<math::vec4>("velBuffer");
     }
     void gpu_particle_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
     {
-        auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
-        auto& posBuffer = emitter.get_buffer<position>("posBuffer");
-        auto& computeOut = emitter.get_buffer<math::vec4>("computeOut");
+        auto& velBuffer = emitter.get_buffer<math::vec4>("velBuffer");
+        auto& posBuffer = emitter.get_buffer<math::vec4>("posBuffer");
 
         auto count = static_cast<cl_ulong>(end - start);
         if (count < 1)
             return;
 
-        auto paddedSize = math::min(((emitter.size() - 1) | 512) + 1, 512ull);
+        auto paddedSize = math::max(((count - 1) | 15) + 1, 16ull);
 
         auto _start = static_cast<cl_ulong>(start);
 
         auto& init_velocity = emitter.get_uniform<compute::function>("initVel");
-        init_velocity(paddedSize, compute::inout(computeOut), compute::karg(_start, "start"), compute::karg(count, "count"));
-        velBuffer.assign(computeOut.begin(), computeOut.end());
+        init_velocity(paddedSize, compute::inout(velBuffer,"A"), compute::karg(_start, "start"), compute::karg(count, "count"));
 
         auto& init_position = emitter.get_uniform<compute::function>("initPos");
-        init_position(paddedSize, compute::inout(computeOut, "A"), compute::karg(_start, "start"), compute::karg(count, "count"));
-        posBuffer.assign(computeOut.begin(), computeOut.end());
+        init_position(paddedSize, compute::inout(posBuffer, "A"), compute::karg(_start, "start"), compute::karg(count, "count"));
     }
     void gpu_particle_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
     {
@@ -70,20 +73,13 @@ namespace legion::core
         if (count < 1)
             return;
 
-        auto& posBuffer = emitter.get_buffer<position>("posBuffer");
-        auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
-        auto& computeOut = emitter.get_buffer<math::vec4>("computeOut");
+        auto& posBuffer = emitter.get_buffer<math::vec4>("posBuffer");
+        auto& velBuffer = emitter.get_buffer<math::vec4>("velBuffer");
 
-        auto vector_add = emitter.get_uniform<compute::function>("vadd");
-        vector_add(math::min(((count - 1) | 512) + 1, 512ull), compute::in(posBuffer), compute::in(velBuffer), compute::out(computeOut));
-        for (size_type i = 0; i < posBuffer.size(); i++)
-        {
-            //log::debug("Particle Position {}", posBuffer[i]);
-            //log::debug("Particle Velocity {}", velBuffer[i]);
-            log::debug("Particle New Position {}", computeOut[i]);
-            log::debug("");
-        }
-        posBuffer.assign(computeOut.begin(), computeOut.end());
+        auto paddedSize = math::max(((count - 1) | 15) + 1, 16ull);
+
+        auto& vector_add = emitter.get_uniform<compute::function>("vadd");
+        vector_add(paddedSize, compute::in(posBuffer), compute::in(velBuffer), compute::out(posBuffer), compute::karg(deltaTime, "dt"));
     }
 #pragma endregion
 #pragma region Orbital Policy
