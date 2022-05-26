@@ -7,6 +7,7 @@
 namespace legion::physics
 {
     constexpr float boxExtentSizeMultiplier = 0.5f;
+    constexpr size_type maskMax = 16;
 
     class PhysicsComponentData
     {
@@ -131,6 +132,32 @@ namespace legion::physics
             for (ColliderData& collider : m_colliders)
             {
                 collider.m_collisionFilter.setReactionToObject(objectType, newReaction);
+            }
+
+            m_colliderModificationRequests.push_back(collider_modification);
+        }
+
+        L_ALWAYS_INLINE void setAllColliderMask(size_type mask)
+        {
+            if (m_colliders.size() == 0) { return; }
+
+            if(mask >= maskMax )
+            {
+                log::warn("parameter 'mask' in function call to PhysicsComponentData::setAllColliderMask has value >= than maskMax");
+                return;
+            }
+
+            modify_all_collider_mask modifyAllMask;
+            modifyAllMask.newMask = mask;
+
+            collider_modification_data collider_modification;
+            collider_modification.colliderIndex = 0;
+            collider_modification.data.newColliderMask = modifyAllMask;
+            collider_modification.modificationType = collider_modification_flag::cm_set_all_collider_mask;
+
+            for (ColliderData& collider : m_colliders)
+            {
+                collider.m_colliderMask = mask;
             }
 
             m_colliderModificationRequests.push_back(collider_modification);

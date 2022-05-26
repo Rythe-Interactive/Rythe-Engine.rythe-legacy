@@ -150,6 +150,8 @@ namespace legion::physics
 
         L_ALWAYS_INLINE CollisionFilter getCollisionFilter() const noexcept { return m_collisionFilter; }
 
+        L_ALWAYS_INLINE size_type getCollisionMask() const noexcept { return m_collisionMask; }
+
     private:
 
         math::vec3 m_currentDisplacement;
@@ -159,6 +161,7 @@ namespace legion::physics
 
         std::bitset<capsule_character_flag::cc_max> m_modificationFlags;
         CollisionFilter m_collisionFilter;
+        size_type m_collisionMask = std::numeric_limits<size_type>::max();
 
         float m_radius = 1.0f;
         float m_height = 2.0f;;

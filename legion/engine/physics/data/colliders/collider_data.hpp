@@ -21,6 +21,11 @@ namespace legion::physics
         physics_object_reaction newReaction;
     };
 
+    struct modify_all_collider_mask
+    {
+        size_type newMask;
+    };
+
     struct collider_modification_data
     {
         size_type colliderIndex = std::numeric_limits<size_type>::max();
@@ -29,6 +34,7 @@ namespace legion::physics
         union modification
         {
             modify_all_collider_reaction newColliderReaction;
+            modify_all_collider_mask newColliderMask;
             math::vec3 newBoxExtents;
             void* newConvexMesh;
             size_type newMaterial;
@@ -147,6 +153,8 @@ namespace legion::physics
 
         L_ALWAYS_INLINE size_type getColliderIndex() const noexcept { return m_colliderIndex; }
 
+        L_ALWAYS_INLINE size_type getColliderMask() const noexcept { return m_colliderMask; }
+
         L_ALWAYS_INLINE const CollisionFilter& getCollisionFilter() const noexcept { return m_collisionFilter; }
 
     protected:
@@ -167,6 +175,7 @@ namespace legion::physics
 
         size_type m_materialHash = defaultPhysicsMaterial;
         size_type m_colliderIndex = std::numeric_limits<size_type>::max();
+        size_type m_colliderMask = std::numeric_limits<size_type>::max();
 
         collider_type m_colliderType = collider_type::not_set;
         pointer<std::vector<collider_modification_data>> m_modificationsRequests;

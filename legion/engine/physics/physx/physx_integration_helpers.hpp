@@ -28,7 +28,7 @@ namespace legion::physics
 
     physx::PxPhysics* getSDK();
 
-    void setShapeFilterData(physx::PxShape* shape, const CollisionFilter& collisionFilter, physics_object_flag objectType);
+    void setShapeFilterData(physx::PxShape* shape, const CollisionFilter& collisionFilter,size_type colliderMask, physics_object_flag objectType);
 
     void calculateLocalColliderTransform(physx::PxTransform& outLocalTransform, const ColliderData& collider);
 

@@ -37,6 +37,7 @@ namespace legion::physics
         cm_set_new_convex_mesh,
         cm_set_new_box_extents,
         cm_set_all_collider_reaction,
+        cm_set_all_collider_mask,
         cm_max //must always be the last enum
     };
 

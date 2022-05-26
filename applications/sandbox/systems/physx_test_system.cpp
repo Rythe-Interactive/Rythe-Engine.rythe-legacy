@@ -8,6 +8,41 @@ namespace legion::physics
     static ecs::entity triggerCharacterBlockDynamic;
     static ecs::entity triggerCharacterTriggerDynamic;
 
+    static size_type glassMask = 0;
+    static size_type bulletProofMask = 1;
+    static size_type brickWallMask = 2;
+
+    static void logQueryHit(QueryHit& logHit,const char* queryAction)
+    {
+        for (QueryHitInfo& overlapInfo : logHit.touchingHit)
+        {
+            log::debug("{0} overlapped: {1}", queryAction,overlapInfo.entityHit->name);
+        }
+
+        if (logHit.blockFound)
+        {
+            log::debug("{0} blocked by: {1}", queryAction, logHit.blockingHit.entityHit->name);
+        }
+        else
+        {
+            log::debug("{0} was not blocked by anything",queryAction);
+        }
+    }
+
+    static void logOverlapHit(OverlapHit& hit)
+    {
+        if (hit.overlapHits.size() == 0)
+        {
+            log::debug("No Overlap!");
+        }
+
+        for (OverlapHitInfo& overlapInfo : hit.overlapHits)
+        {
+            log::debug("overlapped: {0}", overlapInfo.entityOverlapped->name);
+        }
+    }
+
+
     void PhysXTestSystem::setup()
     {
         using namespace legion::core::fs::literals;
@@ -54,8 +89,8 @@ namespace legion::physics
         //setupCubeWorldTestScene();
         //setupBoxAndStackTestScene();
         //setupCharacterControllerTestScene();
-        setupCollisionFilteringScene();
-        //setupSceneQueryScene();
+        //setupCollisionFilteringScene();
+        setupSceneQueryScene();
 
         //enable player to shoot blocks
         app::InputSystem::createBinding<ShootPhysXBox>(app::inputmap::method::C);
@@ -112,6 +147,145 @@ namespace legion::physics
         {
             suzzaneRainTick(deltaTime);
         }
+
+        QueryMask weaponMask;
+        weaponMask.setReactionToMaskIndex(glassMask, physics_object_reaction::reaction_overlap);
+        weaponMask.setReactionToMaskIndex(bulletProofMask, physics_object_reaction::reaction_block);
+        weaponMask.setReactionToMaskIndex(brickWallMask, physics_object_reaction::reaction_block);
+
+        QueryMask visibilityMask;
+        visibilityMask.setReactionToMaskIndex(glassMask, physics_object_reaction::reaction_overlap);
+        visibilityMask.setReactionToMaskIndex(bulletProofMask, physics_object_reaction::reaction_overlap);
+        visibilityMask.setReactionToMaskIndex(brickWallMask, physics_object_reaction::reaction_block);
+
+        QueryMask overlapAllMask(physics_object_reaction::reaction_overlap);
+
+        log::debug("------------------------- All Raycast Result: ---------------------------");
+
+        QueryHit allRaycastHitInfo;
+        PhysicsHelpers::raycast(math::vec3(15, 4, 5), math::vec3(0, 0, -1), 1000.0f, allRaycastHitInfo);
+
+        logQueryHit(allRaycastHitInfo, "raycast");
+
+        log::debug("------------------------- Weapon Raycast Result: ---------------------------");
+
+        QueryHit weaponRaycastHitInfo;
+        PhysicsHelpers::raycast(math::vec3(15, 3, 5), math::vec3(0, 0, -1), 1000.0f, weaponRaycastHitInfo, weaponMask);
+
+        logQueryHit(weaponRaycastHitInfo,"raycast");
+
+        log::debug("------------------------- Visibility Raycast Result: ---------------------------");
+
+        QueryHit visibilityRaycastHitInfo;
+        PhysicsHelpers::raycast(math::vec3(15, 2, 5), math::vec3(0, 0, -1), 1000.0f, visibilityRaycastHitInfo,visibilityMask);
+
+        logQueryHit(visibilityRaycastHitInfo, "raycast");
+
+        log::debug("------------------------- Overlap All Raycast Result: ---------------------------");
+
+        QueryHit overlapRaycastHitInfo;
+        PhysicsHelpers::raycast(math::vec3(15, 1, 5), math::vec3(0, 0, -1), 1000.0f, overlapRaycastHitInfo, overlapAllMask);
+
+        logQueryHit(overlapRaycastHitInfo, "raycast");
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        log::debug("------------------------- All Sweep Result: ---------------------------");
+
+        QueryHit allSweep;
+        PhysicsHelpers::sweepSphere(1.0f, math::vec3(30, 10.0f, 5.0f), math::vec3(0, 0, -1), 30.0f, allSweep);
+
+        logQueryHit(allSweep, "sweep");
+
+        log::debug("------------------------- Weapon Sweep Result: ---------------------------");
+
+        QueryHit weaponSweepInfo;
+        PhysicsHelpers::sweepBox(math::vec3(0.5, 0.5, 0.5), math::vec3(30, 8.0f, 5.0f),
+            math::identity<math::quat>(), math::vec3(0, 0, -1), 30.0f, weaponSweepInfo, weaponMask);
+
+        logQueryHit(weaponSweepInfo, "sweep");
+
+        log::debug("------------------------- Visibility Sweep Result: ---------------------------");
+
+        QueryHit visibilitySweep;
+        PhysicsHelpers::sweepSphere(1.0f, math::vec3(30, 6.0f, 5.0f), math::vec3(0, 0, -1), 30.0f, visibilitySweep,visibilityMask);
+
+        logQueryHit(visibilitySweep, "sweep");
+
+
+        log::debug("------------------------- Overlap All Sweep Result: ---------------------------");
+
+        QueryHit overlapAllSweepInfo;
+        PhysicsHelpers::sweepBox(math::vec3(0.5, 0.5, 0.5), math::vec3(30,4.0f, 5.0f),
+            math::identity<math::quat>(), math::vec3(0, 0, -1), 30.0f, overlapAllSweepInfo, overlapAllMask);
+
+        logQueryHit(overlapAllSweepInfo, "sweep");
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        log::debug("------------------------- Overlap Glass ---------------------------");
+
+        QueryMask glassQuery;
+        glassQuery.setReactionToMaskIndex(glassMask, physics_object_reaction::reaction_overlap);
+        glassQuery.setReactionToDefaultMask(physics_object_reaction::reaction_ignore);
+
+        OverlapHit glassOverlap;
+        PhysicsHelpers::checkBoxOverlap(math::vec3(5, 5, 5), math::vec3(45.5, 0.5, 0), math::identity<math::quat>(),
+            glassOverlap, glassQuery);
+
+        logOverlapHit(glassOverlap);
+
+       log::debug("------------------------- Overlap Bullet Proof ---------------------------");
+
+       QueryMask bulletProofQuery;
+       bulletProofQuery.setReactionToMaskIndex(bulletProofMask, physics_object_reaction::reaction_overlap);
+       bulletProofQuery.setReactionToDefaultMask(physics_object_reaction::reaction_ignore);
+
+       OverlapHit bulletProofOverlap;
+       PhysicsHelpers::checkSphereOverlap(5, math::vec3(45.5, 0.5, 0), math::identity<math::quat>(),
+           bulletProofOverlap, bulletProofQuery);
+
+       logOverlapHit(bulletProofOverlap);
+
+       log::debug("------------------------- Brick Wall Proof ---------------------------");
+
+       QueryMask brickWallQuery;
+       brickWallQuery.setReactionToMaskIndex(brickWallMask, physics_object_reaction::reaction_overlap);
+       brickWallQuery.setReactionToDefaultMask(physics_object_reaction::reaction_ignore);
+
+       OverlapHit brickWallOverlap;
+       PhysicsHelpers::checkBoxOverlap(math::vec3(5, 5, 5), math::vec3(45.5, 0.5, 0), math::identity<math::quat>(),
+           brickWallOverlap, brickWallQuery);
+
+       logOverlapHit(brickWallOverlap);
+
+       log::debug("------------------------- Overlap all ---------------------------");
+
+       OverlapHit allOverlap;
+       PhysicsHelpers::checkSphereOverlap(5, math::vec3(45.5, 0.5, 0), math::identity<math::quat>(),
+           allOverlap, overlapAllMask);
+
+       logOverlapHit(allOverlap);
+
+       /* std::cout << "---------------------- overlap with mask 0 ----------------------" << std::endl;
+
+        PxU32 oneMask = setupRaycastMask(gOverlapOneMask);
+        overlap(PxBoxGeometry(5.0f, 5.0f, 5.0f), PxVec3(45.5f, 0.5f, 0), oneMask);
+
+        std::cout << "---------------------- overlap with mask 1 ----------------------" << std::endl;
+
+        PxU32 twoMask = setupRaycastMask(gOverlapTwoMask);
+        overlap(PxSphereGeometry(5.0f), PxVec3(45.5f, 0.5f, 0), twoMask);
+
+        std::cout << "---------------------- overlap with mask 2 ----------------------" << std::endl;
+
+        PxU32 threeMask = setupRaycastMask(gOverlapThreeMask);
+        overlap(PxBoxGeometry(5.0f, 5.0f, 5.0f), PxVec3(45.5f, 0.5f, 0), threeMask);
+
+        std::cout << "---------------------- overlap all ----------------------" << std::endl;
+
+        PxU32 allOverlapMask = setupRaycastMask(gOverlapThreeMask, true);
+        overlap(PxBoxGeometry(5.0f, 5.0f, 5.0f), PxVec3(45.5f, 0.5f, 0), allOverlapMask);*/
     }
 
     void PhysXTestSystem::setupCubeWorldTestScene()
@@ -339,12 +513,15 @@ namespace legion::physics
         //create four walls for raycast
 
         auto glassWall = createStaticColliderWall(math::vec3(15, 3, 0), legionLogoMat, math::vec3(4.0f, 6.0f, 2.0f));
+        glassWall.get_component<physics_component>()->physicsCompData.setAllColliderMask(glassMask);
         glassWall->name = "glassWall";
        
         auto bulletProofWall = createStaticColliderWall(math::vec3(15, 3, -5), legionLogoMat, math::vec3(4.0f, 6.0f, 2.0f));
+        bulletProofWall.get_component<physics_component>()->physicsCompData.setAllColliderMask(bulletProofMask);
         bulletProofWall->name = "bulletProofWall";
 
         auto brickWall = createStaticColliderWall(math::vec3(15, 3, -10), legionLogoMat, math::vec3(4.0f, 6.0f, 2.0f));
+        brickWall.get_component<physics_component>()->physicsCompData.setAllColliderMask(brickWallMask);
         brickWall->name = "brickWall";
 
         auto finalBrickWall = createStaticColliderWall(math::vec3(15, 3, -15), legionLogoMat, math::vec3(4.0f, 6.0f, 2.0f));
@@ -353,12 +530,15 @@ namespace legion::physics
         //create four walls for sweep
 
         auto glassWallSweep = createStaticColliderWall(math::vec3(30, 6, 0), legionLogoMat, math::vec3(8.0f, 12.0f, 2.0f));
+        glassWallSweep.get_component<physics_component>()->physicsCompData.setAllColliderMask(glassMask);
         glassWallSweep->name = "glassWallSweep";
 
         auto bulletProofWallSweep = createStaticColliderWall(math::vec3(30, 6, -5), legionLogoMat, math::vec3(8.0f, 12.0f, 2.0f));
+        bulletProofWallSweep.get_component<physics_component>()->physicsCompData.setAllColliderMask(bulletProofMask);
         bulletProofWallSweep->name = "bulletProofWallSweep";
 
         auto brickWallSweep = createStaticColliderWall(math::vec3(30, 6, -10), legionLogoMat, math::vec3(8.0f, 12.0f, 2.0f));
+        brickWallSweep.get_component<physics_component>()->physicsCompData.setAllColliderMask(brickWallMask);
         brickWallSweep->name = "brickWallSweep";
 
         auto finalBrickWallSweep = createStaticColliderWall(math::vec3(30, 6, -15), legionLogoMat, math::vec3(8.0f, 12.0f, 2.0f));
@@ -366,23 +546,16 @@ namespace legion::physics
 
         //create boxes for overlap
         auto box1 = createStaticColliderWall(math::vec3(45, 0.5f, 0), legionLogoMat, math::vec3(1.0f, 1.0f, 1.0f));
+        box1.get_component<physics_component>()->physicsCompData.setAllColliderMask(glassMask);
         box1->name = "box1";
 
         auto box2 = createStaticColliderWall(math::vec3(46, 0.5f, 0), legionLogoMat, math::vec3(1.0f, 1.0f, 1.0f));
+        box2.get_component<physics_component>()->physicsCompData.setAllColliderMask(bulletProofMask);
         box2->name = "box2";
 
         auto box3 = createStaticColliderWall(math::vec3(45.5, 1.5f, 0), legionLogoMat, math::vec3(1.0f, 1.0f, 1.0f));
+        box3.get_component<physics_component>()->physicsCompData.setAllColliderMask(brickWallMask);
         box3->name = "box3";
-
-        int u23 = sizeof(std::uint32_t);
-        int sizeType = sizeof(size_type);
-        int shortS = sizeof(short);
-
-        int vec3 = sizeof(math::vec3);
-        int quat = sizeof(math::quat);
-        //int cs = sizeof(specifics);
-        int cf = sizeof(CollisionFilter);
-        int cd = sizeof(ColliderData);
         
     }
 
@@ -515,7 +688,6 @@ namespace legion::physics
             data.jump(math::vec3(0, 0.30f, 0));
         }
     }
-
 
     void PhysXTestSystem::triggerEnterEvent(on_trigger_enter& triggerEnter)
     {
@@ -664,6 +836,7 @@ namespace legion::physics
         }
 
     }
+
     void PhysXTestSystem::createCubeStack(const math::vec3& extents, size_t stackSize, const math::vec3& startPos, int stopAfterStack)
     {
         float floatStackSize = static_cast<float>(stackSize);

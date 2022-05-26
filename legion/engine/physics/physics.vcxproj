@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="data\colliders\collider_data.cpp" />
+    <ClCompile Include="data\query_mask.cpp" />
     <ClCompile Include="diviner\broadphasecollisionalgorithms\broadphaseuniformgrid.cpp" />
     <ClCompile Include="diviner\broadphasecollisionalgorithms\broadphaseuniformgridnocaching.cpp" />
     <ClCompile Include="diviner\colliders\convexcollider.cpp" />
@@ -45,6 +46,8 @@
     <ClInclude Include="data\controller_presets.hpp" />
     <ClInclude Include="data\physics_component_data.hpp" />
     <ClInclude Include="data\physics_enviroment_data.hpp" />
+    <ClInclude Include="data\query_mask.hpp" />
+    <ClInclude Include="data\query_result.hpp" />
     <ClInclude Include="data\rigibody_data.hpp" />
     <ClInclude Include="diviner\broadphasecollisionalgorithms\broadphasebruteforce.hpp" />
     <ClInclude Include="diviner\broadphasecollisionalgorithms\broadphasecollisionalgorithm.hpp" />
@@ -94,6 +97,7 @@
     <ClInclude Include="physx\systems\physx_physics_system.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="physx\data\query_callbacks.inl" />
     <None Include="physx\data\trigger_event_callbacks.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

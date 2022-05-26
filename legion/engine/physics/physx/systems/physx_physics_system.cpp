@@ -11,6 +11,7 @@
 #include <physics/physx/data/controller_hit_feedback.inl>
 #include <physics/physx/data/collision_filter_shader.inl>
 #include <physics/physx/data/trigger_event_callbacks.inl>
+#include <physics/physx/data/query_callbacks.inl>
 
 namespace legion::physics
 {
@@ -158,6 +159,7 @@ namespace legion::physics
         inline static PxDefaultErrorCallback defaultErrorCallback;
         inline static CustomControllerFilterCallback controllerFilterCallback;
         inline static CustomSimulationEventCallback simulationEventCallback;
+        inline static QueryFilterCallback queryFilterCallback;
         inline static async::spinlock setupShutdownLock;
     };
 
@@ -187,6 +189,7 @@ namespace legion::physics
         bindToEvent<request_create_physics_material, &PhysXPhysicsSystem::onRequestCreatePhysicsMaterial>();
 
         PhysicsComponentData::m_generateConvexColliderFunc = &PhysXPhysicsSystem::physxGenerateConvexMesh;
+
         PhysicsHelpers::bindDebugRetrieveCheck([this](size_type hash, const char* materialName)->bool
         {
             auto iter = m_physicsMaterials.find(hash);
@@ -197,6 +200,55 @@ namespace legion::physics
             }
             return true;
         });
+
+        PhysicsHelpers::bindRaycastFunction([this](const math::vec3& start, const math::vec3& unitDir, float rayLength, QueryHit& outHit, QueryMask queryMask = QueryMask())
+            {
+                return physxRaycast(start, unitDir, rayLength, outHit, queryMask);
+            }
+        );
+
+        PhysicsHelpers::bindBoxSweepFunction([this](const math::vec3& extents, const math::vec3& start, const math::quat& boxOrientation,
+            const math::vec3& unitSweepDir, float sweepLength, QueryHit& outHit, QueryMask queryMask)
+            {
+                PxVec3 pxBoxExtents = { extents.x,extents.y,extents.z };
+                PxVec3 pxPosition = { start.x,start.y,start.z };
+                PxQuat pxQuat = { boxOrientation.x,boxOrientation.y,boxOrientation.z,boxOrientation.w };
+
+                PxVec3 pxDir = { unitSweepDir.x,unitSweepDir.y,unitSweepDir.z };
+
+                return physxGeometrySweep(PxBoxGeometry(pxBoxExtents), pxPosition, pxQuat, pxDir, sweepLength, outHit, queryMask);
+            }
+        );
+
+        PhysicsHelpers::bindSweepSphereFunction([this](float radius, const math::vec3& start, const math::vec3& unitDir, float sweepLength,
+            QueryHit& outHit, QueryMask queryMask)
+            {
+                PxVec3 pxPosition = { start.x,start.y,start.z };
+                PxVec3 pxDir = { unitDir.x,unitDir.y,unitDir.z };
+
+                return physxGeometrySweep(PxSphereGeometry(radius), pxPosition, PxQuat(PxIdentity), pxDir, sweepLength, outHit, queryMask);
+            }
+        );
+
+        PhysicsHelpers::bindOverlapBoxFunction([this](const math::vec3& extents, const math::vec3& position, const math::quat& orientation, OverlapHit& outOverlap,
+            QueryMask queryMask)
+            {
+                PxVec3 pxPosition = { position.x, position.y, position.z };
+                PxQuat pxQuat = { orientation.x,orientation.y,orientation.z,orientation.w };
+                PxVec3 pxBoxExtents = { extents.x,extents.y,extents.z };
+
+                return physxGeometryOverlap(PxBoxGeometry(pxBoxExtents), pxPosition, pxQuat, outOverlap, queryMask);
+            }
+        );
+
+        PhysicsHelpers::bindOverlapSphereFunction([this](float radius, const math::vec3& position, const math::quat& orientation, OverlapHit& outOverlap,
+            QueryMask queryMask)
+            {
+                PxVec3 pxPosition = { position.x, position.y, position.z };
+
+                return physxGeometryOverlap(PxSphereGeometry(radius), pxPosition, PxQuat(PxIdentity), outOverlap, queryMask);
+            }
+        );
 
         //debugging related
         bindToEvent<request_flip_physics_continuous, &PhysXPhysicsSystem::flipPhysicsContinuousState>();
@@ -322,6 +374,93 @@ namespace legion::physics
         m_capsuleActionFuncs[capsule_character_flag::cc_move_to] = &processCapsuleMoveTo;
 
         m_hashToPresetProcessFunc.insert({ typeHash<gravity_preset>(),&processGravityPreset });
+    }
+
+    template<class HitBuffer>
+    static void processBlockingHit(HitBuffer& hitBuffer, QueryHit& outHit)
+    {
+        static_assert(std::is_base_of<PxLocationHit, HitBuffer>::value,
+            "template parameter of ::populateQuery must inherit from PxLocationHit");
+
+        ecs::entity blockEntity = { static_cast<ecs::entity_data*>(hitBuffer.actor->userData) };
+
+        PxVec3 pxPos = hitBuffer.position;
+        PxVec3 pxNorm = hitBuffer.normal;
+
+        math::vec3 position{ pxPos.x,pxPos.y,pxPos.z };
+        math::vec3 normal{ pxNorm.x,pxNorm.y,pxNorm.z };
+
+        outHit.blockingHit = QueryHitInfo{ blockEntity,position,normal };
+    }
+
+    bool PhysXPhysicsSystem::physxRaycast(const math::vec3& start, const math::vec3& unitDir, float rayLength, QueryHit& outHit, QueryMask queryMask)
+    {
+        PxVec3 origin(start.x, start.y, start.z);
+        PxVec3 pxUnitDir(unitDir.x, unitDir.y, unitDir.z);
+
+        PxRaycastHit raycastBuffer[256];
+        RaycastCallback raycastCallback({ &outHit },raycastBuffer, 256);
+
+        PxFilterData rayFilterData;
+        rayFilterData.word0 = queryMask.getMask();
+        rayFilterData.word1 = queryMask.getDefaultReaction();
+
+        PxQueryFilterData queryFilterData(rayFilterData,
+            PxQueryFlag::eSTATIC | PxQueryFlag::eDYNAMIC | PxQueryFlag::ePREFILTER);
+
+        m_physxScene->raycast(origin, pxUnitDir.getNormalized(), rayLength, raycastCallback,
+            PxHitFlags(PxHitFlag::eDEFAULT), queryFilterData, &PhysxStatics::queryFilterCallback);
+
+        outHit.blockFound = raycastCallback.hasBlock;
+
+        if (raycastCallback.hasBlock)
+        {
+            PxRaycastHit& blockHit = raycastCallback.block;
+            processBlockingHit(blockHit, outHit);
+        }
+        
+        return raycastCallback.hasAnyHits();
+    }
+
+    bool PhysXPhysicsSystem::physxGeometrySweep(const PxGeometry& geom, const PxVec3& start, const PxQuat& orientation, const PxVec3& unitSweepDir, float sweepLength, QueryHit& outHit, QueryMask queryMask)
+    {
+        PxSweepHit sweepBuffer[256];
+        SweepCallback sweepCallback({ &outHit }, sweepBuffer, 256);
+
+        PxFilterData rayFilterData;
+        rayFilterData.word0 = queryMask.getMask();
+        rayFilterData.word1 = queryMask.getDefaultReaction();
+
+        PxQueryFilterData queryFilterData(rayFilterData,
+            PxQueryFlag::eSTATIC | PxQueryFlag::eDYNAMIC | PxQueryFlag::ePREFILTER);
+
+        m_physxScene->sweep(geom, PxTransform(start, orientation), unitSweepDir, sweepLength,
+            sweepCallback, PxHitFlags(PxHitFlag::eDEFAULT), queryFilterData, &PhysxStatics::queryFilterCallback);
+
+        outHit.blockFound = sweepCallback.hasBlock;
+
+        if (sweepCallback.hasBlock)
+        {
+            PxSweepHit& blockHit = sweepCallback.block;
+            processBlockingHit(blockHit, outHit);
+        }
+
+        return sweepCallback.hasAnyHits();
+    }
+
+    bool PhysXPhysicsSystem::physxGeometryOverlap(const physx::PxGeometry& geom, const physx::PxVec3& position, const physx::PxQuat& orientation, OverlapHit& outOverlap, QueryMask queryMask)
+    {
+        PxOverlapHit overlapBuffer[256];
+        OverlapCallback overlapCallback({ &outOverlap }, overlapBuffer, 256);
+
+        PxFilterData rayFilterData;
+        rayFilterData.word0 = queryMask.getMask();
+        rayFilterData.word1 = queryMask.getDefaultReaction();
+
+        PxQueryFilterData queryFilterData(rayFilterData,
+            PxQueryFlag::eSTATIC | PxQueryFlag::eDYNAMIC | PxQueryFlag::ePREFILTER | PxQueryFlag::eNO_BLOCK);
+
+        return m_physxScene->overlap(geom, PxTransform(position, orientation), overlapCallback, queryFilterData, &PhysxStatics::queryFilterCallback);;
     }
 
     void PhysXPhysicsSystem::markPhysicsWrapperPendingRemove(events::component_destruction<physics_component>& event)
@@ -656,7 +795,7 @@ namespace legion::physics
         PxShape* shape;
         dynamic->getShapes(&shape, 1);
 
-        setShapeFilterData(shape, capsuleData.getCollisionFilter(), physics_object_flag::po_character_controller);
+        setShapeFilterData(shape, capsuleData.getCollisionFilter(), capsuleData.getCollisionMask(), physics_object_flag::po_character_controller);
     }
 
     void PhysXPhysicsSystem::characterControllerSweep(ecs::entity characterEnt, PhysxCharacterWrapper& character, const PxVec3& displacement)

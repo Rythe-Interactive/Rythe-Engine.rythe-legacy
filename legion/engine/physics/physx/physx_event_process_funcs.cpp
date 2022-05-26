@@ -252,7 +252,8 @@ namespace legion::physics
 
         PxShape* planeShape;
         plane->getShapes(&planeShape, 1);
-        setShapeFilterData(planeShape, physicsEnviroment.data.getCollisionFilter(), physics_object_flag::po_terrain);
+        setShapeFilterData(planeShape, physicsEnviroment.data.getCollisionFilter(), physicsEnviroment.data.getCollisionMask(),
+            physics_object_flag::po_terrain);
 
         sceneInfo.scene->addActor(*wrapper.physicsActor);
     }

@@ -25,7 +25,7 @@ namespace legion::physics
         return result;
     }
 
-    void setShapeFilterData(PxShape* shape, const CollisionFilter& collisionFilter,physics_object_flag objectType)
+    void setShapeFilterData(PxShape* shape, const CollisionFilter& collisionFilter, size_type colliderMask, physics_object_flag objectType)
     {
         PxFilterData filterData;
         filterData.word0 = embedCollisionFilterToPxU32(collisionFilter);
@@ -37,6 +37,8 @@ namespace legion::physics
         //set to max of PxU32 in order to pass the internal AND operator check within PhysX
         queryFilterData.word0 = std::numeric_limits<PxU32>::max();
         queryFilterData.word1 = std::numeric_limits<PxU32>::max();
+
+        queryFilterData.word2 = colliderMask;
 
         shape->setQueryFilterData(queryFilterData);
     }
@@ -83,7 +85,7 @@ namespace legion::physics
         PxShape* shape;
         staticCollider->getShapes(&shape, 1);
 
-        setShapeFilterData(shape, collider.getCollisionFilter(),physics_object_flag::po_static);
+        setShapeFilterData(shape, collider.getCollisionFilter(), collider.getColliderMask(), physics_object_flag::po_static);
         
         wrapper.physicsActor = staticCollider;
         sceneInfo.scene->addActor(*staticCollider);
@@ -108,7 +110,7 @@ namespace legion::physics
         PxShape* shape;
         dynamic->getShapes(&shape, 1);
 
-        setShapeFilterData(shape, collider.getCollisionFilter(), physics_object_flag::po_dynamic);
+        setShapeFilterData(shape, collider.getCollisionFilter(), collider.getColliderMask(), physics_object_flag::po_dynamic);
        
         wrapper.physicsActor = dynamic;
         sceneInfo.scene->addActor(*dynamic);
@@ -125,7 +127,7 @@ namespace legion::physics
 
         physics_object_flag objectType = rigid->is<PxRigidStatic>() ? physics_object_flag::po_static : physics_object_flag::po_dynamic;
 
-        setShapeFilterData(shape, collider.getCollisionFilter(), objectType);
+        setShapeFilterData(shape, collider.getCollisionFilter(), collider.getColliderMask(), objectType);
 
         shape->setLocalPose(localTransform);
         rigid->attachShape(*shape);

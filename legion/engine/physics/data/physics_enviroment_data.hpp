@@ -36,6 +36,8 @@ namespace legion::physics
 
         L_ALWAYS_INLINE CollisionFilter getCollisionFilter() const noexcept { return m_collisionFilter; }
 
+        L_ALWAYS_INLINE size_type getCollisionMask() const noexcept { return m_mask; }
+
     private:
 
         math::vec3 m_planeNormal;
@@ -43,6 +45,7 @@ namespace legion::physics
 
         std::bitset<physics_enviroment_flag::pe_max> m_modificationFlags;
         CollisionFilter m_collisionFilter;
+        size_type m_mask = std::numeric_limits<size_type>::max();
 
         physics_enviroment_object_type m_objectType = physics_enviroment_object_type::not_set;
     };

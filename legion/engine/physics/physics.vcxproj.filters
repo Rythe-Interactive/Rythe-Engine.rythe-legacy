@@ -78,6 +78,9 @@
     <ClCompile Include="physics_helpers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="data\query_mask.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="diviner\cube_collider_params.hpp">
@@ -248,9 +251,18 @@
     <ClInclude Include="physx\data\collision_filter_shader.inl">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="data\query_mask.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="data\query_result.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="physx\data\trigger_event_callbacks.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="physx\data\query_callbacks.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

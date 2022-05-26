@@ -16,6 +16,8 @@ namespace physx
     class PxPhysics;
     class PxMaterial;
     class PxController;
+    class PxGeometry;
+    class PxQuat;
     struct PxControllerShapeHit;
 };
 
@@ -51,6 +53,18 @@ namespace legion::physics
         void setupDefaultScene();
 
         void bindEventsToEventProcessors();
+
+        //-------------------------------------------------------- Scene Query --------------------------------------------------------//
+
+        bool physxRaycast(const math::vec3& start, const math::vec3& unitDir, float rayLength, QueryHit& outHit, QueryMask queryMask = QueryMask());
+
+        bool physxGeometrySweep(const physx::PxGeometry& geom, const physx::PxVec3& start, const physx::PxQuat& orientation,
+            const physx::PxVec3& unitSweepDir, float sweepLength, QueryHit& outHit, QueryMask queryMask);
+
+        bool physxGeometryOverlap(const physx::PxGeometry& geom, const physx::PxVec3& position, const physx::PxQuat& orientation,
+            OverlapHit& outOverlap, QueryMask queryMask);
+
+        //----------------------------------------------------------------------------------------------------------------------------//
 
         void markPhysicsWrapperPendingRemove(events::component_destruction<physics_component>& event);
         
