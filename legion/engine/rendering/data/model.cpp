@@ -15,9 +15,14 @@ namespace legion::rendering
         return ModelCache::get_model(id).buffered;
     }
 
-    void model_handle::buffer_data(const buffer& matrixBuffer, const buffer& entityBuffer, const buffer& flipbookBuffer) const
+    void model_handle::init_model_data(/*const buffer& matrixBuffer, const buffer& positionBuffer,const buffer& orientationBuffer, const buffer& scaleBuffer, const buffer& entityBuffer, const buffer& flipbookBuffer*/) const
     {
-        ModelCache::buffer_model(id, matrixBuffer, entityBuffer,flipbookBuffer);
+        ModelCache::init_buffer_model(id/*, matrixBuffer, entityBuffer,flipbookBuffer*/);
+    }
+
+    void model_handle::buffer_data(const buffer& buffer, uint index, size_type size, GLenum type, bool normalized, size_type stride, size_type offset, bool perInstance) const
+    {
+        ModelCache::init_buffer(id, buffer, index, size, type, normalized, stride, offset, perInstance);
     }
 
     void model_handle::overwrite_buffer(buffer& newBuffer, uint bufferID, bool perInstance) const
@@ -70,7 +75,22 @@ namespace legion::rendering
         }
     }
 
-    void ModelCache::buffer_model(id_type id, const buffer& matrixBuffer, const buffer& entityBuffer, const buffer& flipbookBuffer)
+    void ModelCache::init_buffer(id_type id, const buffer& buffer, uint index, size_type size, GLenum type, bool normalized, size_type stride, size_type offset, bool perInstance)
+    {
+        if (id == invalid_id)
+            return;
+        //get mesh handle
+        auto mesh_handle = assets::get<mesh>(id);
+        if (!mesh_handle)
+            return;
+        //get mesh and lock
+        model& model = m_models[id];
+
+        model.vertexArray.setAttribPointer(buffer, index, size, type, normalized, stride, offset);
+        model.vertexArray.setAttribDivisor(index, perInstance);
+    }
+
+    void ModelCache::init_buffer_model(id_type id/*, const buffer& matrixBuffer, const buffer& entityBuffer, const buffer& flipbookBuffer*/)
     {
         if (id == invalid_id)
             return;
@@ -99,21 +119,21 @@ namespace legion::rendering
         model.uvBuffer = buffer(GL_ARRAY_BUFFER, mesh_handle->uvs, GL_STATIC_DRAW);
         model.vertexArray.setAttribPointer(model.uvBuffer, SV_TEXCOORD0, 2, GL_FLOAT, false, 0, 0);
 
-        model.vertexArray.setAttribPointer(entityBuffer, SV_ENTITYID, 2, GL_UNSIGNED_INT, false, 0, 0);
-        model.vertexArray.setAttribDivisor(SV_ENTITYID, 1);
+        //model.vertexArray.setAttribPointer(entityBuffer, SV_ENTITYID, 2, GL_UNSIGNED_INT, false, 0, 0);
+        //model.vertexArray.setAttribDivisor(SV_ENTITYID, 1);
 
-        model.vertexArray.setAttribPointer(flipbookBuffer, SV_FRAMEID, 1, GL_FLOAT, false, 0, 0);
-        model.vertexArray.setAttribDivisor(SV_FRAMEID, 1);
+        //model.vertexArray.setAttribPointer(flipbookBuffer, SV_FRAMEID, 1, GL_FLOAT, false, 0, 0);
+        //model.vertexArray.setAttribDivisor(SV_FRAMEID, 1);
 
-        model.vertexArray.setAttribPointer(matrixBuffer, SV_MODELMATRIX + 0, 4, GL_FLOAT, false, sizeof(math::mat4), 0 * sizeof(math::mat4::col_type));
-        model.vertexArray.setAttribPointer(matrixBuffer, SV_MODELMATRIX + 1, 4, GL_FLOAT, false, sizeof(math::mat4), 1 * sizeof(math::mat4::col_type));
-        model.vertexArray.setAttribPointer(matrixBuffer, SV_MODELMATRIX + 2, 4, GL_FLOAT, false, sizeof(math::mat4), 2 * sizeof(math::mat4::col_type));
-        model.vertexArray.setAttribPointer(matrixBuffer, SV_MODELMATRIX + 3, 4, GL_FLOAT, false, sizeof(math::mat4), 3 * sizeof(math::mat4::col_type));
+        //model.vertexArray.setAttribPointer(matrixBuffer, SV_MODELMATRIX + 0, 4, GL_FLOAT, false, sizeof(math::mat4), 0 * sizeof(math::mat4::col_type));
+        //model.vertexArray.setAttribPointer(matrixBuffer, SV_MODELMATRIX + 1, 4, GL_FLOAT, false, sizeof(math::mat4), 1 * sizeof(math::mat4::col_type));
+        //model.vertexArray.setAttribPointer(matrixBuffer, SV_MODELMATRIX + 2, 4, GL_FLOAT, false, sizeof(math::mat4), 2 * sizeof(math::mat4::col_type));
+        //model.vertexArray.setAttribPointer(matrixBuffer, SV_MODELMATRIX + 3, 4, GL_FLOAT, false, sizeof(math::mat4), 3 * sizeof(math::mat4::col_type));
 
-        model.vertexArray.setAttribDivisor(SV_MODELMATRIX + 0, 1);
-        model.vertexArray.setAttribDivisor(SV_MODELMATRIX + 1, 1);
-        model.vertexArray.setAttribDivisor(SV_MODELMATRIX + 2, 1);
-        model.vertexArray.setAttribDivisor(SV_MODELMATRIX + 3, 1);
+        //model.vertexArray.setAttribDivisor(SV_MODELMATRIX + 0, 1);
+        //model.vertexArray.setAttribDivisor(SV_MODELMATRIX + 1, 1);
+        //model.vertexArray.setAttribDivisor(SV_MODELMATRIX + 2, 1);
+        //model.vertexArray.setAttribDivisor(SV_MODELMATRIX + 3, 1);
 
         model.buffered = true;
     }

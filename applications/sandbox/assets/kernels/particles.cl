@@ -36,6 +36,26 @@ __kernel void init_pos(__global float4* A, const unsigned long start, const unsi
     A[start+i] = (float4)(0.0,0.0,0.0,0.0);
 }
 
+__kernel void init_rot(__global float4* A, const float4 direction,const unsigned long start, const unsigned long count) {
+
+	int i = get_global_id(0);
+
+    if(i > count)
+        return;
+
+    A[start+i] = direction;
+}
+
+__kernel void init_scale(__global float4* A, const unsigned long start, const unsigned long count) {
+
+	int i = get_global_id(0);
+
+    if(i > count)
+        return;
+
+    A[start+i] = (float4)(1.0,1.0,1.0,1.0);
+}
+
 __kernel void particle_matrix_composer(__global const uint* living, 
 __global const float4* posBuffer, 
 __global const float4* rotBuffer, 

@@ -43,7 +43,8 @@ namespace legion::rendering
         
         bool operator==(const model_handle& other) const { return id == other.id; }
         bool is_buffered() const;
-        void buffer_data(const buffer& matrixBuffer, const buffer& entityBuffer, const buffer& flipbookBuffer) const;
+        void init_model_data(/*const buffer& matrixBuffer, const buffer& positionBuffer, const buffer& orientationBuffer, const buffer& scaleBuffer, const buffer& entityBuffer, const buffer& flipbookBuffer*/) const;
+        void buffer_data(const buffer& buffer, uint index, size_type size, GLenum type,bool normalized, size_type stride,size_type offset, bool perInstance) const;
         void overwrite_buffer(buffer& newBuffer, uint bufferID, bool perInstance = false) const;
 
         assets::asset<mesh> get_mesh() const;
@@ -69,7 +70,8 @@ namespace legion::rendering
         static std::string get_model_name(id_type id);
 
         static void overwrite_buffer(id_type id, buffer& newBuffer, uint bufferID, bool perInstance = false);
-        static void buffer_model(id_type id, const buffer& matrixBuffer, const buffer& entityBuffer, const buffer& flipbookBuffer);
+        static void init_buffer_model(id_type id/*, const buffer& matrixBuffer, const buffer& entityBuffer, const buffer& flipbookBuffer*/);
+        static void init_buffer(id_type id,const buffer& buffer, uint index, size_type size, GLenum type, bool normalized, size_type stride, size_type offset, bool perInstance);
         static model_handle create_model(const std::string& name, const fs::view& file, assets::import_settings<mesh> settings = {});
         static model_handle create_model(const std::string& name);
         static model_handle create_model(const std::string& name, id_type meshId);

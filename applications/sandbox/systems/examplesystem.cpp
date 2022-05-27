@@ -308,15 +308,19 @@ void ExampleSystem::setup()
     ent.add_component<transform>();
 
     auto emitter = ent.add_component<particle_emitter>();
-    emitter->set_spawn_rate(128);
+    emitter->set_spawn_rate(1024);
     emitter->set_spawn_interval(.02f);
-    //emitter->create_uniform<float>("minLifeTime") = 5.f;
-    //emitter->create_uniform<float>("maxLifeTime") = 5.f;
-    //emitter->create_uniform<int>("frameCount", 9);
-    emitter->resize(50000);
-    //emitter->add_policy<scale_lifetime_policy>();
+    ////emitter->create_uniform<float>("minLifeTime") = 5.f;
+    ////emitter->create_uniform<float>("maxLifeTime") = 5.f;
+    ////emitter->create_uniform<int>("frameCount", 9);
+    emitter->resize(500000);
+    ////emitter->add_policy<scale_lifetime_policy>();
     emitter->add_policy<gpu_particle_policy>();
-    material = gfx::MaterialCache::create_material("Point", fs::view("assets://shaders/point.shs"));
+    material = gfx::MaterialCache::create_material("Particle", fs::view("assets://shaders/particle.shs"));
+    material.set_param("animated", false);
+    material.set_param("useSolidColor", true);
+    material.set_param("_color", math::colors::green);
+    material.set_param("useTexture", false);
     //auto textureArray = gfx::TextureCache::create_texture_array("Explosion",
     //    {
     //        fs::view("assets://textures/explosion/frame0.png"),

@@ -44,7 +44,7 @@ namespace legion::core::compute
         }
 
         m_size = width * height * channelSize;
-        m_ref_count = new size_type(1);
+        //m_ref_count = new size_type(1);
         //convert buffer_type to cl_mem_flags
         if (type == buffer_type::READ_BUFFER)
             m_type = CL_MEM_READ_ONLY;
@@ -96,7 +96,7 @@ namespace legion::core::compute
         , m_data(nullptr)
         , m_size(0)
     {
-        m_ref_count = new size_type(1);
+        //m_ref_count = new size_type(1);
         //convert buffer_type to cl_mem_flags
         if (type == buffer_type::READ_BUFFER)
             m_type = CL_MEM_READ_ONLY;
@@ -124,7 +124,7 @@ namespace legion::core::compute
     {
         if (!ctx) return;
         //initialize new ref-counter
-        m_ref_count = new size_t(1);
+       // m_ref_count = new size_t(1);
 
 
         //convert buffer_type to cl_mem_flags
@@ -152,7 +152,7 @@ namespace legion::core::compute
         , m_data(nullptr)
         , m_size(0)
     {
-        m_ref_count = new size_type(1);
+       // m_ref_count = new size_type(1);
         //convert buffer_type to cl_mem_flags
         if (type == buffer_type::READ_BUFFER)
             m_type = CL_MEM_READ_ONLY;

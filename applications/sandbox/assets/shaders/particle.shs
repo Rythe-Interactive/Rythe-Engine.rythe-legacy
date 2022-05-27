@@ -2,7 +2,7 @@
 #state DEPTH_WRITE OFF
 #state BLEND TRANSPARENT
 
-generate(vertex, fragment)
+generate(vertex, geometry, fragment)
 
 #include <stdio.shinc>
 #include <utils.shinc>
@@ -16,40 +16,97 @@ variant(depth_only)
 
 shader(vertex)
 {
-    uniform bool fixedSize;
-
     void main(void)
     {
-        if(fixedSize)
-        {
-            gl_Position = FixedSizeBillboardModelToScreenSpacePosition(position);
-        }
-        else
-        {
-            gl_Position = BillboardModelToScreenSpacePosition(position);
-        }
+        // if(fixedSize)
+        // {
+        //     gl_Position = FixedSizeBillboardModelToScreenSpacePosition(modelMatrix);
+        // }
+        // else
+        // {
+        //     gl_Position = BillboardModelToScreenSpacePosition(modelMatrix);
+        // }
+        gl_Position = vec4(stdin(p_position),1.0);
         PropagateStdIO((inverse(ViewProjectionMatrix) * gl_Position).xyz, (BillboardModelMatrix() * vec4(-stdin(normal), 0.0)).xyz);
     }
 }
 
+shader(geometry)
+{
+    geometry_input(triangles)
+    geometry_output(triangle_strip, max_vertices = 3)
+
+    uniform bool fixedSize = false;
+    void main(void)
+    {
+        if(fixedSize)
+        {
+            mat4 modelMatrix = Compose(stdin(0, p_position),stdin(0, p_orientation), stdin(0, p_scale));
+            gl_Position = FixedSizeBillboardModelToScreenSpacePosition(gl_in[0].gl_Position.xyz, modelMatrix);
+        }
+        else
+        {
+            mat4 modelMatrix = Compose(stdin(0, p_position),stdin(0, p_orientation), stdin(0, p_scale));
+            gl_Position = (inverse(ViewProjectionMatrix) * BillboardModelToScreenSpacePosition(gl_in[0].gl_Position.xyz,modelMatrix));
+            stdout(wnormal) = (BillboardModelMatrix(modelMatrix) * vec4(-stdin(0, normal), 0.0)).xyz;
+            PropagateStdIO(0);
+            EmitVertex();
+
+            modelMatrix = Compose(stdin(1, p_position),stdin(1, p_orientation), stdin(1, p_scale));
+            gl_Position = (inverse(ViewProjectionMatrix) * BillboardModelToScreenSpacePosition(gl_in[1].gl_Position.xyz,modelMatrix));
+            stdout(wnormal) = (BillboardModelMatrix(modelMatrix) * vec4(-stdin(1, normal), 0.0)).xyz;
+            PropagateStdIO(1);
+            EmitVertex();
+
+            modelMatrix = Compose(stdin(2, p_position),stdin(2, p_orientation), stdin(2, p_scale));
+            gl_Position = (inverse(ViewProjectionMatrix) * BillboardModelToScreenSpacePosition(gl_in[2].gl_Position.xyz,modelMatrix));
+            stdout(wnormal) = (BillboardModelMatrix(modelMatrix) * vec4(-stdin(2, normal), 0.0)).xyz;
+            PropagateStdIO(2);
+            EmitVertex();
+            EndPrimitive();
+        }
+        //PropagateStdIO((inverse(ViewProjectionMatrix) * gl_Position).xyz, (BillboardModelMatrix(modelMatrix) * vec4(-stdin(normal), 0.0)).xyz);
+    }
+}
+
+
 shader(fragment)
 {
-    uniform sampler2DArray _texture;
-    uniform int frameCount;
+    uniform bool animated = false;
+    uniform sampler2DArray _textureArray;
+    uniform int frameCount = 1;
+ 
+    uniform bool useSolidColor = true;
+    uniform vec4 _color= vec4(1.0);
+
+    uniform bool useTexture = false;
+    uniform sampler2D _texture;
     void main(void)
     {
         #if defined(DEPTH_ONLY)
             fragment_color = vec4(0.0);
         #else 
-            float frame = stdio(frameID); 
-            vec4 current = texture(_texture, vec3(stdio(uv), frame ));
-            vec4 previous = texture(_texture, vec3(stdio(uv), frame-1.0));
-            vec4 color = pow(mix(current, previous,round(1+frame)-frame), vec4(vec3(2.2),1.0));
+            vec4 color = vec4(1.0);
+            if(animated)
+            {
+                float frame = stdio(frameID); 
+                vec4 current = texture(_textureArray, vec3(stdio(uv), frame ));
+                vec4 previous = texture(_textureArray, vec3(stdio(uv), frame-1.0));
+                color = pow(mix(current, previous,round(1+frame)-frame), vec4(vec3(2.2),1.0));
+                color.a *= 1.0 - (frame/frameCount);
+            }
+            else if(useSolidColor)
+            {
+                color = _color;
+            }
+            else if(useTexture)
+            {
+                color = texture(_texture,stdio(uv));
+            }
 
             color.a *= SoftParticleAlpha(2.0);
             if(color.a <= epsilon)
                 discard;
-            color.a *= 1.0 - (frame/frameCount);
             
             fragment_color = color;
             fragment_normal = vec4(vec3(0.0), 1.0);

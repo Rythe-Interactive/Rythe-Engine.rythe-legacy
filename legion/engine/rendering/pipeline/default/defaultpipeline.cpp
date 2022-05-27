@@ -45,17 +45,29 @@ namespace legion::rendering
         buffer entityIdBuffer;
         buffer flipbookBuffer;
 
+        buffer positionBuffer;
+        buffer orientationBuffer;
+        buffer scaleBuffer;
+
         {
             app::context_guard guard(context);
             addFramebuffer("main");
             modelMatrixBuffer = buffer(GL_ARRAY_BUFFER, sizeof(math::mat4) * 1024, nullptr, GL_DYNAMIC_DRAW);
             entityIdBuffer = buffer(GL_ARRAY_BUFFER, sizeof(id_type) * 1024, nullptr, GL_DYNAMIC_DRAW);
             flipbookBuffer = buffer(GL_ARRAY_BUFFER, sizeof(float) * 1024, nullptr, GL_DYNAMIC_DRAW);
+
+            positionBuffer = buffer(GL_ARRAY_BUFFER, sizeof(math::vec3) * 1024, nullptr, GL_DYNAMIC_DRAW);
+            orientationBuffer = buffer(GL_ARRAY_BUFFER, sizeof(math::vec4) * 1024, nullptr, GL_DYNAMIC_DRAW);
+            scaleBuffer = buffer(GL_ARRAY_BUFFER, sizeof(math::vec3) * 1024, nullptr, GL_DYNAMIC_DRAW);
         }
 
         create_meta<buffer>("model matrix buffer", modelMatrixBuffer);
         create_meta<buffer>("entity id buffer", entityIdBuffer);
         create_meta<buffer>("flipbook frame buffer", flipbookBuffer);
+
+        create_meta<buffer>("position buffer", positionBuffer);
+        create_meta<buffer>("orientation buffer", orientationBuffer);
+        create_meta<buffer>("scale buffer", scaleBuffer);
     }
 
 }

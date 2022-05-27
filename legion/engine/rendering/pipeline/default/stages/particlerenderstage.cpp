@@ -3,6 +3,7 @@
 #include <rendering/data/buffer.hpp>
 #include <rendering/data/model.hpp>
 #include <rendering/components/renderable.hpp>
+#include <rendering/util/bindings.hpp>
 
 
 namespace legion::rendering
@@ -25,14 +26,17 @@ namespace legion::rendering
         static id_type lightsId = nameHash("light buffer");
         static id_type lightCountId = nameHash("light count");
         static id_type matricesId = nameHash("model matrix buffer");
+        static id_type positionBufferId = nameHash("position buffer");
+        static id_type orientationBufferId = nameHash("orientation buffer");
+        static id_type scaleBufferId = nameHash("scale buffer");
         static id_type entityBufferId = nameHash("entity id buffer");
         static id_type flipbookBufferId = nameHash("flipbook frame buffer");
         static id_type depthOnlyVariant = nameHash("depth_only");
 
-        core::time::stopwatch particleRenderWatch;
-        particleRenderWatch.start();
+        //core::time::stopwatch particleRenderWatch;
+        //particleRenderWatch.start();
 
-        auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<math::mat4>, std::vector<float>>>>>(batchesId);
+        auto* batches = get_meta < sparse_map < material_handle, sparse_map < model_handle, std::vector<float>>>>(batchesId);
         if (!batches)
             return;
 
@@ -44,12 +48,16 @@ namespace legion::rendering
         if (!lightCount)
             return;
 
-        buffer* modelMatrixBuffer = get_meta<buffer>(matricesId);
-        if (!modelMatrixBuffer)
+        buffer* positionBuffer = get_meta<buffer>(positionBufferId);
+        if (!positionBuffer)
             return;
 
-        buffer* entityIdBuffer = get_meta<buffer>(entityBufferId);
-        if (!entityIdBuffer)
+        buffer* orientationBuffer = get_meta<buffer>(orientationBufferId);
+        if (!orientationBuffer)
+            return;
+
+        buffer* scaleBuffer = get_meta<buffer>(scaleBufferId);
+        if (!scaleBuffer)
             return;
 
         buffer* flipbookBuffer = get_meta<buffer>(flipbookBufferId);
@@ -156,7 +164,13 @@ namespace legion::rendering
                 const model& mesh = modelHandle.get_model();
 
                 if (!mesh.buffered)//Binds the modelMatrixBuffer to the modelHandles data
-                    modelHandle.buffer_data(*modelMatrixBuffer, *entityIdBuffer, *flipbookBuffer);
+                {
+                    modelHandle.init_model_data();
+                    modelHandle.buffer_data(*positionBuffer, SV_PPOSITION, 3, GL_FLOAT, false, 0, 0, true);
+                    modelHandle.buffer_data(*orientationBuffer, SV_PORIENTATION, 4, GL_FLOAT, false, 0, 0, true);
+                    modelHandle.buffer_data(*scaleBuffer, SV_PSCALE, 3, GL_FLOAT, false, 0, 0, true);
+                    modelHandle.buffer_data(*flipbookBuffer, SV_FRAMEID, 1, GL_FLOAT, false, 0, 0, true);
+                }
 
                 if (mesh.submeshes.empty())
                 {
@@ -164,8 +178,10 @@ namespace legion::rendering
                     continue;
                 }
 
-                modelMatrixBuffer->bufferData(instances.first);
-                flipbookBuffer->bufferData(instances.second);
+                //positionBuffer->bufferData();
+                //orientationBuffer->bufferData();
+                //scaleBuffer->bufferData();
+                flipbookBuffer->bufferData(instances);
 
                 {
                     mesh.vertexArray.bind();
@@ -173,7 +189,7 @@ namespace legion::rendering
                     lightsBuffer->bind();
                     for (auto submesh : mesh.submeshes)
                     {
-                        glDrawElementsInstanced(GL_TRIANGLES, (GLuint)submesh.indexCount, GL_UNSIGNED_INT, (GLvoid*)(submesh.indexOffset * sizeof(uint)), (GLsizei)instances.first.size());
+                        glDrawElementsInstanced(GL_TRIANGLES, (GLuint)submesh.indexCount, GL_UNSIGNED_INT, (GLvoid*)(submesh.indexOffset * sizeof(uint)), (GLsizei)instances.size());
                     }
                     lightsBuffer->release();
                     mesh.indexBuffer.release();
@@ -234,7 +250,13 @@ namespace legion::rendering
                 const model& mesh = modelHandle.get_model();
 
                 if (!mesh.buffered)//Binds the modelMatrixBuffer to the modelHandles data
-                    modelHandle.buffer_data(*modelMatrixBuffer, *entityIdBuffer, *flipbookBuffer);
+                {
+                    modelHandle.init_model_data();
+                    modelHandle.buffer_data(*positionBuffer, SV_PPOSITION, 3, GL_FLOAT, false, 0, 0, true);
+                    modelHandle.buffer_data(*orientationBuffer, SV_PORIENTATION, 4, GL_FLOAT, false, 0, 0, true);
+                    modelHandle.buffer_data(*scaleBuffer, SV_PSCALE, 3, GL_FLOAT, false, 0, 0, true);
+                    modelHandle.buffer_data(*flipbookBuffer, SV_FRAMEID, 1, GL_FLOAT, false, 0, 0, true);
+                }
 
                 if (mesh.submeshes.empty())
                 {
@@ -242,8 +264,7 @@ namespace legion::rendering
                     continue;
                 }
 
-                modelMatrixBuffer->bufferData(instances.first);
-                flipbookBuffer->bufferData(instances.second);
+                flipbookBuffer->bufferData(instances);
 
                 {
                     mesh.vertexArray.bind();
@@ -251,7 +272,7 @@ namespace legion::rendering
                     lightsBuffer->bind();
                     for (auto submesh : mesh.submeshes)
                     {
-                        glDrawElementsInstanced(GL_TRIANGLES, (GLuint)submesh.indexCount, GL_UNSIGNED_INT, (GLvoid*)(submesh.indexOffset * sizeof(uint)), (GLsizei)instances.first.size());
+                        glDrawElementsInstanced(GL_TRIANGLES, (GLuint)submesh.indexCount, GL_UNSIGNED_INT, (GLvoid*)(submesh.indexOffset * sizeof(uint)), (GLsizei)instances.size());
                     }
                     lightsBuffer->release();
                     mesh.indexBuffer.release();
@@ -265,7 +286,7 @@ namespace legion::rendering
 
         fbo->release();
 
-        particleRenderWatch.end();
+        //particleRenderWatch.end();
         //log::debug("Particle Render Stage elapsed time:  {}ms", particleRenderWatch.elapsed_time().milliseconds());
     }
 

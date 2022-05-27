@@ -17,6 +17,9 @@ in vec2 uv : SV_TEXCOORD0;
 in uint64_t entityId : SV_ENTITYID;
 in float frameID : SV_FRAMEID;
 in mat4 modelMatrix : SV_MODELMATRIX;
+in vec3 p_position : SV_PPOSITION;
+in vec4 p_orientation : SV_PORIENTATION;
+in vec3 p_scale : SV_PSCALE;
 #endif
 
 // Define standard io keyword so that we can auto detect whether it should be input or output.
@@ -51,6 +54,9 @@ io LGN_STDIO
     flat uint64_t entityId;
     float frameID;
     mat4 modelMatrix;
+    vec3 p_position;
+    vec4 p_orientation;
+    vec3 p_scale;
 }
 #if defined(GEOMETRY_SHADER)
 lgn_stdin[LGN_geom_vtxc];
@@ -73,6 +79,9 @@ out LGN_STDGEOMFRAG
     flat uint64_t entityId;
     float frameID;
     mat4 modelMatrix;
+    vec3 p_position;
+    vec4 p_orientation;
+    vec3 p_scale;
 } lgn_stdout;
 #endif
 
@@ -489,6 +498,37 @@ mat3 GetTBNMatrix(vec3 worldNormal, vec3 worldTangent)
 }
 #endif // End not geometry shader
 
+mat4 Compose(vec3 position, vec4 orientation, vec3 scale)
+{
+    float qxx = orientation.x*orientation.x;
+    float qyy = orientation.y*orientation.y;
+    float qzz = orientation.z*orientation.z;
+
+    float qxz = orientation.x*orientation.z;
+    float qxy = orientation.x*orientation.y;
+    float qyz = orientation.y*orientation.z;
+
+    float qwx = orientation.w*orientation.x;
+    float qwy = orientation.w*orientation.y;
+    float qwz = orientation.w*orientation.z;
+
+    vec3 rotX = vec3(1.0-2.0*(qyy+qzz),2.0*(qxy+qwz),2.0*(qxz-qwy));
+    vec3 rotY = vec3(2.0*(qxy-qwz),1.0-2.0*(qxx+qzz),2.0*(qyz+qwz));
+    vec3 rotZ = vec3(2.0*(qxz+qwy),2.0*(qyz-qwx),1.0-2.0*(qxx+qyy));
+    
+    vec4 localX = vec4(rotX*scale.x,0.0);
+    vec4 localY = vec4(rotY*scale.y,0.0);
+    vec4 localZ = vec4(rotZ*scale.z,0.0);
+    vec4 localW = vec4(position,1.0);
+
+    mat4 modelMatrix;
+    modelMatrix[0] = localX;
+    modelMatrix[1] = localY;
+    modelMatrix[2] = localZ;
+    modelMatrix[3] = localW;
+    return modelMatrix;
+}
+
 #if defined(VERTEX_SHADER)
 void PropagateStdIO()
 {
@@ -503,6 +543,9 @@ void PropagateStdIO()
     lgn_stdio.entityId = entityId;
     lgn_stdio.frameID = frameID;
     lgn_stdio.modelMatrix = modelMatrix;
+    lgn_stdio.p_position = p_position;
+    lgn_stdio.p_orientation = p_orientation;
+    lgn_stdio.p_scale = p_scale;
 }
 
 void PropagateStdIO(vec3 worldPosition, vec3 worldNormal)
@@ -518,6 +561,9 @@ void PropagateStdIO(vec3 worldPosition, vec3 worldNormal)
     lgn_stdio.entityId = entityId;
     lgn_stdio.frameID = frameID;
     lgn_stdio.modelMatrix = modelMatrix;
+    lgn_stdio.p_position = p_position;
+    lgn_stdio.p_orientation = p_orientation;
+    lgn_stdio.p_scale = p_scale;
 }
 #elif defined(GEOMETRY_SHADER)
 void PropagateStdIO(int index)
@@ -533,5 +579,8 @@ void PropagateStdIO(int index)
     stdout(entityId) = stdin(index, entityId);
     stdout(frameID) = stdin(index, frameID);
     stdout(modelMatrix) = stdin(index, modelMatrix);
+    stdout(p_position) = stdin(index, p_position);
+    stdout(p_orientation) = stdin(index, p_orientation);
+    stdout(p_scale) = stdin(index, p_scale);
 }
 #endif
