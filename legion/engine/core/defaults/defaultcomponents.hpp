@@ -4,7 +4,6 @@
 #include <core/data/mesh.hpp>
 #include <core/logging/logging.hpp>
 
-
 namespace legion::core
 {
     struct position : public math::vec3
@@ -13,7 +12,7 @@ namespace legion::core
         position(const position&) = default;
         position(position&&) = default;
         position(const math::vec3& src) : math::vec3(src) {}
-        position(float x, float y, float z) : math::vec3(x, y, z) {}
+        position(float _x, float _y, float _z) : math::vec3(_x, _y, _z) {}
         position(float v) : math::vec3(v) {}
         position& operator=(const position&) = default;
         position& operator=(position&&) = default;
@@ -31,12 +30,40 @@ namespace legion::core
             z = src.z;
             return *this;
         }
+        position& operator+=(const position& src)
+        {
+            x += src.x;
+            y += src.y;
+            z += src.z;
+            return *this;
+        };
+        position& operator+=(position&& src)
+        {
+            x += src.x;
+            y += src.y;
+            z += src.z;
+            return *this;
+        }
+        position& operator-=(const position& src)
+        {
+            x -= src.x;
+            y -= src.y;
+            z -= src.z;
+            return *this;
+        };
+        position& operator-=(position&& src)
+        {
+            x -= src.x;
+            y -= src.y;
+            z -= src.z;
+            return *this;
+        }
     };
 
     struct rotation : public math::quat
     {
         rotation() : math::quat(1, 0, 0, 0) {}
-        rotation(float w, float x, float y, float z) : math::quat(w, x, y, z) {}
+        rotation(float _w, float _x, float _y, float _z) : math::quat(_w, _x, _y, _z) {}
         rotation(const rotation&) = default;
         rotation(rotation&&) = default;
         rotation(const math::quat& src) : math::quat(src) {}
@@ -90,7 +117,7 @@ namespace legion::core
     struct scale : public math::vec3
     {
         scale() : math::vec3(1, 1, 1) {}
-        scale(float x, float y, float z) : math::vec3(x, y, z) {}
+        scale(float _x, float _y, float _z) : math::vec3(_x, _y, _z) {}
         scale(float v) : math::vec3(v) {}
         scale(const scale&) = default;
         scale(scale&&) = default;
@@ -145,7 +172,6 @@ namespace legion::core
             auto [position, rotation, scale] = values();
             return math::compose(scale, rotation, position);
         }
-
     };
 
     struct velocity : public math::vec3
@@ -154,7 +180,7 @@ namespace legion::core
         velocity(const velocity&) = default;
         velocity(velocity&&) = default;
         velocity(const math::vec3& src) : math::vec3(src) {}
-        velocity(float x, float y, float z) : math::vec3(x, y, z) {}
+        velocity(float _x, float _y, float _z) : math::vec3(_x, _y, _z) {}
         velocity(float v) : math::vec3(v) {}
         velocity& operator=(const velocity&) = default;
         velocity& operator=(velocity&&) = default;
@@ -170,6 +196,34 @@ namespace legion::core
             x = src.x;
             y = src.y;
             z = src.z;
+            return *this;
+        }
+        velocity& operator+=(const velocity& src)
+        {
+            x += src.x;
+            y += src.y;
+            z += src.z;
+            return *this;
+        }
+        velocity& operator+=(velocity&& src)
+        {
+            x += src.x;
+            y += src.y;
+            z += src.z;
+            return *this;
+        }
+        velocity& operator-=(const velocity& src)
+        {
+            x -= src.x;
+            y -= src.y;
+            z -= src.z;
+            return *this;
+        }
+        velocity& operator-=(velocity&& src)
+        {
+            x -= src.x;
+            y -= src.y;
+            z -= src.z;
             return *this;
         }
     };

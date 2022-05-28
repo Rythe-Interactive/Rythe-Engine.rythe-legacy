@@ -474,6 +474,7 @@ namespace legion::rendering
                 // Default shader state in case nothing was specified by the shader.
                 shader_state& currentVariantState = state[variant];
                 currentVariantState[GL_DEPTH_TEST] = GL_LEQUAL;
+                currentVariantState[GL_DEPTH_WRITEMASK] = GL_TRUE;
                 currentVariantState[GL_CULL_FACE] = GL_BACK;
                 currentVariantState[GL_BLEND] = GL_FALSE;
                 currentVariantState[GL_DITHER] = GL_FALSE;

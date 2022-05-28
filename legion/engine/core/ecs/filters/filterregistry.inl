@@ -41,7 +41,7 @@ namespace legion::core::ecs
     inline id_type FilterRegistry::generateFilterImpl()
     {
         // Get the id.
-        constexpr id_type id = generateId<component_types...>();
+        static const id_type id = generateId<component_types...>();
         // Register the component types if it they aren't yet.
         Registry::registerComponentType<component_types...>();
 

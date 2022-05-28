@@ -59,13 +59,13 @@ namespace legion::core::ecs
 
     void Registry::onInit()
     {
+        reportDependency<FilterRegistry>();
         create();
 
         for (auto& [id, componentType] : componentTypes())
             tryEmplaceFamily(id, componentType->create_pool());
 
         world = getWorld();
-        reportDependency<FilterRegistry>();
     }
 
     void Registry::onShutdown()
@@ -74,9 +74,9 @@ namespace legion::core::ecs
             family->clear();
     }
 
-    component_pool_base* Registry::getFamily(id_type typeId)
+    pointer<component_pool_base> Registry::getFamily(id_type typeId)
     {
-        return getFamilies().at(typeId).get();
+        return { getFamilies().at(typeId).get() };
     }
 
     const std::string& Registry::getFamilyName(id_type id)
@@ -241,7 +241,7 @@ namespace legion::core::ecs
         return entity{ &entityData(target) };
     }
 
-    void* Registry::createComponent(id_type typeId, entity target)
+    pointer<void> Registry::createComponent(id_type typeId, entity target)
     {
         // Update entity composition.
         instance.m_entityCompositions.at(target).insert(typeId);
@@ -249,6 +249,15 @@ namespace legion::core::ecs
         FilterRegistry::markComponentAdd(typeId, target);
         // Actually create and return the component.
         return getFamily(typeId)->create_component(target);
+    }
+
+    pointer<void> Registry::createComponent(id_type typeId, entity target, pointer<const void> component)
+    {
+        instance.m_entityCompositions.at(target).insert(typeId);
+
+        FilterRegistry::markComponentAdd(typeId, target);
+
+        return getFamily(typeId)->create_component(target, component);
     }
 
     void Registry::destroyComponent(id_type typeId, entity target)
@@ -266,7 +275,7 @@ namespace legion::core::ecs
         return getFamily(typeId)->contains(target);
     }
 
-    void* Registry::getComponent(id_type typeId, entity target)
+    pointer<void> Registry::getComponent(id_type typeId, entity target)
     {
         return getFamily(typeId)->get_component(target);
     }

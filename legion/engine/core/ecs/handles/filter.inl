@@ -87,7 +87,7 @@ namespace legion::core::ecs
     {
         auto& container = std::get<component_container<ComponentType>>(m_containers);
         container.clear();
-        reinterpret_cast<component_pool<ComponentType>*>(Registry::getFamily(typeHash<ComponentType>()))->fill_container(container, FilterRegistry::getList(id));
+        reinterpret_cast<component_pool<ComponentType>*>(Registry::getFamily(typeHash<ComponentType>()).ptr)->fill_container(container, FilterRegistry::getList(id));
         return container;
     }
 }

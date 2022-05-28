@@ -1,5 +1,6 @@
 #pragma once
 #include <core/containers/pointer.hpp>
+#include <core/assets/import_settings.hpp>
 
 namespace legion::core::assets
 {
@@ -23,6 +24,7 @@ namespace legion::core::assets
         id_type id() const noexcept;
         const std::string& name() const;
         const std::string& path() const;
+        const import_settings<AssetType>& import_settings() const;
         void destroy();
         asset copy(const std::string& name) const;
         asset copy(id_type nameHash, const std::string& name) const;

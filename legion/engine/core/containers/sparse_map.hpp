@@ -157,7 +157,7 @@ namespace legion::core
                 return false;
 
             const size_type& sparseval = m_sparse.at(key);
-            return sparseval >= 0 && sparseval < m_dense_key.size() && sparseval < m_size&& m_dense_key.at(sparseval) == key;
+            return (sparseval >= 0) && (sparseval < m_dense_key.size()) && (sparseval < m_size) && (m_dense_key.at(sparseval) == key);
         }
 
         /**@brief Checks whether a certain key is contained in the sparse_map.
@@ -170,7 +170,7 @@ namespace legion::core
                 return false;
 
             const size_type& sparseval = m_sparse.at(key);
-            return sparseval >= 0 && sparseval < m_dense_key.size() && sparseval < m_size&& m_dense_key.at(sparseval) == key;
+            return (sparseval >= 0) && (sparseval < m_dense_key.size()) && (sparseval < m_size) && (m_dense_key.at(sparseval) == key);
         }
 
         /**@brief Checks if all keys in sparse_map are inside this map as well.
@@ -203,7 +203,7 @@ namespace legion::core
             if (m_size == other.m_size)
             {
                 for (int i = 0; i < m_size; i++)
-                    if (!(other.contains(m_dense_key.at(i)) && get(m_dense_key.at(i)) == other.get(m_dense_key.at(i))))
+                    if (!(other.contains(m_dense_key.at(i)) && (get(m_dense_key.at(i)) == other.get(m_dense_key.at(i)))))
                         return false;
 
                 return true;
@@ -221,7 +221,7 @@ namespace legion::core
             if (m_size == other.m_size)
             {
                 for (int i = 0; i < m_size; i++)
-                    if (!(other.contains(m_dense_key.at(i)) && get(m_dense_key.at(i)) == other.get(m_dense_key.at(i))))
+                    if (!(other.contains(m_dense_key.at(i)) && (get(m_dense_key.at(i)) == other.get(m_dense_key.at(i)))))
                         return false;
 
                 return true;
@@ -574,15 +574,18 @@ namespace legion::core
         {
             if (contains(key))
             {
-                if (m_size - 1 != m_sparse.at(key))
+                auto& idx = m_sparse.at(key);
+                if (m_size - 1 != idx)
                 {
-                    m_dense_value.at(m_sparse.at(key)) = std::move(m_dense_value.at(m_size - 1));
-                    m_dense_key.at(m_sparse.at(key)) = std::move(m_dense_key.at(m_size - 1));
-                    m_sparse.at(m_dense_key.at(m_size - 1)) = std::move(m_sparse.at(key));
+                    auto prevKey = m_dense_key.at(m_size - 1);
+                    std::swap(m_dense_value.at(idx), m_dense_value.at(m_size - 1));
+                    std::swap(m_dense_key.at(idx), m_dense_key.at(m_size - 1));
+                    m_sparse.at(prevKey) = idx;
                 }
                 --m_size;
                 m_dense_value.resize(m_size);
                 m_dense_key.resize(m_size);
+                m_sparse.erase(key);
                 return true;
             }
             return false;

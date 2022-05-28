@@ -41,6 +41,11 @@ namespace legion::rendering
         return m_models[id];
     }
 
+    sparse_map<id_type, model> ModelCache::get_all_models()
+    {
+        return m_models;
+    }
+
     std::string ModelCache::get_model_name(id_type id)
     {
         async::readonly_guard guard(m_modelNameLock);
@@ -147,7 +152,7 @@ namespace legion::rendering
 
                 material_handle material = MaterialCache::create_material(name + "/" + mat.name, defaultLitShader);
 
-                if(mat.doubleSided && (mat.transparencyMode == transparency_mode::Blend))
+                if (mat.doubleSided && (mat.transparencyMode == transparency_mode::Blend))
                     material.set_variant("double_sided_transparent");
                 else if (mat.doubleSided)
                     material.set_variant("double_sided");

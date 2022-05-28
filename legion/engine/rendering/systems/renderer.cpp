@@ -407,17 +407,18 @@ namespace legion::rendering
             if (viewportSize.x == 0 || viewportSize.y == 0)
                 continue;
 
-            position& camPos = ent.get_component<position>();
-            rotation& camRot = ent.get_component<rotation>();
-            scale& camScale = ent.get_component<scale>();
+            transform cameraTrans = ent.get_component<transform>();
 
-            math::mat4 view(1.f);
-            math::compose(view, camScale, camRot, camPos);
-            view = math::inverse(view);
+            math::mat4 view = cameraTrans.from_world_matrix();
 
             math::mat4 projection = cam.get_projection(((float)viewportSize.x) / viewportSize.y);
 
-            camera::camera_input cam_input_data(view, projection, camPos, camRot.forward(), cam.nearz, cam.farz, viewportSize);
+            position cameraPos;
+            rotation cameraRot;
+            scale cameraScal;
+            math::decompose(cameraTrans.to_world_matrix(), cameraScal, cameraRot, cameraPos);
+
+            camera::camera_input cam_input_data(view, projection, cameraPos, cameraRot.forward(), cam.nearz, cam.farz, viewportSize);
 
             if (!m_exiting.load(std::memory_order_relaxed))
             {
