@@ -13,13 +13,13 @@ static void TestECS()
     using namespace legion;
 
     ecs::Registry::restart();
-    auto* tcFamily = ecs::Registry::getFamily<test_comp>();
+    auto tcFamily = ecs::Registry::getFamily<test_comp>();
     tcFamily->reserve(1000);
-    auto* posFamily = ecs::Registry::getFamily<position>();
+    auto posFamily = ecs::Registry::getFamily<position>();
     posFamily->reserve(1000);
-    auto* rotFamily = ecs::Registry::getFamily<rotation>();
+    auto rotFamily = ecs::Registry::getFamily<rotation>();
     rotFamily->reserve(1000);
-    auto* scalFamily = ecs::Registry::getFamily<scale>();
+    auto scalFamily = ecs::Registry::getFamily<scale>();
     scalFamily->reserve(1000);
 
     LEGION_SUBTEST("Basic component and entity behaviour")

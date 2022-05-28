@@ -26,7 +26,7 @@ namespace legion::core::ecs
         id_type typeId = typeHash<ComponentType>();
         auto& families = getFamilies();
         if (families.count(typeId)) // Check and fetch in order to avoid a possibly unnecessary allocation and deletion.
-            return dynamic_cast<component_pool<ComponentType>*>(families.at(typeId).get());
+            return { dynamic_cast<component_pool<ComponentType>*>(families.at(typeId).get()) };
 
         // Allocate and emplace if no item was found.
         auto& [_, componentType] = *(componentTypes().try_emplace(typeId, std::make_unique<component_type<ComponentType>>(std::forward<Args>(args)...)).first);

@@ -86,8 +86,6 @@ namespace legion::core
         mutable std::optional<std::vector<math::color>> m_colors = std::nullopt;
     };
 
-    ReportAssetType(image);
-
     template<>
     struct assets::import_settings<image>
     {
@@ -102,6 +100,8 @@ namespace legion::core
 
         NO_DEF_CTOR_RULE5_NOEXCEPT(import_settings);
     };
+
+    ReportAssetType(image);
 }
 
 #include <core/data/image.inl>

@@ -78,8 +78,6 @@ namespace legion::core
         static void calculate_tangents(mesh* data);
     };
 
-    ReportAssetType(mesh);
-
     template<>
     struct assets::import_settings<mesh>
     {
@@ -89,4 +87,6 @@ namespace legion::core
         winding_order windingOrder = winding_order::clockwise;
         math::mat4 transform = math::mat4(1.f);
     };
+
+    ReportAssetType(mesh);
 }
