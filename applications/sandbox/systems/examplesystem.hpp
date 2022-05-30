@@ -46,7 +46,7 @@ public:
             auto ent = createEntity();
 
             auto [pos, rot, scal] = ent.add_component<transform>();
-            pos = math::sphericalRand(5.f);
+            pos = math::spherical_rand(5.f);
             scal = scale(0.1f, 0.1f, 0.1f);
 
             ent.add_component<example_comp, velocity>();

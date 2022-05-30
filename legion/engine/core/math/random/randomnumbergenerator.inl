@@ -10,7 +10,7 @@ namespace legion::core::math
     }
 
     template<typename Integer>
-    L_NODISCARD inline Integer RandomNumberGenerator::generateRandomInteger()
+    L_NODISCARD inline Integer RandomNumberGenerator::generateRandomInteger() noexcept
     {
         if constexpr (::std::is_signed_v<Integer>)
         {
@@ -25,7 +25,7 @@ namespace legion::core::math
     }
 
     template<typename Float>
-    L_NODISCARD inline Float RandomNumberGenerator::generateRandomFloat()
+    L_NODISCARD inline Float RandomNumberGenerator::generateRandomFloat() noexcept
     {
         auto integer = generateRandomInteger<uint_max>();
         return integer / static_cast<Float>(::std::numeric_limits<uint_max>::max());

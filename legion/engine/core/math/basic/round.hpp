@@ -8,111 +8,17 @@
 
 namespace legion::core::math
 {
-    namespace detail
-    {
-        template<typename Target, typename T>
-        L_NODISCARD constexpr static Target _round_impl_(T val)
-        {
-            using value_type = remove_cvr_t<T>;
-            if constexpr (::std::is_integral_v<value_type>)
-            {
-                return static_cast<Target>(val);
-            }
-            else
-            {
-                if (val < static_cast<value_type>(0))
-                {
-                    return static_cast<Target>(static_cast<int_max>(val - static_cast<value_type>(0.5)));
-                }
-                else
-                {
-                    return static_cast<Target>(static_cast<int_max>(val + static_cast<value_type>(0.5)));
-                }
-            }
-        }
+    template<typename Scalar>
+    L_NODISCARD L_ALWAYS_INLINE constexpr auto round(Scalar val) noexcept;
 
-        template<typename Scalar, size_type Size>
-        struct compute_round
-        {
-            static constexpr size_type size = Size;
-            using value_type = vector<Scalar, size>;
+    template<typename Integer = int, typename Scalar = float>
+    L_NODISCARD L_ALWAYS_INLINE constexpr auto iround(Scalar val) noexcept;
 
-            L_NODISCARD constexpr static value_type compute(const value_type& val) noexcept
-            {
-                value_type result;
-                for (size_type i = 0; i < size; i++)
-                    result[i] = detail::_round_impl_<Scalar>(val[i]);
-                return result;
-            }
+    template<typename Scalar>
+    L_NODISCARD L_ALWAYS_INLINE constexpr auto uround(Scalar val) noexcept;
 
-            template<typename Integer>
-            L_NODISCARD constexpr static vector<Integer, size> icompute(const value_type& val) noexcept
-            {
-                vector<Integer, size> result;
-                for (size_type i = 0; i < size; i++)
-                    result[i] = detail::_round_impl_<Integer>(val[i]);
-                return result;
-            }
-        };
-
-        template<typename Scalar>
-        struct compute_round<Scalar, 1u>
-        {
-            static constexpr size_type size = 1u;
-            using value_type = vector<Scalar, size>;
-
-            L_NODISCARD constexpr static Scalar compute(Scalar val) noexcept
-            {
-                return detail::_round_impl_<Scalar>(val);
-            }
-
-            template<typename Integer>
-            L_NODISCARD constexpr static Integer icompute(Scalar val) noexcept
-            {
-                return detail::_round_impl_<Integer>(val);
-            }
-        };
-    }
-
-    template<typename T>
-    L_NODISCARD constexpr static auto round(T val)
-    {
-        using value_type = remove_cvr_t<T>;
-        if constexpr (is_vector_v<value_type>)
-        {
-            return detail::compute_round<typename value_type::scalar, value_type::size>::compute(val);
-        }
-        else
-        {
-            return detail::compute_round<value_type, 1>::compute(val);
-        }
-    }
-
-    template<typename Integer = int, typename T = float>
-    L_NODISCARD constexpr static auto iround(T val)
-    {
-        using value_type = remove_cvr_t<T>;
-        if constexpr (is_vector_v<value_type>)
-        {
-            return detail::compute_round<typename value_type::scalar, value_type::size>::template icompute<Integer>(val);
-        }
-        else
-        {
-            return detail::compute_round<value_type, 1u>::template icompute<Integer>(val);
-        }
-    }
-
-    template<typename T = float>
-    L_NODISCARD constexpr static auto uround(T val)
-    {
-        using value_type = remove_cvr_t<T>;
-        if constexpr (is_vector_v<value_type>)
-        {
-            return detail::compute_round<typename value_type::scalar, value_type::size>::template icompute<uint>(val);
-        }
-        else
-        {
-            return detail::compute_round<value_type, 1u>::template icompute<uint>(val);
-        }
-    }
+    template<typename Scalar>
+    L_NODISCARD L_ALWAYS_INLINE constexpr Scalar ceil(Scalar val) noexcept;
 }
+
+#include <core/math/basic/round.inl>

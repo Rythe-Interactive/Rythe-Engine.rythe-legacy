@@ -206,6 +206,7 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="math\basic\constraint.hpp" />
     <ClInclude Include="math\basic\modf.hpp" />
     <ClInclude Include="math\basic\round.hpp" />
+    <ClInclude Include="math\basic\sign.hpp" />
     <ClInclude Include="math\exponential\inverse_sqrt.hpp" />
     <ClInclude Include="math\geometric\inverse.hpp" />
     <ClInclude Include="math\geometric\normalize_dot.hpp" />
@@ -233,6 +234,7 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="math\matrix\matrix4.hpp" />
     <ClInclude Include="math\matrix\matrix_base.hpp" />
     <ClInclude Include="math\matrix\column\column_base.hpp" />
+    <ClInclude Include="math\random\spherical_rand.hpp" />
     <ClInclude Include="math\util\meta.hpp" />
     <ClInclude Include="math\quaternion\utils.inl" />
     <ClInclude Include="math\quaternion\quaternion.hpp" />
@@ -390,6 +392,7 @@ del /q ".\xcopyexclude"</Command>
     <None Include="math\arithmetic\multiplication_vector.inl" />
     <None Include="math\basic\constraint.inl" />
     <None Include="math\basic\constraint_vector.inl" />
+    <None Include="math\basic\round.inl" />
     <None Include="math\geometric\inverse.inl" />
     <None Include="math\geometric\inverse_matrix.inl" />
     <None Include="math\geometric\inverse_quat.inl" />
@@ -407,6 +410,7 @@ del /q ".\xcopyexclude"</Command>
     <None Include="math\quaternion\matrix_quat_conv.inl" />
     <None Include="math\random\linear_rand.inl" />
     <None Include="math\random\randomnumbergenerator.inl" />
+    <None Include="math\random\spherical_rand.inl" />
     <None Include="math\vector\swizzle\swizzle.inl" />
     <None Include="math\vector\vector1.inl" />
     <None Include="math\vector\vector3.inl" />

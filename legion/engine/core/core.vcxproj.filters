@@ -234,6 +234,8 @@
     <ClInclude Include="math\quaternion\utils.inl" />
     <ClInclude Include="math\quaternion\quaternion.hpp" />
     <ClInclude Include="math\basic\constraint.hpp" />
+    <ClInclude Include="math\random\spherical_rand.hpp" />
+    <ClInclude Include="math\basic\sign.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="platform\cpp.hint" />
@@ -291,5 +293,7 @@
     <None Include="math\vector\vector4.inl" />
     <None Include="math\vector\vector3.inl" />
     <None Include="math\geometric\normalize_quaternion.inl" />
+    <None Include="math\random\spherical_rand.inl" />
+    <None Include="math\basic\round.inl" />
   </ItemGroup>
 </Project>
