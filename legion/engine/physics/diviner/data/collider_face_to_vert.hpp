@@ -8,7 +8,7 @@ namespace legion::physics
     {
     public:
 
-        std::vector<math::vec3> outsideVerts;
+        std::vector<math::float3> outsideVerts;
         core::pointer<HalfEdgeFace> face { nullptr };
 
         ColliderFaceToVert(HalfEdgeFace* pFace) : face{ pFace }
@@ -18,10 +18,10 @@ namespace legion::physics
 
         /** @brief Given the positions in 'outsideVerts', gets the vertex furthest from the HalfEdgeFace 'face'
          */
-        std::pair<math::vec3,float> getFurthestOutsideVert() const;
+        std::pair<math::float3,float> getFurthestOutsideVert() const;
        
         /** @brief Given the vertices in 'vertVector', adds them to 'outsideVerts'
          */
-        void populateVectorWithVerts(std::vector<math::vec3>& vertVector);
+        void populateVectorWithVerts(std::vector<math::float3>& vertVector);
     };
 }

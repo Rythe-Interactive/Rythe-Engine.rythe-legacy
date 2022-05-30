@@ -46,7 +46,7 @@ namespace legion::core
     {
         static id_type baseId = nameHash("\xabLEGION ENGINE\xbb\r\n\x13\n");
         id_type threadId = std::hash<std::thread::id>{}(std::this_thread::get_id());
-        return combine_hash(baseId++, threadId);
+        return hash_combine(baseId++, threadId);
     }
 
     multicast_delegate<void()>& Engine::initializationSequence()

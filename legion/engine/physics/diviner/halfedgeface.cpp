@@ -4,7 +4,7 @@
 
 namespace legion::physics
 {
-    HalfEdgeFace::HalfEdgeFace(HalfEdgeEdge* newStartEdge, math::vec3 newNormal) : startEdge{ newStartEdge }, normal{ newNormal }
+    HalfEdgeFace::HalfEdgeFace(HalfEdgeEdge* newStartEdge, math::float3 newNormal) : startEdge{ newStartEdge }, normal{ newNormal }
     {
         initializeFace();
     }
@@ -13,7 +13,7 @@ namespace legion::physics
     {
         static int faceCount = 0;
 
-        math::vec3 faceCenter{ 0.0f };
+        math::float3 faceCenter{ 0.0f };
         int edgeCount = 0;
 
         auto calculateFaceCentroid = [&faceCenter, &edgeCount](HalfEdgeEdge* edge)
@@ -49,17 +49,17 @@ namespace legion::physics
     float HalfEdgeFace::calculateFaceExtents()
     {
         //get vector of vertices of face
-        std::vector<math::vec3> vertices;
+        std::vector<math::float3> vertices;
         vertices.reserve(6);
 
         auto collectVertices = [&vertices](HalfEdgeEdge* edge) {vertices.push_back(edge->edgePosition); };
         forEachEdge(collectVertices);
 
         //get tangents of normals
-        math::vec3 forward = math::normalize(centroid - startEdge->edgePosition);
-        math::vec3 right = math::cross(normal, forward);
+        math::float3 forward = math::normalize(centroid - startEdge->edgePosition);
+        math::float3 right = math::cross(normal, forward);
 
-        math::vec3 maxForward, minForward, maxRight, minRight;
+        math::float3 maxForward, minForward, maxRight, minRight;
 
         //get support point for the tangents and inverse tangents of this face 
         PhysicsStatics::GetSupportPoint(vertices, forward, maxForward);
@@ -131,7 +131,7 @@ namespace legion::physics
         startEdge = edges.at(0);
     }
 
-    void HalfEdgeFace::DEBUG_DrawFace(const math::mat4& transform,const math::color& debugColor,float time)
+    void HalfEdgeFace::DEBUG_DrawFace(const math::float4x4& transform,const math::color& debugColor,float time)
     {
         auto drawFunc = [&transform,debugColor,time](HalfEdgeEdge* edge)
         {
@@ -139,21 +139,21 @@ namespace legion::physics
 
         };
 
-        math::vec3 worldStart = transform * math::vec4(centroid, 1);
-        math::vec3 worldEnd = transform * math::vec4(centroid + normal * 0.1f, 1);
+        math::float3 worldStart = transform * math::float4(centroid, 1);
+        math::float3 worldEnd = transform * math::float4(centroid + normal * 0.1f, 1);
 
         forEachEdge(drawFunc);
     }
 
-    void HalfEdgeFace::DEBUG_DirectionDrawFace(const math::mat4& transform, const math::color& debugColor, float time)
+    void HalfEdgeFace::DEBUG_DirectionDrawFace(const math::float4x4& transform, const math::color& debugColor, float time)
     {
         auto drawFunc = [&transform, debugColor, time](HalfEdgeEdge* edge)
         {
             edge->DEBUG_directionDrawEdge(transform, debugColor, time, 5.0f);
         };
 
-        math::vec3 worldStart = transform * math::vec4(centroid, 1);
-        math::vec3 worldEnd = transform * math::vec4(centroid + normal * 0.1f, 1);
+        math::float3 worldStart = transform * math::float4(centroid, 1);
+        math::float3 worldEnd = transform * math::float4(centroid + normal * 0.1f, 1);
 
         debug::drawLine(worldStart, worldEnd, math::colors::green, 3.0f, time, false);
 

@@ -62,7 +62,7 @@ namespace legion::physics
         PointerEncapsulator< HalfEdgeEdge> edgeRef;
         PointerEncapsulator< HalfEdgeEdge> edgeInc;
 
-        math::vec3 edgeNormal;
+        math::float3 edgeNormal;
         float aToBEdgeSeperation;
 
         if (PhysicsStatics::FindSeperatingAxisByGaussMapEdgeCheck( this, convexCollider, manifold.transformB, manifold.transformA,
@@ -76,14 +76,14 @@ namespace legion::physics
 
         //TODO all penetration querys should supply a constructor that takes in a  ConvexConvexCollisionInfo
         
-        math::vec3 worldFaceCentroidA = manifold.transformA * math::vec4(ARefFace.ptr->centroid, 1);
-        math::vec3 worldFaceNormalA = manifold.transformA * math::vec4(ARefFace.ptr->normal, 0);
+        math::float3 worldFaceCentroidA = manifold.transformA * math::float4(ARefFace.ptr->centroid, 1);
+        math::float3 worldFaceNormalA = manifold.transformA * math::float4(ARefFace.ptr->normal, 0);
         
-        math::vec3 worldFaceCentroidB = manifold.transformB * math::vec4(BRefFace.ptr->centroid, 1);
-        math::vec3 worldFaceNormalB = manifold.transformB * math::vec4(BRefFace.ptr->normal, 0);
+        math::float3 worldFaceCentroidB = manifold.transformB * math::float4(BRefFace.ptr->centroid, 1);
+        math::float3 worldFaceNormalB = manifold.transformB * math::float4(BRefFace.ptr->normal, 0);
 
-        math::vec3 worldEdgeAPosition = edgeRef.ptr? manifold.transformB * math::vec4(edgeRef.ptr->edgePosition, 1) : math::vec3();
-        math::vec3 worldEdgeNormal = edgeNormal;
+        math::float3 worldEdgeAPosition = edgeRef.ptr? manifold.transformB * math::float4(edgeRef.ptr->edgePosition, 1) : math::float3();
+        math::float3 worldEdgeNormal = edgeNormal;
 
         auto abPenetrationQuery =
             std::make_unique< ConvexConvexPenetrationQuery>(ARefFace.ptr
@@ -122,8 +122,8 @@ namespace legion::physics
     void ConvexCollider::PopulateContactPointsWith(ConvexCollider* convexCollider, physics_manifold& manifold)
     {
         OPTICK_EVENT();
-        math::mat4& refTransform = manifold.penetrationInformation->isARef ? manifold.transformA : manifold.transformB;
-        math::mat4& incTransform = manifold.penetrationInformation->isARef ? manifold.transformB : manifold.transformA;
+        math::float4x4& refTransform = manifold.penetrationInformation->isARef ? manifold.transformA : manifold.transformB;
+        math::float4x4& incTransform = manifold.penetrationInformation->isARef ? manifold.transformB : manifold.transformA;
 
         physicsComponent* refPhysicsComp = manifold.penetrationInformation->isARef ? manifold.physicsCompA : manifold.physicsCompB;
         physicsComponent* incPhysicsComp = manifold.penetrationInformation->isARef ? manifold.physicsCompB : manifold.physicsCompA;
@@ -136,8 +136,8 @@ namespace legion::physics
         rigidbody* refRB = manifold.penetrationInformation->isARef ? manifold.rigidbodyA : manifold.rigidbodyB;
         rigidbody* incRB = manifold.penetrationInformation->isARef ? manifold.rigidbodyB : manifold.rigidbodyA;
 
-        math::vec3 refWorldCentroid = refTransform * math::vec4(refPhysicsComp->localCenterOfMass,1);
-        math::vec3 incWorldCentroid = incTransform * math::vec4(incPhysicsComp->localCenterOfMass,1);
+        math::float3 refWorldCentroid = refTransform * math::float4(refPhysicsComp->localCenterOfMass,1);
+        math::float3 incWorldCentroid = incTransform * math::float4(incPhysicsComp->localCenterOfMass,1);
 
         for ( auto& contact : manifold.contacts)
         {
@@ -155,13 +155,13 @@ namespace legion::physics
         }
     }
 
-    void ConvexCollider::UpdateTightAABB(const math::mat4& transform)
+    void ConvexCollider::UpdateTightAABB(const math::float4x4& transform)
     {
         minMaxWorldAABB = PhysicsStatics::ConstructAABBFromTransformedVertices
         (vertices, transform);
     }
 
-    void ConvexCollider::DrawColliderRepresentation(const math::mat4& transform,math::color usedColor, float width, float time,bool ignoreDepth)
+    void ConvexCollider::DrawColliderRepresentation(const math::float4x4& transform,math::color usedColor, float width, float time,bool ignoreDepth)
     {
         if (!shouldBeDrawn) { return; }
 
@@ -170,8 +170,8 @@ namespace legion::physics
             physics::HalfEdgeEdge* initialEdge = face->startEdge;
             physics::HalfEdgeEdge* currentEdge = face->startEdge;
 
-            math::vec3 faceStart = transform * math::vec4(face->centroid, 1);
-            math::vec3 faceEnd = faceStart + math::vec3((transform * math::vec4(face->normal, 0))) * 0.5f;
+            math::float3 faceStart = transform * math::float4(face->centroid, 1);
+            math::float3 faceEnd = faceStart + math::float3((transform * math::float4(face->normal, 0))) * 0.5f;
 
             debug::user_projectDrawLine(faceStart, faceEnd, math::colors::green, 2.0f);
 
@@ -182,8 +182,8 @@ namespace legion::physics
                 physics::HalfEdgeEdge* edgeToExecuteOn = currentEdge;
                 currentEdge = currentEdge->nextEdge;
 
-                math::vec3 worldStart = transform * math::vec4(edgeToExecuteOn->edgePosition, 1);
-                math::vec3 worldEnd = transform * math::vec4(edgeToExecuteOn->nextEdge->edgePosition, 1);
+                math::float3 worldStart = transform * math::float4(edgeToExecuteOn->edgePosition, 1);
+                math::float3 worldEnd = transform * math::float4(edgeToExecuteOn->nextEdge->edgePosition, 1);
 
                 debug::user_projectDrawLine(worldStart, worldEnd, usedColor, width, time,ignoreDepth);
 

@@ -78,12 +78,12 @@ namespace legion::application
 
         }
 
-        inline static math::dvec2 getMousePosition()
+        inline static math::double2 getMousePosition()
         {
             return m_mousePos;
         }
 
-        inline static math::dvec2 getMouseDelta()
+        inline static math::double2 getMouseDelta()
         {
             return m_mouseDelta;
         }
@@ -584,8 +584,8 @@ namespace legion::application
             }
         }
 
-        static math::dvec2 m_mousePos;
-        static math::dvec2 m_mouseDelta;
+        static math::double2 m_mousePos;
+        static math::double2 m_mouseDelta;
 
         static std::set<int> m_presentGamepads;
         static sparse_map<inputmap::method, sparse_map<id_type, action_data>> m_actions;

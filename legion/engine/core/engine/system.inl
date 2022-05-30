@@ -24,7 +24,7 @@ namespace legion::core
     template<typename event_type, void(SelfType::* func_type)(event_type&) CNDOXY(typename)>
     inline L_ALWAYS_INLINE id_type System<SelfType>::bindToEvent()
     {
-        id_type id = combine_hash(event_type::id, force_value_cast<ptr_type>(func_type));
+        id_type id = hash_combine(event_type::id, force_value_cast<ptr_type>(func_type));
 
         auto temp = delegate<void(event_type&)>::template from<SelfType, func_type>(reinterpret_cast<SelfType*>(this));
         auto& del = m_bindings.try_emplace(id, reinterpret_cast<delegate<void(events::event_base&)>&&>(std::move(temp))).first->second;

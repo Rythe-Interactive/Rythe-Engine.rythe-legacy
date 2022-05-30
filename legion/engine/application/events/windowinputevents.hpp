@@ -33,10 +33,10 @@ namespace legion::application
     struct mouse_moved final : public events::event<mouse_moved>
     {
         ecs::component<window> windowHandle;
-        math::dvec2 position;
+        math::double2 position;
 
         mouse_moved() = default;
-        mouse_moved(ecs::component<window> windowHandle, math::dvec2 position) : windowHandle(windowHandle), position(position) {}
+        mouse_moved(ecs::component<window> windowHandle, math::double2 position) : windowHandle(windowHandle), position(position) {}
 
         
     };
@@ -57,10 +57,10 @@ namespace legion::application
     struct mouse_scrolled final : public events::event<mouse_scrolled>
     {
         ecs::component<window> windowHandle;
-        math::dvec2 offset;
+        math::double2 offset;
 
         mouse_scrolled() = default;
-        mouse_scrolled(ecs::component<window> windowHandle, math::dvec2 offset) : windowHandle(windowHandle), offset(offset) {}
+        mouse_scrolled(ecs::component<window> windowHandle, math::double2 offset) : windowHandle(windowHandle), offset(offset) {}
 
         
     };
