@@ -313,7 +313,7 @@ void ExampleSystem::setup()
     ////emitter->create_uniform<float>("minLifeTime") = 5.f;
     ////emitter->create_uniform<float>("maxLifeTime") = 5.f;
     ////emitter->create_uniform<int>("frameCount", 9);
-    emitter->resize(500);
+    emitter->resize(1000000);
     ////emitter->add_policy<scale_lifetime_policy>();
     emitter->add_policy<gpu_particle_policy>();
     material = gfx::MaterialCache::create_material("Particle", fs::view("assets://shaders/particle.shs"));

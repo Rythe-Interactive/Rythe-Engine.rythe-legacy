@@ -20,9 +20,9 @@ namespace legion::rendering
         ModelCache::init_buffer_model(id/*, matrixBuffer, entityBuffer,flipbookBuffer*/);
     }
 
-    void model_handle::write_buffer(const buffer& buffer, uint index, size_type size, GLenum type, bool normalized, size_type stride, size_type offset, bool perInstance) const
+    void model_handle::init_buffer(const buffer& buffer, uint index, size_type size, GLenum type, bool normalized, size_type stride, size_type offset, bool perInstance) const
     {
-        ModelCache::write_buffer(id, buffer, index, size, type, normalized, stride, offset, perInstance);
+        ModelCache::init_buffer(id, buffer, index, size, type, normalized, stride, offset, perInstance);
     }
 
     void model_handle::overwrite_buffer(buffer& newBuffer, uint bufferID, bool perInstance) const
@@ -75,14 +75,20 @@ namespace legion::rendering
         }
     }
 
-    void ModelCache::write_buffer(id_type id, const buffer& buffer, uint index, size_type size, GLenum type, bool normalized, size_type stride, size_type offset, bool perInstance)
+    void ModelCache::init_buffer(id_type id, const buffer& buffer, uint index, size_type size, GLenum type, bool normalized, size_type stride, size_type offset, bool perInstance)
     {
         if (id == invalid_id)
+        {
+            log::warn("Invalid model id");
             return;
+        }
         //get mesh handle
         auto mesh_handle = assets::get<mesh>(id);
         if (!mesh_handle)
+        {
+            log::warn("Invalid mesh handle");
             return;
+        }
         //get mesh and lock
         model& model = m_models[id];
 
@@ -93,11 +99,17 @@ namespace legion::rendering
     void ModelCache::init_buffer_model(id_type id/*, const buffer& matrixBuffer, const buffer& entityBuffer, const buffer& flipbookBuffer*/)
     {
         if (id == invalid_id)
+        {
+            log::warn("Invalid model id");
             return;
+        }
 
         auto mesh_handle = assets::get<mesh>(id);
         if (!mesh_handle)
+        {
+            log::warn("Invalid mesh handle");
             return;
+        }
 
         model& model = m_models[id];
 

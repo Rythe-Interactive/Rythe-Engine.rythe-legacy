@@ -56,8 +56,8 @@ namespace legion::core
 
         if (!emitter.has_buffer<math::vec4>("posBuffer"))
             emitter.create_buffer<math::vec4>("posBuffer");
-        if (!emitter.has_buffer<rotation>("rotBuffer"))
-            emitter.create_buffer<rotation>("rotBuffer");
+        if (!emitter.has_buffer<math::vec4>("rotBuffer"))
+            emitter.create_buffer<math::vec4>("rotBuffer");
         if (!emitter.has_buffer<math::vec4>("scaleBuffer"))
             emitter.create_buffer<math::vec4>("scaleBuffer");
 
@@ -75,7 +75,7 @@ namespace legion::core
     {
         auto& velBuffer = emitter.get_buffer<math::vec4>("velBuffer");
         auto& posBuffer = emitter.get_buffer<math::vec4>("posBuffer");
-        auto& rotBuffer = emitter.get_buffer<rotation>("rotBuffer");
+        auto& rotBuffer = emitter.get_buffer<math::vec4>("rotBuffer");
         auto& scaleBuffer = emitter.get_buffer<math::vec4>("scaleBuffer");
 
         auto count = static_cast<cl_ulong>(end - start);
@@ -92,7 +92,7 @@ namespace legion::core
         auto& init_position = emitter.get_uniform<compute::function>("initPos");
         init_position(paddedSize, compute::inout(posBuffer, "A"), compute::karg(_start, "start"), compute::karg(count, "count"));
 
-        rotation dir = rotation::lookat(math::vec3(0.f), math::vec3::backward);
+        rotation dir = rotation::lookat(math::vec3(0.f),math::vec3::forward);
         auto& init_rotation = emitter.get_uniform<compute::function>("initRot");
         init_rotation(paddedSize, compute::inout(rotBuffer, "A"), compute::karg(dir, "direction"), compute::karg(_start, "start"), compute::karg(count, "count"));
 
@@ -111,8 +111,8 @@ namespace legion::core
 
         auto paddedSize = math::max(((count - 1) | 15) + 1, 16ull);
 
-        //auto& vector_add = emitter.get_uniform<compute::function>("vadd");
-        //vector_add(paddedSize, ioPosBuffer, ioVelBuffer, ioPosBuffer, compute::karg(deltaTime, "dt"));
+        auto& vector_add = emitter.get_uniform<compute::function>("vadd");
+        vector_add(paddedSize, ioPosBuffer, ioVelBuffer, ioPosBuffer, compute::karg(deltaTime, "dt"));
     }
 #pragma endregion
 #pragma region Orbital Policy

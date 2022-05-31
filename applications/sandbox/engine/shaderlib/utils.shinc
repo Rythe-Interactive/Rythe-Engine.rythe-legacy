@@ -20,26 +20,26 @@ mat4 BillboardModelMatrix()
     scale.z = length(stdin(modelMatrix)[2].xyz);
     #endif
 
-    billboardMatrix[0] = -vec4(ViewMatrix[0][2], ViewMatrix[1][2], ViewMatrix[2][2], 0) * scale.x;
+    billboardMatrix[0] = -vec4(ViewMatrix[0][0], ViewMatrix[1][0], ViewMatrix[2][0], 0) * scale.x;
     billboardMatrix[1] = vec4(ViewMatrix[0][1], ViewMatrix[1][1], ViewMatrix[2][1], 0) * scale.y;
-    billboardMatrix[2] = -vec4(ViewMatrix[0][0], ViewMatrix[1][0], ViewMatrix[2][0], 0) * scale.z;
+    billboardMatrix[2] = -vec4(ViewMatrix[0][2], ViewMatrix[1][2], ViewMatrix[2][2], 0) * scale.z;
     return billboardMatrix;
 }
 
-mat4 BillboardModelMatrix(mat4 modelMatrix)
+mat4 BillboardModelMatrix(mat4 _modelMatrix)
 {
     mat4 billboardMatrix;
     vec3 scale;
     #if defined(GEOMETRY_SHADER)
-    billboardMatrix[3] = modelMatrix[3];
-    scale.x = length(modelMatrix[0].xyz);
-    scale.y = length(modelMatrix[1].xyz);
-    scale.z = length(modelMatrix[2].xyz);
+    billboardMatrix[3] = _modelMatrix[3];
+    scale.x = length(_modelMatrix[0].xyz);
+    scale.y = length(_modelMatrix[1].xyz);
+    scale.z = length(_modelMatrix[2].xyz);
     #else
-    billboardMatrix[3] = modelMatrix[3];
-    scale.x = length(modelMatrix[0].xyz);
-    scale.y = length(modelMatrix[1].xyz);
-    scale.z = length(modelMatrix[2].xyz);
+    billboardMatrix[3] = _modelMatrix[3];
+    scale.x = length(_modelMatrix[0].xyz);
+    scale.y = length(_modelMatrix[1].xyz);
+    scale.z = length(_modelMatrix[2].xyz);
     #endif
 
     billboardMatrix[0] = -vec4(ViewMatrix[0][0], ViewMatrix[1][0], ViewMatrix[2][0], 0) * scale.x;

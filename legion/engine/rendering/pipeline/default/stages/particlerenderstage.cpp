@@ -36,7 +36,7 @@ namespace legion::rendering
         //core::time::stopwatch particleRenderWatch;
         //particleRenderWatch.start();
 
-        auto* batches = get_meta < sparse_map < material_handle, sparse_map < model_handle, std::vector<float>>>>(batchesId);
+        auto* batches = get_meta< sparse_map < material_handle, sparse_map < model_handle, std::pair<ecs::entity, std::vector<float>>>>>(batchesId);
         if (!batches)
             return;
 
@@ -46,6 +46,14 @@ namespace legion::rendering
 
         size_type* lightCount = get_meta<size_type>(lightCountId);
         if (!lightCount)
+            return;
+
+        buffer* modelMatrixBuffer = get_meta<buffer>(matricesId);
+        if (!modelMatrixBuffer)
+            return;
+
+        buffer* entityIdBuffer = get_meta<buffer>(entityBufferId);
+        if (!entityIdBuffer)
             return;
 
         buffer* positionBuffer = get_meta<buffer>(positionBufferId);
@@ -164,14 +172,26 @@ namespace legion::rendering
 
                 const model& mesh = modelHandle.get_model();
 
+                auto& emitter = instances.first.get_component<particle_emitter>().get();
+
                 if (!mesh.buffered)//Binds the modelMatrixBuffer to the modelHandles data
                 {
                     modelHandle.init_model_data();
-                    modelHandle.write_buffer(*positionBuffer, SV_TEXCOORD1, 3, GL_FLOAT, false, sizeof(float) * 4, 0, true);
-                    modelHandle.write_buffer(*orientationBuffer, SV_TEXCOORD2, 4, GL_FLOAT, false, sizeof(float) * 4, 0, true);
-                    modelHandle.write_buffer(*scaleBuffer, SV_TEXCOORD3, 3, GL_FLOAT, false, sizeof(float) * 4, 0, true);
-                    modelHandle.write_buffer(*flipbookBuffer, SV_FRAMEID, 1, GL_FLOAT, false, sizeof(float), 0, true);
+                    modelHandle.init_buffer(*modelMatrixBuffer, SV_MODELMATRIX + 0, 4, GL_FLOAT, false, sizeof(math::mat4), 0 * sizeof(math::mat4::col_type), true);
+                    modelHandle.init_buffer(*modelMatrixBuffer, SV_MODELMATRIX + 1, 4, GL_FLOAT, false, sizeof(math::mat4), 1 * sizeof(math::mat4::col_type), true);
+                    modelHandle.init_buffer(*modelMatrixBuffer, SV_MODELMATRIX + 2, 4, GL_FLOAT, false, sizeof(math::mat4), 2 * sizeof(math::mat4::col_type), true);
+                    modelHandle.init_buffer(*modelMatrixBuffer, SV_MODELMATRIX + 3, 4, GL_FLOAT, false, sizeof(math::mat4), 3 * sizeof(math::mat4::col_type), true);
+                    modelHandle.init_buffer(*positionBuffer, SV_TEXCOORD1, 3, GL_FLOAT, false, sizeof(float) * 4, 0, true);
+                    modelHandle.init_buffer(*orientationBuffer, SV_TEXCOORD2, 4, GL_FLOAT, false, sizeof(float) * 4, 0, true);
+                    modelHandle.init_buffer(*scaleBuffer, SV_TEXCOORD3, 3, GL_FLOAT, false, sizeof(float) * 4, 0, true);
+                    modelHandle.init_buffer(*flipbookBuffer, SV_FRAMEID, 1, GL_FLOAT, false, sizeof(float), 0, true);
+                    modelHandle.init_buffer(*entityIdBuffer, SV_ENTITYID, 2, GL_UNSIGNED_INT, false, 0, 0, true);
                 }
+
+                positionBuffer->bufferData(emitter.get_buffer<math::vec4>("posBuffer"));
+                orientationBuffer->bufferData(emitter.get_buffer<math::vec4>("rotBuffer"));
+                scaleBuffer->bufferData(emitter.get_buffer<math::vec4>("scaleBuffer"));
+                flipbookBuffer->bufferData(instances.second);
 
                 if (mesh.submeshes.empty())
                 {
@@ -179,15 +199,13 @@ namespace legion::rendering
                     continue;
                 }
 
-                flipbookBuffer->bufferData(instances);
-
                 {
                     mesh.vertexArray.bind();
                     mesh.indexBuffer.bind();
                     lightsBuffer->bind();
                     for (auto submesh : mesh.submeshes)
                     {
-                        glDrawElementsInstanced(GL_TRIANGLES, (GLuint)submesh.indexCount, GL_UNSIGNED_INT, (GLvoid*)(submesh.indexOffset * sizeof(uint)), (GLsizei)instances.size());
+                        glDrawElementsInstanced(GL_TRIANGLES, (GLuint)submesh.indexCount, GL_UNSIGNED_INT, (GLvoid*)(submesh.indexOffset * sizeof(uint)), (GLsizei)instances.second.size());
                     }
                     lightsBuffer->release();
                     mesh.indexBuffer.release();
@@ -246,17 +264,26 @@ namespace legion::rendering
                 auto modelName = ModelCache::get_model_name(modelHandle.id);
 
                 const model& mesh = modelHandle.get_model();
+                auto& emitter = instances.first.get_component<particle_emitter>().get();
 
                 if (!mesh.buffered)//Binds the modelMatrixBuffer to the modelHandles data
                 {
                     modelHandle.init_model_data();
-                    modelHandle.write_buffer(*positionBuffer, SV_TEXCOORD1, 3, GL_FLOAT, false, sizeof(float) * 4, 0, true);
-                    modelHandle.write_buffer(*orientationBuffer, SV_TEXCOORD2, 4, GL_FLOAT, false, sizeof(float) * 4, 0, true);
-                    modelHandle.write_buffer(*scaleBuffer, SV_TEXCOORD3, 3, GL_FLOAT, false, sizeof(float) * 4, 0, true);
-                    modelHandle.write_buffer(*flipbookBuffer, SV_FRAMEID, 1, GL_FLOAT, false, sizeof(float), 0, true);
+                    modelHandle.init_buffer(*modelMatrixBuffer, SV_MODELMATRIX + 0, 4, GL_FLOAT, false, sizeof(math::mat4), 0 * sizeof(math::mat4::col_type), true);
+                    modelHandle.init_buffer(*modelMatrixBuffer, SV_MODELMATRIX + 1, 4, GL_FLOAT, false, sizeof(math::mat4), 1 * sizeof(math::mat4::col_type), true);
+                    modelHandle.init_buffer(*modelMatrixBuffer, SV_MODELMATRIX + 2, 4, GL_FLOAT, false, sizeof(math::mat4), 2 * sizeof(math::mat4::col_type), true);
+                    modelHandle.init_buffer(*modelMatrixBuffer, SV_MODELMATRIX + 3, 4, GL_FLOAT, false, sizeof(math::mat4), 3 * sizeof(math::mat4::col_type), true);
+                    modelHandle.init_buffer(*positionBuffer, SV_TEXCOORD1, 3, GL_FLOAT, false, sizeof(float) * 4, 0, true);
+                    modelHandle.init_buffer(*orientationBuffer, SV_TEXCOORD2, 4, GL_FLOAT, false, sizeof(float) * 4, 0, true);
+                    modelHandle.init_buffer(*scaleBuffer, SV_TEXCOORD3, 3, GL_FLOAT, false, sizeof(float) * 4, 0, true);
+                    modelHandle.init_buffer(*flipbookBuffer, SV_FRAMEID, 1, GL_FLOAT, false, sizeof(float), 0, true);
+                    modelHandle.init_buffer(*entityIdBuffer, SV_ENTITYID, 2, GL_UNSIGNED_INT, false, 0, 0, true);
                 }
 
-                flipbookBuffer->bufferData(instances);
+                positionBuffer->bufferData(emitter.get_buffer<math::vec4>("posBuffer"));
+                orientationBuffer->bufferData(emitter.get_buffer<math::vec4>("rotBuffer"));
+                scaleBuffer->bufferData(emitter.get_buffer<math::vec4>("scaleBuffer"));
+                flipbookBuffer->bufferData(instances.second);
 
                 if (mesh.submeshes.empty())
                 {
@@ -270,7 +297,7 @@ namespace legion::rendering
                     lightsBuffer->bind();
                     for (auto submesh : mesh.submeshes)
                     {
-                        glDrawElementsInstanced(GL_TRIANGLES, (GLuint)submesh.indexCount, GL_UNSIGNED_INT, (GLvoid*)(submesh.indexOffset * sizeof(uint)), (GLsizei)instances.size());
+                        glDrawElementsInstanced(GL_TRIANGLES, (GLuint)submesh.indexCount, GL_UNSIGNED_INT, (GLvoid*)(submesh.indexOffset * sizeof(uint)), (GLsizei)instances.second.size());
                     }
                     lightsBuffer->release();
                     mesh.indexBuffer.release();

@@ -20,17 +20,18 @@ shader(vertex)
 
     void main(void)
     {
-       //mat4 _modelMatrix = Compose(p_position, p_orientation, p_scale);
+        mat4 _modelMatrix = Compose(p_position, p_orientation, p_scale);
+        stdout(modelMatrix) = _modelMatrix;
         if(fixedSize)
         {
-            gl_Position = FixedSizeBillboardModelToScreenSpacePosition(position);
+            gl_Position = FixedSizeBillboardModelToScreenSpacePosition(position, _modelMatrix);
         }
         else
         {
-            gl_Position = BillboardModelToScreenSpacePosition(position);
+            gl_Position = BillboardModelToScreenSpacePosition(position,_modelMatrix);
         }
-        PropagateStdIO((inverse(ViewProjectionMatrix) * gl_Position).xyz, (BillboardModelMatrix() * vec4(-stdin(normal), 0.0)).xyz);
-        stdout(modelMatrix) = Compose(p_position, p_orientation, p_scale);
+        PropagateStdIO((inverse(ViewProjectionMatrix) * gl_Position).xyz+p_position, (BillboardModelMatrix() * vec4(stdin(-normal), 0.0)).xyz);
+        stdout(modelMatrix) = _modelMatrix;
     }
 }
 

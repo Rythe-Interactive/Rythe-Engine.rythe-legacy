@@ -68,6 +68,7 @@ namespace legion::rendering
         create_meta<buffer>("position buffer", positionBuffer);
         create_meta<buffer>("orientation buffer", orientationBuffer);
         create_meta<buffer>("scale buffer", scaleBuffer);
+
     }
 
 }

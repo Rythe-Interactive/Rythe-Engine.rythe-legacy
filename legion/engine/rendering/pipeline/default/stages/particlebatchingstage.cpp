@@ -5,7 +5,7 @@ namespace legion::rendering
 {
     void ParticleBatchingStage::setup(app::window& context)
     {
-        create_meta< sparse_map < material_handle, sparse_map < model_handle, std::vector<float>>>>("particle batches");
+        create_meta< sparse_map < material_handle, sparse_map < model_handle, std::pair<ecs::entity, std::vector<float>>>>>("particle batches");
         //particle_matrix_composer = fs::view("assets://kernels/particles.cl").load_as<compute::function>("particle_matrix_composer");
         //particle_matrix_composer.setLocalSize(16);
     }
@@ -13,7 +13,7 @@ namespace legion::rendering
     void ParticleBatchingStage::render(app::window& context, camera& cam, const camera::camera_input& camInput, time::span deltaTime)
     {
         static id_type batchesId = nameHash("particle batches");
-        auto* batches = get_meta< sparse_map < material_handle, sparse_map < model_handle, std::vector<float>>>>(batchesId);
+        auto* batches = get_meta< sparse_map < material_handle, sparse_map < model_handle, std::pair<ecs::entity,std::vector<float>>>>>(batchesId);
         static ecs::filter<particle_emitter> emitterFilter;
 
         //core::time::stopwatch watch;
@@ -22,7 +22,8 @@ namespace legion::rendering
             for (auto [material, models] : *batches)
                 for (auto [model, batch] : models)
                 {
-                    batch.clear();
+                    batch.first = ecs::entity{0};
+                    batch.second.clear();
                 }
         }
 
@@ -46,7 +47,7 @@ namespace legion::rendering
 
             bool hasPosBuffer = emitter.has_buffer<math::vec4>(posBufferId);
             bool hasScaleBuffer = emitter.has_buffer<math::vec4>(scaleBufferId);
-            bool hasRotBuffer = emitter.has_buffer<rotation>(rotBufferId);
+            bool hasRotBuffer = emitter.has_buffer<math::vec4>(rotBufferId);
 
             bool hasMeshFilter = emitter.has_uniform<mesh_filter>(meshFilterId);
             bool hasRenderer = emitter.has_uniform<mesh_renderer>(rendererId);
@@ -54,17 +55,17 @@ namespace legion::rendering
             if ((!hasPosBuffer && !hasScaleBuffer && !hasRotBuffer) || (!hasMeshFilter || !hasRenderer))
                 continue;
 
-            buffer* posBuffer = get_meta<buffer>("position buffer");
-            if (hasPosBuffer && posBuffer)
-                posBuffer->bufferData(emitter.get_buffer<math::vec4>(posBufferId));
+            //buffer* posBuffer = get_meta<buffer>("position buffer");
+            //if (hasPosBuffer && posBuffer)
+            //    posBuffer->bufferData(emitter.get_buffer<math::vec4>(posBufferId));
 
-            buffer* scaleBuffer = get_meta<buffer>("scale buffer");
-            if (hasScaleBuffer && scaleBuffer)
-                scaleBuffer->bufferData(emitter.get_buffer<math::vec4>(scaleBufferId));
+            //buffer* scaleBuffer = get_meta<buffer>("scale buffer");
+            //if (hasScaleBuffer && scaleBuffer)
+            //    scaleBuffer->bufferData(emitter.get_buffer<math::vec4>(scaleBufferId));
 
-            buffer* rotBuffer = get_meta<buffer>("orientation buffer");
-            if (hasRotBuffer && rotBuffer)
-                rotBuffer->bufferData(emitter.get_buffer<rotation>(rotBufferId));
+            //buffer* rotBuffer = get_meta<buffer>("orientation buffer");
+            //if (hasRotBuffer && rotBuffer)
+            //    rotBuffer->bufferData(emitter.get_buffer<rotation>(rotBufferId));
 
 
             //auto compare = [&](position& a, position& b)
@@ -91,18 +92,19 @@ namespace legion::rendering
 
             auto& batch = (*batches)[renderer.material][model_handle{ filter.shared_mesh.id() }];
             //batch.first.insert(batch.first.end(), emitter.size(), math::mat4());
+            batch.first = ent;
             if (emitter.has_buffer<float>(frameID))
             {
                 auto& frameIDBuffer = emitter.get_buffer<float>(frameID);
                 for (size_type i = 0; i < emitter.size(); i++)
                 {
                     id_type particleId = particleIds[i];
-                    batch.push_back(frameIDBuffer[particleId]);
+                    batch.second.push_back(frameIDBuffer[particleId]);
                 }
             }
             else
             {
-                batch.insert(batch.end(), emitter.size(), 0);
+                batch.second.insert(batch.second.end(), emitter.size(), 0);
             }
 
             //scale scal{ 1.f };

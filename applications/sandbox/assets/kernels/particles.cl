@@ -23,7 +23,7 @@ __kernel void init_vel(__global float4* A, const unsigned long start, const unsi
     seed = (seed * 0x5DEECE66DL + 0xBL) & ((1L << 48-i-i) - 1);
     float z = seed >> 42;
 
-    A[start+i] = (float4)(1.0+x,1.0+y,1.0+z,0.0);
+    A[start+i] = (float4)(1.0f+x,1.0f+y,1.0f+z,0.0f);
 }
 
 __kernel void init_pos(__global float4* A, const unsigned long start, const unsigned long count) {
@@ -32,8 +32,16 @@ __kernel void init_pos(__global float4* A, const unsigned long start, const unsi
 
     if(i > count)
         return;
+    A[start+i] = (float4)(0.0f,0.0f,0.0f,0.0f);
+}
 
-    A[start+i] = (float4)(1.0,1.0,1.0,0.0);
+__kernel void init_pos_cube(__global float4* A, const unsigned long start, const unsigned long count) {
+
+	int i = get_global_id(0);
+
+    if(i > count)
+        return;
+    A[start+i] = (float4)((start + i)%100,((start + i)/100)%100,((start+i)/(100*100)),0.0);
 }
 
 __kernel void init_rot(__global float4* A, const float4 direction,const unsigned long start, const unsigned long count) {
@@ -53,7 +61,7 @@ __kernel void init_scale(__global float4* A, const unsigned long start, const un
     if(i > count)
         return;
 
-    A[start+i] = (float4)(1.0,1.0,1.0,1.0);
+    A[start+i] = (float4)(1.0f,1.0f,1.0f,1.0f);
 }
 
 __kernel void particle_matrix_composer(__global const uint* living, 
