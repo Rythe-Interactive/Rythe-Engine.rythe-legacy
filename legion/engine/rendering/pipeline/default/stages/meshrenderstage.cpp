@@ -21,6 +21,8 @@ namespace legion::rendering
         static id_type matricesId = nameHash("model matrix buffer");
         static id_type entityBufferId = nameHash("entity id buffer");
         static id_type flipbookBufferId = nameHash("flipbook frame buffer");
+        //core::time::stopwatch watch;
+        //watch.start();
 
         auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<id_type>, std::vector<math::mat4>>>>>(batchesId);
         if (!batches)
@@ -171,12 +173,12 @@ namespace legion::rendering
                         if (!mesh.buffered)
                         {
                             modelHandle.init_model_data();
-                            modelHandle.buffer_data(*modelMatrixBuffer, SV_MODELMATRIX + 0, 4, GL_FLOAT, false, sizeof(math::mat4), 0 * sizeof(math::mat4::col_type), true);
-                            modelHandle.buffer_data(*modelMatrixBuffer, SV_MODELMATRIX + 1, 4, GL_FLOAT, false, sizeof(math::mat4), 1 * sizeof(math::mat4::col_type), true);
-                            modelHandle.buffer_data(*modelMatrixBuffer, SV_MODELMATRIX + 2, 4, GL_FLOAT, false, sizeof(math::mat4), 2 * sizeof(math::mat4::col_type), true);
-                            modelHandle.buffer_data(*modelMatrixBuffer, SV_MODELMATRIX + 3, 4, GL_FLOAT, false, sizeof(math::mat4), 3 * sizeof(math::mat4::col_type), true);
+                            modelHandle.write_buffer(*modelMatrixBuffer, SV_MODELMATRIX + 0, 4, GL_FLOAT, false, sizeof(math::mat4), 0 * sizeof(math::mat4::col_type), true);
+                            modelHandle.write_buffer(*modelMatrixBuffer, SV_MODELMATRIX + 1, 4, GL_FLOAT, false, sizeof(math::mat4), 1 * sizeof(math::mat4::col_type), true);
+                            modelHandle.write_buffer(*modelMatrixBuffer, SV_MODELMATRIX + 2, 4, GL_FLOAT, false, sizeof(math::mat4), 2 * sizeof(math::mat4::col_type), true);
+                            modelHandle.write_buffer(*modelMatrixBuffer, SV_MODELMATRIX + 3, 4, GL_FLOAT, false, sizeof(math::mat4), 3 * sizeof(math::mat4::col_type), true);
 
-                            modelHandle.buffer_data(*entityIdBuffer, SV_ENTITYID, 2, GL_UNSIGNED_INT, false, 0, 0, true);
+                            modelHandle.write_buffer(*entityIdBuffer, SV_ENTITYID, 2, GL_UNSIGNED_INT, false, 0, 0, true);
                         }
 
 
@@ -262,12 +264,12 @@ namespace legion::rendering
                 if (!mesh.buffered)
                 {
                     modelHandle.init_model_data();
-                    modelHandle.buffer_data(*modelMatrixBuffer, SV_MODELMATRIX + 0, 4, GL_FLOAT, false, sizeof(math::mat4), 0 * sizeof(math::mat4::col_type), true);
-                    modelHandle.buffer_data(*modelMatrixBuffer, SV_MODELMATRIX + 1, 4, GL_FLOAT, false, sizeof(math::mat4), 1 * sizeof(math::mat4::col_type), true);
-                    modelHandle.buffer_data(*modelMatrixBuffer, SV_MODELMATRIX + 2, 4, GL_FLOAT, false, sizeof(math::mat4), 2 * sizeof(math::mat4::col_type), true);
-                    modelHandle.buffer_data(*modelMatrixBuffer, SV_MODELMATRIX + 3, 4, GL_FLOAT, false, sizeof(math::mat4), 3 * sizeof(math::mat4::col_type), true);
+                    modelHandle.write_buffer(*modelMatrixBuffer, SV_MODELMATRIX + 0, 4, GL_FLOAT, false, sizeof(math::mat4), 0 * sizeof(math::mat4::col_type), true);
+                    modelHandle.write_buffer(*modelMatrixBuffer, SV_MODELMATRIX + 1, 4, GL_FLOAT, false, sizeof(math::mat4), 1 * sizeof(math::mat4::col_type), true);
+                    modelHandle.write_buffer(*modelMatrixBuffer, SV_MODELMATRIX + 2, 4, GL_FLOAT, false, sizeof(math::mat4), 2 * sizeof(math::mat4::col_type), true);
+                    modelHandle.write_buffer(*modelMatrixBuffer, SV_MODELMATRIX + 3, 4, GL_FLOAT, false, sizeof(math::mat4), 3 * sizeof(math::mat4::col_type), true);
 
-                    modelHandle.buffer_data(*entityIdBuffer, SV_ENTITYID, 2, GL_UNSIGNED_INT, false, 0, 0, true);
+                    modelHandle.write_buffer(*entityIdBuffer, SV_ENTITYID, 2, GL_UNSIGNED_INT, false, 0, 0, true);
                 }
 
                 if (mesh.submeshes.empty())
@@ -295,6 +297,9 @@ namespace legion::rendering
             material.release();
         }
         fbo->release();
+
+        //watch.end();
+        //log::debug("Mesh render Stage elapsed time:  {}ms", watch.elapsed_time().milliseconds());
     }
 
     priority_type MeshRenderStage::priority()

@@ -118,6 +118,7 @@ namespace legion::rendering
             return;
         }
 
+
         fbo->bind();
 
         for (auto [material, instancesPerMaterial] : *batches)
@@ -166,10 +167,10 @@ namespace legion::rendering
                 if (!mesh.buffered)//Binds the modelMatrixBuffer to the modelHandles data
                 {
                     modelHandle.init_model_data();
-                    modelHandle.buffer_data(*positionBuffer, SV_PPOSITION, 3, GL_FLOAT, false, 0, 0, true);
-                    modelHandle.buffer_data(*orientationBuffer, SV_PORIENTATION, 4, GL_FLOAT, false, 0, 0, true);
-                    modelHandle.buffer_data(*scaleBuffer, SV_PSCALE, 3, GL_FLOAT, false, 0, 0, true);
-                    modelHandle.buffer_data(*flipbookBuffer, SV_FRAMEID, 1, GL_FLOAT, false, 0, 0, true);
+                    modelHandle.write_buffer(*positionBuffer, SV_TEXCOORD1, 3, GL_FLOAT, false, sizeof(float) * 4, 0, true);
+                    modelHandle.write_buffer(*orientationBuffer, SV_TEXCOORD2, 4, GL_FLOAT, false, sizeof(float) * 4, 0, true);
+                    modelHandle.write_buffer(*scaleBuffer, SV_TEXCOORD3, 3, GL_FLOAT, false, sizeof(float) * 4, 0, true);
+                    modelHandle.write_buffer(*flipbookBuffer, SV_FRAMEID, 1, GL_FLOAT, false, sizeof(float), 0, true);
                 }
 
                 if (mesh.submeshes.empty())
@@ -178,9 +179,6 @@ namespace legion::rendering
                     continue;
                 }
 
-                //positionBuffer->bufferData();
-                //orientationBuffer->bufferData();
-                //scaleBuffer->bufferData();
                 flipbookBuffer->bufferData(instances);
 
                 {
@@ -252,19 +250,19 @@ namespace legion::rendering
                 if (!mesh.buffered)//Binds the modelMatrixBuffer to the modelHandles data
                 {
                     modelHandle.init_model_data();
-                    modelHandle.buffer_data(*positionBuffer, SV_PPOSITION, 3, GL_FLOAT, false, 0, 0, true);
-                    modelHandle.buffer_data(*orientationBuffer, SV_PORIENTATION, 4, GL_FLOAT, false, 0, 0, true);
-                    modelHandle.buffer_data(*scaleBuffer, SV_PSCALE, 3, GL_FLOAT, false, 0, 0, true);
-                    modelHandle.buffer_data(*flipbookBuffer, SV_FRAMEID, 1, GL_FLOAT, false, 0, 0, true);
+                    modelHandle.write_buffer(*positionBuffer, SV_TEXCOORD1, 3, GL_FLOAT, false, sizeof(float) * 4, 0, true);
+                    modelHandle.write_buffer(*orientationBuffer, SV_TEXCOORD2, 4, GL_FLOAT, false, sizeof(float) * 4, 0, true);
+                    modelHandle.write_buffer(*scaleBuffer, SV_TEXCOORD3, 3, GL_FLOAT, false, sizeof(float) * 4, 0, true);
+                    modelHandle.write_buffer(*flipbookBuffer, SV_FRAMEID, 1, GL_FLOAT, false, sizeof(float), 0, true);
                 }
+
+                flipbookBuffer->bufferData(instances);
 
                 if (mesh.submeshes.empty())
                 {
                     log::warn("Empty mesh found. Model name: {},  Model ID {}", modelName, modelHandle.get_mesh().id());
                     continue;
                 }
-
-                flipbookBuffer->bufferData(instances);
 
                 {
                     mesh.vertexArray.bind();
@@ -278,6 +276,7 @@ namespace legion::rendering
                     mesh.indexBuffer.release();
                     mesh.vertexArray.release();
                 }
+
             }
             material.release();
             if (material != m_defaultDepthOnlyMaterial)

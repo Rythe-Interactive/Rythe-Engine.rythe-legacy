@@ -22,8 +22,8 @@ namespace legion::core
     void ParticleSystem::update(time::span deltaTime)
     {
         ecs::filter<particle_emitter> filter;
-        core::time::stopwatch watch;
-        watch.start();
+        //core::time::stopwatch watch;
+        //watch.start();
         for (auto& ent : filter)
         {
             auto& emitter = ent.get_component<particle_emitter>().get();
@@ -52,7 +52,7 @@ namespace legion::core
 
             maintenance(emitter, deltaTime);
         }
-        watch.end();
+        //watch.end();
         //log::debug("Particle System elapsed time:  {}ms", watch.elapsed_time().milliseconds());
         //log::debug("");
     }
@@ -68,6 +68,9 @@ namespace legion::core
         auto startCount = emitter.m_particleCount;
         if (emitter.m_particleCount + count >= emitter.m_capacity)
             count = emitter.m_capacity - startCount;
+
+        //core::time::stopwatch watch;
+        //watch.start();
 
         id_type ageBufferId = nameHash("lifetimeBuffer");
         auto& ageBuffer = emitter.has_buffer<life_time>(ageBufferId) ? emitter.get_buffer<life_time>(ageBufferId) : emitter.create_buffer<life_time>("lifetimeBuffer");
@@ -86,6 +89,8 @@ namespace legion::core
 
         for (auto& policy : emitter.m_particlePolicies)
             policy->onInit(emitter, startCount, emitter.m_particleCount);
+        //watch.end();
+        //log::debug("Particle Emit elapsed time: {}ms", watch.elapsed_time().milliseconds());
     }
 
 
@@ -93,6 +98,9 @@ namespace legion::core
     {
         if (emitter.m_particleCount == 0)
             return;
+
+        //core::time::stopwatch watch;
+        //watch.start();
         auto& ageBuffer = emitter.get_buffer<life_time>("lifetimeBuffer");
 
         size_type destroyed = 0;
@@ -123,5 +131,8 @@ namespace legion::core
 
         for (auto& policy : emitter.m_particlePolicies)
             policy->onUpdate(emitter, deltaTime, emitter.m_particleCount);
+
+        //watch.end();
+        //log::debug("Particle Maintenance elapsed time: {}ms", watch.elapsed_time().milliseconds());
     }
 }

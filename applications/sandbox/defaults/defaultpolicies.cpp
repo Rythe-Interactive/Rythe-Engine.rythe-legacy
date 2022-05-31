@@ -63,6 +63,13 @@ namespace legion::core
 
         if (!emitter.has_buffer<math::vec4>("velBuffer"))
             emitter.create_buffer<math::vec4>("velBuffer");
+
+        //if (!emitter.has_uniform<compute::inout<std::vector<math::vec4>>>("ioPosBuffer"))
+        //    emitter.create_uniform<compute::inout<std::vector<math::vec4>>>("ioPosBuffer");
+
+        //if (!emitter.has_uniform<compute::inout<std::vector<math::vec4>>>("ioVelBuffer"))
+        //    emitter.create_uniform<compute::inout<std::vector<math::vec4>>>("ioVelBuffer");
+
     }
     void gpu_particle_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
     {
@@ -85,12 +92,13 @@ namespace legion::core
         auto& init_position = emitter.get_uniform<compute::function>("initPos");
         init_position(paddedSize, compute::inout(posBuffer, "A"), compute::karg(_start, "start"), compute::karg(count, "count"));
 
-        rotation dir = rotation::lookat(math::vec3(0.f), math::vec3::forward);
+        rotation dir = rotation::lookat(math::vec3(0.f), math::vec3::backward);
         auto& init_rotation = emitter.get_uniform<compute::function>("initRot");
         init_rotation(paddedSize, compute::inout(rotBuffer, "A"), compute::karg(dir, "direction"), compute::karg(_start, "start"), compute::karg(count, "count"));
 
         auto& init_scale = emitter.get_uniform<compute::function>("initScale");
         init_scale(paddedSize, compute::inout(scaleBuffer, "A"), compute::karg(_start, "start"), compute::karg(count, "count"));
+
     }
     void gpu_particle_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
     {
@@ -101,10 +109,10 @@ namespace legion::core
         auto& posBuffer = emitter.get_buffer<math::vec4>("posBuffer");
         auto& velBuffer = emitter.get_buffer<math::vec4>("velBuffer");
 
-        //auto paddedSize = math::max(((count - 1) | 15) + 1, 16ull);
+        auto paddedSize = math::max(((count - 1) | 15) + 1, 16ull);
 
         //auto& vector_add = emitter.get_uniform<compute::function>("vadd");
-        //vector_add(paddedSize, compute::in(posBuffer), compute::in(velBuffer), compute::out(posBuffer), compute::karg(deltaTime, "dt"));
+        //vector_add(paddedSize, ioPosBuffer, ioVelBuffer, ioPosBuffer, compute::karg(deltaTime, "dt"));
     }
 #pragma endregion
 #pragma region Orbital Policy

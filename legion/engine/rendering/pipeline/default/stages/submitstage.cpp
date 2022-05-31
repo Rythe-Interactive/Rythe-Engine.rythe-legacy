@@ -35,6 +35,8 @@ namespace legion::rendering
     {
         (void)deltaTime;
         (void)camInput;
+        //core::time::stopwatch watch;
+        //watch.start();
 
         static id_type mainId = nameHash("main");
 
@@ -87,6 +89,8 @@ namespace legion::rendering
         glEnable(GL_DEPTH_TEST);
         m_screenShader.release();
         cam.renderTarget.release();
+        //watch.end();
+        //log::debug("Submit Stage elapsed time:  {}ms", watch.elapsed_time().milliseconds());
     }
 
     priority_type SubmitStage::priority()

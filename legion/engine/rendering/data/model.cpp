@@ -20,9 +20,9 @@ namespace legion::rendering
         ModelCache::init_buffer_model(id/*, matrixBuffer, entityBuffer,flipbookBuffer*/);
     }
 
-    void model_handle::buffer_data(const buffer& buffer, uint index, size_type size, GLenum type, bool normalized, size_type stride, size_type offset, bool perInstance) const
+    void model_handle::write_buffer(const buffer& buffer, uint index, size_type size, GLenum type, bool normalized, size_type stride, size_type offset, bool perInstance) const
     {
-        ModelCache::init_buffer(id, buffer, index, size, type, normalized, stride, offset, perInstance);
+        ModelCache::write_buffer(id, buffer, index, size, type, normalized, stride, offset, perInstance);
     }
 
     void model_handle::overwrite_buffer(buffer& newBuffer, uint bufferID, bool perInstance) const
@@ -75,7 +75,7 @@ namespace legion::rendering
         }
     }
 
-    void ModelCache::init_buffer(id_type id, const buffer& buffer, uint index, size_type size, GLenum type, bool normalized, size_type stride, size_type offset, bool perInstance)
+    void ModelCache::write_buffer(id_type id, const buffer& buffer, uint index, size_type size, GLenum type, bool normalized, size_type stride, size_type offset, bool perInstance)
     {
         if (id == invalid_id)
             return;

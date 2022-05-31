@@ -85,7 +85,6 @@ public:
     void onGetCamera(time::span)
     {
         static ecs::filter<gfx::camera> query{};
-
         if (query.size())
         {
             camera = query[0];

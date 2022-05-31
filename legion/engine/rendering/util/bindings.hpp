@@ -17,12 +17,12 @@
 /* in 8  */  #define SV_ENTITYID       SV_TANGENT + 1
 /* in 9  */  #define SV_FRAMEID         SV_ENTITYID+ 1
 /* in 10  */  #define SV_MODELMATRIX    SV_FRAMEID + 1
-/* in 11  */  #define SV_PPOSITION    SV_MODELMATRIX + 1
-/* in 12  */  #define SV_PORIENTATION    SV_PPOSITION + 1
-/* in 13  */  #define SV_PSCALE    SV_PORIENTATION + 1
+///* in 11  */  #define SV_PPOSITION    SV_MODELMATRIX + 1
+///* in 12  */  #define SV_PORIENTATION    SV_PPOSITION + 1
+///* in 13  */  #define SV_PSCALE    SV_PORIENTATION + 1
 
 
-/* uniform 10  */  #define SV_VIEW           SV_PSCALE + 1
+/* uniform 10  */  #define SV_VIEW           SV_MODELMATRIX + 1
 /* uniform 11 */  #define SV_PROJECT        SV_VIEW + 1
 /* uniform 12 */  #define SV_CAMPOS         SV_PROJECT + 1
 /* uniform 13 */  #define SV_VIEWDIR        SV_CAMPOS + 1
@@ -73,9 +73,6 @@ namespace legion::rendering::detail
             defines.push_back("SV_ENTITYID=" + std::to_string(SV_ENTITYID));
             defines.push_back("SV_FRAMEID=" + std::to_string(SV_FRAMEID));
             defines.push_back("SV_MODELMATRIX=" + std::to_string(SV_MODELMATRIX));
-            defines.push_back("SV_PPOSITION=" + std::to_string(SV_PPOSITION));
-            defines.push_back("SV_PORIENTATION=" + std::to_string(SV_PORIENTATION));
-            defines.push_back("SV_PSCALE=" + std::to_string(SV_PSCALE));
 
             defines.push_back("SV_VIEW=" + std::to_string(SV_VIEW));
             defines.push_back("SV_PROJECT=" + std::to_string(SV_PROJECT));

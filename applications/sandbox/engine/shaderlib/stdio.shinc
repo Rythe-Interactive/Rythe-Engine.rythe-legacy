@@ -16,10 +16,10 @@ in vec4 vertexcolor : SV_COLOR;
 in vec2 uv : SV_TEXCOORD0;
 in uint64_t entityId : SV_ENTITYID;
 in float frameID : SV_FRAMEID;
+in vec3 p_position : SV_TEXCOORD1;
+in vec4 p_orientation : SV_TEXCOORD2;
+in vec3 p_scale : SV_TEXCOORD3;
 in mat4 modelMatrix : SV_MODELMATRIX;
-in vec3 p_position : SV_PPOSITION;
-in vec4 p_orientation : SV_PORIENTATION;
-in vec3 p_scale : SV_PSCALE;
 #endif
 
 // Define standard io keyword so that we can auto detect whether it should be input or output.
@@ -54,9 +54,7 @@ io LGN_STDIO
     flat uint64_t entityId;
     float frameID;
     mat4 modelMatrix;
-    vec3 p_position;
-    vec4 p_orientation;
-    vec3 p_scale;
+
 }
 #if defined(GEOMETRY_SHADER)
 lgn_stdin[LGN_geom_vtxc];
@@ -79,9 +77,6 @@ out LGN_STDGEOMFRAG
     flat uint64_t entityId;
     float frameID;
     mat4 modelMatrix;
-    vec3 p_position;
-    vec4 p_orientation;
-    vec3 p_scale;
 } lgn_stdout;
 #endif
 
@@ -521,12 +516,12 @@ mat4 Compose(vec3 position, vec4 orientation, vec3 scale)
     vec4 localZ = vec4(rotZ*scale.z,0.0);
     vec4 localW = vec4(position,1.0);
 
-    mat4 modelMatrix;
-    modelMatrix[0] = localX;
-    modelMatrix[1] = localY;
-    modelMatrix[2] = localZ;
-    modelMatrix[3] = localW;
-    return modelMatrix;
+    mat4 _modelMatrix;
+    _modelMatrix[0] = localX;
+    _modelMatrix[1] = localY;
+    _modelMatrix[2] = localZ;
+    _modelMatrix[3] = localW;
+    return _modelMatrix;
 }
 
 #if defined(VERTEX_SHADER)
@@ -543,9 +538,6 @@ void PropagateStdIO()
     lgn_stdio.entityId = entityId;
     lgn_stdio.frameID = frameID;
     lgn_stdio.modelMatrix = modelMatrix;
-    lgn_stdio.p_position = p_position;
-    lgn_stdio.p_orientation = p_orientation;
-    lgn_stdio.p_scale = p_scale;
 }
 
 void PropagateStdIO(vec3 worldPosition, vec3 worldNormal)
@@ -561,9 +553,6 @@ void PropagateStdIO(vec3 worldPosition, vec3 worldNormal)
     lgn_stdio.entityId = entityId;
     lgn_stdio.frameID = frameID;
     lgn_stdio.modelMatrix = modelMatrix;
-    lgn_stdio.p_position = p_position;
-    lgn_stdio.p_orientation = p_orientation;
-    lgn_stdio.p_scale = p_scale;
 }
 #elif defined(GEOMETRY_SHADER)
 void PropagateStdIO(int index)
@@ -579,8 +568,5 @@ void PropagateStdIO(int index)
     stdout(entityId) = stdin(index, entityId);
     stdout(frameID) = stdin(index, frameID);
     stdout(modelMatrix) = stdin(index, modelMatrix);
-    stdout(p_position) = stdin(index, p_position);
-    stdout(p_orientation) = stdin(index, p_orientation);
-    stdout(p_scale) = stdin(index, p_scale);
 }
 #endif

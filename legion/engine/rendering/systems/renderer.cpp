@@ -379,8 +379,10 @@ namespace legion::rendering
         if (!m_pipelineProvider)
             return;
 
-        static ecs::filter<camera> cameraQuery{};
 
+        static ecs::filter<camera> cameraQuery{};
+        //core::time::stopwatch watch;
+        //watch.start();
         for (auto ent : cameraQuery)
         {
             camera& cam = ent.get_component<camera>();
@@ -425,6 +427,9 @@ namespace legion::rendering
                 m_currentPipeline->render(win, cam, cam_input_data, deltatime);
             }
         }
+
+        //watch.end();
+        //log::debug("Render System elapsed time:  {}ms", watch.elapsed_time().milliseconds());
     }
 
     L_NODISCARD RenderPipelineBase* Renderer::getPipeline(app::window& context)

@@ -12,9 +12,9 @@ void ExampleSystem::setup()
     log::filter(log::severity_debug);
     log::debug("ExampleSystem setup");
 
-    auto* pipeline = dynamic_cast<gfx::DefaultPipeline*>(gfx::Renderer::getMainPipeline());
-    if (pipeline)
-        pipeline->attachStage<MouseHover>();
+    //auto* pipeline = dynamic_cast<gfx::DefaultPipeline*>(gfx::Renderer::getMainPipeline());
+    //if (pipeline)
+    //    pipeline->attachStage<MouseHover>();
 
     app::window& win = ecs::world.get_component<app::window>();
     app::context_guard guard(win);
@@ -308,16 +308,16 @@ void ExampleSystem::setup()
     ent.add_component<transform>();
 
     auto emitter = ent.add_component<particle_emitter>();
-    emitter->set_spawn_rate(1024);
+    emitter->set_spawn_rate(10000);
     emitter->set_spawn_interval(.02f);
     ////emitter->create_uniform<float>("minLifeTime") = 5.f;
     ////emitter->create_uniform<float>("maxLifeTime") = 5.f;
     ////emitter->create_uniform<int>("frameCount", 9);
-    emitter->resize(500000);
+    emitter->resize(500);
     ////emitter->add_policy<scale_lifetime_policy>();
     emitter->add_policy<gpu_particle_policy>();
     material = gfx::MaterialCache::create_material("Particle", fs::view("assets://shaders/particle.shs"));
-    material.set_param("animated", false);
+    //material.set_param("animated", false);
     material.set_param("useSolidColor", true);
     material.set_param("_color", math::colors::green);
     material.set_param("useTexture", false);

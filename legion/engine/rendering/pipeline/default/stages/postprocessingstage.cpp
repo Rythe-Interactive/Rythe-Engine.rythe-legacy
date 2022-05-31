@@ -26,6 +26,9 @@ namespace legion::rendering
 
     void PostProcessingStage::render(app::window& context, camera& cam, const camera::camera_input& camInput, time::span deltaTime)
     {
+
+        //core::time::stopwatch watch;
+        //watch.start();
         static id_type mainId = nameHash("main");
 
         auto fbo = getFramebuffer(mainId);
@@ -91,6 +94,8 @@ namespace legion::rendering
         rendering::shader::release();
 
         glEnable(GL_DEPTH_TEST);
+        //watch.end();
+        //log::debug("Post Processing Stage elapsed time:  {}ms", watch.elapsed_time().milliseconds());
     }
 
     priority_type PostProcessingStage::priority()

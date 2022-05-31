@@ -16,6 +16,8 @@ namespace legion::rendering
         auto* batches = get_meta< sparse_map < material_handle, sparse_map < model_handle, std::vector<float>>>>(batchesId);
         static ecs::filter<particle_emitter> emitterFilter;
 
+        //core::time::stopwatch watch;
+        //watch.start();
         {
             for (auto [material, models] : *batches)
                 for (auto [model, batch] : models)
@@ -31,8 +33,6 @@ namespace legion::rendering
             return;
         }
 
-        //core::time::stopwatch watch;
-        //watch.start();
         for (auto& ent : emitterFilter)
         {
             auto& emitter = ent.get_component<particle_emitter>().get();

@@ -1,4 +1,5 @@
 #include <rendering/pipeline/default/postfx/tonemapping.hpp>
+#include <rendering/pipeline/base/pipelinebase.hpp>
 
 namespace legion::rendering
 {
@@ -73,7 +74,11 @@ namespace legion::rendering
         auto doAutoExposure = m_autoExposure.load(std::memory_order_relaxed);
         static bool firstFrame = true;
         static id_type historyMetaId = nameHash("scene color history");
-        texture_handle* historyTexture = pipeline->get_meta<texture_handle>(historyMetaId);
+        texture_handle* historyTexture = nullptr;
+        //if (pipeline->has_meta<texture_handle>(historyMetaId))
+        //    historyTexture = pipeline->get_meta<texture_handle>(historyMetaId);
+        //else
+        //    historyTexture = pipeline->create_meta<texture_handle>(historyMetaId);
 
         if (doAutoExposure)
         {

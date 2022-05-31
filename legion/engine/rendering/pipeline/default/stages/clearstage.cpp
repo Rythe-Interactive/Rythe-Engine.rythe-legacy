@@ -13,6 +13,9 @@ namespace legion::rendering
         (void)deltaTime;
         (void)camInput;
 
+        //core::time::stopwatch watch;
+        //watch.start();
+
         static id_type mainId = nameHash("main");
 
         auto fbo = getFramebuffer(mainId);
@@ -52,6 +55,8 @@ namespace legion::rendering
         glDrawBuffers(4, attachments);
 
         fbo->release();
+        //watch.end();
+        //log::debug("Clear Stage elapsed time: {}ms",watch.elapsed_time().milliseconds());
     }
 
     priority_type ClearStage::priority()

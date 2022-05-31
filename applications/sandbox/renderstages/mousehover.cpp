@@ -71,6 +71,9 @@ void MouseHover::render(app::window& context, gfx::camera& cam, const gfx::camer
         return;
     }
 
+    //core::time::stopwatch watch;
+    //watch.start();
+
     auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<id_type>, std::vector<math::mat4>>>>>(batchesId);
     if (!batches)
         return;
@@ -211,12 +214,12 @@ void MouseHover::render(app::window& context, gfx::camera& cam, const gfx::camer
             if (!mesh.buffered)
             {
                 modelHandle.init_model_data();
-                modelHandle.buffer_data(*modelMatrixBuffer, SV_MODELMATRIX + 0, 4, GL_FLOAT, false, sizeof(math::mat4), 0 * sizeof(math::mat4::col_type), true);
-                modelHandle.buffer_data(*modelMatrixBuffer, SV_MODELMATRIX + 1, 4, GL_FLOAT, false, sizeof(math::mat4), 1 * sizeof(math::mat4::col_type), true);
-                modelHandle.buffer_data(*modelMatrixBuffer, SV_MODELMATRIX + 2, 4, GL_FLOAT, false, sizeof(math::mat4), 2 * sizeof(math::mat4::col_type), true);
-                modelHandle.buffer_data(*modelMatrixBuffer, SV_MODELMATRIX + 3, 4, GL_FLOAT, false, sizeof(math::mat4), 3 * sizeof(math::mat4::col_type), true);
+                modelHandle.write_buffer(*modelMatrixBuffer, SV_MODELMATRIX + 0, 4, GL_FLOAT, false, sizeof(math::mat4), 0 * sizeof(math::mat4::col_type), true);
+                modelHandle.write_buffer(*modelMatrixBuffer, SV_MODELMATRIX + 1, 4, GL_FLOAT, false, sizeof(math::mat4), 1 * sizeof(math::mat4::col_type), true);
+                modelHandle.write_buffer(*modelMatrixBuffer, SV_MODELMATRIX + 2, 4, GL_FLOAT, false, sizeof(math::mat4), 2 * sizeof(math::mat4::col_type), true);
+                modelHandle.write_buffer(*modelMatrixBuffer, SV_MODELMATRIX + 3, 4, GL_FLOAT, false, sizeof(math::mat4), 3 * sizeof(math::mat4::col_type), true);
 
-                modelHandle.buffer_data(*entityIdBuffer, SV_ENTITYID, 2, GL_UNSIGNED_INT, false, 0, 0, true);
+                modelHandle.write_buffer(*entityIdBuffer, SV_ENTITYID, 2, GL_UNSIGNED_INT, false, 0, 0, true);
             }
 
             if (mesh.submeshes.empty())
@@ -271,6 +274,8 @@ void MouseHover::render(app::window& context, gfx::camera& cam, const gfx::camer
     id_type b = static_cast<id_type>(math::iround<float, int64>(hoveredColor.b * 65535.f));
     id_type a = static_cast<id_type>(math::iround<float, int64>(hoveredColor.a * 65535.f));
     m_hoveredEntityId = r | (g << 16ull) | (b << 32ull) | (a << 48ull);
+    //watch.end();
+    //log::debug("MouseOver elapsed time:  {}ms", watch.elapsed_time().milliseconds());
 }
 
 priority_type MouseHover::priority()

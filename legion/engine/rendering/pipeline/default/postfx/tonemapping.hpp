@@ -1,6 +1,6 @@
 #pragma once
 #include <rendering/data/postprocessingeffect.hpp>
-#include <rendering/util/bindings.hpp>
+
 
 namespace legion::rendering
 {
