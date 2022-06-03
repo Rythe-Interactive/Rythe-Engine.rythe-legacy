@@ -7,6 +7,7 @@ namespace legion::physics
 {
     static ecs::entity triggerCharacterBlockDynamic;
     static ecs::entity triggerCharacterTriggerDynamic;
+    static ecs::entity triggerStayDynamic;
 
     static size_type glassMask = 0;
     static size_type bulletProofMask = 1;
@@ -108,6 +109,20 @@ namespace legion::physics
 
     void PhysXTestSystem::update(legion::time::span deltaTime)
     {
+        static float wait = 5.0f;
+        static float currentWait = 0.0f;
+
+        if (currentWait > wait)
+        {
+            MoveCharacter(math::vec3(0.0f, 0, -1 * deltaTime));
+        }
+        else
+        {
+            currentWait += deltaTime;
+        }
+
+      
+
         float speed = 5.0f * deltaTime;
 
         if (moveBools[move_dir::forward])
@@ -263,29 +278,9 @@ namespace legion::physics
 
        OverlapHit allOverlap;
        PhysicsHelpers::checkSphereOverlap(5, math::vec3(45.5, 0.5, 0), math::identity<math::quat>(),
-           allOverlap, overlapAllMask);
+           allOverlap);
 
        logOverlapHit(allOverlap);
-
-       /* std::cout << "---------------------- overlap with mask 0 ----------------------" << std::endl;
-
-        PxU32 oneMask = setupRaycastMask(gOverlapOneMask);
-        overlap(PxBoxGeometry(5.0f, 5.0f, 5.0f), PxVec3(45.5f, 0.5f, 0), oneMask);
-
-        std::cout << "---------------------- overlap with mask 1 ----------------------" << std::endl;
-
-        PxU32 twoMask = setupRaycastMask(gOverlapTwoMask);
-        overlap(PxSphereGeometry(5.0f), PxVec3(45.5f, 0.5f, 0), twoMask);
-
-        std::cout << "---------------------- overlap with mask 2 ----------------------" << std::endl;
-
-        PxU32 threeMask = setupRaycastMask(gOverlapThreeMask);
-        overlap(PxBoxGeometry(5.0f, 5.0f, 5.0f), PxVec3(45.5f, 0.5f, 0), threeMask);
-
-        std::cout << "---------------------- overlap all ----------------------" << std::endl;
-
-        PxU32 allOverlapMask = setupRaycastMask(gOverlapThreeMask, true);
-        overlap(PxBoxGeometry(5.0f, 5.0f, 5.0f), PxVec3(45.5f, 0.5f, 0), allOverlapMask);*/
     }
 
     void PhysXTestSystem::setupCubeWorldTestScene()
@@ -450,16 +445,11 @@ namespace legion::physics
     void PhysXTestSystem::setupCollisionFilteringScene()
     {
         //setup character controller
-        m_characterControllerEnt = createDefaultMeshEntity({ 0,2.0,10 }, sphereH, concreteMat);
+        m_characterControllerEnt = createDefaultMeshEntity({ 0,2.0,5 }, sphereH, concreteMat);
         m_characterControllerEnt->name = "controller";
 
         auto& capsuleCont = *m_characterControllerEnt.add_component<capsule_controller>();
         CapsuleControllerData& capsule = capsuleCont.data;
-
-        gravity_preset gravity;
-        gravity.gravityValue = math::vec3(0.0f, -0.98f, 0.0f);
-        //gravity.gravityAcc = math::vec3(0.0f);
-        capsule.addPreset(gravity);
 
         rigidbody_force_feedback force_feedback;
         force_feedback.forceAmount = 1000.0f;
@@ -479,37 +469,43 @@ namespace legion::physics
         auto scaleAndAddPhysicsComp = [](ecs::entity ent)->physics_component&
         {
             auto& physicsComp = *ent.add_component<physics_component>();
-            physicsComp.physicsCompData.AddBoxCollider({ 5.0f,1.0f,1.0f });
-            *ent.get_component<scale>() = math::vec3{ 5.0f,1.0f,1.0f };
+            physicsComp.physicsCompData.AddBoxCollider({ 10.0f,2.0f,2.0f });
+            *ent.get_component<scale>() = math::vec3{ 10.0f,2.0f,2.0f };
 
             return physicsComp;
         };
 
         //setup invisible wall
-        triggerCharacterBlockDynamic = createDefaultMeshEntity({ 0, 0.5f, 0 }, cubeH, concreteMat); triggerCharacterBlockDynamic->name = "firstWall";
+        triggerCharacterBlockDynamic = createDefaultMeshEntity({ 0, 1.0f, 0 }, cubeH, concreteMat); triggerCharacterBlockDynamic->name = "firstWall";
         physics_component& invisibleWall = scaleAndAddPhysicsComp(triggerCharacterBlockDynamic);
 
         invisibleWall.physicsCompData.setAllColliderReactionToObject(physics_object_flag::po_character_controller, physics_object_reaction::reaction_overlap);
 
         //setup trigger wall
-        triggerCharacterTriggerDynamic = createDefaultMeshEntity({ 0, 0.5f, -5 }, cubeH, concreteMat); triggerCharacterTriggerDynamic->name = "triggerWall";
+        triggerCharacterTriggerDynamic = createDefaultMeshEntity({ 0, 1.0f, -5 }, cubeH, concreteMat); triggerCharacterTriggerDynamic->name = "triggerWall";
         physics_component& triggerWall = scaleAndAddPhysicsComp(triggerCharacterTriggerDynamic);
 
         triggerWall.physicsCompData.setAllColliderReactionToObject(physics_object_flag::po_character_controller, physics_object_reaction::reaction_overlap);
         triggerWall.physicsCompData.setAllColliderReactionToObject(physics_object_flag::po_dynamic, physics_object_reaction::reaction_overlap);
 
         //setup third block
-        auto blockCharacterBlockDynamic = createDefaultMeshEntity({ 0, 0.5f, -10 }, cubeH, concreteMat); blockCharacterBlockDynamic->name = "thirdWall";
+        auto blockCharacterBlockDynamic = createDefaultMeshEntity({ 0, 1.0f, -10 }, cubeH, concreteMat); blockCharacterBlockDynamic->name = "thirdWall";
         physics_component& thirdBlock = scaleAndAddPhysicsComp(blockCharacterBlockDynamic);
 
         setupCharacterMoveBindings();
 
         bindToEvent<on_trigger_enter, &PhysXTestSystem::triggerEnterEvent>();
+        bindToEvent<on_trigger_stay, &PhysXTestSystem::triggerStayEvent>();
         bindToEvent<on_trigger_exit, &PhysXTestSystem::triggerExitEvent>();
+       
     }
 
     void PhysXTestSystem::setupSceneQueryScene()
     {
+        auto groundPlane = createEntity(); groundPlane->name = "plane";
+        auto& enviromentComp = *groundPlane.add_component<physics_enviroment>();
+        enviromentComp.data.instantiateInfinitePlane(math::vec3(0, 1, 0), 0);
+
         //create four walls for raycast
 
         auto glassWall = createStaticColliderWall(math::vec3(15, 3, 0), legionLogoMat, math::vec3(4.0f, 6.0f, 2.0f));
@@ -696,15 +692,49 @@ namespace legion::physics
 
         if (first == m_characterControllerEnt && second == triggerCharacterBlockDynamic)
         {
-            auto left = createDefaultMeshEntity({ -2, 10.f, -5 }, sphereH, concreteMat);
-            left.add_component<physics_component>()->physicsCompData.AddSphereCollider(0.5f,{});
-            left.add_component<rigidbody>();
-
-
-            auto right =createDefaultMeshEntity({ 2, 10.f, -5 }, sphereH, concreteMat);
-            right.add_component<physics_component>()->physicsCompData.AddSphereCollider(0.5f, {});
+            auto right =createDefaultMeshEntity({ 2, 8.f, -6 }, sphereH, concreteMat);
+            *right.get_component<scale>() = math::vec3(2.0f);
+            right.add_component<physics_component>()->physicsCompData.AddSphereCollider(1.0f, {});
             right.add_component<rigidbody>();
+
+            triggerStayDynamic = right;
         }
+
+    }
+
+    void PhysXTestSystem::triggerStayEvent(on_trigger_stay& triggerStay)
+    {
+        auto spawnSphereFunc = [this]()
+        {
+            static float z = 0;
+
+            auto sphere = createDefaultMeshEntity(math::vec3(-15, 5, z), sphereH, legionLogoMat);
+
+            sphere.add_component<physics_component>()->physicsCompData.AddSphereCollider(0.5f, math::vec3(0));
+            sphere.add_component<rigidbody>();
+            z -= 1.0f;
+        };
+
+        ecs::entity first = triggerStay.collision.firstEntity;
+        ecs::entity second = triggerStay.collision.secondEntity;
+
+        bool colWithTriggerStay = first == triggerStayDynamic || second == triggerStayDynamic;
+
+        if (colWithTriggerStay)
+        {
+            float velMag = math::length(triggerStayDynamic.get_component<rigidbody>()->data.getVelocity());
+
+           if (velMag != 0.0f)
+           {
+               spawnSphereFunc();
+           }
+        }
+    }
+
+    void PhysXTestSystem::triggerExitEvent(on_trigger_exit& triggerExit)
+    {
+        ecs::entity first = triggerExit.collision.firstEntity;
+        ecs::entity second = triggerExit.collision.secondEntity;
 
         bool firstHasRB = first.has_component<rigidbody>();
         bool secondHasRB = second.has_component<rigidbody>();
@@ -717,33 +747,31 @@ namespace legion::physics
         {
             firstTimeTrigger = false;
             {
-                auto left = createDefaultMeshEntity({ -2, 10.f, 0 }, sphereH, concreteMat);
-                left.add_component<physics_component>()->physicsCompData.AddSphereCollider(0.5f, {});
+                auto left = createDefaultMeshEntity({ -2, 5.f, 0 }, sphereH, concreteMat);
+                *left.get_component<scale>() = math::vec3(2.0f);
+                left.add_component<physics_component>()->physicsCompData.AddSphereCollider(1.0f, {});
                 left.add_component<rigidbody>();
 
 
-                auto right = createDefaultMeshEntity({ 2, 10.f, 0 }, sphereH, concreteMat);
-                right.add_component<physics_component>()->physicsCompData.AddSphereCollider(0.5f, {});
+                auto right = createDefaultMeshEntity({ 2, 5.f, 0 }, sphereH, concreteMat);
+                *right.get_component<scale>() = math::vec3(2.0f);
+                right.add_component<physics_component>()->physicsCompData.AddSphereCollider(1.0f, {});
                 right.add_component<rigidbody>();
             }
 
             {
-                auto left = createDefaultMeshEntity({ -2, 10.f, -10 }, sphereH, concreteMat);
-                left.add_component<physics_component>()->physicsCompData.AddSphereCollider(0.5f, {});
+                auto left = createDefaultMeshEntity({ -2, 5.f, -10 }, sphereH, concreteMat);
+                *left.get_component<scale>() = math::vec3(2.0f);
+                left.add_component<physics_component>()->physicsCompData.AddSphereCollider(1.0f, {});
                 left.add_component<rigidbody>();
 
 
-                auto right = createDefaultMeshEntity({ 2, 10.f, -10 }, sphereH, concreteMat);
-                right.add_component<physics_component>()->physicsCompData.AddSphereCollider(0.5f, {});
+                auto right = createDefaultMeshEntity({ 2, 5.f, -10 }, sphereH, concreteMat);
+                *right.get_component<scale>() = math::vec3(2.0f);
+                right.add_component<physics_component>()->physicsCompData.AddSphereCollider(1.0f, {});
                 right.add_component<rigidbody>();
             }
         }
-
-    }
-
-    void PhysXTestSystem::triggerExitEvent(on_trigger_exit& triggerExit)
-    {
-
     }
 
     void PhysXTestSystem::initializeLitMaterial(rendering::material_handle& materialToInitialize,

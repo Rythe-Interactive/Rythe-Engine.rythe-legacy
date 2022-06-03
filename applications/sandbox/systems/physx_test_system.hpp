@@ -124,6 +124,8 @@ namespace legion::physics
 
         void triggerEnterEvent(on_trigger_enter& triggerEnter);
 
+        void triggerStayEvent(on_trigger_stay& triggerStay);
+
         void triggerExitEvent(on_trigger_exit& triggerExit);
 
         //-------------------------- Scene Setup Helpers ---------------------------------------//
