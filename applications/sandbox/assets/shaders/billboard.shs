@@ -1,5 +1,4 @@
 #version 450
-
 generate(vertex, fragment)
 
 #include <stdio.shinc>

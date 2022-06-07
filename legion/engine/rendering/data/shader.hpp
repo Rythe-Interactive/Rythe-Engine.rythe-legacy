@@ -101,7 +101,7 @@ namespace legion::rendering
                 tex = invalid_texture_handle.get_texture();
 
             glActiveTexture(GL_TEXTURE0 + m_textureUnit);
-            glBindTexture(GL_TEXTURE_2D, tex.textureId);
+            glBindTexture(static_cast<GLenum>(tex.type), tex.textureId);
             glUniform1i(m_location, m_textureUnit);
             glActiveTexture(GL_TEXTURE0);
         }

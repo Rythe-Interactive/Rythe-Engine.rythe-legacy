@@ -65,6 +65,10 @@ namespace legion::rendering
                 shader_parameter_base* uniform = nullptr;
                 switch (type)
                 {
+                case GL_SAMPLER_2D_ARRAY:
+                    uniform = new rendering::uniform<texture_handle>(id, name, type, location, textureUnit);
+                    textureUnit++;
+                    break;
                 case GL_SAMPLER_2D:
                     uniform = new rendering::uniform<texture_handle>(id, name, type, location, textureUnit);
                     textureUnit++;

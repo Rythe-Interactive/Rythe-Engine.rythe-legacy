@@ -14,6 +14,7 @@ namespace legion::rendering
         ecs::filter<skybox_renderer> filter;
         static id_type matricesId = nameHash("model matrix buffer");
         static id_type entityBufferId = nameHash("entity id buffer");
+        static id_type flipbookBufferId = nameHash("flipbook frame buffer");
         static id_type mainId = nameHash("main");
         static auto modelHandle = rendering::ModelCache::create_model("Cube", fs::view("assets://models/cube.glb"));
 
@@ -50,8 +51,12 @@ namespace legion::rendering
         if (!entityIdBuffer)
             return;
 
+        buffer* flipbookBuffer = get_meta<buffer>(flipbookBufferId);
+        if (!flipbookBuffer)
+            return;
+
         if (!mesh.buffered)
-            modelHandle.buffer_data(*modelMatrixBuffer, *entityIdBuffer);
+            modelHandle.buffer_data(*modelMatrixBuffer, *entityIdBuffer,*flipbookBuffer);
 
         entityIdBuffer->bufferData(std::vector<id_type>{filter.at(0)->id});
         modelMatrixBuffer->bufferData(std::vector<math::mat4>{math::mat4(1.f)});

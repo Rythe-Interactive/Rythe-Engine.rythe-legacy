@@ -57,6 +57,7 @@ void MouseHover::render(app::window& context, gfx::camera& cam, const gfx::camer
     static id_type lightCountId = nameHash("light count");
     static id_type matricesId = nameHash("model matrix buffer");
     static id_type entityBufferId = nameHash("entity id buffer");
+    static id_type flipbookBufferId = nameHash("flipbook frame buffer");
     static id_type editorMetaVariant = nameHash("editor_meta");
 
     float renderScale = FramebufferResizeStage::getRenderScale();
@@ -88,6 +89,10 @@ void MouseHover::render(app::window& context, gfx::camera& cam, const gfx::camer
 
     buffer* entityIdBuffer = get_meta<buffer>(entityBufferId);
     if (!entityIdBuffer)
+        return;
+
+    buffer* flipbookBuffer = get_meta<buffer>(flipbookBufferId);
+    if (!flipbookBuffer)
         return;
 
     auto* fbo = getFramebuffer(mainId);
@@ -204,7 +209,7 @@ void MouseHover::render(app::window& context, gfx::camera& cam, const gfx::camer
             const model& mesh = modelHandle.get_model();
 
             if (!mesh.buffered)
-                modelHandle.buffer_data(*modelMatrixBuffer, *entityIdBuffer);
+                modelHandle.buffer_data(*modelMatrixBuffer, *entityIdBuffer, *flipbookBuffer);
 
             if (mesh.submeshes.empty())
             {

@@ -21,6 +21,9 @@
     <ClCompile Include="systems\gui_test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="systems\examplesystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="systems\diviner_physics_test_system.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -28,6 +31,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="renderstages\mousehover.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="defaults\defaultpolicies.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -69,6 +75,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="systems\physx_test_system.hpp">
+      <Filter>Header Files</Filter>
+      </ClInclude>
+    <ClInclude Include="defaults\defaultpolicies.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="systems\physics_test_system.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="renderstages\mousehover.hpp">
