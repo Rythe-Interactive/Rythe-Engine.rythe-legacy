@@ -25,13 +25,15 @@ namespace legion::core
         }
     }
 #pragma endregion
-#pragma region Point Cloud Policy
-    void gpu_particle_policy::setup(particle_emitter& emitter)
+#pragma region Verlet Policy
+    void verlet_integration_policy::setup(particle_emitter& emitter)
     {
-        if (!emitter.has_uniform<compute::function>("vadd"))
-            emitter.create_uniform<compute::function>("vadd", fs::view("assets://kernels/particles.cl").load_as<compute::function>("vector_add"));
-        if (!emitter.has_uniform<compute::function>("initVel"))
-            emitter.create_uniform<compute::function>("initVel", fs::view("assets://kernels/particles.cl").load_as<compute::function>("init_vel"));
+        if (!emitter.has_uniform<compute::function>("verletIntegration"))
+            emitter.create_uniform<compute::function>("verletIntegration", fs::view("assets://kernels/particles.cl").load_as<compute::function>("verlet_integration"));
+        if (!emitter.has_uniform<compute::function>("constrainPositions"))
+            emitter.create_uniform<compute::function>("constrainPositions", fs::view("assets://kernels/particles.cl").load_as<compute::function>("constrain_positions"));
+        if (!emitter.has_uniform<compute::function>("spatialGrid"))
+            emitter.create_uniform<compute::function>("spatialGrid", fs::view("assets://kernels/particles.cl").load_as<compute::function>("spatial_grid"));
         if (!emitter.has_uniform<compute::function>("initPos"))
             emitter.create_uniform<compute::function>("initPos", fs::view("assets://kernels/particles.cl").load_as<compute::function>("init_pos"));
         if (!emitter.has_uniform<compute::function>("initRot"))
@@ -39,8 +41,17 @@ namespace legion::core
         if (!emitter.has_uniform<compute::function>("initScale"))
             emitter.create_uniform<compute::function>("initScale", fs::view("assets://kernels/particles.cl").load_as<compute::function>("init_scale"));
 
-        auto& init_velocity = emitter.get_uniform<compute::function>("initVel");
-        init_velocity.setLocalSize(16);
+        if (!emitter.has_buffer<math::vec4>("posBuffer"))
+            emitter.create_buffer<math::vec4>("posBuffer");
+        if (!emitter.has_buffer<math::vec4>("prevPosBuffer"))
+            emitter.create_buffer<math::vec4>("prevPosBuffer");
+        if (!emitter.has_buffer<math::vec4>("rotBuffer"))
+            emitter.create_buffer<math::vec4>("rotBuffer");
+        if (!emitter.has_buffer<math::vec4>("scaleBuffer"))
+            emitter.create_buffer<math::vec4>("scaleBuffer");
+
+        if (!emitter.has_buffer<size_type>("gridCells"))
+            emitter.create_buffer<size_type>("gridCells");
 
         auto& init_position = emitter.get_uniform<compute::function>("initPos");
         init_position.setLocalSize(16);
@@ -51,8 +62,108 @@ namespace legion::core
         auto& init_scale = emitter.get_uniform<compute::function>("initScale");
         init_scale.setLocalSize(16);
 
-        auto& vector_add = emitter.get_uniform<compute::function>("vadd");
-        vector_add.setLocalSize(16);
+        auto& verlet_integration = emitter.get_uniform<compute::function>("verletIntegration");
+        verlet_integration.setLocalSize(16);
+
+        auto& constrain_positions = emitter.get_uniform<compute::function>("constrainPositions");
+        constrain_positions.setLocalSize(16);
+
+        auto& spatial_grid = emitter.get_uniform<compute::function>("spatialGrid");
+        spatial_grid.setLocalSize(16);
+    }
+    void verlet_integration_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
+    {
+        auto& init_position = emitter.get_uniform<compute::function>("initPos");
+        auto& init_rotation = emitter.get_uniform<compute::function>("initRot");
+        auto& init_scale = emitter.get_uniform<compute::function>("initScale");
+        auto& verlet_integration = emitter.get_uniform<compute::function>("verletIntegration");
+        auto& constrain_positions = emitter.get_uniform<compute::function>("constrainPositions");
+
+        auto& posBuffer = emitter.get_buffer<math::vec4>("posBuffer");
+        auto& prevPosBuffer = emitter.get_buffer<math::vec4>("prevPosBuffer");
+        auto& rotBuffer = emitter.get_buffer<math::vec4>("rotBuffer");
+        auto& scaleBuffer = emitter.get_buffer<math::vec4>("scaleBuffer");
+
+        auto count = end - start;
+
+        auto paddedSize = math::max(((count - 1) | 15) + 1, 16ull);
+
+        math::vec4 startPos = math::vec4(1.f, 0.f, 0.f, 0.f);
+        math::vec4 prevPos = startPos;
+
+        //auto ioPosBuffer = compute::Context::createBuffer(posBuffer,compute::buffer_type::READ_BUFFER | compute::buffer_type::WRITE_BUFFER, "positions");
+
+        //std::vector<math::vec4> subPosBuffer = { posBuffer.begin() + start, posBuffer.begin() + end };
+        //std::vector<math::vec4> subPrevPosBuffer = { prevPosBuffer.begin() + start, prevPosBuffer.begin() +end};
+
+        //std::vector<math::vec4> subRotBuffer = { rotBuffer.begin() + start, rotBuffer.begin() + end };
+
+        //std::vector<math::vec4> subScaleBuffer = { scaleBuffer.begin() + start, scaleBuffer.begin() + end };
+
+        int _start = static_cast<int>(start);
+        int _end = static_cast<int>(end);
+
+        init_position(paddedSize, compute::inout(posBuffer, "positions"), compute::karg(startPos, "position"), compute::karg(_start, "start"), compute::karg(_end, "end"));
+        init_position(paddedSize, compute::inout(prevPosBuffer, "positions"), compute::karg(prevPos, "position"), compute::karg(_start, "start"), compute::karg(_end, "end"));
+
+        rotation dir = rotation::lookat(math::vec3(0.f), math::vec3::forward);
+        init_rotation(paddedSize, compute::inout(rotBuffer, "rotations"), compute::karg(dir, "direction"), compute::karg(_start, "start"), compute::karg(_end, "end"));
+
+        math::vec4 scale = math::vec4(.1f);
+        init_scale(paddedSize, compute::inout(scaleBuffer, "scales"), compute::karg(scale, "scale"), compute::karg(_start, "start"), compute::karg(_end, "end"));
+    }
+    void verlet_integration_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
+    {
+        using namespace lgn::core;
+        if (count < 1)
+            return;
+
+        //core::time::stopwatch watch;
+        //watch.start();
+
+        auto& posBuffer = emitter.get_buffer<math::vec4>("posBuffer");
+        auto& prevPosBuffer = emitter.get_buffer<math::vec4>("prevPosBuffer");
+        auto& gridCells = emitter.get_buffer<size_type>("gridCells");
+        auto livingBuffer = emitter.get_living_buffer();
+
+        auto& spatial_grid = emitter.get_uniform<compute::function>("spatialGrid");
+        auto paddedSize = math::max(((count - 1) | 15) + 1, 16ull);
+
+        math::ivec3 cellDims(1);
+
+        spatial_grid(paddedSize, compute::inout(gridCells,"gridCells"), compute::in(posBuffer, "positions"), compute::karg(cellDims, "cellDims"));
+
+        math::vec4 acceleration = math::vec4(0.f, -1.f, 0.f, 0.f);
+        auto& verlet_integration = emitter.get_uniform<compute::function>("verletIntegration");
+        verlet_integration(paddedSize, compute::in(livingBuffer, "living"), compute::inout(posBuffer, "positions"), compute::inout(prevPosBuffer, "prevPositions"), compute::karg(acceleration, "acceleration"), compute::karg(deltaTime, "dt"));
+
+        cl_float radius = 3.f;
+        auto& constrain_positions = emitter.get_uniform<compute::function>("constrainPositions");
+        constrain_positions(paddedSize, compute::in(livingBuffer, "living"), compute::inout(posBuffer, "positions"), compute::karg(radius, "radius"));
+
+        /*watch.end();
+        log::debug("OpenCL position update elapsed time: {}ms",watch.elapsed_time().milliseconds());*/
+    }
+#pragma endregion
+#pragma region Point Cloud Policy
+    void gpu_particle_policy::setup(particle_emitter& emitter)
+    {
+        if (!emitter.has_uniform<compute::function>("vadd"))
+            emitter.create_uniform<compute::function>("vadd", fs::view("assets://kernels/particles.cl").load_as<compute::function>("vector_add"));
+        if (!emitter.has_uniform<compute::function>("initVel"))
+            emitter.create_uniform<compute::function>("initVel", fs::view("assets://kernels/particles.cl").load_as<compute::function>("init_vel"));
+        if (!emitter.has_uniform<compute::function>("initVelField"))
+            emitter.create_uniform<compute::function>("initVelField", fs::view("assets://kernels/particles.cl").load_as<compute::function>("init_velField"));
+        if (!emitter.has_uniform<compute::function>("initPos"))
+            emitter.create_uniform<compute::function>("initPos", fs::view("assets://kernels/particles.cl").load_as<compute::function>("init_pos"));
+        if (!emitter.has_uniform<compute::function>("initPosCube"))
+            emitter.create_uniform<compute::function>("initPosCube", fs::view("assets://kernels/particles.cl").load_as<compute::function>("init_pos_cube"));
+        if (!emitter.has_uniform<compute::function>("initPosDisk"))
+            emitter.create_uniform<compute::function>("initPosDisk", fs::view("assets://kernels/particles.cl").load_as<compute::function>("init_pos_disk"));
+        if (!emitter.has_uniform<compute::function>("initRot"))
+            emitter.create_uniform<compute::function>("initRot", fs::view("assets://kernels/particles.cl").load_as<compute::function>("init_rot"));
+        if (!emitter.has_uniform<compute::function>("initScale"))
+            emitter.create_uniform<compute::function>("initScale", fs::view("assets://kernels/particles.cl").load_as<compute::function>("init_scale"));
 
         if (!emitter.has_buffer<math::vec4>("posBuffer"))
             emitter.create_buffer<math::vec4>("posBuffer");
@@ -64,40 +175,91 @@ namespace legion::core
         if (!emitter.has_buffer<math::vec4>("velBuffer"))
             emitter.create_buffer<math::vec4>("velBuffer");
 
-        //if (!emitter.has_uniform<compute::inout<std::vector<math::vec4>>>("ioPosBuffer"))
-        //    emitter.create_uniform<compute::inout<std::vector<math::vec4>>>("ioPosBuffer");
+        auto& init_velocity = emitter.get_uniform<compute::function>("initVel");
+        init_velocity.setLocalSize(16);
 
-        //if (!emitter.has_uniform<compute::inout<std::vector<math::vec4>>>("ioVelBuffer"))
-        //    emitter.create_uniform<compute::inout<std::vector<math::vec4>>>("ioVelBuffer");
+        auto& init_velField = emitter.get_uniform<compute::function>("initVelField");
+        init_velField.setLocalSize(16);
 
-    }
-    void gpu_particle_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
-    {
+        auto& init_position = emitter.get_uniform<compute::function>("initPos");
+        init_position.setLocalSize(16);
+
+        auto& init_pos_cube = emitter.get_uniform<compute::function>("initPosCube");
+        init_pos_cube.setLocalSize(16);
+
+        auto& init_pos_disk = emitter.get_uniform<compute::function>("initPosDisk");
+        init_pos_disk.setLocalSize(16);
+
+        auto& init_rotation = emitter.get_uniform<compute::function>("initRot");
+        init_rotation.setLocalSize(16);
+
+        auto& init_scale = emitter.get_uniform<compute::function>("initScale");
+        init_scale.setLocalSize(16);
+
+        auto& vector_add = emitter.get_uniform<compute::function>("vadd");
+        vector_add.setLocalSize(16);
+
         auto& velBuffer = emitter.get_buffer<math::vec4>("velBuffer");
         auto& posBuffer = emitter.get_buffer<math::vec4>("posBuffer");
         auto& rotBuffer = emitter.get_buffer<math::vec4>("rotBuffer");
         auto& scaleBuffer = emitter.get_buffer<math::vec4>("scaleBuffer");
 
-        auto count = static_cast<cl_ulong>(end - start);
-        if (count < 1)
-            return;
+        auto paddedSize = math::max(((emitter.capacity() - 1) | 255) + 1, 256ull);
 
-        auto paddedSize = math::max(((count - 1) | 15) + 1, 16ull);
+        //std::vector<math::vec4> directions;
+        //for (size_type i = 0; i < 25; i++)
+        //{
+        //    directions.push_back(math::vec4(math::sphericalRand(1.f), 0.f));
+        //}
+        //cl_int dirCount = directions.size();
+        cl_int radius = 3.f;
+        //init_position(paddedSize, compute::inout(posBuffer, "positions"), compute::in(directions, "spawnDirs"), compute::karg(dirCount, "dirCount"), compute::karg(radius, "radius"));
+        init_pos_disk(paddedSize, compute::inout(posBuffer, "positions"), compute::karg(radius, "radius"));
 
-        auto _start = static_cast<cl_ulong>(start);
+        math::vec4 center = math::vec4(0.f);
+        init_velField(paddedSize, compute::inout(posBuffer, "positions"), compute::inout(velBuffer, "vectorField"), compute::karg(center, "center"));
 
-        auto& init_velocity = emitter.get_uniform<compute::function>("initVel");
-        init_velocity(paddedSize, compute::inout(velBuffer, "A"), compute::karg(_start, "start"), compute::karg(count, "count"));
+        //init_pos_cube(paddedSize, compute::inout(posBuffer, "A"), compute::karg(width, "width"), compute::karg(height, "height"), compute::karg(depth, "depth"));
 
-        auto& init_position = emitter.get_uniform<compute::function>("initPos");
-        init_position(paddedSize, compute::inout(posBuffer, "A"), compute::karg(_start, "start"), compute::karg(count, "count"));
+        //init_position(paddedSize, compute::inout(posBuffer, "A"));
 
-        rotation dir = rotation::lookat(math::vec3(0.f),math::vec3::forward);
-        auto& init_rotation = emitter.get_uniform<compute::function>("initRot");
-        init_rotation(paddedSize, compute::inout(rotBuffer, "A"), compute::karg(dir, "direction"), compute::karg(_start, "start"), compute::karg(count, "count"));
+        rotation dir = rotation::lookat(math::vec3(0.f), math::vec3::forward);
+        init_rotation(paddedSize, compute::inout(rotBuffer, "A"), compute::karg(dir, "direction"));
 
-        auto& init_scale = emitter.get_uniform<compute::function>("initScale");
-        init_scale(paddedSize, compute::inout(scaleBuffer, "A"), compute::karg(_start, "start"), compute::karg(count, "count"));
+        init_scale(paddedSize, compute::inout(scaleBuffer, "A"));
+    }
+    void gpu_particle_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
+    {
+        //auto& velBuffer = emitter.get_buffer<math::vec4>("velBuffer");
+        //auto& posBuffer = emitter.get_buffer<math::vec4>("posBuffer");
+        //auto& rotBuffer = emitter.get_buffer<math::vec4>("rotBuffer");
+        //auto& scaleBuffer = emitter.get_buffer<math::vec4>("scaleBuffer");
+
+        //auto count = static_cast<cl_ulong>(end - start);
+        //if (count < 1)
+        //    return;
+
+        //auto paddedSize = math::max(((emitter.capacity() - 1) | 15) + 1, 16ull);
+
+        //auto _start = static_cast<cl_ulong>(start);
+
+        //auto& init_velocity = emitter.get_uniform<compute::function>("initVel");
+        //std::vector<math::vec4> directions;
+        //for (size_type i = 0; i < paddedSize; i++)
+        //{
+        //    directions.push_back(math::vec4(math::ballRand(1.f), 0.f));
+        //}
+        //init_velocity(paddedSize, compute::inout(velBuffer, "A"), compute::in(directions, "directions"), compute::karg(_start, "start"), compute::karg(count, "count"));
+
+        //auto& init_position = emitter.get_uniform<compute::function>("initPos");
+        //init_position(paddedSize, compute::inout(posBuffer, "A"), compute::karg(_start, "start"), compute::karg(count, "count"));
+
+        //rotation dir = rotation::lookat(math::vec3(0.f), math::vec3::forward);
+        //auto& init_rotation = emitter.get_uniform<compute::function>("initRot");
+        //init_rotation(paddedSize, compute::inout(rotBuffer, "A"), compute::karg(dir, "direction"), compute::karg(_start, "start"), compute::karg(count, "count"));
+
+        //auto& init_scale = emitter.get_uniform<compute::function>("initScale");
+        //init_scale(paddedSize, compute::inout(scaleBuffer, "A"), compute::karg(_start, "start"), compute::karg(count, "count"));
 
     }
     void gpu_particle_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
@@ -106,13 +268,20 @@ namespace legion::core
         if (count < 1)
             return;
 
+        //core::time::stopwatch watch;
+        //watch.start();
+
         auto& posBuffer = emitter.get_buffer<math::vec4>("posBuffer");
         auto& velBuffer = emitter.get_buffer<math::vec4>("velBuffer");
 
-        auto paddedSize = math::max(((count - 1) | 15) + 1, 16ull);
+        auto paddedSize = math::max(((count - 1) | 512) + 1, 512ull);
+
+        math::vec4 center = math::vec4(0.f);
 
         auto& vector_add = emitter.get_uniform<compute::function>("vadd");
-        vector_add(paddedSize, ioPosBuffer, ioVelBuffer, ioPosBuffer, compute::karg(deltaTime, "dt"));
+        vector_add(paddedSize, compute::inout(posBuffer), compute::inout(velBuffer), compute::karg(deltaTime, "dt"), compute::karg(center, "center"));
+        /*watch.end();
+        log::debug("OpenCL position update elapsed time: {}ms",watch.elapsed_time().milliseconds());*/
     }
 #pragma endregion
 #pragma region Orbital Policy

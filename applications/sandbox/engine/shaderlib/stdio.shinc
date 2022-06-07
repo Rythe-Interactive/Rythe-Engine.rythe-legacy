@@ -182,6 +182,11 @@ vec4 ModelToScreenSpacePosition(vec3 pos)
     #endif
 }
 
+vec4 ModelToScreenSpacePosition(vec3 pos, mat4 _modelMatrix)
+{
+    return (ViewProjectionMatrix * _modelMatrix) * vec4(pos, 1.f);
+}
+
 vec4 SceneColor(vec2 uv)
 {
     return texture(lgn_sceneColor, uv);

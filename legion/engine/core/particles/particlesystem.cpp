@@ -77,15 +77,15 @@ namespace legion::core
         auto minLifeTime = emitter.has_uniform<float>("minLifeTime") ? emitter.get_uniform<float>("minLifeTime") : 0.f;
         auto maxLifeTime = emitter.has_uniform<float>("maxLifeTime") ? emitter.get_uniform<float>("maxLifeTime") : 0.f;
 
+        emitter.set_alive(startCount, count, true);
+        emitter.m_particleCount += count;
+        emitter.m_totalParticlesSpawned += count;
+
         for (size_type idx = startCount; idx < emitter.m_particleCount; idx++)
         {
             ageBuffer.at(idx).age = 0;
             ageBuffer.at(idx).max = math::linearRand(minLifeTime, maxLifeTime);
         }
-
-        emitter.set_alive(startCount, count, true);
-        emitter.m_particleCount += count;
-        emitter.m_totalParticlesSpawned += count;
 
         for (auto& policy : emitter.m_particlePolicies)
             policy->onInit(emitter, startCount, emitter.m_particleCount);
@@ -105,6 +105,12 @@ namespace legion::core
 
         size_type destroyed = 0;
         size_type activeCount = 0;
+
+        //for (size_type idx = 0; idx < emitter.get_living_buffer().size(); idx++)
+        //{
+        //    log::debug("Particle [{}]: Living? {}", idx, emitter.get_living_buffer()[idx]);
+        //}
+        //log::debug("");
         if (emitter.has_uniform<float>("minLifeTime") && emitter.has_uniform<float>("maxLifeTime"))
         {
             for (activeCount = 0; activeCount < emitter.m_particleCount; activeCount++)
@@ -129,10 +135,10 @@ namespace legion::core
                 policy->onDestroy(emitter, emitter.m_particleCount, targetCount);
         }
 
-        for (auto& policy : emitter.m_particlePolicies)
-            policy->onUpdate(emitter, deltaTime, emitter.m_particleCount);
-
         //watch.end();
         //log::debug("Particle Maintenance elapsed time: {}ms", watch.elapsed_time().milliseconds());
+
+        for (auto& policy : emitter.m_particlePolicies)
+            policy->onUpdate(emitter, deltaTime, emitter.m_particleCount);
     }
 }

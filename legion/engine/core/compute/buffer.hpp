@@ -55,8 +55,8 @@ namespace legion::core::compute {
         Buffer(cl_context ctx, void* data, size_type width, size_type height, size_type depth, cl_mem_object_type object_type, cl_image_format* format, buffer_type type, std::string name);
         Buffer(cl_context ctx, cl_uint buffer, buffer_type type, bool is_renderbuffer, std::string name);
         Buffer(cl_context ctx, cl_uint gl_target, cl_uint gl_texture, cl_uint miplevel, buffer_type type, std::string name);
-    
         Buffer(cl_context ctx, byte* data, size_type len, buffer_type type, std::string name);
+        Buffer(Buffer buffer, buffer_type type, cl_buffer_create_type buffer_create_type, const void* buffer_create_info);
 
         Buffer(Buffer&& b) noexcept;
         Buffer(const Buffer& b);

@@ -44,7 +44,7 @@ namespace legion::core::compute
         }
 
         m_size = width * height * channelSize;
-        //m_ref_count = new size_type(1);
+        m_ref_count = new size_type(1);
         //convert buffer_type to cl_mem_flags
         if (type == buffer_type::READ_BUFFER)
             m_type = CL_MEM_READ_ONLY;
@@ -96,7 +96,7 @@ namespace legion::core::compute
         , m_data(nullptr)
         , m_size(0)
     {
-        //m_ref_count = new size_type(1);
+        m_ref_count = new size_type(1);
         //convert buffer_type to cl_mem_flags
         if (type == buffer_type::READ_BUFFER)
             m_type = CL_MEM_READ_ONLY;
@@ -124,7 +124,7 @@ namespace legion::core::compute
     {
         if (!ctx) return;
         //initialize new ref-counter
-       // m_ref_count = new size_t(1);
+       m_ref_count = new size_t(1);
 
 
         //convert buffer_type to cl_mem_flags
@@ -152,7 +152,7 @@ namespace legion::core::compute
         , m_data(nullptr)
         , m_size(0)
     {
-       // m_ref_count = new size_type(1);
+       m_ref_count = new size_type(1);
         //convert buffer_type to cl_mem_flags
         if (type == buffer_type::READ_BUFFER)
             m_type = CL_MEM_READ_ONLY;
@@ -168,6 +168,32 @@ namespace legion::core::compute
         {
             log::error("clCreateFromGLTexture failed for Buffer: {}", m_name);
         }
+    }
+
+    Buffer::Buffer(Buffer buffer, buffer_type type, cl_buffer_create_type buffer_create_type, const void* buffer_create_info)
+    {
+        if (!buffer.isValid()) return;
+        //initialize new ref-counter
+        m_ref_count = new size_t(1);
+
+        //convert buffer_type to cl_mem_flags
+        if (type == buffer_type::READ_BUFFER)
+            m_type = CL_MEM_READ_ONLY;
+        else if (type == buffer_type::WRITE_BUFFER)
+            m_type = CL_MEM_WRITE_ONLY;
+        else
+            m_type = CL_MEM_READ_WRITE;
+
+
+        cl_int ret;
+
+        //create buffer
+        m_memory_object = clCreateSubBuffer(buffer.m_memory_object, m_type, buffer_create_type, buffer_create_info, &ret);
+        if (ret != CL_SUCCESS)
+        {
+            log::error("clCreateSubBuffer failed for Buffer: {}", m_name);
+        }
+
     }
 
     void Buffer::rename(const std::string& name)
@@ -186,21 +212,21 @@ namespace legion::core::compute
 
         //Move Ctor needs to be explicitly defined
         //to increase Reference Counter
-     //   ++* m_ref_count;
+        ++* m_ref_count;
     }
 
     Buffer::Buffer(const Buffer& b) :
         m_name(b.m_name),
         m_memory_object(b.m_memory_object),
-        //    m_ref_count(b.m_ref_count),
+        m_ref_count(b.m_ref_count),
         m_type(b.m_type),
         m_data(b.m_data),
         m_size(b.m_size)
     {
         //Copy Ctor needs to be explicitly defined
         //to increase Reference Counter
-       // if(m_ref_count)
-      //  ++* m_ref_count;
+        if(m_ref_count)
+        ++* m_ref_count;
     }
 
 
@@ -208,14 +234,13 @@ namespace legion::core::compute
 
     Buffer::~Buffer()
     {
-
         //check if this is the last element
         //TODO(algo-ryth-mix): make this thread-safe
-        //if (m_ref_count && --*m_ref_count == 0)
-        //{
-        //    //free ref-counter & memory_object
-        //    /*delete m_ref_count;
-        //    clReleaseMemObject(m_memory_object);*/
-        //}
+        if (m_ref_count && --*m_ref_count == 0)
+        {
+            //free ref-counter & memory_object
+            delete m_ref_count;
+            clReleaseMemObject(m_memory_object);
+        }
     }
 }

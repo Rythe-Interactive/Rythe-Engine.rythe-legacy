@@ -308,34 +308,37 @@ void ExampleSystem::setup()
     ent.add_component<transform>();
 
     auto emitter = ent.add_component<particle_emitter>();
-    emitter->set_spawn_rate(10000);
-    emitter->set_spawn_interval(.02f);
-    ////emitter->create_uniform<float>("minLifeTime") = 5.f;
-    ////emitter->create_uniform<float>("maxLifeTime") = 5.f;
-    ////emitter->create_uniform<int>("frameCount", 9);
-    emitter->resize(1000000);
+    emitter->set_spawn_rate(1);
+    emitter->set_spawn_interval(.2f);
+    emitter->create_uniform<float>("minLifeTime") = 10.f;
+    emitter->create_uniform<float>("maxLifeTime") = 20.f;
+    //emitter->create_uniform<int>("frameCount", 9);
+    emitter->resize(100);
     ////emitter->add_policy<scale_lifetime_policy>();
-    emitter->add_policy<gpu_particle_policy>();
+    //emitter->add_policy<gpu_particle_policy>();
+    emitter->add_policy<verlet_integration_policy>();
     material = gfx::MaterialCache::create_material("Particle", fs::view("assets://shaders/particle.shs"));
-    //material.set_param("animated", false);
+    //auto textureArray = gfx::TextureCache::create_texture_array("Explosion",
+    //{
+    //    fs::view("assets://textures/explosion/frame0.png"),
+    //    fs::view("assets://textures/explosion/frame1.png"),
+    //    fs::view("assets://textures/explosion/frame2.png"),
+    //    fs::view("assets://textures/explosion/frame3.png"),
+    //    fs::view("assets://textures/explosion/frame4.png"),
+    //    fs::view("assets://textures/explosion/frame5.png"),
+    //    fs::view("assets://textures/explosion/frame6.png"),
+    //    fs::view("assets://textures/explosion/frame7.png"),
+    //    fs::view("assets://textures/explosion/frame8.png"),
+    //});
+    material.set_param("billboard", true);
+    material.set_param("animated", false);
     material.set_param("useSolidColor", true);
     material.set_param("_color", math::colors::green);
     material.set_param("useTexture", false);
-    //auto textureArray = gfx::TextureCache::create_texture_array("Explosion",
-    //    {
-    //        fs::view("assets://textures/explosion/frame0.png"),
-    //        fs::view("assets://textures/explosion/frame1.png"),
-    //        fs::view("assets://textures/explosion/frame2.png"),
-    //        fs::view("assets://textures/explosion/frame3.png"),
-    //        fs::view("assets://textures/explosion/frame4.png"),
-    //        fs::view("assets://textures/explosion/frame5.png"),
-    //        fs::view("assets://textures/explosion/frame6.png"),
-    //        fs::view("assets://textures/explosion/frame7.png"),
-    //        fs::view("assets://textures/explosion/frame8.png"),
-    //    });
+
     //material.set_param("_texture", textureArray);
     //material.set_param("frameCount", emitter->get_uniform<int>("frameCount"));
-    model = gfx::ModelCache::create_model("Billboard", fs::view("assets://models/billboard.glb"));
+    model = gfx::ModelCache::create_model("Billboard", fs::view("assets://models/sphere.obj"));
     emitter->add_policy<gfx::rendering_policy>(gfx::rendering_policy{ model, material });
     //emitter->add_policy<gfx::flipbook_policy>();
 

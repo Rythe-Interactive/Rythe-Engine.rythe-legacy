@@ -16,21 +16,31 @@ variant(depth_only)
 
 shader(vertex)
 {
+    uniform bool billboard;
     uniform bool fixedSize;
+
 
     void main(void)
     {
         mat4 _modelMatrix = Compose(p_position, p_orientation, p_scale);
         stdout(modelMatrix) = _modelMatrix;
-        if(fixedSize)
+        if(billboard)
         {
-            gl_Position = FixedSizeBillboardModelToScreenSpacePosition(position, _modelMatrix);
+            if(fixedSize)
+            {
+                gl_Position = FixedSizeBillboardModelToScreenSpacePosition(position, _modelMatrix);
+            }
+            else
+            {
+                gl_Position = BillboardModelToScreenSpacePosition(position, _modelMatrix);
+            }
+            PropagateStdIO((inverse(ViewProjectionMatrix) * gl_Position).xyz+p_position, (BillboardModelMatrix() * vec4(stdin(-normal), 0.0)).xyz);
         }
         else
         {
-            gl_Position = BillboardModelToScreenSpacePosition(position,_modelMatrix);
+            gl_Position = ModelToScreenSpacePosition(position, _modelMatrix);
+            PropagateStdIO((inverse(ViewProjectionMatrix) * gl_Position).xyz+p_position, (_modelMatrix * vec4(stdin(-normal), 0.0)).xyz);
         }
-        PropagateStdIO((inverse(ViewProjectionMatrix) * gl_Position).xyz+p_position, (BillboardModelMatrix() * vec4(stdin(-normal), 0.0)).xyz);
         stdout(modelMatrix) = _modelMatrix;
     }
 }
@@ -38,9 +48,9 @@ shader(vertex)
 
 shader(fragment)
 {
-    //uniform bool animated = false;
-    //uniform sampler2DArray _textureArray;
-    //uniform int frameCount = 1;
+    uniform bool animated = false;
+    uniform sampler2DArray _textureArray;
+    uniform int frameCount = 1;
  
     uniform bool useSolidColor = true;
     uniform vec4 _color= vec4(1.0);
@@ -53,15 +63,15 @@ shader(fragment)
             fragment_color = vec4(0.0);
         #else 
             vec4 color = vec4(1.0);
-            // if(animated)
-            // {
-            //     float frame = stdio(frameID); 
-            //     vec4 current = texture(_textureArray, vec3(stdio(uv), frame ));
-            //     vec4 previous = texture(_textureArray, vec3(stdio(uv), frame-1.0));
-            //     color = pow(mix(current, previous,round(1+frame)-frame), vec4(vec3(2.2),1.0));
-            //     color.a *= 1.0 - (frame/frameCount);
-            // }
-            // else
+            if(animated)
+            {
+                float frame = stdio(frameID); 
+                vec4 current = texture(_textureArray, vec3(stdio(uv), frame ));
+                vec4 previous = texture(_textureArray, vec3(stdio(uv), frame-1.0));
+                color = pow(mix(current, previous,round(1+frame)-frame), vec4(vec3(2.2),1.0));
+                color.a *= 1.0 - (frame/frameCount);
+            }
+            else
             if(useSolidColor)
             {
                 color = _color;

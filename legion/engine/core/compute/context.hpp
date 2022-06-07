@@ -64,6 +64,14 @@ namespace legion::core::compute
             );
         }
 
+        static Buffer createSubBuffer(Buffer buffer, buffer_type type, size_type start, size_type end)
+        {
+            cl_buffer_region* region;
+            region->origin = start;
+            region->size = (end - start);
+            return Buffer(buffer, type, static_cast<cl_buffer_create_type>(CL_BUFFER_CREATE_TYPE_REGION), region);
+        }
+
         static Buffer createBuffer(byte* data, size_type size, buffer_type type, std::string name = "")
         {
             return Buffer(instance.m_context, data, size, type, std::forward<std::string>(name));
@@ -106,6 +114,45 @@ namespace legion::core::compute
             }
 
             return Buffer(instance.m_context, img.data(), width, height, depth, CL_MEM_OBJECT_IMAGE2D, &fmt, type, name);
+        }
+
+        static Buffer create3DImage(math::ivec3 res,channel_format format, image_components components, buffer_type type, std::string name = "")
+        {
+            size_type width = static_cast<size_type>(res.x);
+            size_type height = static_cast<size_type>(res.y);
+            size_type depth = static_cast<size_type>(res.z);
+
+            cl_image_format fmt;
+
+            switch (format) {
+            case channel_format::eight_bit: fmt.image_channel_data_type = CL_UNORM_INT8; break;
+            case channel_format::sixteen_bit: fmt.image_channel_data_type = CL_UNORM_INT16; break;
+            case channel_format::float_hdr: fmt.image_channel_data_type = CL_FLOAT; break;
+            case channel_format::depth_stencil:
+            default:
+            {
+                log::warn("Buffer::createImage invalid Image format!");
+                fmt.image_channel_data_type = CL_UNORM_INT8;
+            }
+            }
+
+            switch (components)
+            {
+            case image_components::grey: fmt.image_channel_order = CL_R; break;
+            case image_components::grey_alpha: fmt.image_channel_order = CL_RA; break;
+            case image_components::rgb: fmt.image_channel_order = CL_RGB; break;
+            case image_components::rgba: fmt.image_channel_order = CL_RGBA; break;
+            case image_components::depth:
+            case image_components::depth_stencil:
+            case image_components::stencil:
+            default:
+            {
+                log::warn("Buffer::createImage invalid Image Components!");
+                fmt.image_channel_order = CL_RGBA;
+            }
+            }
+
+            return Buffer(instance.m_context, nullptr, width, height, depth, CL_MEM_OBJECT_IMAGE3D, &fmt, type, name);
         }
 
         static Buffer createImageFromOpenGLImage(uint target, uint texture, buffer_type type, std::string name = "", uint mip_level = 0)
