@@ -16,38 +16,81 @@ variant(depth_only)
 
 shader(vertex)
 {
+    uniform bool isBillboard;
     uniform bool fixedSize;
 
     void main(void)
     {
-        if(fixedSize)
+        if(isBillboard)
         {
-            gl_Position = FixedSizeBillboardModelToScreenSpacePosition(position);
+            if(fixedSize)
+            {
+                gl_Position = FixedSizeBillboardModelToScreenSpacePosition(position);
+            }
+            else
+            {
+                gl_Position = BillboardModelToScreenSpacePosition(position);
+            }
+            PropagateStdIO((inverse(ViewProjectionMatrix) * gl_Position).xyz, (BillboardModelMatrix() * vec4(-stdin(normal), 0.0)).xyz);
         }
         else
         {
-            gl_Position = BillboardModelToScreenSpacePosition(position);
+            PropagateStdIO();
         }
-        PropagateStdIO((inverse(ViewProjectionMatrix) * gl_Position).xyz, (BillboardModelMatrix() * vec4(-stdin(normal), 0.0)).xyz);
     }
 }
 
 shader(fragment)
 {
-    uniform sampler2DArray _texture;
-    uniform int frameCount;
+    uniform bool isAnimated = false;
+    uniform sampler2DArray _textureArray;
+    uniform int frameCount = 1;
+    uniform blend = false;
+ 
+    uniform bool useSolidColor = true;
+    uniform vec4 _color= vec4(1.0);
+
+    uniform bool useTexture = false;
+    uniform sampler2D _texture;
+
+    uniform bool isSoftParticle = false;
+
     void main(void)
     {
-        vec4 color = pow(texture(_texture, vec3(stdio(uv), stdio(frameID))),vec4(vec3(2.2),1.0));
-        color.a *= SoftParticleAlpha(2.0);
-        if(color.a <= epsilon)
-            discard;
-
-        color.a *= 1.0 - (stdio(frameID)/frameCount);
-
         #if defined(DEPTH_ONLY)
             fragment_color = vec4(0.0);
         #else 
+            vec4 color = vec4(1.0);
+            if(isAnimated)
+            {
+                float frame = stdio(frameID); 
+                vec4 current = texture(_textureArray, vec3(stdio(uv), frame ));
+                if(blend)
+                {
+                    vec4 previous = texture(_textureArray, vec3(stdio(uv), frame-1.0));
+                    color = pow(mix(current, previous,round(1+frame)-frame), vec4(vec3(2.2),1.0));
+                }
+                else
+                {
+                    color = current;
+                }
+            }
+            else if(useSolidColor)
+            {
+                color = _color;
+            }
+            else if(useTexture)
+            {
+                color = texture(_texture, stdio(uv));
+            }
+
+            if(isSoftParticle)
+            {
+                color.a *= SoftParticleAlpha(2.0);
+                if(color.a <= epsilon)
+                    discard;
+            }
+
             fragment_color = color;
             fragment_normal = vec4(vec3(0.0), 1.0);
             fragment_position = vec4(vec3(0.0), 1.0);

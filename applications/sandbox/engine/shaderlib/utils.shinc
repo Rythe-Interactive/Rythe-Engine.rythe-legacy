@@ -42,9 +42,9 @@ mat4 BillboardModelMatrix()
     scale.z = length(stdin(modelMatrix)[2].xyz);
     #endif
 
-    billboardMatrix[0] = -vec4(ViewMatrix[0][2], ViewMatrix[1][2], ViewMatrix[2][2], 0) * scale.x;
+    billboardMatrix[0] = -vec4(ViewMatrix[0][0], ViewMatrix[1][0], ViewMatrix[2][0], 0) * scale.x;
     billboardMatrix[1] = vec4(ViewMatrix[0][1], ViewMatrix[1][1], ViewMatrix[2][1], 0) * scale.y;
-    billboardMatrix[2] = -vec4(ViewMatrix[0][0], ViewMatrix[1][0], ViewMatrix[2][0], 0) * scale.z;
+    billboardMatrix[2] = -vec4(ViewMatrix[0][2], ViewMatrix[1][2], ViewMatrix[2][2], 0) * scale.z;
     return billboardMatrix;
 }
 

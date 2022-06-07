@@ -19,6 +19,6 @@ shader(fragment)
     uniform sampler2DArray _textures;
     void main(void)
     {
-        SubmitOutput(texture(_textures, vec3(stdio(uv),float(frameID))));
+        SubmitOutput(texture(_textures, vec3(stdio(uv), stdio(frameID))));
     }
 }

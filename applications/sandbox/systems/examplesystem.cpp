@@ -407,28 +407,25 @@ void ExampleSystem::setup()
         fountain.initForce = 0.5f;
         emitter->add_policy<fountain_policy>(fountain);
         emitter->add_policy<scale_lifetime_policy>();
-        material = gfx::MaterialCache::create_material("AnimParticle", fs::view("assets://shaders/particle.shs"));
-        auto textureArray = gfx::TextureCache::create_texture_array("Explosion",
-            {
-                fs::view("assets://textures/explosion/frame0.png"),
-                fs::view("assets://textures/explosion/frame1.png"),
-                fs::view("assets://textures/explosion/frame2.png"),
-                fs::view("assets://textures/explosion/frame3.png"),
-                fs::view("assets://textures/explosion/frame4.png"),
-                fs::view("assets://textures/explosion/frame5.png"),
-                fs::view("assets://textures/explosion/frame6.png"),
-                fs::view("assets://textures/explosion/frame7.png"),
-                fs::view("assets://textures/explosion/frame8.png"),
-            });
-        material.set_param("_texture", textureArray);
-        material.set_param("frameCount", emitter->get_uniform<int>("frameCount"));
-        material.set_variant("depth_only");
-        material.set_param("_texture", textureArray);
-        material.set_param("frameCount", emitter->get_uniform<int>("frameCount"));
-        material.set_variant("default");
+        material = gfx::MaterialCache::create_material("AnimParticle", fs::view("assets://shaders/billboard.shs"));
+        material.set_param("_texture", gfx::TextureCache::create_texture(fs::view("assets://textures/explosion/frame0.png")));
+        //auto textureArray = gfx::TextureCache::create_texture_array("Explosion",
+        //    {
+        //        fs::view("assets://textures/explosion/frame0.png"),
+        //        fs::view("assets://textures/explosion/frame1.png"),
+        //        fs::view("assets://textures/explosion/frame2.png"),
+        //        fs::view("assets://textures/explosion/frame3.png"),
+        //        fs::view("assets://textures/explosion/frame4.png"),
+        //        fs::view("assets://textures/explosion/frame5.png"),
+        //        fs::view("assets://textures/explosion/frame6.png"),
+        //        fs::view("assets://textures/explosion/frame7.png"),
+        //        fs::view("assets://textures/explosion/frame8.png"),
+        //    });
+        //material.set_param("_texture", textureArray);
+        //material.set_param("frameCount", emitter->get_uniform<int>("frameCount"));
         model = gfx::ModelCache::create_model("Billboard", fs::view("assets://models/billboard.glb"));
         emitter->add_policy<gfx::rendering_policy>(gfx::rendering_policy{ model, material });
-        emitter->add_policy<gfx::flipbook_policy>();
+        //emitter->add_policy<gfx::flipbook_policy>();
     }
 
     app::InputSystem::createBinding<tonemap_action>(app::inputmap::method::F2);
