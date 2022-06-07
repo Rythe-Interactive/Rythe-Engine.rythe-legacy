@@ -255,26 +255,26 @@ void ExampleSystem::setup()
     }
     //Sun
     {
-        auto ent = createEntity("Sun");
-        auto [pos, rot, scal] = ent.add_component<transform>();
-        pos->x = -30.f;
-        pos->z = 30.f;
-        scal = scale(10.f);
-        material = gfx::MaterialCache::create_material("Sun", fs::view("assets://shaders/pbr.shs"));
-        //gfx::ModelCache::create_model("Sponza", fs::view("assets://models/Sponza/Sponza.gltf"));
-        gfx::ModelCache::create_model("Cola", fs::view("assets://models/cola.glb"));
-        //gfx::ModelCache::create_model("Fireplace", fs::view("assets://models/Fireplace.glb"));
-        gfx::ModelCache::create_model("Gnome", fs::view("assets://models/gnomecentered.obj"));
-        gfx::MaterialCache::create_material("Test", fs::view("assets://shaders/uv.shs"));
+        //auto ent = createEntity("Sun");
+        //auto [pos, rot, scal] = ent.add_component<transform>();
+        //pos->x = -30.f;
+        //pos->z = 30.f;
+        //scal = scale(10.f);
+        //material = gfx::MaterialCache::create_material("Sun", fs::view("assets://shaders/pbr.shs"));
+        ////gfx::ModelCache::create_model("Sponza", fs::view("assets://models/Sponza/Sponza.gltf"));
+        //gfx::ModelCache::create_model("Cola", fs::view("assets://models/cola.glb"));
+        ////gfx::ModelCache::create_model("Fireplace", fs::view("assets://models/Fireplace.glb"));
+        //gfx::ModelCache::create_model("Gnome", fs::view("assets://models/gnomecentered.obj"));
+        //gfx::MaterialCache::create_material("Test", fs::view("assets://shaders/uv.shs"));
 
-        material.set_param(SV_ALBEDO, rendering::TextureCache::create_texture(fs::view("assets://textures/2kSun.jpg")));
-        material.set_param(SV_NORMALHEIGHT, rendering::TextureCache::create_texture(fs::view("assets://textures/slate/slate-normalHeight-2048.png")));
-        material.set_param(SV_MRDAO, rendering::TextureCache::create_texture(fs::view("assets://textures/slate/slate-MRDAo-2048.png")));
-        material.set_param(SV_EMISSIVE, rendering::TextureCache::create_texture(fs::view("assets://textures/2kSun.jpg")));
-        material.set_param(SV_HEIGHTSCALE, 1.f);
+        //material.set_param(SV_ALBEDO, rendering::TextureCache::create_texture(fs::view("assets://textures/2kSun.jpg")));
+        //material.set_param(SV_NORMALHEIGHT, rendering::TextureCache::create_texture(fs::view("assets://textures/slate/slate-normalHeight-2048.png")));
+        //material.set_param(SV_MRDAO, rendering::TextureCache::create_texture(fs::view("assets://textures/slate/slate-MRDAo-2048.png")));
+        //material.set_param(SV_EMISSIVE, rendering::TextureCache::create_texture(fs::view("assets://textures/2kSun.jpg")));
+        //material.set_param(SV_HEIGHTSCALE, 1.f);
 
-        ent.add_component<gfx::mesh_renderer>(gfx::mesh_renderer(material, model));
-        ent.add_component(gfx::light::point(math::color(1.f, 215.f / 255.f, 0.f), 10.f, 50.f));
+        //ent.add_component<gfx::mesh_renderer>(gfx::mesh_renderer(material, model));
+        //ent.add_component(gfx::light::point(math::color(1.f, 215.f / 255.f, 0.f), 10.f, 50.f));
     }
 
     ////Orbits
@@ -305,19 +305,33 @@ void ExampleSystem::setup()
     //}
 
     auto ent = createEntity();
+    ent.add_component<gfx::mesh_renderer>(gfx::mesh_renderer(material, model));
     ent.add_component<transform>();
 
     auto emitter = ent.add_component<particle_emitter>();
-    emitter->set_spawn_rate(1);
+    emitter->set_spawn_rate(5000);
     emitter->set_spawn_interval(.2f);
     //emitter->create_uniform<float>("minLifeTime") = 10.f;
     //emitter->create_uniform<float>("maxLifeTime") = 20.f;
     //emitter->create_uniform<int>("frameCount", 9);
-    emitter->resize(100);
+    emitter->resize(100000);
     ////emitter->add_policy<scale_lifetime_policy>();
-    //emitter->add_policy<gpu_particle_policy>();
-    emitter->add_policy<verlet_integration_policy>();
+    emitter->add_policy<example_policy>();
+    emitter->add_policy<gpu_orbital_policy>();
     material = gfx::MaterialCache::create_material("Particle", fs::view("assets://shaders/particle.shs"));
+    material.set_param("isLit", true);
+    material.set_param("billboard", false);
+    material.set_param("animated", false);
+    material.set_param("useSolidColor", false);
+    material.set_param("_color", math::colors::green);
+    material.set_param("useTexture", false);
+
+    material.set_param(SV_ALBEDO, rendering::TextureCache::create_texture(fs::view("engine://resources/default/albedo")));
+    material.set_param(SV_NORMALHEIGHT, rendering::TextureCache::create_texture(fs::view("engine://resources/default/normalHeight")));
+    material.set_param(SV_MRDAO, rendering::TextureCache::create_texture(fs::view("engine://resources/default/MRDAo")));
+    material.set_param(SV_EMISSIVE, rendering::TextureCache::create_texture(fs::view("engine://resources/default/emissive")));
+    material.set_param(SV_HEIGHTSCALE, 1.f);
+
     //auto textureArray = gfx::TextureCache::create_texture_array("Explosion",
     //{
     //    fs::view("assets://textures/explosion/frame0.png"),
@@ -330,15 +344,10 @@ void ExampleSystem::setup()
     //    fs::view("assets://textures/explosion/frame7.png"),
     //    fs::view("assets://textures/explosion/frame8.png"),
     //});
-    material.set_param("billboard", true);
-    material.set_param("animated", false);
-    material.set_param("useSolidColor", true);
-    material.set_param("_color", math::colors::green);
-    material.set_param("useTexture", false);
 
     //material.set_param("_texture", textureArray);
     //material.set_param("frameCount", emitter->get_uniform<int>("frameCount"));
-    model = gfx::ModelCache::create_model("Billboard", fs::view("assets://models/sphere.obj"));
+    //model = gfx::ModelCache::create_model("Billboard", fs::view("assets://models/sphere.obj"));
     emitter->add_policy<gfx::rendering_policy>(gfx::rendering_policy{ model, material });
     //emitter->add_policy<gfx::flipbook_policy>();
 

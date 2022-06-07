@@ -190,6 +190,7 @@ namespace legion::core::scheduling
 
         instance.m_start.store(true, std::memory_order_release);
 
+        Clock::update();
         Clock::subscribeToTick(doTick);
 
         while (!instance.m_exit.load(std::memory_order_relaxed))

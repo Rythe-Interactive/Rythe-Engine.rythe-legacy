@@ -47,9 +47,6 @@ namespace legion::core
                 }
             }
 
-            if (emitter.m_particleCount <= 0)
-                emitter.stop();
-
             maintenance(emitter, deltaTime);
         }
         //watch.end();
@@ -89,8 +86,8 @@ namespace legion::core
 
         for (auto& policy : emitter.m_particlePolicies)
             policy->onInit(emitter, startCount, emitter.m_particleCount);
-        //watch.end();
-        //log::debug("Particle Emit elapsed time: {}ms", watch.elapsed_time().milliseconds());
+   /*     watch.end();
+        log::debug("Particle Emit elapsed time: {}ms", watch.elapsed_time().milliseconds());*/
     }
 
 
@@ -106,11 +103,6 @@ namespace legion::core
         size_type destroyed = 0;
         size_type activeCount = 0;
 
-        //for (size_type idx = 0; idx < emitter.get_living_buffer().size(); idx++)
-        //{
-        //    log::debug("Particle [{}]: Living? {}", idx, emitter.get_living_buffer()[idx]);
-        //}
-        //log::debug("");
         if (emitter.has_uniform<float>("minLifeTime") && emitter.has_uniform<float>("maxLifeTime"))
         {
             for (activeCount = 0; activeCount < emitter.m_particleCount; activeCount++)
@@ -135,10 +127,10 @@ namespace legion::core
                 policy->onDestroy(emitter, emitter.m_particleCount, targetCount);
         }
 
-        //watch.end();
-        //log::debug("Particle Maintenance elapsed time: {}ms", watch.elapsed_time().milliseconds());
-
         for (auto& policy : emitter.m_particlePolicies)
             policy->onUpdate(emitter, deltaTime, emitter.m_particleCount);
+
+        //watch.end();
+        //log::debug("Particle Maintenance elapsed time: {}ms", watch.elapsed_time().milliseconds());
     }
 }

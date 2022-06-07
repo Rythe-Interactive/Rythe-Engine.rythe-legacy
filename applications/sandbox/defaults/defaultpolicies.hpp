@@ -15,23 +15,13 @@ namespace legion::core
         virtual void onInit(particle_emitter& emitter, size_type start, size_type end) override;
     };
 
-    struct verlet_integration_policy : public particle_policy<verlet_integration_policy>
+    struct gpu_orbital_policy : public particle_policy<gpu_orbital_policy>
     {
-        NO_DTOR_RULE5_NOEXCEPT(verlet_integration_policy);
-        ~verlet_integration_policy() = default;
+        NO_DTOR_RULE5_NOEXCEPT(gpu_orbital_policy);
+        ~gpu_orbital_policy() = default;
 
         virtual void setup(particle_emitter& emitter) override;
         virtual void onInit(particle_emitter& emitter, size_type start, size_type end) override;
-        virtual void onUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
-    };
-
-    struct gpu_particle_policy : public particle_policy<gpu_particle_policy>
-    {
-        NO_DTOR_RULE5_NOEXCEPT(gpu_particle_policy);
-        ~gpu_particle_policy() = default;
-
-        virtual void setup(particle_emitter& emitter) override;
-        virtual void onInit(particle_emitter & emitter, size_type start, size_type end) override;
         virtual void onUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
     };
 

@@ -433,6 +433,13 @@ vec3 GetWorldNormal()
 #endif
 }
 
+#if defined(VERTEX_SHADER)
+vec3 GetWorldNormal(mat4 _modelMatrix)
+{
+    return normalize((_modelMatrix* vec4(stdio(normal), 0.0)).xyz);
+}
+#endif
+
 vec3 GetWorldTangent()
 {
     vec3 worldNormal = GetWorldNormal();
@@ -443,6 +450,15 @@ vec3 GetWorldTangent()
     return normalize(worldTangent - dot(worldTangent, worldNormal) * worldNormal);
 #endif
 }
+
+#if defined(VERTEX_SHADER)
+vec3 GetWorldTangent(mat4 _modelMatrix)
+{
+    vec3 worldNormal = GetWorldNormal(_modelMatrix);
+    vec3 worldTangent = normalize((_modelMatrix * vec4(tangent, 0.0)).xyz);
+    return normalize(worldTangent - dot(worldTangent, worldNormal) * worldNormal);
+}
+#endif
 
 vec3 GetWorldTangent(vec3 worldNormal)
 {
@@ -554,6 +570,21 @@ void PropagateStdIO(vec3 worldPosition, vec3 worldNormal)
     lgn_stdio.wnormal = worldNormal;
     lgn_stdio.tangent = tangent;
     lgn_stdio.wtangent = GetWorldTangent(lgn_stdio.wnormal);
+    lgn_stdio.uv = uv;
+    lgn_stdio.entityId = entityId;
+    lgn_stdio.frameID = frameID;
+    lgn_stdio.modelMatrix = modelMatrix;
+}
+
+void PropagateStdIO(vec3 worldPosition, vec3 worldNormal, vec3 worldTangent)
+{
+    lgn_stdio.position = position;
+    lgn_stdio.wvertex = worldPosition;
+    lgn_stdio.vertexcolor = vertexcolor;
+    lgn_stdio.normal = normal;
+    lgn_stdio.wnormal = worldNormal;
+    lgn_stdio.tangent = tangent;
+    lgn_stdio.wtangent = worldTangent;
     lgn_stdio.uv = uv;
     lgn_stdio.entityId = entityId;
     lgn_stdio.frameID = frameID;

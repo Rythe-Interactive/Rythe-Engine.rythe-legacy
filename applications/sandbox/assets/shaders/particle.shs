@@ -7,6 +7,7 @@ generate(vertex,fragment)
 #include <stdio.shinc>
 #include <utils.shinc>
 #include <math_ext.shinc>
+#include <lighting.shinc>
 
 variant(depth_only)
 {
@@ -34,12 +35,12 @@ shader(vertex)
             {
                 gl_Position = BillboardModelToScreenSpacePosition(position, _modelMatrix);
             }
-            PropagateStdIO((inverse(ViewProjectionMatrix) * gl_Position).xyz+p_position, (BillboardModelMatrix() * vec4(stdin(-normal), 0.0)).xyz);
+            PropagateStdIO((inverse(ViewProjectionMatrix) * gl_Position).xyz+p_position, (BillboardModelMatrix() * vec4(stdin(-normal), 0.0)).xyz, GetWorldTangent(_modelMatrix));
         }
         else
         {
             gl_Position = ModelToScreenSpacePosition(position, _modelMatrix);
-            PropagateStdIO((inverse(ViewProjectionMatrix) * gl_Position).xyz+p_position, (_modelMatrix * vec4(stdin(-normal), 0.0)).xyz);
+            PropagateStdIO((inverse(ViewProjectionMatrix) * gl_Position).xyz+p_position, (_modelMatrix * vec4(stdin(-normal), 0.0)).xyz, GetWorldTangent(_modelMatrix));
         }
         stdout(modelMatrix) = _modelMatrix;
     }
@@ -57,38 +58,64 @@ shader(fragment)
 
     uniform bool useTexture = false;
     uniform sampler2D _texture;
+
+    uniform bool isLit = false;
+    uniform bool discardExcess;
+    uniform sampler2D skybox;
+
+
     void main(void)
     {
         #if defined(DEPTH_ONLY)
             fragment_color = vec4(0.0);
         #else 
             vec4 color = vec4(1.0);
-            if(animated)
+            if(!isLit)
             {
-                float frame = stdio(frameID); 
-                vec4 current = texture(_textureArray, vec3(stdio(uv), frame ));
-                vec4 previous = texture(_textureArray, vec3(stdio(uv), frame-1.0));
-                color = pow(mix(current, previous,round(1+frame)-frame), vec4(vec3(2.2),1.0));
-                color.a *= 1.0 - (frame/frameCount);
-            }
-            else
-            if(useSolidColor)
-            {
-                color = _color;
-            }
-            else if(useTexture)
-            {
-                color = texture(_texture,stdio(uv));
-            }
+                if(animated)
+                {
+                    float frame = stdio(frameID); 
+                    vec4 current = texture(_textureArray, vec3(stdio(uv), frame ));
+                    vec4 previous = texture(_textureArray, vec3(stdio(uv), frame-1.0));
+                    color = pow(mix(current, previous,round(1+frame)-frame), vec4(vec3(2.2),1.0));
+                    color.a *= 1.0 - (frame/frameCount);
+                }
+                else if(useSolidColor)
+                {
+                    color = _color;
+                }
+                else if(useTexture)
+                {
+                    color = texture(_texture,stdio(uv));
+                }
 
-            color.a *= SoftParticleAlpha(2.0);
-            if(color.a <= epsilon)
-                discard;
-            
-            fragment_color = color;
-            fragment_normal = vec4(vec3(0.0), 1.0);
-            fragment_position = vec4(vec3(0.0), 1.0);
-            fragment_overdraw = vec4(vec3(0.0), 1.0);
+                color.a *= SoftParticleAlpha(2.0);
+                if(color.a <= epsilon)
+                    discard;
+                
+                fragment_color = color;
+                fragment_normal = vec4(vec3(0.0), 1.0);
+                fragment_position = vec4(vec3(0.0), 1.0);
+                fragment_overdraw = vec4(vec3(0.0), 1.0);
+            }
+             else
+            {
+                Camera camera = GetCamera();
+
+                vec3 worldNormal = GetWorldNormal();
+                Material material = ExtractMaterial(stdio(uv), camera, worldNormal, GetWorldTangent(worldNormal));
+
+                if(discardExcess)
+                    if(material.texcoords.x < 0 || material.texcoords.x > 1 || material.texcoords.y < 0 || material.texcoords.y > 1)
+                        discard;
+
+                vec3 worldpos = (worldNormal * material.height) + GetWorldPosition();
+
+                vec3 lighting = GetAllLighting(material, camera, worldpos);
+                lighting += FakeIBL(camera, material);
+
+                SubmitOutput(vec4(lighting, material.albedo.a), material.normal, worldpos, material.emissive);
+            }
         #endif
     }
 }
