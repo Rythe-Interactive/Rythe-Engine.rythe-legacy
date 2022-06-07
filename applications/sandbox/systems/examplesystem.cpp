@@ -310,8 +310,8 @@ void ExampleSystem::setup()
     auto emitter = ent.add_component<particle_emitter>();
     emitter->set_spawn_rate(1);
     emitter->set_spawn_interval(.2f);
-    emitter->create_uniform<float>("minLifeTime") = 10.f;
-    emitter->create_uniform<float>("maxLifeTime") = 20.f;
+    //emitter->create_uniform<float>("minLifeTime") = 10.f;
+    //emitter->create_uniform<float>("maxLifeTime") = 20.f;
     //emitter->create_uniform<int>("frameCount", 9);
     emitter->resize(100);
     ////emitter->add_policy<scale_lifetime_policy>();

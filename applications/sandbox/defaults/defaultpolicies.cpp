@@ -32,8 +32,12 @@ namespace legion::core
             emitter.create_uniform<compute::function>("verletIntegration", fs::view("assets://kernels/particles.cl").load_as<compute::function>("verlet_integration"));
         if (!emitter.has_uniform<compute::function>("constrainPositions"))
             emitter.create_uniform<compute::function>("constrainPositions", fs::view("assets://kernels/particles.cl").load_as<compute::function>("constrain_positions"));
+        if (!emitter.has_uniform<compute::function>("resetSpatialGrid"))
+            emitter.create_uniform<compute::function>("resetSpatialGrid", fs::view("assets://kernels/particles.cl").load_as<compute::function>("reset_spatial_grid"));
         if (!emitter.has_uniform<compute::function>("spatialGrid"))
             emitter.create_uniform<compute::function>("spatialGrid", fs::view("assets://kernels/particles.cl").load_as<compute::function>("spatial_grid"));
+        if (!emitter.has_uniform<compute::function>("collisionDetection"))
+            emitter.create_uniform<compute::function>("collisionDetection", fs::view("assets://kernels/particles.cl").load_as<compute::function>("collision_detection"));
         if (!emitter.has_uniform<compute::function>("initPos"))
             emitter.create_uniform<compute::function>("initPos", fs::view("assets://kernels/particles.cl").load_as<compute::function>("init_pos"));
         if (!emitter.has_uniform<compute::function>("initRot"))
@@ -70,6 +74,12 @@ namespace legion::core
 
         auto& spatial_grid = emitter.get_uniform<compute::function>("spatialGrid");
         spatial_grid.setLocalSize(16);
+
+        auto& collision_detection = emitter.get_uniform<compute::function>("collisionDetection");
+        collision_detection.setLocalSize(16);
+
+        auto& reset_spatial_grid = emitter.get_uniform<compute::function>("resetSpatialGrid");
+        reset_spatial_grid.setLocalSize(16);
     }
     void verlet_integration_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
     {
@@ -109,7 +119,7 @@ namespace legion::core
         rotation dir = rotation::lookat(math::vec3(0.f), math::vec3::forward);
         init_rotation(paddedSize, compute::inout(rotBuffer, "rotations"), compute::karg(dir, "direction"), compute::karg(_start, "start"), compute::karg(_end, "end"));
 
-        math::vec4 scale = math::vec4(.1f);
+        math::vec4 scale = math::vec4(1.f);
         init_scale(paddedSize, compute::inout(scaleBuffer, "scales"), compute::karg(scale, "scale"), compute::karg(_start, "start"), compute::karg(_end, "end"));
     }
     void verlet_integration_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
@@ -129,9 +139,15 @@ namespace legion::core
         auto& spatial_grid = emitter.get_uniform<compute::function>("spatialGrid");
         auto paddedSize = math::max(((count - 1) | 15) + 1, 16ull);
 
-        math::ivec3 cellDims(1);
+        auto& reset_spatial_grid = emitter.get_uniform<compute::function>("resetSpatialGrid");
+        reset_spatial_grid(math::max(((emitter.capacity() - 1) | 15) + 1, 16ull), compute::inout(gridCells, "gridCells"));
 
-        spatial_grid(paddedSize, compute::inout(gridCells,"gridCells"), compute::in(posBuffer, "positions"), compute::karg(cellDims, "cellDims"));
+        math::vec4 cellDims(.1f);
+        math::vec4 bounds(100.f);
+        spatial_grid(paddedSize, compute::inout(gridCells, "gridCells"), compute::in(posBuffer, "positions"), compute::karg(cellDims, "cellDims"), compute::karg(bounds, "bounds"));
+
+        auto& collision_detection = emitter.get_uniform<compute::function>("collisionDetection");
+        collision_detection(paddedSize, compute::in(gridCells, "gridCells"), compute::inout(posBuffer, "positions"), compute::karg(bounds, "bounds"));
 
         math::vec4 acceleration = math::vec4(0.f, -1.f, 0.f, 0.f);
         auto& verlet_integration = emitter.get_uniform<compute::function>("verletIntegration");

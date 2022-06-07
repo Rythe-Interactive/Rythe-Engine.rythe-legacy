@@ -1,8 +1,59 @@
-kernel void spatial_grid(global int* gridCells, global const float4* positions, const float4 cellDims)
+ulong gridIdx(const float3 pos, const float3 bounds)
+{
+    return pos.x+(pos.y*bounds.x)+(pos.z*bounds.x*bounds.y);
+}
+
+kernel void reset_spatial_grid(global ulong* gridCells)
 {
     int i = get_global_id(0);
-    int idx = positions[i].x+(positions[i].y*2)+(positions[i].z*2*2);
-    gridCells[idx] = i;
+    gridCells[i] = -1;
+}
+
+kernel void spatial_grid(global ulong* gridCells, global const float4* positions, const float3 cellDims, const float4 bounds)
+{
+    int i = get_global_id(0);
+    float3 pos = positions[i].xyz;
+    ulong idx = gridIdx(pos, bounds.xyz);
+    if(gridCells[idx] == (ulong)(-1))
+        gridCells[idx] = i;
+}
+
+kernel void boundary_detection(global ulong* gridCells, global float4* positions, const float4 bounds)
+{
+    int i = get_global_id(0);
+    float3 pos = positions[i].xyz;
+}
+
+kernel void collision_detection(global const ulong* gridCells, global float4* positions, const float4 bounds)
+{
+    int i = get_global_id(0);
+    float3 pos = positions[gridCells[i]].xyz;
+    ulong idx = gridIdx(pos, bounds.xyz);
+   
+    // positions[gridCells[idx]].xyz = (float3)(2.f);
+    // __attribute__((opencl_unroll_hint(3)))
+    for(int x = -1; x >= 1; x++)
+    {
+        positions[gridCells[idx]].xyz = (float3)(2.f);
+        for(int y = -1; y >= 1; y++)
+        {
+            for(int z = -1; z >= 1; z++)
+            {
+                ulong n_idx = gridIdx(pos + (float3)(x,y,z), bounds.xyz);
+                //positions[gridCells[n_idx]].xyz = (float3)(x,y,z);
+                // ulong n_idx = gridIdx(pos + (float3)(x,y,z), bounds);
+                // if(n_idx != (ulong)(-1) && n_idx != idx)
+                // {
+                //     float3 n_pos = positions[n_idx].xyz; 
+                //     float3 axis = normalize(pos-n_pos);
+                //     //positions[idx].xyz = (float3)(2.f);
+                //     positions[idx].xyz += 5.f * axis;
+                //     positions[n_idx].xyz -= 5.f * axis;
+                // }
+            }
+        }
+    }
+        
 }
 
 kernel void vector_add(global float4* positions, global float4* velocities, const float dt, const float4 center)
