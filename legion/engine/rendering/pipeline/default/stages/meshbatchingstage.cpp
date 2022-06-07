@@ -35,6 +35,9 @@ namespace  legion::rendering
             std::vector<std::reference_wrapper<std::pair<std::vector<id_type>, std::vector<math::mat4>>>> batchList;
             for (size_type i = 0; i < renderablesQuery.size(); i++)
             {
+                if (!renderablesQuery[i]->active)
+                    continue;
+
                 auto& batch = (*batches)[renderers[i].get().material][model_handle{ filters[i].get().shared_mesh.id() }];
                 if (batch.first.empty())
                     batchList.push_back(std::ref(batch));

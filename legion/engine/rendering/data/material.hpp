@@ -33,7 +33,7 @@ namespace legion::rendering
     public:
         /**@brief Get the type hash of the variable type of this parameter.
          */
-        id_type type() { return m_typeId; }
+        id_type type() const { return m_typeId; }
 
         /**@brief Get the name of the parameter
          */
@@ -85,8 +85,6 @@ namespace legion::rendering
         friend struct material_handle;
     private:
         shader_handle m_shader;
-        bool m_canLoadOrSave = true;
-
 
         void init(const shader_handle& shader)
         {
@@ -238,17 +236,17 @@ namespace legion::rendering
         void set_variant(id_type variantId);
         void set_variant(const std::string& variant);
 
-        L_NODISCARD shader_handle get_shader();
+        L_NODISCARD shader_handle get_shader() const;
 
         void destroy();
 
         /**@brief Bind the material to the rendering context and prepare for use.
          */
-        void bind();
+        void bind() const;
 
         /**@brief Release the material from the rendering context.
          */
-        void release()
+        static void release()
         {
             shader_handle::release();
         }
@@ -261,12 +259,12 @@ namespace legion::rendering
         /**@brief Check if the material has a parameter by name.
          */
         template<typename T>
-        L_NODISCARD bool has_param(const std::string& name);
+        L_NODISCARD bool has_param(const std::string& name) const;
 
         /**@brief Get the value of a parameter by name.
          */
         template<typename T>
-        L_NODISCARD T get_param(const std::string& name);
+        L_NODISCARD T get_param(const std::string& name) const;
 
         /**@brief Set the value of a parameter by location.
          */
@@ -276,20 +274,20 @@ namespace legion::rendering
         /**@brief Check if the material has a parameter by location.
          */
         template<typename T>
-        L_NODISCARD bool has_param(GLint location);
+        L_NODISCARD bool has_param(GLint location) const;
 
         /**@brief Get the value of a parameter by location.
          */
         template<typename T>
-        L_NODISCARD T get_param(GLint location);
+        L_NODISCARD T get_param(GLint location) const;
 
         L_NODISCARD const std::string& get_name() const;
 
-        L_NODISCARD const std::unordered_map<id_type, std::unique_ptr<material_parameter_base>>& get_params();
+        L_NODISCARD const std::unordered_map<id_type, std::unique_ptr<material_parameter_base>>& get_params() const;
 
         /**@brief Get attribute bound to a certain name.
          */
-        attribute get_attribute(const std::string& name);
+        attribute get_attribute(const std::string& name) const;
 
         bool operator==(const material_handle& other) const { return id == other.id; }
         bool operator!=(const material_handle& other) const { return id != other.id; }
@@ -373,7 +371,7 @@ namespace legion::rendering
     }
 
     template<typename T>
-    L_NODISCARD bool material_handle::has_param(const std::string& name)
+    L_NODISCARD bool material_handle::has_param(const std::string& name) const
     {
         async::readonly_guard guard(MaterialCache::m_materialLock);
 
@@ -389,7 +387,7 @@ namespace legion::rendering
     }
 
     template<typename T>
-    L_NODISCARD bool material_handle::has_param(GLint location)
+    L_NODISCARD bool material_handle::has_param(GLint location) const
     {
         async::readonly_guard guard(MaterialCache::m_materialLock);
 
@@ -405,7 +403,7 @@ namespace legion::rendering
     }
 
     template<typename T>
-    L_NODISCARD T material_handle::get_param(const std::string& name)
+    L_NODISCARD T material_handle::get_param(const std::string& name) const
     {
         async::readonly_guard guard(MaterialCache::m_materialLock);
 
@@ -421,7 +419,7 @@ namespace legion::rendering
     }
 
     template<typename T>
-    L_NODISCARD T material_handle::get_param(GLint location)
+    L_NODISCARD T material_handle::get_param(GLint location) const
     {
         async::readonly_guard guard(MaterialCache::m_materialLock);
 

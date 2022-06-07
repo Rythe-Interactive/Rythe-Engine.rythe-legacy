@@ -9,6 +9,7 @@
 #include <core/compute/context.hpp>
 #include <core/particles/particles.hpp>
 
+
 namespace legion::core
 {
     void CoreModule::setup()
@@ -23,7 +24,6 @@ namespace legion::core
         assets::AssetCache<image>::addLoader<StbImageLoader>();
 
         createProcessChain("Update");
-
         reportSystem<ParticleSystem>();
     }
 

@@ -303,7 +303,6 @@ namespace legion::core::filesystem
 
     }
 
-
     void view::make_inheritance() const
     {
         //make all higher level fs inherit the traits from the lower level

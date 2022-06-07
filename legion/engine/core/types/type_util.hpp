@@ -322,7 +322,7 @@ namespace legion::core
      * @param expr Variable of which you wish to auto deduct type.
      */
     template<typename T>
-    id_type typeHash(T expr)
+    id_type typeHash(T&& expr)
     {
         return typeHash<remove_cvr_t<T>>();
     }

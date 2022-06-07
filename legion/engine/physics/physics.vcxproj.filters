@@ -24,9 +24,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="diviner\components\physics_component.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="diviner\colliders\convexcollider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -57,6 +54,27 @@
     <ClCompile Include="diviner\broadphasecollisionalgorithms\broadphaseuniformgridnocaching.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="physx\systems\physx_physics_system.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="physx\physx_event_process_funcs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="physx\physx_integration_helpers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="physx\data\physx_wrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="data\colliders\collider_data.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="diviner\components\physics_component.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="physx\data\physx_wrapper_container.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="diviner\cube_collider_params.hpp">
@@ -65,9 +83,6 @@
     <ClInclude Include="module\physicsmodule.hpp">
       <Filter>module</Filter>
     </ClInclude>
-    <ClInclude Include="diviner\components\physics_component.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="diviner\colliders\physicscollider.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -75,9 +90,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="diviner\data\physics_manifold.hpp">
-      <Filter>components</Filter>
-    </ClInclude>
-    <ClInclude Include="diviner\components\rigidbody.hpp">
       <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="diviner\halfedgeface.hpp">
@@ -125,7 +137,7 @@
     <ClInclude Include="diviner\data\edgepenetrationquery.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="diviner\events\events.hpp">
+    <ClInclude Include="events\events.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="diviner\data\VoronoiAABB.hpp">
@@ -165,6 +177,45 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="diviner\data\convex_convergence_identifier.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="physx\systems\physx_physics_system.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="components\rigidbody.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="data\rigibody_data.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="physx\data\physx_wrapper.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="physx\data\physx_wrapper_container.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="physx\physx_event_process_funcs.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="physx\physx_integration_helpers.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="data\component_flags.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="data\colliders\collider_data.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="data\physics_component_data.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="diviner\components\physics_component.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="diviner\components\rigidbody.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="components\physics_component.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

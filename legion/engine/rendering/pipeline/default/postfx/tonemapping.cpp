@@ -42,9 +42,19 @@ namespace legion::rendering
         m_autoExposure.store(enable, std::memory_order_relaxed);
     }
 
+    bool Tonemapping::autoExposureEnabled() noexcept
+    {
+        return m_autoExposure.load(std::memory_order_relaxed);
+    }
+
     void Tonemapping::setExposure(float value) noexcept
     {
         m_exposure.store(value, std::memory_order_relaxed);
+    }
+
+    float Tonemapping::getExposure() noexcept
+    {
+        return m_exposure.load(std::memory_order_relaxed);
     }
 
     void Tonemapping::setup(app::window& context)

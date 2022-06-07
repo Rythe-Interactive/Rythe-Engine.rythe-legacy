@@ -37,7 +37,7 @@ namespace legion::core
     };                                                                                                                  \
                                                                                                                         \
     template<typename C, typename F>                                                                                    \
-    constexpr bool CONCAT(has_, CONCAT(x, _v)) = CONCAT(has_, x)<C, F>::value;                                   \
+    constexpr bool CONCAT(has_, CONCAT(x, _v)) = CONCAT(has_, x)<C, F>::value;                                          \
                                                                                                                         \
     template<typename, typename T>                                                                                      \
     struct CONCAT(has_static_, x) {                                                                                     \
@@ -70,7 +70,7 @@ namespace legion::core
     };                                                                                                                  \
                                                                                                                         \
     template<typename C, typename F>                                                                                    \
-    constexpr bool CONCAT(has_, CONCAT(x, _v)) = CONCAT(has_, x)<C, F>::value;                                   \
+    constexpr bool CONCAT(has_, CONCAT(x, _v)) = CONCAT(has_, x)<C, F>::value;                                          \
                                                                                                                         \
     template<typename, typename T>                                                                                      \
     struct CONCAT(has_static_, x) {                                                                                     \
@@ -122,20 +122,27 @@ namespace legion::core
     };                                                                                                                  \
                                                                                                                         \
     template<EXPAND(typenames(EXPAND(templateArgs)))>                                                                   \
-    constexpr bool CONCAT(name, _v) = name<EXPAND(templateArgs)>::value;
-
-    HAS_FUNC(begin);
-    HAS_FUNC(end);
-
-    COMBINE_SFINAE(is_container, has_begin_v<T L_COMMA typename T::iterator(void)>&& has_end_v<T L_COMMA typename T::iterator(void)>, T);
-
-    HAS_FUNC(resize);
-
-    COMBINE_SFINAE(is_resizable_container, has_begin_v<T L_COMMA typename T::iterator(void)>&& has_end_v<T L_COMMA typename T::iterator(void)>&& has_resize_v<T L_COMMA void(size_type)>, T);
+    constexpr bool CONCAT(name, _v) = name<EXPAND(templateArgs)>::value; 
 
     HAS_FUNC(setup);
     HAS_FUNC(shutdown);
     HAS_FUNC(update);
+
+    HAS_FUNC(begin);
+    HAS_FUNC(end);
+    HAS_FUNC(at);
+
+    HAS_FUNC(size);
+    HAS_FUNC(resize);
+
+    HAS_FUNC(push_back);
+    HAS_FUNC(emplace);
+    HAS_FUNC(insert);
+
+    COMBINE_SFINAE(is_container, has_begin_v<T L_COMMA typename T::iterator(void)>&& has_end_v<T L_COMMA typename T::iterator(void)>, T);
+    COMBINE_SFINAE(is_resizable_container, has_begin_v<T L_COMMA typename T::iterator(void)>&& has_end_v<T L_COMMA typename T::iterator(void)>&& has_resize_v<T L_COMMA void(size_type)>, T);
+    COMBINE_SFINAE(is_any_castable, std::is_constructible<T L_COMMA const T&>::value, T);
+
 
     template<typename derived_type, typename base_type>
     using inherits_from = typename std::enable_if<std::is_base_of<base_type, derived_type>::value, int>::type;
@@ -220,7 +227,28 @@ namespace legion::core
         static constexpr bool value = type::value;
     };
 
-
     template<class T, typename... Args>
     inline constexpr bool is_brace_constructible_v = is_brace_constructible<T, Args...>::value;
+
+
+    template<size_type I, typename Check, typename...>
+    struct element_at_is_same_as;
+
+    template<size_type I, typename Check, typename Type, typename... Types>
+    struct element_at_is_same_as<I, Check, Type, Types...> : element_at_is_same_as<I-1, Check, Type, Types...> {};
+
+    template<typename Check, typename Type, typename... Types>
+    struct element_at_is_same_as<0, Check, Type, Types...>
+    {
+        static constexpr bool value = ::std::is_same_v<Check, Type>;
+    };
+
+    template<size_type I, typename Check>
+    struct element_at_is_same_as<I, Check>
+    {
+        static constexpr bool value = false;
+    };
+
+    template<size_type I, typename Check, typename... Types>
+    inline constexpr bool element_at_is_same_as_v = element_at_is_same_as<I, Check, Types...>::value;
 }
