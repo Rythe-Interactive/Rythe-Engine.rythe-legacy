@@ -309,21 +309,23 @@ void ExampleSystem::setup()
     ent.add_component<transform>();
 
     auto emitter = ent.add_component<particle_emitter>();
-    emitter->set_spawn_rate(5000);
-    emitter->set_spawn_interval(.2f);
-    //emitter->create_uniform<float>("minLifeTime") = 10.f;
-    //emitter->create_uniform<float>("maxLifeTime") = 20.f;
+    emitter->set_spawn_rate(10000);
+    emitter->set_spawn_interval(.02f);
+    emitter->create_uniform<float>("minLifeTime") = 1.f;
+    emitter->create_uniform<float>("maxLifeTime") = 5.f;
     //emitter->create_uniform<int>("frameCount", 9);
     emitter->resize(100000);
     ////emitter->add_policy<scale_lifetime_policy>();
-    emitter->add_policy<example_policy>();
-    emitter->add_policy<gpu_orbital_policy>();
+    //emitter->add_policy<example_policy>();
+    //emitter->add_policy<gpu_orbital_policy>();
+    emitter->add_policy<gpu_fountain_policy>();
+    //emitter->add_policy<fountain_policy>();
     material = gfx::MaterialCache::create_material("Particle", fs::view("assets://shaders/particle.shs"));
-    material.set_param("isLit", true);
+    material.set_param("isLit", false);
     material.set_param("billboard", false);
     material.set_param("animated", false);
-    material.set_param("useSolidColor", false);
-    material.set_param("_color", math::colors::green);
+    material.set_param("useSolidColor", true);
+    material.set_param("_color", math::color(0.f, 0.f, 1.f, .5f));
     material.set_param("useTexture", false);
 
     material.set_param(SV_ALBEDO, rendering::TextureCache::create_texture(fs::view("engine://resources/default/albedo")));

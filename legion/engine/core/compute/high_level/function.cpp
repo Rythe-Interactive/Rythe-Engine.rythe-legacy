@@ -84,7 +84,11 @@ namespace legion::core::compute
             }
 
         }
-        m_kernel->finish();
+
+        if (!m_async)
+            m_kernel->finish();
+        else
+            m_busy = true;
 
         return common::success;
     }

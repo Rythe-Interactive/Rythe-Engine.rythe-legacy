@@ -39,13 +39,25 @@ namespace legion::core
         virtual void onUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
     };
 
+    struct gpu_fountain_policy : public particle_policy<gpu_fountain_policy>
+    {
+        NO_DTOR_RULE5_NOEXCEPT(gpu_fountain_policy);
+        ~gpu_fountain_policy() = default;
+
+        virtual void setup(particle_emitter& emitter) override;
+        virtual void onInit(particle_emitter& emitter, size_type start, size_type end) override;
+        virtual void onUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
+    };
+
     struct fountain_policy : public particle_policy<fountain_policy>
     {
         NO_DTOR_RULE5_NOEXCEPT(fountain_policy);
         ~fountain_policy() = default;
 
-        float initForce;
+        float initForce = 2.f;
+        math::vec4 gravity = math::vec4(0.f,-1.f,0.f,0.f);
 
+        virtual void setup(particle_emitter& emitter) override;
         virtual void onInit(particle_emitter& emitter, size_type start, size_type end) override;
         virtual void onUpdate(particle_emitter& emitter, float deltaTime, size_type count) override;
     };

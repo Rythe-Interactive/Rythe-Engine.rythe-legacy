@@ -1,9 +1,26 @@
 //Initialization Functions
+kernel void init_particle(global float4* positions, const float4 position,
+                          global float4* rotations, const float4 direction,
+                          global float4* scales, const float4 scale,
+                          global float4* velocitys, global const float4* initForce, 
+                          const int start, const int end )
+{
+	int i = get_global_id(0);
+    int idx = start+i;
+    if(idx >= end)
+        return;
+        
+    positions[idx] = position;
+    rotations[idx] = direction;
+    scales[idx] = scale;
+    velocitys[idx].xyz = initForce[i].xyz;
+}
+
 kernel void init_pos(global float4* positions, const float4 position, const int start, const int end)
 {
 	int i = get_global_id(0);
     int idx = start+i;
-    if(idx > start+end)
+    if(idx > end)
         return;
 
     positions[idx] = position;
@@ -13,7 +30,7 @@ kernel void init_rot(global float4* rotations, const float4 direction, const int
 {
 	int i = get_global_id(0);
     int idx = start+i;
-    if(idx > start+end)
+    if(idx > end)
         return;
         
     rotations[idx] = direction;
@@ -22,18 +39,21 @@ kernel void init_rot(global float4* rotations, const float4 direction, const int
 kernel void init_scale(global float4* scales, const float4 scale, const int start, const int end)
 {
 	int i = get_global_id(0);
-        int idx = start+i;
-    if(idx > start+end)
+    int idx = start+i;
+    if(idx > end)
         return;
         
     scales[idx] = scale;
 }
 
-kernel void init_vel(global float4* velocity, global const float3* directions) {
-
+kernel void init_vel(global float4* velocitys, global const float4* initForce, const int start, const int end)
+{
 	int i = get_global_id(0);
+    int idx = start+i;
+    if(idx > end)
+        return;
 
-    velocity[i] = (float4)(directions[i], 0.0f);
+    velocitys[idx].xyz = initForce[i].xyz;
 }
 
 kernel void init_velField(global float4* positions, global float4* vectorField, const float4 center)

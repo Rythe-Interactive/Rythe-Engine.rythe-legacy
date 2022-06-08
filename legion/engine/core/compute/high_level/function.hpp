@@ -19,10 +19,6 @@ namespace legion::core::compute {
     struct out_ident {};
     struct inout_ident {};
 
-    //struct sub_in_ident {};
-    //struct sub_out_ident {};
-    //struct sub_inout_ident {};
-
     namespace detail {
         struct buffer_base
         {
@@ -36,19 +32,6 @@ namespace legion::core::compute {
             std::pair<byte*, size_type> container;
             std::string name;
         };
-
-        //struct sub_buffer_base
-        //{
-        //    sub_buffer_base(byte* buffer, size_type size, std::string n) : container(std::make_pair(buffer, size)), name(std::move(n)) {}
-        //    sub_buffer_base(const sub_buffer_base& other) = default;
-        //    sub_buffer_base(sub_buffer_base&& other) noexcept = default;
-        //    sub_buffer_base& operator=(const sub_buffer_base& other) = default;
-        //    sub_buffer_base& operator=(sub_buffer_base&& other) noexcept = default;
-        //    ~sub_buffer_base() = default;
-
-        //    std::pair<byte*, size_type> container;
-        //    std::string name;
-        //};
     }
 
     struct invalid_karg_type {};
@@ -153,6 +136,8 @@ namespace legion::core::compute {
         std::shared_ptr<Kernel> m_kernel;
         std::shared_ptr<Program> m_program;
         size_t m_locals = 512;
+        bool m_async;
+        mutable bool m_busy;
     public:
 
 
@@ -174,6 +159,30 @@ namespace legion::core::compute {
                 m_locals = (std::min)(locals, max);
 
             return m_locals;
+        }
+
+        void setAsyncDispatch(bool isAsync) noexcept
+        {
+            m_async = isAsync;
+        }
+
+        L_NODISCARD bool getAsyncDispatch() const noexcept
+        {
+            return m_async;
+        }
+
+        L_NODISCARD bool isBusy() const noexcept
+        {
+            return m_busy;
+        }
+
+        void wait() const
+        {
+            if (m_busy)
+            {
+                m_kernel->finish();
+                m_busy = false;
+            }
         }
     };
 

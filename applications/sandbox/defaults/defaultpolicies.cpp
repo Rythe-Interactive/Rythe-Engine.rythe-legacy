@@ -20,8 +20,8 @@ namespace legion::core
             int maxBound = 60;
             auto pos = math::vec4(math::normalize(baseDir) * minBound + math::normalize(baseDir) * (idx % (maxBound - minBound)) / 2.f, 1);
             auto dist = math::length(pos);
-            auto rand = math::diskRand(dist/maxBound);
-            pos += math::vec4(rand.x, (1.f-(dist/maxBound))*2.f, rand.y, 0.f);
+            auto rand = math::diskRand(dist / maxBound);
+            pos += math::vec4(rand.x, (1.f - (dist / maxBound)) * 2.f, rand.y, 0.f);
             //pos.y = math::sin(dist / math::pi<float>()) * 5.f * (pos.x / maxBound);
             posBuffer[idx] = pos;
         }
@@ -103,12 +103,11 @@ namespace legion::core
 
         //core::time::stopwatch watch;
         //watch.start();
-        update_orbits(paddedSize, compute::in(livingBuffer, "living"), compute::inout(posBuffer, "positions"), compute::inout(velBuffer, "velocitys"), compute::karg(gravForce, "gravForce"),compute::karg(c_mass, "c_mass"), compute::karg(deltaTime, "dt"));
+        update_orbits(paddedSize, compute::in(livingBuffer, "living"), compute::inout(posBuffer, "positions"), compute::inout(velBuffer, "velocitys"), compute::karg(gravForce, "gravForce"), compute::karg(c_mass, "c_mass"), compute::karg(deltaTime, "dt"));
         //watch.end();
         //log::debug("Orbital Calc update elapsed time {}ms", watch.elapsed_time().milliseconds());
     }
 #pragma endregion
-
 #pragma region Orbital Policy
     void orbital_policy::setup(particle_emitter& emitter)
     {
@@ -160,31 +159,143 @@ namespace legion::core
     }
 
 #pragma endregion
+#pragma region gpu_fountain_policy
+    void gpu_fountain_policy::setup(particle_emitter& emitter)
+    {
+        if (!emitter.has_uniform<compute::function>("initParticle"))
+            emitter.create_uniform<compute::function>("initParticle", fs::view("assets://kernels/particles.cl").load_as<compute::function>("init_particle")).setLocalSize(16);
+        if (!emitter.has_uniform<compute::function>("initPos"))
+            emitter.create_uniform<compute::function>("initPos", fs::view("assets://kernels/particles.cl").load_as<compute::function>("init_pos")).setLocalSize(16);
+        if (!emitter.has_uniform<compute::function>("initRot"))
+            emitter.create_uniform<compute::function>("initRot", fs::view("assets://kernels/particles.cl").load_as<compute::function>("init_rot")).setLocalSize(16);
+        if (!emitter.has_uniform<compute::function>("initScale"))
+            emitter.create_uniform<compute::function>("initScale", fs::view("assets://kernels/particles.cl").load_as<compute::function>("init_scale")).setLocalSize(16);
+
+        if (!emitter.has_uniform<compute::function>("initVel"))
+            emitter.create_uniform<compute::function>("initVel", fs::view("assets://kernels/fountainPolicy.cl").load_as<compute::function>("init_vel")).setLocalSize(16);
+
+        if (!emitter.has_uniform<compute::function>("gravUpdate"))
+            emitter.create_uniform<compute::function>("gravUpdate", fs::view("assets://kernels/fountainPolicy.cl").load_as<compute::function>("grav_update")).setLocalSize(16);
+
+        if (!emitter.has_uniform<math::vec4>("gravity"))
+            emitter.create_uniform<math::vec4>("gravity", math::vec4(0.f, -1.f, 0.f, 0.f));
+
+        if (!emitter.has_buffer<math::vec4>("posBuffer"))
+            emitter.create_buffer<math::vec4>("posBuffer");
+        if (!emitter.has_buffer<math::vec4>("velBuffer"))
+            emitter.create_buffer<math::vec4>("velBuffer");
+        if (!emitter.has_buffer<math::vec4>("rotBuffer"))
+            emitter.create_buffer<math::vec4>("rotBuffer");
+        if (!emitter.has_buffer<math::vec4>("scaleBuffer"))
+            emitter.create_buffer<math::vec4>("scaleBuffer");
+
+
+        auto& init_particle = emitter.get_uniform<compute::function>("initParticle");
+        init_particle.setAsyncDispatch(true);
+        auto& init_vel = emitter.get_uniform<compute::function>("initVel");
+        init_vel.setAsyncDispatch(true);
+        auto& grav_update = emitter.get_uniform<compute::function>("gravUpdate");
+        grav_update.setAsyncDispatch(true);
+    }
+    void gpu_fountain_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
+    {
+
+        auto& init_particle = emitter.get_uniform<compute::function>("initParticle");
+        auto& init_position = emitter.get_uniform<compute::function>("initPos");
+        auto& init_rotation = emitter.get_uniform<compute::function>("initRot");
+        auto& init_scale = emitter.get_uniform<compute::function>("initScale");
+
+        auto& init_vel = emitter.get_uniform<compute::function>("initVel");
+
+        auto& posBuffer = emitter.get_buffer<math::vec4>("posBuffer");
+        auto& velBuffer = emitter.get_buffer<math::vec4>("velBuffer");
+        auto& rotBuffer = emitter.get_buffer<math::vec4>("rotBuffer");
+        auto& scaleBuffer = emitter.get_buffer<math::vec4>("scaleBuffer");
+
+        auto paddedSize = math::max(((end - start - 1) | 15) + 1, 16ull);
+        int _start = static_cast<int>(start);
+        int _end = static_cast<int>(end);
+
+        //core::time::stopwatch watch;
+        //watch.start();
+        math::vec4 initPosition = math::vec4(0.f);
+        rotation dir = rotation::lookat(math::vec3(0.f), math::vec3::forward);
+        math::vec4 scale = math::vec4(.1f);
+        std::vector<math::vec4> initForce;
+        for (size_type i = start; i < end; i++)
+        {
+            auto diskRand = math::diskRand(.5f);
+            initForce.push_back(math::vec4(diskRand.x, 1.f, diskRand.y, 0.f) * 2.f);
+        }
+        init_particle(paddedSize, compute::inout(posBuffer, "positions"), compute::karg(initPosition, "position"),
+            compute::inout(rotBuffer, "rotations"), compute::karg(dir, "direction"),
+            compute::inout(scaleBuffer, "scales"), compute::karg(scale, "scale"),
+            compute::inout(velBuffer, "velocitys"), compute::inout(initForce, "initForce"),
+            compute::karg(_start, "start"), compute::karg(_end, "end"));
+    }
+    void gpu_fountain_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
+    {
+        using namespace lgn::core;
+        if (count < 1)
+            return;
+
+        auto& init_particle = emitter.get_uniform<compute::function>("initParticle");
+
+        auto& posBuffer = emitter.get_buffer<math::vec4>("posBuffer");
+        auto& velBuffer = emitter.get_buffer<math::vec4>("velBuffer");
+        auto livingBuffer = emitter.get_living_buffer();
+        auto paddedSize = math::max(((count - 1) | 15) + 1, 16ull);
+
+        math::vec4 gravity = emitter.get_uniform<math::vec4>("gravity");
+        auto& grav_update = emitter.get_uniform<compute::function>("gravUpdate");
+        init_particle.wait();
+        grav_update.wait();
+        grav_update(paddedSize, compute::in(livingBuffer, "living"), compute::inout(posBuffer, "positions"), compute::inout(velBuffer, "velocitys"), compute::karg(gravity, "gravity"), compute::karg(deltaTime, "dt"));
+    }
+#pragma endregion
 #pragma region Fountain Policy
+    void fountain_policy::setup(particle_emitter& emitter)
+    {
+        if (!emitter.has_buffer<math::vec4>("posBuffer"))
+            emitter.create_buffer<math::vec4>("posBuffer");
+        if (!emitter.has_buffer<math::vec4>("velBuffer"))
+            emitter.create_buffer<math::vec4>("velBuffer");
+        if (!emitter.has_buffer<math::vec4>("rotBuffer"))
+            emitter.create_buffer<math::vec4>("rotBuffer");
+        if (!emitter.has_buffer<math::vec4>("scaleBuffer"))
+            emitter.create_buffer<math::vec4>("scaleBuffer");
+    }
     void fountain_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
     {
-        static id_type posBufferId = nameHash("posBuffer");
-        static id_type velBufferId = nameHash("velBuffer");
-        auto& posBuffer = emitter.has_buffer<position>(posBufferId) ? emitter.get_buffer<position>(posBufferId) : emitter.create_buffer<position>("posBuffer");
-        auto& velBuffer = emitter.has_buffer<velocity>(velBufferId) ? emitter.get_buffer<velocity>(velBufferId) : emitter.create_buffer<velocity>("velBuffer");
+        auto& posBuffer = emitter.get_buffer<math::vec4>("posBuffer");
+        auto& velBuffer = emitter.get_buffer<math::vec4>("velBuffer");
+        auto& rotBuffer = emitter.get_buffer<math::vec4>("rotBuffer");
+        auto& scaleBuffer = emitter.get_buffer<math::vec4>("scaleBuffer");
 
+        math::vec4 initPosition = math::vec4(0.f);
+        math::vec4 dir = math::vec4(math::vec3::zero, 1.f);
+        math::vec4 scale = math::vec4(.1f);
         for (size_type idx = start; idx < end; idx++)
         {
-            auto randpoint = math::diskRand(.2f);
-            posBuffer[idx] = math::vec3(randpoint.x, math::linearRand(0.f, 0.8f), randpoint.y);
-            auto direction = math::vec3::up /*+ math::normalize(math::vec3(math::linearRand(-1.f, 1.f), 0.f, math::linearRand(-1.f, 1.f)))*/;
+            posBuffer[idx] = initPosition;
+            rotBuffer[idx] = dir;
+            scaleBuffer[idx] = scale;
+
+            auto diskRand = math::diskRand(1.0f);
+            auto direction = math::vec4(diskRand.x, 1.f, diskRand.y, 0.f);
             velBuffer[idx] = direction * initForce;
         }
     }
 
     void fountain_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
     {
-        auto& posBuffer = emitter.get_buffer<position>("posBuffer");
-        auto& velBuffer = emitter.get_buffer<velocity>("velBuffer");
+        auto& posBuffer = emitter.get_buffer<math::vec4>("posBuffer");
+        auto& velBuffer = emitter.get_buffer<math::vec4>("velBuffer");
+
         for (size_type idx = 0; idx < count; idx++)
         {
+            velBuffer[idx] += gravity * deltaTime;
             posBuffer[idx] += velBuffer[idx] * deltaTime;
-            velBuffer[idx] += math::vec3(0.f, -0.10f, 0.f) * deltaTime;
         }
     }
 #pragma endregion
@@ -224,6 +335,7 @@ namespace legion::core
         }
     }
 #pragma endregion
+#pragma region color_life_time_policy
     void color_lifetime_policy::setup(particle_emitter& emitter)
     {
         if (!emitter.has_buffer<math::color>("colorBuffer"))
@@ -249,7 +361,7 @@ namespace legion::core
             }
         }
     }
-
+#pragma endregion
 #pragma region Boids
 #pragma region Locomotion
     void locomotion_policy::setup(particle_emitter& emitter)
