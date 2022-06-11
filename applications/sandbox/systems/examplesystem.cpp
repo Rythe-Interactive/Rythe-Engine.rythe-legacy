@@ -309,17 +309,17 @@ void ExampleSystem::setup()
     ent.add_component<transform>();
 
     auto emitter = ent.add_component<particle_emitter>();
-    emitter->set_spawn_rate(10000);
+    emitter->set_spawn_rate(1000);
     emitter->set_spawn_interval(.02f);
-    emitter->create_uniform<float>("minLifeTime") = 1.f;
-    emitter->create_uniform<float>("maxLifeTime") = 5.f;
+    //emitter->create_uniform<float>("minLifeTime") = 1.f;
+    //emitter->create_uniform<float>("maxLifeTime") = 5.f;
     //emitter->create_uniform<int>("frameCount", 9);
     emitter->resize(100000);
     ////emitter->add_policy<scale_lifetime_policy>();
-    //emitter->add_policy<example_policy>();
+    emitter->add_policy<example_policy>();
     //emitter->add_policy<gpu_orbital_policy>();
-    emitter->add_policy<gpu_fountain_policy>();
     //emitter->add_policy<fountain_policy>();
+    //emitter->add_policy<gpu_fountain_policy>();
     material = gfx::MaterialCache::create_material("Particle", fs::view("assets://shaders/particle.shs"));
     material.set_param("isLit", false);
     material.set_param("billboard", false);

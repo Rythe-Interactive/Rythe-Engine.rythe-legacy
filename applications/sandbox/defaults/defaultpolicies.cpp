@@ -74,7 +74,7 @@ namespace legion::core
         int _start = static_cast<int>(start);
         int _end = static_cast<int>(end);
 
-        /*       init_position(paddedSize, compute::inout(posBuffer, "positions"), compute::karg(_start, "start"), compute::karg(_end, "end"));*/
+         //init_position(paddedSize, compute::inout(posBuffer, "positions"), compute::karg(_start, "start"), compute::karg(_end, "end"));
 
         rotation dir = rotation::lookat(math::vec3(0.f), math::vec3::forward);
         init_rotation(paddedSize, compute::inout(rotBuffer, "rotations"), compute::karg(dir, "direction"), compute::karg(_start, "start"), compute::karg(_end, "end"));
@@ -84,7 +84,7 @@ namespace legion::core
 
         float gravForce = emitter.get_uniform<float>("gravForce");
         float c_mass = emitter.get_uniform<float>("celestialMass");
-        init_vel(paddedSize, compute::in(posBuffer, "positions"), compute::inout(velBuffer, "velocitys"), compute::karg(gravForce, "gravForce"), compute::karg(c_mass, "c_mass"), compute::karg(_start, "start"), compute::karg(_end, "end"));
+        init_vel(paddedSize, compute::inout(posBuffer, "positions"), compute::inout(velBuffer, "velocitys"), compute::karg(gravForce, "gravForce"), compute::karg(c_mass, "c_mass"), compute::karg(_start, "start"), compute::karg(_end, "end"));
     }
     void gpu_orbital_policy::onUpdate(particle_emitter& emitter, float deltaTime, size_type count)
     {
@@ -93,6 +93,9 @@ namespace legion::core
             return;
 
         auto& update_orbits = emitter.get_uniform<compute::function>("updateOrbits");
+        auto& init_position = emitter.get_uniform<compute::function>("initPos");
+        auto& init_rotation = emitter.get_uniform<compute::function>("initRot");
+        auto& init_scale = emitter.get_uniform<compute::function>("initScale");
 
         auto& posBuffer = emitter.get_buffer<math::vec4>("posBuffer");
         auto& velBuffer = emitter.get_buffer<math::vec4>("velBuffer");
@@ -103,6 +106,10 @@ namespace legion::core
 
         //core::time::stopwatch watch;
         //watch.start();
+        init_position.wait();
+        init_rotation.wait();
+        init_scale.wait();
+        update_orbits.wait();
         update_orbits(paddedSize, compute::in(livingBuffer, "living"), compute::inout(posBuffer, "positions"), compute::inout(velBuffer, "velocitys"), compute::karg(gravForce, "gravForce"), compute::karg(c_mass, "c_mass"), compute::karg(deltaTime, "dt"));
         //watch.end();
         //log::debug("Orbital Calc update elapsed time {}ms", watch.elapsed_time().milliseconds());
@@ -199,7 +206,6 @@ namespace legion::core
     }
     void gpu_fountain_policy::onInit(particle_emitter& emitter, size_type start, size_type end)
     {
-
         auto& init_particle = emitter.get_uniform<compute::function>("initParticle");
         auto& init_position = emitter.get_uniform<compute::function>("initPos");
         auto& init_rotation = emitter.get_uniform<compute::function>("initRot");
