@@ -89,7 +89,7 @@ namespace legion::physics
 
         PxDefaultMemoryOutputStream buf;
         if (!PS::cooking->cookConvexMesh(convexDesc, buf))
-            return NULL;
+            return nullptr;
 
         PxDefaultMemoryInputData input(buf.getData(), buf.getSize());
         auto convex = PS::physxSDK->createConvexMesh(input);

@@ -15,7 +15,7 @@ namespace legion::physics
         const math::vec3& vel = rigidbody.rigidbodyData.getVelocity();
 
         PxRigidDynamic* rigid = static_cast<PxRigidDynamic*>(wrapper.physicsActor);
-        
+
         PxVec3 pxVelocity(vel.x, vel.y, vel.z);
         rigid->setLinearVelocity(pxVelocity);
     }
