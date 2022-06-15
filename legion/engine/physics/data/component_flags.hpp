@@ -32,23 +32,4 @@ namespace legion::physics
         rb_angular_drag,
         rb_max //must always be the last enum
     };
-
-    enum class collider_type
-    {
-        box,
-        quickhull_convex,
-        sphere,
-        not_set //internal use only
-    };
-
-    enum rigidbody_flag : size_type
-    {
-        rb_velocity,
-        rb_angular_velocity,
-        rb_inertia_tensor,
-        rb_mass,
-        rb_linear_drag,
-        rb_angular_drag,
-        rb_max //must always be the last enum
-    };
 }

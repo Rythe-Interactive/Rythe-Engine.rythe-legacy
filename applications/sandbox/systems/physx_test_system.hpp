@@ -12,11 +12,6 @@ struct self_destruct_component
     float selfDestructTimer = 0.0f;
 };
 
-struct self_destruct_component
-{
-    float selfDestructTimer = 0.0f;
-};
-
 namespace legion::physics
 {
     class PhysXTestSystem : public System<PhysXTestSystem>
