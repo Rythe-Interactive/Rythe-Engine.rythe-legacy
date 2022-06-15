@@ -44,12 +44,12 @@ namespace legion::physics
 
         L_ALWAYS_INLINE const math::vec3& getBoxExtents() const noexcept { return m_boxExtents; }
 
-        L_ALWAYS_INLINE void* getConvexPtr() const noexcept { return m_internalConvexStructure; }
+        L_ALWAYS_INLINE pointer<void> getConvexPtr() const noexcept { return { m_internalConvexStructure }; }
 
     private:
 
         math::vec3 m_boxExtents{0.0f};
-        void* m_internalConvexStructure{nullptr};
+        pointer<void> m_internalConvexStructure{nullptr};
     };
 
     class SphereColliderData : public ColliderData

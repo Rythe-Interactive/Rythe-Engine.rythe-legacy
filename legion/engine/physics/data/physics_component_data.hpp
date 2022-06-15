@@ -10,13 +10,9 @@ namespace legion::physics
 
     class PhysicsComponentData
     {
-    public:
+        typedef delegate<void* (const std::vector<math::vec3>& vertices)> GenerateConvexrDelegate;
 
-        inline static delegate<void* (const std::vector<math::vec3>& vertices)> m_generateConvexColliderFunc =
-            [](const std::vector<math::vec3>& vertices) -> void*
-        {
-            return nullptr;
-        };
+    public:
 
         L_ALWAYS_INLINE void AddBoxCollider(const math::vec3& extents, const math::vec3& offset, const math::quat& rotation)
         {
@@ -68,6 +64,11 @@ namespace legion::physics
 
         L_ALWAYS_INLINE void resetModificationFlags() { m_modificationFlags.reset(); }
 
+        static void setConvexGeneratorDelegate(GenerateConvexrDelegate generateConvexFunc)
+        {
+            m_generateConvexColliderFunc = generateConvexFunc;
+        }
+
     private:
 
         L_ALWAYS_INLINE void updateColliderRecords(physics_component_flag firstColliderFlag, physics_component_flag nextColliderFlag) noexcept
@@ -78,6 +79,13 @@ namespace legion::physics
 
             m_colliderCount++;
         }
+
+        inline static GenerateConvexrDelegate m_generateConvexColliderFunc =
+            [](const std::vector<math::vec3>& vertices) -> void*
+        {
+            log::warn("convex collider not generated because PhysicsComponentData::m_generateConvexColliderFunc not set ");
+            return nullptr;
+        };
 
         std::vector<ConvexColliderData> m_convexColliderData;
         std::vector<SphereColliderData> m_sphereColliderData;

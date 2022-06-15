@@ -79,7 +79,6 @@ namespace legion::physics
         }
     }
 
-
     void processAddFirstSphere(physics_component& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
     {
         PhysicsComponentData& data = physicsComponent.physicsCompData;
@@ -127,8 +126,6 @@ namespace legion::physics
 
             instantiateNextCollider<PxSphereGeometry, float&>(getSDK(), wrapper, localTransform, sceneInfo, radius);
         }
-
-
     }
 
     void processAddFirstConvex(physics_component& physicsComponent, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity)
@@ -145,7 +142,7 @@ namespace legion::physics
             PxTransform localTransform;
 
             calculateGlobalAndLocalTransforms(localTransform, transform, convex, entity);
-            PxConvexMesh* convexMesh = static_cast<PxConvexMesh*>(convex.getConvexPtr());
+            PxConvexMesh* convexMesh = static_cast<PxConvexMesh*>(convex.getConvexPtr().ptr);
 
             if (wrapper.bodyType == physics_body_type::rigidbody)
             {
@@ -171,7 +168,7 @@ namespace legion::physics
             PxTransform localTransform;
             calculateLocalColliderTransform(localTransform, convex);
 
-            PxConvexMesh* convexMesh = static_cast<PxConvexMesh*>(convex.getConvexPtr());
+            PxConvexMesh* convexMesh = static_cast<PxConvexMesh*>(convex.getConvexPtr().ptr);
             instantiateNextCollider<PxConvexMeshGeometry, PxConvexMesh*&>(getSDK(), wrapper, localTransform, sceneInfo, convexMesh);
         }
     }

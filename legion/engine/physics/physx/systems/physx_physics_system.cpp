@@ -51,12 +51,13 @@ namespace legion::physics
         }
 
         bindEventsToEventProcessors();
-        //createProcess<&PhysXPhysicsSystem::fixedUpdate>("Physics", m_timeStep);
 
         bindToEvent<events::component_destruction<physics_component>, &PhysXPhysicsSystem::markPhysicsWrapperPendingRemove>();
 
-        PhysicsComponentData::m_generateConvexColliderFunc = &PhysXPhysicsSystem::physxGenerateConvexMesh;
-
+        PhysicsComponentData::setConvexGeneratorDelegate([this](const std::vector<math::vec3>& vertices)->void*
+            {
+                return physxGenerateConvexMesh(vertices);
+            });
     }
 
     void PhysXPhysicsSystem::shutdown()
