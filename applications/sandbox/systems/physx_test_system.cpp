@@ -90,20 +90,20 @@ namespace legion::physics
         auto unrotatedBlock = createDefaultMeshEntity(math::vec3(0, 2, 0), cubeH, tileMat);
         {
             auto unrotatedBlockPC = unrotatedBlock.add_component<physics_component>();
-            unrotatedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1));
+            unrotatedBlockPC->physicsCompData.addBoxCollider(math::vec3(1));
             
             float headOffset = 0.5f;
             addRobotPartLambda(math::vec3(headOffset), math::vec3(0, 0.75f,0), unrotatedBlock,  math::identity<math::quat>(),cubeH);
-            unrotatedBlockPC->physicsCompData.AddBoxCollider(math::vec3(headOffset), math::vec3(0, 0.75f, 0), math::identity<math::quat>());
+            unrotatedBlockPC->physicsCompData.addBoxCollider(math::vec3(headOffset), math::vec3(0, 0.75f, 0), math::identity<math::quat>());
 
             addRobotPartLambda(math::vec3(1.0, 0.5, 0.5), math::vec3(1, 0.0f, 0), unrotatedBlock,  math::identity<math::quat>(), cubeH);
-            unrotatedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1.0, 0.5f, 0.5f),math::vec3(1,0,0), math::identity<math::quat>());
+            unrotatedBlockPC->physicsCompData.addBoxCollider(math::vec3(1.0, 0.5f, 0.5f),math::vec3(1,0,0), math::identity<math::quat>());
 
             addRobotPartLambda(math::vec3(1.0, 0.5, 0.5), math::vec3(-1, 0.0f, 0), unrotatedBlock,  math::identity<math::quat>(), cubeH);
-            unrotatedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1.0, 0.5f, 0.5f), math::vec3(-1, 0, 0), math::identity<math::quat>());
+            unrotatedBlockPC->physicsCompData.addBoxCollider(math::vec3(1.0, 0.5f, 0.5f), math::vec3(-1, 0, 0), math::identity<math::quat>());
 
             addRobotPartLambda(math::vec3(1.0f), math::vec3(0, -1.0f, 0), unrotatedBlock, math::identity<math::quat>(),sphereH);
-            unrotatedBlockPC->physicsCompData.AddSphereCollider(0.5f, math::vec3(0, -1, 0));
+            unrotatedBlockPC->physicsCompData.addSphereCollider(0.5f, math::vec3(0, -1, 0));
 
             auto& rb = *unrotatedBlock.add_component<rigidbody>();
             rb.rigidbodyData.setMass(5.0f);
@@ -113,7 +113,7 @@ namespace legion::physics
         auto shiftedBlock = createDefaultMeshEntity(math::vec3(0, 10, 0), cubeH, concreteMat);
         {
             auto shiftedBlockPC = shiftedBlock.add_component<physics_component>();
-            shiftedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1, 1, 1));
+            shiftedBlockPC->physicsCompData.addBoxCollider(math::vec3(1, 1, 1));
 
             shiftedBlock.add_component<rigidbody>();
         }
@@ -142,7 +142,7 @@ namespace legion::physics
             const std::vector<math::vec3>& verts = renderable.shared_mesh.ptr->vertices;
 
             auto& statuePhysicsComponent = *statue.add_component<physics_component>();
-            statuePhysicsComponent.physicsCompData.AddConvexCollider(verts, math::vec3(), math::identity<math::quat>());
+            statuePhysicsComponent.physicsCompData.addConvexCollider(verts, math::vec3(), math::identity<math::quat>());
         }
 
         {
@@ -151,7 +151,7 @@ namespace legion::physics
             const std::vector<math::vec3>& verts = renderable.shared_mesh.ptr->vertices;
 
             auto& suzannePhysicsComponent = *suzanne.add_component<physics_component>();
-            suzannePhysicsComponent.physicsCompData.AddConvexCollider(verts, math::vec3(), math::identity<math::quat>());
+            suzannePhysicsComponent.physicsCompData.addConvexCollider(verts, math::vec3(), math::identity<math::quat>());
 
             suzanne.add_component<rigidbody>();
         }
@@ -170,7 +170,7 @@ namespace legion::physics
 
         {
             auto shiftedBlockPC = shiftedBlock.add_component<physics_component>();
-            shiftedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1, 1, 1));
+            shiftedBlockPC->physicsCompData.addBoxCollider(math::vec3(1, 1, 1));
 
             rigidbody& rb = *shiftedBlock.add_component<rigidbody>();
             rb.rigidbodyData.setVelocity(cameraDirection * 20.0f);
@@ -192,7 +192,7 @@ namespace legion::physics
 
         {
             auto shiftedBlockPC = shiftedBlock.add_component<physics_component>();
-            shiftedBlockPC->physicsCompData.AddSphereCollider(0.5f, math::vec3());
+            shiftedBlockPC->physicsCompData.addSphereCollider(0.5f, math::vec3());
 
             rigidbody& rb = *shiftedBlock.add_component<rigidbody>();
             rb.rigidbodyData.setVelocity(cameraDirection * 20.0f);
@@ -269,7 +269,7 @@ namespace legion::physics
         scaleH = scale;
 
         auto& phyComp = *ent.add_component<physics_component>();
-        phyComp.physicsCompData.AddBoxCollider(scale);
+        phyComp.physicsCompData.addBoxCollider(scale);
 
         return ent;
     }
@@ -298,7 +298,7 @@ namespace legion::physics
             const std::vector<math::vec3>& verts = renderable.shared_mesh.ptr->vertices;
 
             auto& phyComp = *ent.add_component<physics_component>();
-            phyComp.physicsCompData.AddConvexCollider(verts, math::vec3(), math::identity<math::quat>());
+            phyComp.physicsCompData.addConvexCollider(verts, math::vec3(), math::identity<math::quat>());
 
             ent.add_component<rigidbody>();
         }
