@@ -64,17 +64,20 @@ namespace legion::physics
 
             const math::vec3& extents = convexCollider.getBoxExtents();
 
-            if (wrapper.bodyType == physics_body_type::rigidbody)
+            switch (wrapper.bodyType)
             {
+            case physics_body_type::rigidbody:
                 instantiateDynamicActorWith<PxBoxGeometry, const PxVec3&>(getSDK(), wrapper, transform,
                     localTransform, sceneInfo, entity, PxVec3(extents.x, extents.y, extents.z));
-            }
-            else if (wrapper.bodyType == physics_body_type::static_collider)
-            {
+                break;
+            case physics_body_type::static_collider:
                 instantiateStaticActorWith<PxBoxGeometry, const PxVec3&>(getSDK(), wrapper, transform,
                     localTransform, sceneInfo, entity, PxVec3(extents.x, extents.y, extents.z));
+                break;
+            default:
+                log::warn("PhysxInternalWrapper::bodyType set to an unsupported body type");
             }
-                
+  
             break;
         }
     }
@@ -96,13 +99,16 @@ namespace legion::physics
 
             float radius = sphereCollider.getRadius();
 
-            if (wrapper.bodyType == physics_body_type::rigidbody)
+            switch (wrapper.bodyType)
             {
-                instantiateDynamicActorWith<PxSphereGeometry,float&>(getSDK(), wrapper, transform, localTransform, sceneInfo, entity, radius);
-            }
-            else if (wrapper.bodyType == physics_body_type::static_collider)
-            {
+            case physics_body_type::rigidbody:
+                instantiateDynamicActorWith<PxSphereGeometry, float&>(getSDK(), wrapper, transform, localTransform, sceneInfo, entity, radius);
+                break;
+            case physics_body_type::static_collider:
                 instantiateStaticActorWith<PxSphereGeometry, float&>(getSDK(), wrapper, transform, localTransform, sceneInfo, entity, radius);
+                break;
+            default:
+                log::warn("PhysxInternalWrapper::bodyType set to an unsupported body type");
             }
 
             break;
@@ -142,15 +148,21 @@ namespace legion::physics
             PxTransform localTransform;
 
             calculateGlobalAndLocalTransforms(localTransform, transform, convex, entity);
-            PxConvexMesh* convexMesh = static_cast<PxConvexMesh*>(convex.getConvexPtr().ptr);
 
-            if (wrapper.bodyType == physics_body_type::rigidbody)
+            //const cast because PxConvexMeshGeometry does not accept const PxConvexMesh*
+            const PxConvexMesh* cconvexMesh = static_cast< const PxConvexMesh*>(convex.getConvexPtr().ptr);
+            PxConvexMesh* convexMesh = const_cast<PxConvexMesh*>(cconvexMesh);
+
+            switch (wrapper.bodyType)
             {
+            case physics_body_type::rigidbody:
                 instantiateDynamicActorWith<PxConvexMeshGeometry, PxConvexMesh*&>(getSDK(), wrapper, transform, localTransform, sceneInfo, entity, convexMesh);
-            }
-            else if (wrapper.bodyType == physics_body_type::static_collider)
-            {
+                break;
+            case physics_body_type::static_collider:
                 instantiateStaticActorWith<PxConvexMeshGeometry, PxConvexMesh*&>(getSDK(), wrapper, transform, localTransform, sceneInfo, entity, convexMesh);
+                break;
+            default:
+                log::warn("PhysxInternalWrapper::bodyType set to an unsupported body type");
             }
         }
     }
@@ -168,7 +180,10 @@ namespace legion::physics
             PxTransform localTransform;
             calculateLocalColliderTransform(localTransform, convex);
 
-            PxConvexMesh* convexMesh = static_cast<PxConvexMesh*>(convex.getConvexPtr().ptr);
+            //const cast because PxConvexMeshGeometry does not accept const PxConvexMesh*
+            const PxConvexMesh* cconvexMesh = static_cast<const PxConvexMesh*>(convex.getConvexPtr().ptr);
+            PxConvexMesh* convexMesh = const_cast<PxConvexMesh*>(cconvexMesh);
+
             instantiateNextCollider<PxConvexMeshGeometry, PxConvexMesh*&>(getSDK(), wrapper, localTransform, sceneInfo, convexMesh);
         }
     }

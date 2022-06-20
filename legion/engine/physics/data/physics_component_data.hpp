@@ -10,7 +10,7 @@ namespace legion::physics
 
     class PhysicsComponentData
     {
-        typedef delegate<void* (const std::vector<math::vec3>& vertices)> GenerateConvexDelegate;
+        using GenerateConvexDelegate = delegate<void* (const std::vector<math::vec3>& vertices)>;
 
     public:
 
