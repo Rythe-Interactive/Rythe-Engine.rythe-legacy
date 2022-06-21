@@ -149,7 +149,6 @@ namespace legion::physics
 
             calculateGlobalAndLocalTransforms(localTransform, transform, convex, entity);
 
-            //const cast because PxConvexMeshGeometry does not accept const PxConvexMesh*
             PxConvexMesh* convexMesh = static_cast<PxConvexMesh*>(convex.getConvexPtr());
 
             switch (wrapper.bodyType)
@@ -179,7 +178,6 @@ namespace legion::physics
             PxTransform localTransform;
             calculateLocalColliderTransform(localTransform, convex);
 
-            //const cast because PxConvexMeshGeometry does not accept const PxConvexMesh*
             PxConvexMesh* convexMesh = static_cast<PxConvexMesh*>(convex.getConvexPtr());
 
             instantiateNextCollider<PxConvexMeshGeometry, PxConvexMesh*&>(getSDK(), wrapper, localTransform, sceneInfo, convexMesh);
