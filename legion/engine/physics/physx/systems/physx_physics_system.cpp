@@ -17,7 +17,8 @@ namespace legion::physics
         inline static PxFoundation* foundation = nullptr;
         inline static PxPvd* pvd = nullptr;
         inline static PxDefaultCpuDispatcher* dispatcher = nullptr;
-        inline static PxPhysics* phyxSDK = nullptr;
+        inline static PxPhysics* physxSDK = nullptr;
+        inline static PxCooking* cooking = nullptr;
 
         inline static PxDefaultAllocator defaultAllocator;
         inline static PxDefaultErrorCallback defaultErrorCallback;
@@ -31,9 +32,11 @@ namespace legion::physics
     constexpr size_type defaultPVDListeningPort = 5425;
     constexpr size_type defaultPVDHostTimeout = 10;
 
+    constexpr size_type convexHullVertexLimit = 256;
+
     physx::PxPhysics* PhysXPhysicsSystem::getSDK()
     {
-        return PS::phyxSDK;
+        return PS::physxSDK;
     }
 
     void PhysXPhysicsSystem::setup()
@@ -48,9 +51,13 @@ namespace legion::physics
         }
 
         bindEventsToEventProcessors();
-        createProcess<&PhysXPhysicsSystem::fixedUpdate>("Physics", m_timeStep);
 
         bindToEvent<events::component_destruction<physics_component>, &PhysXPhysicsSystem::markPhysicsWrapperPendingRemove>();
+
+        PhysicsComponentData::setConvexGeneratorDelegate([this](const std::vector<math::vec3>& vertices)->void*
+            {
+                return physxGenerateConvexMesh(vertices);
+            });
     }
 
     void PhysXPhysicsSystem::shutdown()
@@ -70,6 +77,26 @@ namespace legion::physics
         }
     }
 
+    void* PhysXPhysicsSystem::physxGenerateConvexMesh(const std::vector<math::vec3>& vertices)
+    {
+        PxConvexMeshDesc convexDesc;
+        convexDesc.points.count = vertices.size();
+        convexDesc.points.stride = sizeof(math::vec3);
+        convexDesc.points.data = vertices.data();
+        convexDesc.flags =
+            PxConvexFlag::eCOMPUTE_CONVEX | PxConvexFlag::eDISABLE_MESH_VALIDATION | PxConvexFlag::eFAST_INERTIA_COMPUTATION;
+        convexDesc.vertexLimit = convexHullVertexLimit;
+
+        PxDefaultMemoryOutputStream buf;
+        if (!PS::cooking->cookConvexMesh(convexDesc, buf))
+            return nullptr;
+
+        PxDefaultMemoryInputData input(buf.getData(), buf.getSize());
+        auto convex = PS::physxSDK->createConvexMesh(input);
+
+        return convex;
+    }
+
     void PhysXPhysicsSystem::lazyInitPhysXVariables()
     {
         if (PS::selfInstanceCounter == 1)
@@ -83,21 +110,29 @@ namespace legion::physics
 
             PS::dispatcher = PxDefaultCpuDispatcherCreate(0); //deal with multithreading later on
 
-            PS::phyxSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *PS::foundation, PxTolerancesScale(), true, PS::pvd);
+            PxTolerancesScale scale;
+            PS::physxSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *PS::foundation, scale, true, PS::pvd);
+
+            PxCookingParams params(scale);
+            params.meshWeldTolerance = 0.001f;
+            params.meshPreprocessParams = PxMeshPreprocessingFlags(PxMeshPreprocessingFlag::eWELD_VERTICES);
+            params.buildGPUData = false; //TODO set to true later on when GPU bodies are supported 
+
+            PS::cooking = PxCreateCooking(PX_PHYSICS_VERSION, *PS::foundation, params);
         }
     }
 
     void PhysXPhysicsSystem::setupDefaultScene()
     {
-        PxSceneDesc sceneDesc(PS::phyxSDK->getTolerancesScale());
+        PxSceneDesc sceneDesc(PS::physxSDK->getTolerancesScale());
         sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
         sceneDesc.cpuDispatcher = PS::dispatcher;
         sceneDesc.filterShader = PxDefaultSimulationFilterShader;
         sceneDesc.flags |= PxSceneFlag::eENABLE_STABILIZATION;
         sceneDesc.flags |= PxSceneFlag::eENABLE_ACTIVE_ACTORS;
 
-        m_physxScene = PS::phyxSDK->createScene(sceneDesc);
-        m_defaultMaterial = PS::phyxSDK->createMaterial(0.5f, 0.5f, 0.1f);
+        m_physxScene = PS::physxSDK->createScene(sceneDesc);
+        m_defaultMaterial = PS::physxSDK->createMaterial(0.5f, 0.5f, 0.1f);
     }
 
     void PhysXPhysicsSystem::bindEventsToEventProcessors()
@@ -106,6 +141,8 @@ namespace legion::physics
         m_physicsComponentActionFuncs[physics_component_flag::pc_add_next_box] = &processAddNextBox;
         m_physicsComponentActionFuncs[physics_component_flag::pc_add_first_sphere] = &processAddFirstSphere;
         m_physicsComponentActionFuncs[physics_component_flag::pc_add_next_sphere] = &processAddNextSphere;
+        m_physicsComponentActionFuncs[physics_component_flag::pc_add_first_convex] = &processAddFirstConvex;
+        m_physicsComponentActionFuncs[physics_component_flag::pc_add_next_convex] = &processAddNextConvex;
 
         m_rigidbodyComponentActionFuncs[rigidbody_flag::rb_velocity] = &processVelocityModification;
         m_rigidbodyComponentActionFuncs[rigidbody_flag::rb_mass] = &processMassModification;
@@ -113,8 +150,9 @@ namespace legion::physics
 
     void PhysXPhysicsSystem::releasePhysXVariables()
     {
+        PS::cooking->release();
         PS::dispatcher->release();
-        PS::phyxSDK->release();
+        PS::physxSDK->release();
 
         if (PS::pvd)
         {
@@ -127,7 +165,21 @@ namespace legion::physics
         PS::foundation->release();
     }
 
-    void PhysXPhysicsSystem::fixedUpdate(time::time_span<fast_time> deltaTime)
+    void PhysXPhysicsSystem::update(legion::time::span deltaTime)
+    {
+        m_accumulation += deltaTime;
+
+        size_type tickAmount = 0;
+
+        while (m_accumulation > m_timeStep && tickAmount < m_maxPhysicsStep)
+        {
+            m_accumulation -= m_timeStep;
+            physicsStep();
+            ++tickAmount;
+        }
+    }
+
+    void PhysXPhysicsSystem::physicsStep()
     {
         executePreSimulationActions();
 

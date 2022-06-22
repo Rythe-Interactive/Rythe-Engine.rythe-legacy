@@ -1,6 +1,7 @@
 #include "physx_test_system.hpp"
 #include <rendering/components/camera.hpp>
 #include <physics/physics.hpp>
+#include <random>
 
 namespace legion::physics
 {
@@ -26,6 +27,9 @@ namespace legion::physics
 
         cubeH = rendering::ModelCache::create_model("cube", "assets://models/cube.obj"_view);
         sphereH = rendering::ModelCache::create_model("sphere", "assets://models/sphere.obj"_view);
+        suzanneH = rendering::ModelCache::create_model("suzanne", "assets://models/suzanne.glb"_view);
+        statueH = rendering::ModelCache::create_model("statue", "assets://models/gnomecentered.obj"_view);
+        colaCanH = rendering::ModelCache::create_model("cola","assets://models/cola.glb"_view);
 
         directionalLightH = rendering::ModelCache::create_model("directional light", "assets://models/directional-light.obj"_view);
 
@@ -58,10 +62,16 @@ namespace legion::physics
                 entity.destroy();
             }
         }
+
+        suzzaneRainTick(deltaTime);
     }
 
     void PhysXTestSystem::setupCubeWorldTestScene()
     {
+        math::quat rotX90 = math::rotate(math::pi<float>() / 2.0f, math::vec3(1, 0, 0));
+        math::quat rotY90 = math::rotate(math::pi<float>() / 2.0f, math::vec3(0, 1, 0));
+        math::quat rotZ90 = math::rotate(math::pi<float>() / 2.0f, math::vec3(0, 0, 1));
+
         auto addRobotPartLambda = [this](const math::vec3& scaleValue, const math::vec3& offset,ecs::entity parent,const math::quat& localRot,rendering::model_handle handle)
         {
             auto nextBlock = createDefaultMeshEntity(offset, handle, legionLogoMat);
@@ -71,44 +81,29 @@ namespace legion::physics
             parent.add_child(nextBlock);
         };
 
-        //wall block
-        auto rotBlock = createDefaultMeshEntity(math::vec3(0, 0, 5), cubeH, tileMat);
-        rotBlock.get_component<scale>() = math::vec3(10, 1, 10);
-        auto rot = math::rotate(math::pi<float>() / 2.0f, math::vec3(1, 0, 0));
-        rotBlock.get_component<rotation>() = math::toQuat(rot);
+        createStaticColliderWall(math::vec3(0, 0, 5), tileMat, math::vec3(10, 1, 10),
+            rotX90);
 
-        {
-            auto wideBlockPhysComp = rotBlock.add_component<physics_component>();
-            wideBlockPhysComp->physicsCompData.AddBoxCollider(math::vec3(10, 1, 10));
-        }
-
-        //add wide block
-        auto wideBlock = createDefaultMeshEntity(math::vec3(0, 0, 0), cubeH, legionLogoMat);
-        wideBlock.get_component<scale>() = math::vec3(10, 1, 10);
-
-        {
-            auto wideBlockPhysComp = wideBlock.add_component<physics_component>();
-            wideBlockPhysComp->physicsCompData.AddBoxCollider(math::vec3(10, 1, 10));
-        }
+        createStaticColliderWall(math::vec3(0, 0, 0), legionLogoMat, math::vec3(10, 1, 10));
 
         //add default cube at center
         auto unrotatedBlock = createDefaultMeshEntity(math::vec3(0, 2, 0), cubeH, tileMat);
         {
             auto unrotatedBlockPC = unrotatedBlock.add_component<physics_component>();
-            unrotatedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1));
+            unrotatedBlockPC->physicsCompData.addBoxCollider(math::vec3(1));
             
             float headOffset = 0.5f;
             addRobotPartLambda(math::vec3(headOffset), math::vec3(0, 0.75f,0), unrotatedBlock,  math::identity<math::quat>(),cubeH);
-            unrotatedBlockPC->physicsCompData.AddBoxCollider(math::vec3(headOffset), math::vec3(0, 0.75f, 0), math::identity<math::quat>());
+            unrotatedBlockPC->physicsCompData.addBoxCollider(math::vec3(headOffset), math::vec3(0, 0.75f, 0), math::identity<math::quat>());
 
             addRobotPartLambda(math::vec3(1.0, 0.5, 0.5), math::vec3(1, 0.0f, 0), unrotatedBlock,  math::identity<math::quat>(), cubeH);
-            unrotatedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1.0, 0.5f, 0.5f),math::vec3(1,0,0), math::identity<math::quat>());
+            unrotatedBlockPC->physicsCompData.addBoxCollider(math::vec3(1.0, 0.5f, 0.5f),math::vec3(1,0,0), math::identity<math::quat>());
 
             addRobotPartLambda(math::vec3(1.0, 0.5, 0.5), math::vec3(-1, 0.0f, 0), unrotatedBlock,  math::identity<math::quat>(), cubeH);
-            unrotatedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1.0, 0.5f, 0.5f), math::vec3(-1, 0, 0), math::identity<math::quat>());
+            unrotatedBlockPC->physicsCompData.addBoxCollider(math::vec3(1.0, 0.5f, 0.5f), math::vec3(-1, 0, 0), math::identity<math::quat>());
 
             addRobotPartLambda(math::vec3(1.0f), math::vec3(0, -1.0f, 0), unrotatedBlock, math::identity<math::quat>(),sphereH);
-            unrotatedBlockPC->physicsCompData.AddSphereCollider(0.5f, math::vec3(0, -1, 0));
+            unrotatedBlockPC->physicsCompData.addSphereCollider(0.5f, math::vec3(0, -1, 0));
 
             auto& rb = *unrotatedBlock.add_component<rigidbody>();
             rb.rigidbodyData.setMass(5.0f);
@@ -118,7 +113,7 @@ namespace legion::physics
         auto shiftedBlock = createDefaultMeshEntity(math::vec3(0, 10, 0), cubeH, concreteMat);
         {
             auto shiftedBlockPC = shiftedBlock.add_component<physics_component>();
-            shiftedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1, 1, 1));
+            shiftedBlockPC->physicsCompData.addBoxCollider(math::vec3(1, 1, 1));
 
             shiftedBlock.add_component<rigidbody>();
         }
@@ -129,6 +124,39 @@ namespace legion::physics
 
         app::InputSystem::createBinding<ShootPhysXSphere>(app::inputmap::method::V);
         bindToEvent<ShootPhysXSphere, &PhysXTestSystem::shootPhysXSphere>();
+
+        //---------------------------------------------- CONVEX TEST -----------------------------------------------------//
+
+        createStaticColliderWall(math::vec3(15, 0, 0), legionLogoMat, math::vec3(10, 1, 10));
+
+        createStaticColliderWall(math::vec3(15, 0, 5), tileMat, math::vec3(10, 1, 10), rotX90);
+
+        createStaticColliderWall(math::vec3(10, 0, 0), tileMat, math::vec3(10, 1, 10), rotZ90);
+
+        createStaticColliderWall(math::vec3(20, 0, 0), tileMat, math::vec3(10, 1, 10), rotZ90);
+      
+        {
+            auto statue = createDefaultMeshEntity(math::vec3(15, 1.6f, 0), statueH, concreteMat);
+            *statue.get_component<rotation>() = math::rotate(math::pi<float>(), math::vec3(0, 1, 0));
+            auto& renderable = *statue.get_component<mesh_filter>();
+            const std::vector<math::vec3>& verts = renderable.shared_mesh.ptr->vertices;
+
+            auto& statuePhysicsComponent = *statue.add_component<physics_component>();
+            statuePhysicsComponent.physicsCompData.addConvexCollider(verts, math::vec3(), math::identity<math::quat>());
+        }
+
+        {
+            auto suzanne = createDefaultMeshEntity(math::vec3(15, 8, 4), suzanneH, tileMat);
+            auto& renderable = *suzanne.get_component<mesh_filter>();
+            const std::vector<math::vec3>& verts = renderable.shared_mesh.ptr->vertices;
+
+            auto& suzannePhysicsComponent = *suzanne.add_component<physics_component>();
+            suzannePhysicsComponent.physicsCompData.addConvexCollider(verts, math::vec3(), math::identity<math::quat>());
+
+            suzanne.add_component<rigidbody>();
+        }
+
+
     }
 
     void PhysXTestSystem::shootPhysXCubes(ShootPhysXBox& action)
@@ -142,7 +170,7 @@ namespace legion::physics
 
         {
             auto shiftedBlockPC = shiftedBlock.add_component<physics_component>();
-            shiftedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1, 1, 1));
+            shiftedBlockPC->physicsCompData.addBoxCollider(math::vec3(1, 1, 1));
 
             rigidbody& rb = *shiftedBlock.add_component<rigidbody>();
             rb.rigidbodyData.setVelocity(cameraDirection * 20.0f);
@@ -164,7 +192,7 @@ namespace legion::physics
 
         {
             auto shiftedBlockPC = shiftedBlock.add_component<physics_component>();
-            shiftedBlockPC->physicsCompData.AddSphereCollider(0.5f, math::vec3());
+            shiftedBlockPC->physicsCompData.addSphereCollider(0.5f, math::vec3());
 
             rigidbody& rb = *shiftedBlock.add_component<rigidbody>();
             rb.rigidbodyData.setVelocity(cameraDirection * 20.0f);
@@ -226,5 +254,54 @@ namespace legion::physics
         ent.add_component(rendering::mesh_renderer(TextureH, cubeH));
 
         return ent;
+    }
+
+    ecs::entity PhysXTestSystem::createStaticColliderWall(math::vec3 position, rendering::material_handle TextureH,
+        math::vec3 scale, math::quat rot)
+    {
+        auto ent = createEntity();
+
+        auto [positionH, rotationH, scaleH] = ent.add_component<transform>();
+        ent.add_component(rendering::mesh_renderer(TextureH, cubeH));
+
+        positionH = position;
+        rotationH = rot;
+        scaleH = scale;
+
+        auto& phyComp = *ent.add_component<physics_component>();
+        phyComp.physicsCompData.addBoxCollider(scale);
+
+        return ent;
+    }
+
+    void PhysXTestSystem::suzzaneRainTick(legion::time::span deltaTime)
+    {
+        m_currentInterval += deltaTime;
+
+        if (m_currentInterval > m_rainInterval)
+        {
+            std::array<gfx::model_handle, 3> models{ colaCanH,statueH,suzanneH };
+
+            m_currentInterval = 0.0f;
+
+            static std::mt19937 generator;
+            std::uniform_real_distribution<double> xGen(0,m_rainExtents.x);
+            std::uniform_real_distribution<double> yGen(0, m_rainExtents.y);
+            std::uniform_real_distribution<double> zGen(0, m_rainExtents.z);
+
+            std::uniform_int_distribution<std::mt19937::result_type> modelGen(0, 2);
+
+            math::vec3 randomPosition = m_rainStartPos + math::vec3(xGen(generator), yGen(generator), zGen(generator));
+
+            auto ent = createDefaultMeshEntity(randomPosition, models[modelGen(generator)], tileMat);
+            auto& renderable = *ent.get_component<mesh_filter>();
+            const std::vector<math::vec3>& verts = renderable.shared_mesh.ptr->vertices;
+
+            auto& phyComp = *ent.add_component<physics_component>();
+            phyComp.physicsCompData.addConvexCollider(verts, math::vec3(), math::identity<math::quat>());
+
+            ent.add_component<rigidbody>();
+        }
+
     }
 }
