@@ -7,6 +7,7 @@
 #include "../systems/gui_test.hpp"
 #include "../systems/diviner_physics_test_system.hpp"
 #include "../systems/physx_test_system.hpp"
+#include "../systems/physics_debugging_system.hpp"
 
 class ExampleModule : public legion::Module
 {
@@ -26,8 +27,9 @@ public:
 
         //reportSystem<MySystem>();
         reportSystem<SimpleCameraController>();
-        reportSystem<ExampleSystem>();
+        reportSystem<physics::PhysXTestSystem>();
         reportSystem<GuiTestSystem>();
+        reportSystem<physics::PhysicsDebuggingSystem>();
 
         registerComponentType<self_destruct_component>();
     }
