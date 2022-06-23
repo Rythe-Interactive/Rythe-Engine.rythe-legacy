@@ -1,6 +1,5 @@
 #include "physx_physics_system.hpp"
 #include <physx/PxPhysicsAPI.h>
-#include <filesystem>
 #include <physics/components/physics_component.hpp>
 #include <physics/components/rigidbody.hpp>
 #include <physics/events/events.hpp>
