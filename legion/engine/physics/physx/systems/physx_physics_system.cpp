@@ -10,12 +10,133 @@ namespace legion::physics
 {
     using namespace physx;
 
+    constexpr bool shouldDebugDraw = false;
+
+    static void debugDrawPhysXScene(PxScene* sceneToDraw)
+    {
+        if (!shouldDebugDraw) return;
+
+        const PxRenderBuffer& rb = sceneToDraw->getRenderBuffer();
+        for (PxU32 i = 0; i < rb.getNbLines(); i++)
+        {
+            const PxDebugLine& line = rb.getLines()[i];
+
+            const PxVec3& pxStart = line.pos0;
+            const PxVec3& pxEnd = line.pos1;
+
+            math::vec3 start{ pxStart.x, pxStart.y, pxStart.z };
+            math::vec3 end{ pxEnd.x, pxEnd.y,pxEnd.z };
+
+            debug::drawLine(start, end, math::colors::green, 1.0f, 0.0f);
+        }
+    }
+
+    static void identifyPhysxDebugOutputFilepath(std::string& outFileName)
+    {
+        std::time_t t = std::time(0);
+        std::tm* now = std::localtime(&t);
+
+        //file name is date and time of file creation, placed in the logs folder of sandbox
+        outFileName = "./logs/";
+        outFileName += std::to_string(now->tm_year + 1900) + "-";
+        outFileName += std::to_string(now->tm_mon + 1) + "-";
+        outFileName += std::to_string(now->tm_mday)+ "-";
+        outFileName += std::to_string(now->tm_hour) + "-";
+        outFileName += std::to_string(now->tm_min) + "-";
+        outFileName += std::to_string(now->tm_sec);
+        outFileName += ".pxd2";
+    }
+
+    //PhysX PVD Debugger Related
+    constexpr const char* pvdHost = "127.0.0.1";
+    constexpr size_type defaultPVDListeningPort = 5425;
+    constexpr size_type defaultPVDHostTimeout = 10;
+
+    class DebuggerWrapper
+    {
+    public:
+
+        enum class transport_mode
+        {
+            pvd_network,
+            file_output,
+            none
+        };
+
+        void initializeDebugger(PxFoundation* foundation, transport_mode mode)
+        {
+            switch (mode)
+            {
+            case transport_mode::pvd_network:
+                initializePVDDebugger(foundation);
+                break;
+            case transport_mode::file_output:
+                initializeFileDebugger(foundation);
+                break;
+            case transport_mode::none:
+                break;
+            default:
+                break;
+            }
+        }
+
+        void release()
+        {
+            if (m_pvd)
+            {
+                m_pvd->disconnect();
+                m_pvd->release();
+                m_transport->release();
+            }
+        }
+
+        PxPvd* getPVD() const noexcept { return m_pvd; }
+
+    private:
+
+        void initializeFileDebugger(PxFoundation* foundation)
+        {
+            if (!m_isDebuggerInit)
+            {
+                std::string filepath;
+                identifyPhysxDebugOutputFilepath(filepath);
+
+                m_isDebuggerInit = true;
+                m_pvd = PxCreatePvd(*foundation);
+                m_transport = PxDefaultPvdFileTransportCreate(filepath.c_str());
+                m_pvd->connect(*m_transport, PxPvdInstrumentationFlag::eALL);
+            }
+            else
+            {
+                log::warn("physx debugger already initialized!");
+            }
+        }
+
+        void initializePVDDebugger(PxFoundation* foundation)
+        {
+            if (!m_isDebuggerInit)
+            {
+                m_isDebuggerInit = true;
+                m_pvd = PxCreatePvd(*foundation);
+                m_transport = PxDefaultPvdSocketTransportCreate(pvdHost, defaultPVDListeningPort, defaultPVDHostTimeout);
+            }
+            else
+            {
+                log::warn("physx debugger already initialized!");
+            }
+        }
+
+        PxPvd* m_pvd = nullptr;
+        PxPvdTransport* m_transport = nullptr;
+        bool m_isDebuggerInit = false;
+    };
+
     struct PhysxStatics
     {
         inline static size_type selfInstanceCounter = 0;
 
         inline static PxFoundation* foundation = nullptr;
-        inline static PxPvd* pvd = nullptr;
+        inline static DebuggerWrapper debugger;
         inline static PxDefaultCpuDispatcher* dispatcher = nullptr;
         inline static PxPhysics* physxSDK = nullptr;
         inline static PxCooking* cooking = nullptr;
@@ -26,11 +147,6 @@ namespace legion::physics
     };
 
     using PS = PhysxStatics;
-
-    //PhysX PVD Debugger Related
-    constexpr const char* pvdHost = "127.0.0.1";
-    constexpr size_type defaultPVDListeningPort = 5425;
-    constexpr size_type defaultPVDHostTimeout = 10;
 
     constexpr size_type convexHullVertexLimit = 256;
 
@@ -58,6 +174,10 @@ namespace legion::physics
             {
                 return physxGenerateConvexMesh(vertices);
             });
+            
+        //debugging related
+        bindToEvent<request_flip_physics_continuous, &PhysXPhysicsSystem::flipPhysicsContinuousState>();
+        bindToEvent<request_single_physics_tick, &PhysXPhysicsSystem::activateSingleStepContinue>();
     }
 
     void PhysXPhysicsSystem::shutdown()
@@ -104,14 +224,14 @@ namespace legion::physics
             PS::foundation = PxCreateFoundation(PX_PHYSICS_VERSION,
                 PS::defaultAllocator, PS::defaultErrorCallback);
 
-            PS::pvd = PxCreatePvd(*PS::foundation);
-            PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate(pvdHost, defaultPVDListeningPort, defaultPVDHostTimeout);
-            PS::pvd->connect(*transport, PxPvdInstrumentationFlag::eDEBUG);
-
             PS::dispatcher = PxDefaultCpuDispatcherCreate(0); //deal with multithreading later on
 
+            #ifdef LEGION_DEBUG
+            PS::debugger.initializeDebugger(PS::foundation, DebuggerWrapper::transport_mode::none);
+            #endif
+
             PxTolerancesScale scale;
-            PS::physxSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *PS::foundation, scale, true, PS::pvd);
+            PS::physxSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *PS::foundation, scale, true, PS::debugger.getPVD());
 
             PxCookingParams params(scale);
             params.meshWeldTolerance = 0.001f;
@@ -133,6 +253,19 @@ namespace legion::physics
 
         m_physxScene = PS::physxSDK->createScene(sceneDesc);
         m_defaultMaterial = PS::physxSDK->createMaterial(0.5f, 0.5f, 0.1f);
+        
+        #ifdef LEGION_DEBUG
+        m_physxScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
+        m_physxScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES, 1.0f);
+        m_physxScene->setVisualizationParameter(PxVisualizationParameter::eBODY_MASS_AXES, 1.0f);
+        #endif
+
+        PxPvdSceneClient* pvdClient = m_physxScene->getScenePvdClient();
+        if (pvdClient)
+        {
+            pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
+            pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
+        }
     }
 
     void PhysXPhysicsSystem::bindEventsToEventProcessors()
@@ -153,30 +286,29 @@ namespace legion::physics
         PS::cooking->release();
         PS::dispatcher->release();
         PS::physxSDK->release();
-
-        if (PS::pvd)
-        {
-            PxPvdTransport* transport = PS::pvd->getTransport();
-            PS::pvd->release();
-            PS::pvd = nullptr;
-            transport->release();
-        }
-
+        PS::debugger.release();
         PS::foundation->release();
     }
 
     void PhysXPhysicsSystem::update(legion::time::span deltaTime)
     {
-        m_accumulation += deltaTime;
-
-        size_type tickAmount = 0;
-
-        while (m_accumulation > m_timeStep && tickAmount < m_maxPhysicsStep)
+        if (m_isContinuousStepActive || m_isSingleStepContinueAcitve)
         {
-            m_accumulation -= m_timeStep;
-            physicsStep();
-            ++tickAmount;
+            m_accumulation += deltaTime;
+
+            size_type tickAmount = 0;
+
+            while (m_accumulation > m_timeStep && tickAmount < m_maxPhysicsStep)
+            {
+                m_accumulation -= m_timeStep;
+                physicsStep();
+                ++tickAmount;
+            }
+
+            m_isSingleStepContinueAcitve = false;
         }
+
+        debugDrawPhysXScene(m_physxScene);
     }
 
     void PhysXPhysicsSystem::physicsStep()
