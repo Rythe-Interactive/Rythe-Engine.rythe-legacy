@@ -34,24 +34,18 @@ namespace legion::physics
 
     static void identifyPhysxDebugOutputFilepath(std::string& outFileName)
     {
-        std::filesystem::path directoryPath = std::filesystem::current_path().parent_path().parent_path(); //leads to project directory
-        directoryPath += "\\";
-
         std::time_t t = std::time(0);
         std::tm* now = std::localtime(&t);
 
-        //file name is date and time of file creation
-        std::string filename;
-        filename += std::to_string(now->tm_year + 1900) + "-";
-        filename += std::to_string(now->tm_mon + 1) + "-";
-        filename += std::to_string(now->tm_mday)+ "-";
-        filename += std::to_string(now->tm_hour) + "-";
-        filename += std::to_string(now->tm_min) + "-";
-        filename += std::to_string(now->tm_sec);
-        filename += ".pxd2";
-
-        outFileName = directoryPath.string();
-        outFileName += filename;
+        //file name is date and time of file creation, placed in the logs folder of sandbox
+        outFileName = "./logs/";
+        outFileName += std::to_string(now->tm_year + 1900) + "-";
+        outFileName += std::to_string(now->tm_mon + 1) + "-";
+        outFileName += std::to_string(now->tm_mday)+ "-";
+        outFileName += std::to_string(now->tm_hour) + "-";
+        outFileName += std::to_string(now->tm_min) + "-";
+        outFileName += std::to_string(now->tm_sec);
+        outFileName += ".pxd2";
     }
 
     //PhysX PVD Debugger Related
@@ -233,7 +227,7 @@ namespace legion::physics
 
             PS::dispatcher = PxDefaultCpuDispatcherCreate(0); //deal with multithreading later on
 
-            #ifdef _DEBUG
+            #ifdef LEGION_DEBUG
             PS::debugger.initializeDebugger(PS::foundation, DebuggerWrapper::transport_mode::none);
             #endif
 
@@ -260,8 +254,8 @@ namespace legion::physics
 
         m_physxScene = PS::physxSDK->createScene(sceneDesc);
         m_defaultMaterial = PS::physxSDK->createMaterial(0.5f, 0.5f, 0.1f);
-
-        #ifdef _DEBUG
+        
+        #ifdef LEGION_DEBUG
         m_physxScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
         m_physxScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES, 1.0f);
         m_physxScene->setVisualizationParameter(PxVisualizationParameter::eBODY_MASS_AXES, 1.0f);
