@@ -27,7 +27,7 @@ public:
 
         //reportSystem<MySystem>();
         reportSystem<SimpleCameraController>();
-        reportSystem<physics::PhysXTestSystem>();
+        reportSystem<ExampleSystem>();
         reportSystem<GuiTestSystem>();
         reportSystem<physics::PhysicsDebuggingSystem>();
 
