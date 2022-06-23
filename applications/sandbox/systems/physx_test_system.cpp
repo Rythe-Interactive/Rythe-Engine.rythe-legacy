@@ -176,7 +176,7 @@ namespace legion::physics
 
         ecs::entity bigSphere = createDefaultMeshEntity(math::vec3(0, 20, 100), sphereH, concreteMat);
         *bigSphere.add_component<scale>() = math::vec3(5.0f);
-        bigSphere.add_component<physics_component>()->physicsCompData.AddSphereCollider(5.0f, math::vec3());
+        bigSphere.add_component<physics_component>()->physicsCompData.addSphereCollider(5.0f, math::vec3());
 
         auto& rbData = (*bigSphere.add_component<rigidbody>()).data;
         rbData.setVelocity(math::vec3(0, -25, -100));
@@ -352,7 +352,7 @@ namespace legion::physics
                 *entity.get_component<scale>() = extents;
 
                 auto& physComp = *entity.add_component<physics_component>();
-                physComp.physicsCompData.AddBoxCollider(extents);
+                physComp.physicsCompData.addBoxCollider(extents);
 
                 entity.add_component<rigidbody>();
             }

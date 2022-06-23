@@ -43,11 +43,13 @@ namespace legion::physics
         math::vec3 m_boxExtents{ 0.0f };
     };
 
+    using InternalConvexColliderPtr = void*;
+
     class ConvexColliderData
     {
     public:
 
-        ConvexColliderData(void* internalConvexColliderStructure);
+        ConvexColliderData(InternalConvexColliderPtr ccPtr);
 
         L_ALWAYS_INLINE void* getConvexPtr() const noexcept { return m_internalConvexStructure; }
 

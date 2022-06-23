@@ -35,7 +35,6 @@ namespace legion::physics
 
         PhysicsComponentData& operator=(PhysicsComponentData&& other)
         {
-            m_convexColliderData.push_back(ConvexColliderData(offset,rotation,extents * boxExtentSizeMultiplier));
             m_colliders = std::move(other.m_colliders);
             m_colliderModificationRequests = std::move(other.m_colliderModificationRequests);
 
@@ -51,13 +50,7 @@ namespace legion::physics
             return *this;
         }
 
-        inline static delegate<void* (const std::vector<math::vec3>& vertices)> m_generateConvexColliderFunc =
-            [](const std::vector<math::vec3>& vertices) -> void*
-        {
-            return nullptr;
-        };
-
-        L_ALWAYS_INLINE void AddBoxCollider(const math::vec3& extents, const math::vec3& offset, const math::quat& rotation)
+        L_ALWAYS_INLINE void addBoxCollider(const math::vec3& extents, const math::vec3& offset, const math::quat& rotation)
         {
             if (extents.y == 0.0f)
             {
