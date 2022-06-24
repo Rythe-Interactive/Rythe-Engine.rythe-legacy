@@ -82,7 +82,6 @@ namespace legion::physics
         std::array<cmEventProcessFunc, collider_modification_flag::cm_max> m_colliderActionFuncs;
 
         std::vector<size_type> m_wrapperPendingRemovalID;
-
         std::unordered_map<size_type, physx::PxMaterial*> m_physicsMaterials;
 
         //------------------------------------------------ Debugging Related --------------------------------------------------------------//

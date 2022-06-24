@@ -212,7 +212,6 @@ namespace legion::physics
 
             ConvexColliderData& convex = collider.getColliderAsConvex();
             PxConvexMesh* convexMesh = static_cast<PxConvexMesh*>(convex.getConvexPtr());
-
             instantiateNextCollider<PxConvexMeshGeometry, PxConvexMesh*&>(getSDK(), wrapper, localTransform, sceneInfo, convexMesh);
         }
     }

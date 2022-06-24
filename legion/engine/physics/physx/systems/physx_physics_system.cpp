@@ -101,7 +101,6 @@ namespace legion::physics
             {
                 std::string filepath;
                 identifyPhysxDebugOutputFilepath(filepath);
-                log::debug("pth {0}", filepath.c_str());
                 m_isDebuggerInit = true;
                 m_pvd = PxCreatePvd(*foundation);
                 m_transport = PxDefaultPvdFileTransportCreate(filepath.c_str());
@@ -177,7 +176,6 @@ namespace legion::physics
                 return physxGenerateConvexMesh(vertices);
             });
             
-        
         PhysicsHelpers::bindDebugRetrieveCheck([this](size_type hash, const char* materialName)->bool
         {
             auto iter = m_physicsMaterials.find(hash);
@@ -270,8 +268,10 @@ namespace legion::physics
         sceneDesc.flags |= PxSceneFlag::eENABLE_ACTIVE_ACTORS;
 
         m_physxScene = PS::physxSDK->createScene(sceneDesc);
-        PxMaterial* m_defaultMaterial = PS::physxSDK->createMaterial(0.5f, 0.5f, 0.6f);
-        m_physicsMaterials.insert({ 0,m_defaultMaterial });
+
+        PxMaterial* defaultMaterial = PS::physxSDK->createMaterial(0.5f, 0.5f, 0.6f);
+        m_physicsMaterials.insert({ 0,defaultMaterial });
+
         
         #ifdef LEGION_DEBUG
         m_physxScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
