@@ -41,6 +41,7 @@
     <ClInclude Include="data\component_flags.hpp" />
     <ClInclude Include="data\physics_component_data.hpp" />
     <ClInclude Include="data\physics_enviroment_data.hpp" />
+    <ClInclude Include="data\physics_material.hpp" />
     <ClInclude Include="data\rigibody_data.hpp" />
     <ClInclude Include="diviner\broadphasecollisionalgorithms\broadphasebruteforce.hpp" />
     <ClInclude Include="diviner\broadphasecollisionalgorithms\broadphasecollisionalgorithm.hpp" />

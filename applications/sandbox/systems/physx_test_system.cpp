@@ -45,7 +45,7 @@ namespace legion::physics
             sun.add_component<transform>(position(10, 10, 10), rotation::lookat(math::vec3(1, 1, -1), math::vec3::zero), scale());
         }
 
-        PhysicsHelpers::createPhysicsMaterial(0.5f, 0.5f, 0.1f, "DefaultNonBouncy");
+        PhysicsHelpers::createPhysicsMaterial(0.5f, 0.5f, 0.1f, m_defaultNonBouncy);
         
         setupCubeWorldTestScene();
         //setupBoxAndStackTestScene();
@@ -305,7 +305,7 @@ namespace legion::physics
 
     void PhysXTestSystem::suzzaneRainTick(legion::time::span deltaTime)
     {
-        size_type hash = PhysicsHelpers::retrievePhysicsMaterialHash("DefaultNonBouncy");
+        size_type hash = PhysicsHelpers::retrievePhysicsMaterialHash(m_defaultNonBouncy);
 
         m_currentInterval += deltaTime;
 

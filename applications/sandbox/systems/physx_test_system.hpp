@@ -82,5 +82,7 @@ namespace legion::physics
 
         math::vec3 m_rainStartPos = math::vec3(10,12,-5);
         math::vec3 m_rainExtents = math::vec3(10,0,10);
+
+        const char* m_defaultNonBouncy = "DefaultNonBouncy";
     };
 }

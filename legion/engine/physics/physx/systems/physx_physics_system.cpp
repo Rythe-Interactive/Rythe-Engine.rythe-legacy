@@ -175,17 +175,6 @@ namespace legion::physics
             {
                 return physxGenerateConvexMesh(vertices);
             });
-            
-        PhysicsHelpers::bindDebugRetrieveCheck([this](size_type hash, const char* materialName)->bool
-        {
-            auto iter = m_physicsMaterials.find(hash);
-            if (iter == m_physicsMaterials.end())
-            {
-                log::warn("tried to retrieve material {0}. This material does not exist", materialName);
-                return false;
-            }
-            return true;
-        });
 
         //debugging related
         bindToEvent<request_flip_physics_continuous, &PhysXPhysicsSystem::flipPhysicsContinuousState>();
@@ -268,9 +257,9 @@ namespace legion::physics
         sceneDesc.flags |= PxSceneFlag::eENABLE_ACTIVE_ACTORS;
 
         m_physxScene = PS::physxSDK->createScene(sceneDesc);
-
+        
         PxMaterial* defaultMaterial = PS::physxSDK->createMaterial(0.5f, 0.5f, 0.6f);
-        m_physicsMaterials.insert({ 0,defaultMaterial });
+        m_physicsMaterials.insert({ defaultMaterialHash,defaultMaterial });
 
         
         #ifdef LEGION_DEBUG
