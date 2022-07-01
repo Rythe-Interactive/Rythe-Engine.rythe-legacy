@@ -7,13 +7,6 @@ namespace legion::physics
 {
     constexpr size_type defaultPhysicsMaterial = 0;
 
-    struct physics_material
-    {
-        float dynamicFriction;
-        float staticFriction;
-        float restitution;
-    };
-
     struct collider_modification_data
     {
         size_type colliderIndex = std::numeric_limits<size_type>::max();
@@ -22,56 +15,19 @@ namespace legion::physics
         union modification
         {
             math::vec3 newBoxExtents;
-            void* newConvexMesh;
+            float newRadius;
             size_type newMaterial;
         };
 
         modification data;
     };
 
-    class BoxColliderData
-    {
-    public:
-
-        BoxColliderData() = default;
-        BoxColliderData(const math::vec3& boxExtents) noexcept;
-
-        L_ALWAYS_INLINE const math::vec3& getBoxExtents() const noexcept { return m_boxExtents; }
-
-    private:
-
-        math::vec3 m_boxExtents{ 0.0f };
-    };
-
     using InternalConvexColliderPtr = void*;
-
-    class ConvexColliderData
-    {
-    public:
-
-        ConvexColliderData(InternalConvexColliderPtr ccPtr);
-
-        L_ALWAYS_INLINE void* getConvexPtr() const noexcept { return m_internalConvexStructure; }
-
-    private:
-
-        void* m_internalConvexStructure{ nullptr };
-    };
-
-    class SphereColliderData
-    {
-    public:
-
-        SphereColliderData(float radius) noexcept;
-
-        L_ALWAYS_INLINE const float getRadius() const noexcept { return m_radius; }
-
-    private:
-        float m_radius{ 0 };
-    };
 
     class ColliderData
     {
+        friend class PhysicsComponentData;
+
     public:
 
         ColliderData(size_type colliderIndex,pointer<std::vector<collider_modification_data>> modificationsRequests, collider_type colliderType, const math::vec3& offset, const math::quat& rotation) noexcept;
@@ -102,6 +58,51 @@ namespace legion::physics
             m_modificationsRequests->push_back(modData);
         }
 
+        L_ALWAYS_INLINE pointer<const math::vec3> getBoxExtents() 
+        {
+            if (m_colliderType != collider_type::box) return { nullptr };
+
+            return { &m_colliderSpecifics.boxExtents };
+        }
+
+        void setBoxExtents(const math::vec3& newExtents) noexcept
+        {
+            collider_modification_data modData;
+            modData.colliderIndex = m_colliderIndex;
+            modData.modificationType = collider_modification_flag::cm_set_new_box_extents;
+            modData.data.newBoxExtents = newExtents;
+
+            m_modificationsRequests->push_back(modData);
+        }
+
+        L_ALWAYS_INLINE pointer<const float> getSphereRadius()
+        {
+            if (m_colliderType != collider_type::sphere) return { nullptr };
+
+            return { &m_colliderSpecifics.sphereRadius };
+        }
+
+        void setSphereRadius(float newRadius) noexcept
+        {
+            collider_modification_data modData;
+            modData.colliderIndex = m_colliderIndex;
+            modData.modificationType = collider_modification_flag::cm_set_new_sphere_radius;
+            modData.data.newRadius = newRadius;
+
+            m_modificationsRequests->push_back(modData);
+        }
+
+        L_ALWAYS_INLINE InternalConvexColliderPtr getConvexCollider()
+        {
+            if (m_colliderType != collider_type::quickhull_convex) return { nullptr };
+
+            return  m_colliderSpecifics.internalConvexStructure;
+        }
+
+        L_ALWAYS_INLINE size_type getColliderIndex() const noexcept { return m_colliderIndex; }
+
+    private:
+
         L_ALWAYS_INLINE void setModificationRequestVector(pointer<std::vector<collider_modification_data>> modificationsRequests) noexcept
         {
             m_modificationsRequests = modificationsRequests;
@@ -109,46 +110,26 @@ namespace legion::physics
 
         L_ALWAYS_INLINE void setColliderToBox(const math::vec3& boxExtents)
         {
-            m_colliderSpecifics.boxCollider = { boxExtents };
+            m_colliderSpecifics.boxExtents = { boxExtents };
         }
 
-        L_ALWAYS_INLINE void setColliderToConvexCollider(void* convexMesh)
+        L_ALWAYS_INLINE void setColliderToConvexCollider(InternalConvexColliderPtr convexMesh)
         {
-            m_colliderSpecifics.convexCollider = { convexMesh };
+            m_colliderSpecifics.internalConvexStructure = { convexMesh };
         }
 
         L_ALWAYS_INLINE void setColliderToSphereCollider(float radius)
         {
-            m_colliderSpecifics.sphereCollider = { radius };
+            m_colliderSpecifics.sphereRadius = { radius };
         }
-
-        L_ALWAYS_INLINE BoxColliderData& getColliderAsBox() 
-        {
-            return m_colliderSpecifics.boxCollider;
-        }
-
-        L_ALWAYS_INLINE SphereColliderData& getColliderAsSphere()
-        {
-            return m_colliderSpecifics.sphereCollider;
-        }
-
-        L_ALWAYS_INLINE ConvexColliderData& getColliderAsConvex()
-        {
-            return m_colliderSpecifics.convexCollider;
-        }
-
-        L_ALWAYS_INLINE size_type getColliderIndex() const noexcept { return m_colliderIndex; }
-
-
-    protected:
 
         union ColliderSpecifics
         {
-            ColliderSpecifics() : boxCollider{} {}
+            ColliderSpecifics() : boxExtents{ 0.0f } {}
 
-            BoxColliderData boxCollider;
-            ConvexColliderData convexCollider;
-            SphereColliderData sphereCollider;
+            math::vec3 boxExtents;
+            InternalConvexColliderPtr internalConvexStructure;
+            float sphereRadius;
         };
 
         ColliderSpecifics m_colliderSpecifics;
@@ -160,7 +141,7 @@ namespace legion::physics
         size_type m_colliderIndex = std::numeric_limits<size_type>::max();
 
         collider_type m_colliderType = collider_type::not_set;
-        pointer<std::vector<collider_modification_data>> m_modificationsRequests;
+        pointer<std::vector<collider_modification_data>> m_modificationsRequests{nullptr};
 
         bool m_isRegistered = false;
     };

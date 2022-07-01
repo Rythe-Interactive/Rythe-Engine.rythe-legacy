@@ -84,5 +84,8 @@ namespace legion::physics
         math::vec3 m_rainExtents = math::vec3(10,0,10);
 
         const char* m_defaultNonBouncy = "DefaultNonBouncy";
+
+        ecs::entity inflatableBlock;
+        ecs::entity inflatableSphere;
     };
 }

@@ -7,10 +7,4 @@ namespace legion::physics
         :
         m_rotationOffset(rotation), m_positionOffset(offset), m_colliderIndex(colliderIndex),
         m_colliderType(colliderType),  m_modificationsRequests(modificationsRequests),m_isRegistered(false) { }
-
-    BoxColliderData::BoxColliderData( const math::vec3& boxExtents) noexcept : m_boxExtents{ boxExtents } { }
-
-    SphereColliderData::SphereColliderData(float radius) noexcept : m_radius{radius} { }
-        
-    ConvexColliderData::ConvexColliderData(InternalConvexColliderPtr ccPtr) :  m_internalConvexStructure{ ccPtr } { }
 }

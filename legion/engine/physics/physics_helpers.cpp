@@ -7,6 +7,8 @@ namespace legion::physics
     void PhysicsHelpers::createPhysicsMaterial(float dynamicFriction, float staticFriction, float restitution, const char* name)
     {
         size_type hashResult = nameHash(name);
+
+        m_physicsMaterialHashes.push_back(hashResult);
         events::EventBus::raiseEvent<request_create_physics_material>(request_create_physics_material{ dynamicFriction,staticFriction,restitution,hashResult});
     }
 

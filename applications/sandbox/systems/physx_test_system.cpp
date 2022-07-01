@@ -5,8 +5,6 @@
 
 namespace legion::physics
 {
-
-
     void PhysXTestSystem::setup()
     {
         using namespace legion::core::fs::literals;
@@ -77,10 +75,37 @@ namespace legion::physics
         {
             suzzaneRainTick(deltaTime);
         }
+
+        if (inflatableBlock.valid() && inflatableSphere.valid())
+        {
+            static float currentTime = 0.0f;
+            currentTime += deltaTime;
+
+            {
+                math::vec3 addedExtents{ math::abs(math::sin(math::deg2rad(45.0f * currentTime))) };
+                math::vec3 colliderExtents = math::vec3(0.5f) + addedExtents;
+                auto& blockPhyComp = *inflatableBlock.get_component<physics_component>();
+                blockPhyComp.physicsCompData.getColliders()[0].setBoxExtents(colliderExtents);
+
+
+                *inflatableBlock.get_component<scale>() = (colliderExtents * 2);
+            }
+
+            {
+                float radius = 0.5f + math::abs(math::sin(math::deg2rad(45.0f * currentTime)));
+                auto& blockPhyComp = *inflatableSphere.get_component<physics_component>();
+
+                blockPhyComp.physicsCompData.getColliders()[0].setSphereRadius(radius);
+
+                *inflatableSphere.get_component<scale>() = (radius * 2);
+            }
+        }
     }
 
     void PhysXTestSystem::setupCubeWorldTestScene()
     {
+        physics_material_hash hash = PhysicsHelpers::retrievePhysicsMaterialHash(m_defaultNonBouncy);
+
         math::quat rotX90 = math::rotate(math::pi<float>() / 2.0f, math::vec3(1, 0, 0));
         math::quat rotY90 = math::rotate(math::pi<float>() / 2.0f, math::vec3(0, 1, 0));
         math::quat rotZ90 = math::rotate(math::pi<float>() / 2.0f, math::vec3(0, 0, 1));
@@ -161,6 +186,36 @@ namespace legion::physics
             suzannePhysicsComponent.physicsCompData.addConvexCollider(verts, math::vec3(), math::identity<math::quat>());
 
             suzanne.add_component<rigidbody>();
+        }
+
+        //---------------------------------------------- INFLATABLE TEST -----------------------------------------------------//
+
+        createStaticColliderWall(math::vec3(30, 0, 0), legionLogoMat, math::vec3(10, 1, 10));
+
+        createStaticColliderWall(math::vec3(25, 0, 0), legionLogoMat, math::vec3(10, 1, 10), rotZ90);
+
+        createStaticColliderWall(math::vec3(35, 0, 0), legionLogoMat, math::vec3(10, 1, 10), rotZ90);
+
+        createStaticColliderWall(math::vec3(30, 0, 5), legionLogoMat, math::vec3(10, 1, 10), rotX90);
+
+        {
+            inflatableBlock = createDefaultMeshEntity(math::vec3(27, 1.0f, 0), cubeH, tileMat);
+
+            auto& phyComp = *inflatableBlock.add_component<physics_component>();
+            phyComp.physicsCompData.addBoxCollider(math::vec3{ 1 });
+            phyComp.physicsCompData.getColliders()[0].setMaterialHash(hash);
+
+            inflatableBlock.add_component<rigidbody>();
+        }
+
+        {
+            inflatableSphere = createDefaultMeshEntity(math::vec3(33, 1.0f, 0), sphereH, tileMat);
+
+            auto& phyComp = *inflatableSphere.add_component<physics_component>();
+            phyComp.physicsCompData.addSphereCollider(0.5f, math::vec3{});
+            phyComp.physicsCompData.getColliders()[0].setMaterialHash(hash);
+
+            inflatableSphere.add_component<rigidbody>();
         }
     }
 
