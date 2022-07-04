@@ -40,63 +40,51 @@ namespace legion::physics
 
         L_ALWAYS_INLINE collider_type getColliderType() const noexcept  { return m_colliderType; }
 
-        bool isRegisteredOrNotOfType(collider_type colliderType) const noexcept
+        L_ALWAYS_INLINE bool isRegisteredOrNotOfType(collider_type colliderType) const noexcept
         {
             return m_isRegistered || colliderType != m_colliderType;
         }
 
         L_ALWAYS_INLINE size_type getMaterialHash() const noexcept { return m_materialHash; }
-        L_ALWAYS_INLINE void setMaterialHash(size_type materialHash) noexcept
+
+        void setMaterialHash(size_type materialHash) noexcept;
+        
+
+        L_ALWAYS_INLINE pointer<const math::vec3> getBoxExtents() const
         {
-            m_materialHash = materialHash;
-
-            collider_modification_data modData;
-            modData.colliderIndex = m_colliderIndex;
-            modData.modificationType = collider_modification_flag::cm_set_new_material;
-            modData.data.newMaterial = materialHash;
-
-            m_modificationsRequests->push_back(modData);
-        }
-
-        L_ALWAYS_INLINE pointer<const math::vec3> getBoxExtents() 
-        {
-            if (m_colliderType != collider_type::box) return { nullptr };
+            if (m_colliderType != collider_type::box)
+            {
+                log::warn("ColliderData::getBoxExtents called on a collider that is not of type collider_type::box");
+                return { nullptr };
+            }
 
             return { &m_colliderSpecifics.boxExtents };
         }
 
-        void setBoxExtents(const math::vec3& newExtents) noexcept
+        void setBoxExtents(const math::vec3& newExtents) noexcept;
+        
+        L_ALWAYS_INLINE pointer<const float> getSphereRadius() const 
         {
-            collider_modification_data modData;
-            modData.colliderIndex = m_colliderIndex;
-            modData.modificationType = collider_modification_flag::cm_set_new_box_extents;
-            modData.data.newBoxExtents = newExtents;
-
-            m_modificationsRequests->push_back(modData);
-        }
-
-        L_ALWAYS_INLINE pointer<const float> getSphereRadius()
-        {
-            if (m_colliderType != collider_type::sphere) return { nullptr };
+            if (m_colliderType != collider_type::sphere)
+            {
+                log::warn("ColliderData::getSphereRadius called on a collider that is not of type collider_type::sphere");
+                return { nullptr };
+            }
 
             return { &m_colliderSpecifics.sphereRadius };
         }
 
-        void setSphereRadius(float newRadius) noexcept
+        void setSphereRadius(float newRadius) noexcept;
+        
+        L_ALWAYS_INLINE InternalConvexColliderPtr getConvexCollider() const 
         {
-            collider_modification_data modData;
-            modData.colliderIndex = m_colliderIndex;
-            modData.modificationType = collider_modification_flag::cm_set_new_sphere_radius;
-            modData.data.newRadius = newRadius;
+            if (m_colliderType != collider_type::quickhull_convex)
+            {
+                log::warn("ColliderData::getConvexCollider called on a collider that is not of type collider_type::quickhull_convex");
+                return { nullptr };
+            }
 
-            m_modificationsRequests->push_back(modData);
-        }
-
-        L_ALWAYS_INLINE InternalConvexColliderPtr getConvexCollider()
-        {
-            if (m_colliderType != collider_type::quickhull_convex) return { nullptr };
-
-            return  m_colliderSpecifics.internalConvexStructure;
+            return m_colliderSpecifics.internalConvexStructure;
         }
 
         L_ALWAYS_INLINE size_type getColliderIndex() const noexcept { return m_colliderIndex; }

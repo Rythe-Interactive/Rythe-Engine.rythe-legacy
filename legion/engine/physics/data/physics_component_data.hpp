@@ -52,9 +52,10 @@ namespace legion::physics
 
         L_ALWAYS_INLINE void addBoxCollider(const math::vec3& extents, const math::vec3& offset, const math::quat& rotation)
         {
-            if (extents.y == 0.0f)
+            if (extents.x == 0.0f || extents.y == 0.0f || extents.z == 0.0f)
             {
-                DebugBreak();
+                log::warn("PhysicsComponentData::addBoxCollider called with parameter 'extents' having an x,y, or z value equal to zero");
+                return;
             }
              
             m_colliders.push_back(ColliderData(m_colliderCount,{ &m_colliderModificationRequests },collider_type::box, offset, rotation));
@@ -85,8 +86,14 @@ namespace legion::physics
             }
         }
         
-        L_ALWAYS_INLINE void addSphereCollider(float radius, const math::vec3& offset)
+        L_ALWAYS_INLINE void addSphereCollider(float radius, const math::vec3& offset = math::vec3(0.0f))
         {
+           if (radius == 0.0f)
+           {
+                log::warn("PhysicsComponentData::addSphereCollider called with parameter radius equal to zero");
+                return;
+           }
+
            m_colliders.push_back(ColliderData(m_colliderCount, { &m_colliderModificationRequests }, collider_type::sphere, offset, math::identity<math::quat>() ));
            m_colliders[m_colliderCount].setColliderToSphereCollider(radius);
            updateColliderRecords(physics_component_flag::pc_add_first_sphere, physics_component_flag::pc_add_next_sphere);
