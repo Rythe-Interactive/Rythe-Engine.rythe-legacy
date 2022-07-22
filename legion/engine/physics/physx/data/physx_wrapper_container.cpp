@@ -4,13 +4,12 @@ namespace legion::physics
 {
     PhysxInternalWrapper& PhysxWrapperContainer::createPhysxWrapper(physics_component& unregisteredPhysXWrapper)
     {
-        unregisteredPhysXWrapper.physicsComponentID = nextID;
-        m_wrapperIDSet.insert(nextID);
+        return registerWrapperID(unregisteredPhysXWrapper.physicsComponentID);
+    }
 
-        m_physxWrappers.emplace_back();
-
-        nextID++;
-        return m_physxWrappers[m_physxWrappers.size() - 1];
+    PhysxInternalWrapper& PhysxWrapperContainer::createPhysxWrapper(physics_enviroment& unregisteredPhysXWrapper)
+    {
+        return registerWrapperID(unregisteredPhysXWrapper.physicsEnviromentID);
     }
 
     void PhysxWrapperContainer::PopAndSwapRemoveWrapper(size_type id)
@@ -34,5 +33,16 @@ namespace legion::physics
         }
 
         return { nullptr };
+    }
+
+    PhysxInternalWrapper& PhysxWrapperContainer::registerWrapperID(size_type& outID)
+    {
+        outID = nextID;
+        m_wrapperIDSet.insert(nextID);
+
+        m_physxWrappers.emplace_back();
+
+        nextID++;
+        return m_physxWrappers[m_physxWrappers.size() - 1];
     }
 }

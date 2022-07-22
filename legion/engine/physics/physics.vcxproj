@@ -23,6 +23,7 @@
     <ClCompile Include="diviner\components\physics_component.cpp" />
     <ClCompile Include="diviner\physics_statics.cpp" />
     <ClCompile Include="diviner\systems\physicssystem.cpp" />
+    <ClCompile Include="physics_helpers.cpp" />
     <ClCompile Include="physx\data\physx_wrapper.cpp" />
     <ClCompile Include="physx\data\physx_wrapper_container.cpp" />
     <ClCompile Include="physx\physx_event_process_funcs.cpp" />
@@ -35,9 +36,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="components\physics_enviroment.hpp" />
     <ClInclude Include="data\colliders\collider_data.hpp" />
     <ClInclude Include="data\component_flags.hpp" />
     <ClInclude Include="data\physics_component_data.hpp" />
+    <ClInclude Include="data\physics_enviroment_data.hpp" />
+    <ClInclude Include="data\physics_material.hpp" />
     <ClInclude Include="data\rigibody_data.hpp" />
     <ClInclude Include="diviner\broadphasecollisionalgorithms\broadphasebruteforce.hpp" />
     <ClInclude Include="diviner\broadphasecollisionalgorithms\broadphasecollisionalgorithm.hpp" />
@@ -77,6 +81,7 @@
     <ClInclude Include="module\physicsmodule.hpp" />
     <ClInclude Include="diviner\components\rigidbody.hpp" />
     <ClInclude Include="components\physics_component.hpp" />
+    <ClInclude Include="physics_helpers.hpp" />
     <ClInclude Include="physx\data\physx_wrapper.hpp" />
     <ClInclude Include="physx\data\physx_wrapper_container.hpp" />
     <ClInclude Include="physx\physx_event_process_funcs.hpp" />

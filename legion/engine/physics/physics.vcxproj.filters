@@ -81,13 +81,13 @@
     <ClCompile Include="physx\data\physx_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="data\colliders\convex_collider_data.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="diviner\components\physics_component.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="physx\data\physx_wrapper_container.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="physics_helpers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -231,7 +231,7 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="components\physics_component.hpp">
-    <Filter>Header Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="physx\data\physx_wrapper.hpp">
       <Filter>Header Files</Filter>
@@ -248,9 +248,6 @@
     <ClInclude Include="data\component_flags.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="data\colliders\convex_collider_data.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="data\physics_component_data.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -261,6 +258,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="components\physics_component.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="components\physics_enviroment.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="data\physics_enviroment_data.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="physics_helpers.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="data\physics_material.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

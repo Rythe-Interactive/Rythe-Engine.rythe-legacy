@@ -2,19 +2,41 @@
 
 namespace legion::physics
 {
-    ColliderData::ColliderData(collider_type colliderType, const math::vec3& offset, const math::quat& rotation) noexcept
+    ColliderData::ColliderData(size_type colliderIndex, pointer<std::vector<collider_modification_data>> modificationsRequests, collider_type colliderType,
+        const math::vec3& offset, const math::quat& rotation) noexcept
         :
-        m_rotationOffset(rotation), m_positionOffset(offset), m_isRegistered(false), m_colliderType(colliderType)  { }
+        m_rotationOffset(rotation), m_positionOffset(offset), m_colliderIndex(colliderIndex),
+        m_colliderType(colliderType),  m_modificationsRequests(modificationsRequests),m_isRegistered(false) { }
 
-    ConvexColliderData::ConvexColliderData(const math::vec3& offset, const math::quat& rotation, const math::vec3& boxExtents) noexcept
-        :
-        ColliderData(collider_type::box,offset,rotation), m_boxExtents{ boxExtents } { }
+    void ColliderData::setMaterialHash(size_type materialHash) noexcept
+    {
+        m_materialHash = materialHash;
 
-    SphereColliderData::SphereColliderData(const math::vec3& offset, float radius) noexcept
-        :
-        ColliderData(collider_type::sphere, offset, math::identity<math::quat>()), m_radius{radius} { }
-        
-    ConvexColliderData::ConvexColliderData(const math::vec3& offset, const math::quat& rotation, InternalConvexColliderPtr ccPtr)
-        :
-        ColliderData(collider_type::quickhull_convex, offset, rotation), m_internalConvexStructure{ ccPtr } { }
+        collider_modification_data modData;
+        modData.colliderIndex = m_colliderIndex;
+        modData.modificationType = collider_modification_flag::cm_set_new_material;
+        modData.data.newMaterial = materialHash;
+
+        m_modificationsRequests->push_back(modData);
+    }
+
+    void ColliderData::setBoxExtents(const math::vec3& newExtents) noexcept
+    {
+        collider_modification_data modData;
+        modData.colliderIndex = m_colliderIndex;
+        modData.modificationType = collider_modification_flag::cm_set_new_box_extents;
+        modData.data.newBoxExtents = newExtents;
+
+        m_modificationsRequests->push_back(modData);
+    }
+
+    void ColliderData::setSphereRadius(float newRadius) noexcept
+    {
+        collider_modification_data modData;
+        modData.colliderIndex = m_colliderIndex;
+        modData.modificationType = collider_modification_flag::cm_set_new_sphere_radius;
+        modData.data.newRadius = newRadius;
+
+        m_modificationsRequests->push_back(modData);
+    }
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include <core/core.hpp>
 #include <rendering/rendering.hpp>
+#include <physics/physics_helpers.hpp>
 
 namespace lgn = legion;
 
@@ -27,6 +28,8 @@ namespace legion::physics
         //wide block, 1 normal cube on the center, 1 rotated default cube on top of it
         void setupCubeWorldTestScene();
 
+        void setupBoxAndStackTestScene();
+
         //------------------------ Rigidbody Shooter -------------------------------------------//
 
         void shootPhysXCubes(ShootPhysXBox& action);
@@ -48,6 +51,9 @@ namespace legion::physics
             math::quat rot = math::quat(1,0,0,0));
 
         void suzzaneRainTick(legion::time::span deltaTime);
+
+        void createCubeStack(const math::vec3& extents, size_t stackSize, const math::vec3& startPos);
+
 
         //--------------------------- Rendering Variables ---------------------------------------//
 
@@ -76,5 +82,10 @@ namespace legion::physics
 
         math::vec3 m_rainStartPos = math::vec3(10,12,-5);
         math::vec3 m_rainExtents = math::vec3(10,0,10);
+
+        const char* m_defaultNonBouncy = "DefaultNonBouncy";
+
+        ecs::entity inflatableBlock;
+        ecs::entity inflatableSphere;
     };
 }
