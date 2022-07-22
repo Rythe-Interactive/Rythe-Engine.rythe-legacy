@@ -59,7 +59,7 @@ namespace legion::physics
             }
              
             m_colliders.push_back(ColliderData(m_colliderCount,{ &m_colliderModificationRequests },collider_type::box, offset, rotation));
-            m_colliders[m_colliderCount].setColliderToBox(extents * boxExtentSizeMultiplier);
+            m_colliders[m_colliderCount].setColliderToBoxCollider(extents * boxExtentSizeMultiplier);
 
             updateColliderRecords(physics_component_flag::pc_add_first_box, physics_component_flag::pc_add_next_box);
         }

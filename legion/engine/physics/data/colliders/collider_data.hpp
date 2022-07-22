@@ -96,7 +96,7 @@ namespace legion::physics
             m_modificationsRequests = modificationsRequests;
         }
 
-        L_ALWAYS_INLINE void setColliderToBox(const math::vec3& boxExtents)
+        L_ALWAYS_INLINE void setColliderToBoxCollider(const math::vec3& boxExtents)
         {
             m_colliderSpecifics.boxExtents = { boxExtents };
         }

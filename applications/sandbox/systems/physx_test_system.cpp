@@ -199,7 +199,7 @@ namespace legion::physics
         createStaticColliderWall(math::vec3(30, 0, 5), legionLogoMat, math::vec3(10, 1, 10), rotX90);
 
         {
-            inflatableBlock = createDefaultMeshEntity(math::vec3(27, 1.0f, 0), cubeH, tileMat);
+            inflatableBlock = createDefaultMeshEntity(math::vec3(27, 5.0f, 0), cubeH, tileMat);
 
             auto& phyComp = *inflatableBlock.add_component<physics_component>();
             phyComp.physicsCompData.addBoxCollider(math::vec3{ 1 });
@@ -209,7 +209,7 @@ namespace legion::physics
         }
 
         {
-            inflatableSphere = createDefaultMeshEntity(math::vec3(33, 1.0f, 0), sphereH, tileMat);
+            inflatableSphere = createDefaultMeshEntity(math::vec3(33, 5.0f, 0), sphereH, tileMat);
 
             auto& phyComp = *inflatableSphere.add_component<physics_component>();
             phyComp.physicsCompData.addSphereCollider(0.5f, math::vec3{});
