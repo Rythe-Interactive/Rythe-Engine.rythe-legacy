@@ -30,6 +30,9 @@
     <ClCompile Include="renderstages\mousehover.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="systems\physics_debugging_system.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -69,6 +72,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="systems\physx_test_system.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="systems\physics_debugging_system.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="renderstages\mousehover.hpp">

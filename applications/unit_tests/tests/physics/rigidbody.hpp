@@ -11,7 +11,7 @@ static void TestRigidbody()
 
     LEGION_SUBTEST("Rigidbody Read and Write")
     {
-        physics::RigidbodyData& rbData = rigidbody.rigidbodyData;
+        physics::RigidbodyData& rbData = rigidbody.data;
 
         rbData.setMass(3.0f);
         L_CHECK(rbData.getMass() == 3.0f);

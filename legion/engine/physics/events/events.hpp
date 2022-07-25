@@ -70,4 +70,30 @@ namespace legion::physics {
     {
         using collision_event_base<collision_event>::collision_event_base;
     };
+
+    struct request_create_physics_material : public events::event<request_create_physics_material>
+    {
+        float newDynamicFriction;
+        float newStaticFriction;
+        float newRestitution;
+        size_type newMaterialHash;
+
+        request_create_physics_material(float dynamicFriction, float staticFriction,
+            float restitution, size_type materialHash)
+            : newDynamicFriction(dynamicFriction), newStaticFriction(staticFriction),
+            newRestitution(restitution), newMaterialHash(materialHash)
+        {
+
+        }
+    };
+    //-------------------------------------------- Debugging Related ---------------------------------------------//
+
+    struct request_flip_physics_continuous final : public events::event<request_flip_physics_continuous>
+    {
+        request_flip_physics_continuous(bool continuousState) : newContinuousState{ continuousState } {}
+
+        bool newContinuousState;
+    };
+
+    struct request_single_physics_tick final : public events::event<request_single_physics_tick> { };
 }

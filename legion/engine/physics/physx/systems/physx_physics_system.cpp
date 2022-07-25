@@ -2,6 +2,7 @@
 #include <physx/PxPhysicsAPI.h>
 #include <physics/components/physics_component.hpp>
 #include <physics/components/rigidbody.hpp>
+#include <physics/components/physics_enviroment.hpp>
 #include <physics/events/events.hpp>
 #include <physics/physx/physx_event_process_funcs.hpp>
 
@@ -10,14 +11,135 @@ namespace legion::physics
 {
     using namespace physx;
 
+    constexpr bool shouldDebugDraw = false;
+
+    static void debugDrawPhysXScene(PxScene* sceneToDraw)
+    {
+        if (!shouldDebugDraw) return;
+
+        const PxRenderBuffer& rb = sceneToDraw->getRenderBuffer();
+        for (PxU32 i = 0; i < rb.getNbLines(); i++)
+        {
+            const PxDebugLine& line = rb.getLines()[i];
+
+            const PxVec3& pxStart = line.pos0;
+            const PxVec3& pxEnd = line.pos1;
+
+            math::vec3 start{ pxStart.x, pxStart.y, pxStart.z };
+            math::vec3 end{ pxEnd.x, pxEnd.y,pxEnd.z };
+
+            debug::drawLine(start, end, math::colors::green, 1.0f, 0.0f);
+        }
+    }
+
+    static void identifyPhysxDebugOutputFilepath(std::string& outFileName)
+    {
+        std::time_t t = std::time(0);
+        std::tm* now = std::localtime(&t);
+
+        //file name is date and time of file creation, placed in the logs folder of sandbox
+        outFileName = "./logs/";
+        outFileName += std::to_string(now->tm_year + 1900) + "-";
+        outFileName += std::to_string(now->tm_mon + 1) + "-";
+        outFileName += std::to_string(now->tm_mday)+ "-";
+        outFileName += std::to_string(now->tm_hour) + "-";
+        outFileName += std::to_string(now->tm_min) + "-";
+        outFileName += std::to_string(now->tm_sec);
+        outFileName += ".pxd2";
+    }
+
+    //PhysX PVD Debugger Related
+    constexpr const char* pvdHost = "127.0.0.1";
+    constexpr size_type defaultPVDListeningPort = 5425;
+    constexpr size_type defaultPVDHostTimeout = 10;
+
+    class DebuggerWrapper
+    {
+    public:
+
+        enum class transport_mode
+        {
+            pvd_network,
+            file_output,
+            none
+        };
+
+        void initializeDebugger(PxFoundation* foundation, transport_mode mode)
+        {
+            switch (mode)
+            {
+            case transport_mode::pvd_network:
+                initializePVDDebugger(foundation);
+                break;
+            case transport_mode::file_output:
+                initializeFileDebugger(foundation);
+                break;
+            case transport_mode::none:
+                break;
+            default:
+                break;
+            }
+        }
+
+        void release()
+        {
+            if (m_pvd)
+            {
+                m_pvd->disconnect();
+                m_pvd->release();
+                m_transport->release();
+            }
+        }
+
+        PxPvd* getPVD() const noexcept { return m_pvd; }
+
+    private:
+
+        void initializeFileDebugger(PxFoundation* foundation)
+        {
+            if (!m_isDebuggerInit)
+            {
+                std::string filepath;
+                identifyPhysxDebugOutputFilepath(filepath);
+                m_isDebuggerInit = true;
+                m_pvd = PxCreatePvd(*foundation);
+                m_transport = PxDefaultPvdFileTransportCreate(filepath.c_str());
+                m_pvd->connect(*m_transport, PxPvdInstrumentationFlag::eALL);
+            }
+            else
+            {
+                log::warn("physx debugger already initialized!");
+            }
+        }
+
+        void initializePVDDebugger(PxFoundation* foundation)
+        {
+            if (!m_isDebuggerInit)
+            {
+                m_isDebuggerInit = true;
+                m_pvd = PxCreatePvd(*foundation);
+                m_transport = PxDefaultPvdSocketTransportCreate(pvdHost, defaultPVDListeningPort, defaultPVDHostTimeout);
+            }
+            else
+            {
+                log::warn("physx debugger already initialized!");
+            }
+        }
+
+        PxPvd* m_pvd = nullptr;
+        PxPvdTransport* m_transport = nullptr;
+        bool m_isDebuggerInit = false;
+    };
+
     struct PhysxStatics
     {
         inline static size_type selfInstanceCounter = 0;
 
         inline static PxFoundation* foundation = nullptr;
-        inline static PxPvd* pvd = nullptr;
+        inline static DebuggerWrapper debugger;
         inline static PxDefaultCpuDispatcher* dispatcher = nullptr;
-        inline static PxPhysics* phyxSDK = nullptr;
+        inline static PxPhysics* physxSDK = nullptr;
+        inline static PxCooking* cooking = nullptr;
 
         inline static PxDefaultAllocator defaultAllocator;
         inline static PxDefaultErrorCallback defaultErrorCallback;
@@ -26,14 +148,11 @@ namespace legion::physics
 
     using PS = PhysxStatics;
 
-    //PhysX PVD Debugger Related
-    constexpr const char* pvdHost = "127.0.0.1";
-    constexpr size_type defaultPVDListeningPort = 5425;
-    constexpr size_type defaultPVDHostTimeout = 10;
+    constexpr size_type convexHullVertexLimit = 256;
 
     physx::PxPhysics* PhysXPhysicsSystem::getSDK()
     {
-        return PS::phyxSDK;
+        return PS::physxSDK;
     }
 
     void PhysXPhysicsSystem::setup()
@@ -48,9 +167,18 @@ namespace legion::physics
         }
 
         bindEventsToEventProcessors();
-        createProcess<&PhysXPhysicsSystem::fixedUpdate>("Physics", m_timeStep);
 
         bindToEvent<events::component_destruction<physics_component>, &PhysXPhysicsSystem::markPhysicsWrapperPendingRemove>();
+        bindToEvent<request_create_physics_material, &PhysXPhysicsSystem::onRequestCreatePhysicsMaterial>();
+
+        PhysicsComponentData::setConvexGeneratorDelegate([this](const std::vector<math::vec3>& vertices)->void*
+            {
+                return physxGenerateConvexMesh(vertices);
+            });
+
+        //debugging related
+        bindToEvent<request_flip_physics_continuous, &PhysXPhysicsSystem::flipPhysicsContinuousState>();
+        bindToEvent<request_single_physics_tick, &PhysXPhysicsSystem::activateSingleStepContinue>();
     }
 
     void PhysXPhysicsSystem::shutdown()
@@ -60,7 +188,11 @@ namespace legion::physics
         m_physxWrapperContainer.ReleasePhysicsWrappers();
 
         m_physxScene->release();
-        m_defaultMaterial->release();
+
+        for (auto& hashToMaterialPair : m_physicsMaterials)
+        {
+            hashToMaterialPair.second->release();
+        }
         
         PS::selfInstanceCounter--;
 
@@ -70,6 +202,26 @@ namespace legion::physics
         }
     }
 
+    void* PhysXPhysicsSystem::physxGenerateConvexMesh(const std::vector<math::vec3>& vertices)
+    {
+        PxConvexMeshDesc convexDesc;
+        convexDesc.points.count = vertices.size();
+        convexDesc.points.stride = sizeof(math::vec3);
+        convexDesc.points.data = vertices.data();
+        convexDesc.flags =
+            PxConvexFlag::eCOMPUTE_CONVEX | PxConvexFlag::eDISABLE_MESH_VALIDATION | PxConvexFlag::eFAST_INERTIA_COMPUTATION;
+        convexDesc.vertexLimit = convexHullVertexLimit;
+
+        PxDefaultMemoryOutputStream buf;
+        if (!PS::cooking->cookConvexMesh(convexDesc, buf))
+            return nullptr;
+
+        PxDefaultMemoryInputData input(buf.getData(), buf.getSize());
+        auto convex = PS::physxSDK->createConvexMesh(input);
+
+        return convex;
+    }
+
     void PhysXPhysicsSystem::lazyInitPhysXVariables()
     {
         if (PS::selfInstanceCounter == 1)
@@ -77,27 +229,51 @@ namespace legion::physics
             PS::foundation = PxCreateFoundation(PX_PHYSICS_VERSION,
                 PS::defaultAllocator, PS::defaultErrorCallback);
 
-            PS::pvd = PxCreatePvd(*PS::foundation);
-            PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate(pvdHost, defaultPVDListeningPort, defaultPVDHostTimeout);
-            PS::pvd->connect(*transport, PxPvdInstrumentationFlag::eDEBUG);
-
             PS::dispatcher = PxDefaultCpuDispatcherCreate(0); //deal with multithreading later on
 
-            PS::phyxSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *PS::foundation, PxTolerancesScale(), true, PS::pvd);
+            #ifdef LEGION_DEBUG
+            PS::debugger.initializeDebugger(PS::foundation, DebuggerWrapper::transport_mode::none);
+            #endif
+
+            PxTolerancesScale scale;
+            PS::physxSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *PS::foundation, scale, true, PS::debugger.getPVD());
+
+            PxCookingParams params(scale);
+            params.meshWeldTolerance = 0.001f;
+            params.meshPreprocessParams = PxMeshPreprocessingFlags(PxMeshPreprocessingFlag::eWELD_VERTICES);
+            params.buildGPUData = false; //TODO set to true later on when GPU bodies are supported 
+
+            PS::cooking = PxCreateCooking(PX_PHYSICS_VERSION, *PS::foundation, params);
         }
     }
 
     void PhysXPhysicsSystem::setupDefaultScene()
     {
-        PxSceneDesc sceneDesc(PS::phyxSDK->getTolerancesScale());
+        PxSceneDesc sceneDesc(PS::physxSDK->getTolerancesScale());
         sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
         sceneDesc.cpuDispatcher = PS::dispatcher;
         sceneDesc.filterShader = PxDefaultSimulationFilterShader;
         sceneDesc.flags |= PxSceneFlag::eENABLE_STABILIZATION;
         sceneDesc.flags |= PxSceneFlag::eENABLE_ACTIVE_ACTORS;
 
-        m_physxScene = PS::phyxSDK->createScene(sceneDesc);
-        m_defaultMaterial = PS::phyxSDK->createMaterial(0.5f, 0.5f, 0.1f);
+        m_physxScene = PS::physxSDK->createScene(sceneDesc);
+        
+        PxMaterial* defaultMaterial = PS::physxSDK->createMaterial(0.5f, 0.5f, 0.6f);
+        m_physicsMaterials.insert({ defaultMaterialHash,defaultMaterial });
+
+        
+        #ifdef LEGION_DEBUG
+        m_physxScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
+        m_physxScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES, 1.0f);
+        m_physxScene->setVisualizationParameter(PxVisualizationParameter::eBODY_MASS_AXES, 1.0f);
+        #endif
+
+        PxPvdSceneClient* pvdClient = m_physxScene->getScenePvdClient();
+        if (pvdClient)
+        {
+            pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
+            pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
+        }
     }
 
     void PhysXPhysicsSystem::bindEventsToEventProcessors()
@@ -106,28 +282,54 @@ namespace legion::physics
         m_physicsComponentActionFuncs[physics_component_flag::pc_add_next_box] = &processAddNextBox;
         m_physicsComponentActionFuncs[physics_component_flag::pc_add_first_sphere] = &processAddFirstSphere;
         m_physicsComponentActionFuncs[physics_component_flag::pc_add_next_sphere] = &processAddNextSphere;
+        m_physicsComponentActionFuncs[physics_component_flag::pc_add_first_convex] = &processAddFirstConvex;
+        m_physicsComponentActionFuncs[physics_component_flag::pc_add_next_convex] = &processAddNextConvex;
 
         m_rigidbodyComponentActionFuncs[rigidbody_flag::rb_velocity] = &processVelocityModification;
+        m_rigidbodyComponentActionFuncs[rigidbody_flag::rb_angular_velocity] = &processAngularVelocityModification;
         m_rigidbodyComponentActionFuncs[rigidbody_flag::rb_mass] = &processMassModification;
+        m_rigidbodyComponentActionFuncs[rigidbody_flag::rb_angular_drag] = &processAngularDragModification;
+        m_rigidbodyComponentActionFuncs[rigidbody_flag::rb_linear_drag] = &processLinearDragModification;
+
+        m_enviromentComponentActionFuncs[physics_enviroment_flag::pe_add_plane] = &processAddInfinitePlane;
+
+        m_colliderActionFuncs[collider_modification_flag::cm_set_new_material] = &processSetPhysicsMaterial;
+        m_colliderActionFuncs[collider_modification_flag::cm_set_new_box_extents] = &processSetBoxSize;
+        m_colliderActionFuncs[collider_modification_flag::cm_set_new_sphere_radius] = &processSetSphereSize;
+
     }
 
     void PhysXPhysicsSystem::releasePhysXVariables()
     {
+        PS::cooking->release();
         PS::dispatcher->release();
-        PS::phyxSDK->release();
-
-        if (PS::pvd)
-        {
-            PxPvdTransport* transport = PS::pvd->getTransport();
-            PS::pvd->release();
-            PS::pvd = nullptr;
-            transport->release();
-        }
-
+        PS::physxSDK->release();
+        PS::debugger.release();
         PS::foundation->release();
     }
 
-    void PhysXPhysicsSystem::fixedUpdate(time::time_span<fast_time> deltaTime)
+    void PhysXPhysicsSystem::update(legion::time::span deltaTime)
+    {
+        if (m_isContinuousStepActive || m_isSingleStepContinueAcitve)
+        {
+            m_accumulation += deltaTime;
+
+            size_type tickAmount = 0;
+
+            while (m_accumulation > m_timeStep && tickAmount < m_maxPhysicsStep)
+            {
+                m_accumulation -= m_timeStep;
+                physicsStep();
+                ++tickAmount;
+            }
+
+            m_isSingleStepContinueAcitve = false;
+        }
+
+        debugDrawPhysXScene(m_physxScene);
+    }
+
+    void PhysXPhysicsSystem::physicsStep()
     {
         executePreSimulationActions();
 
@@ -135,6 +337,14 @@ namespace legion::physics
         m_physxScene->fetchResults(true);
 
         executePostSimulationActions();
+    }
+
+    void PhysXPhysicsSystem::onRequestCreatePhysicsMaterial(request_create_physics_material& physicsMaterialRequest)
+    {
+        physx::PxMaterial* material = PS::physxSDK->createMaterial(physicsMaterialRequest.newStaticFriction,
+            physicsMaterialRequest.newDynamicFriction, physicsMaterialRequest.newRestitution);
+
+        m_physicsMaterials.insert({ physicsMaterialRequest.newMaterialHash, material });
     }
 
     void PhysXPhysicsSystem::executePreSimulationActions()
@@ -147,8 +357,9 @@ namespace legion::physics
 
         m_wrapperPendingRemovalID.clear();
 
-        //[2] Identify new physics components
+        //[2] Identify new physics components and enviroments
         ecs::filter<physics_component> physicsComponentFilter;
+        ecs::filter<physics_enviroment> physicsEnviromentFilter;
 
         for (auto entity : physicsComponentFilter)
         {
@@ -157,6 +368,16 @@ namespace legion::physics
             if (physComp.physicsComponentID == invalid_physics_component)
             {
                 m_physxWrapperContainer.createPhysxWrapper(physComp);
+            }
+        }
+
+        for (auto entity : physicsEnviromentFilter)
+        {
+            auto& physEnv = *entity.get_component<physics_enviroment>();
+
+            if (physEnv.physicsEnviromentID == invalid_physics_enviroment)
+            {
+                m_physxWrapperContainer.createPhysxWrapper(physEnv);
             }
         }
 
@@ -179,15 +400,23 @@ namespace legion::physics
             }
         }
 
-        //[4] Go through events generated by physics_component and rigidbody
+        //[4] Go through events generated by physics_components,rigidbodies, and physics enviroments
         PhysxEnviromentInfo enviromentInfo;
         enviromentInfo.scene = m_physxScene;
-        enviromentInfo.defaultMaterial = m_defaultMaterial;
+        enviromentInfo.defaultMaterial = m_physicsMaterials[defaultPhysicsMaterial];
+        enviromentInfo.physicsMaterials = &m_physicsMaterials;
+        enviromentInfo.defaultRigidbodyDensity = 10.0f;
 
         for (auto entity : physicsComponentFilter)
         {
             auto& physComp = *entity.get_component<physics_component>();
             processPhysicsComponentEvents(entity, physComp, enviromentInfo);
+        }
+
+        for (auto entity : physicsComponentFilter)
+        {
+            auto& physComp = *entity.get_component<physics_component>();
+            processColliderModificationEvents(physComp, enviromentInfo);
         }
 
         for (auto entity : physicsAndRigidbodyComponentFilter)
@@ -196,6 +425,12 @@ namespace legion::physics
             auto& physComp = *entity.get_component<physics_component>();
 
             processRigidbodyComponentEvents(entity, rbComp, physComp, enviromentInfo);
+        }
+
+        for (auto entity : physicsEnviromentFilter)
+        {
+            auto& physEnv = *entity.get_component<physics_enviroment>();
+            processPhysicsEnviromentEvents(entity, physEnv, enviromentInfo);
         }
 
         //[4] Physics Objects transformation may get directly modified by other systems
@@ -226,6 +461,28 @@ namespace legion::physics
             *entity.get_component<position>() = math::vec3(pxPosition.x, pxPosition.y, pxPosition.z);
             *entity.get_component<rotation>() = math::quat(pxRotation.w, pxRotation.x, pxRotation.y, pxRotation.z);
         }
+
+        //[2] Transfer linear and angular velocity changes from PxRigidDynamics to actual entity rigidbody components
+        ecs::filter<physics_component, rigidbody> physicsAndRigidbodyComponentFilter;
+
+        for (ecs::entity ent : physicsAndRigidbodyComponentFilter)
+        {
+            physics_component& phyComp = *ent.get_component<physics_component>();
+            rigidbody& rbComp = *ent.get_component<rigidbody>();
+
+            pointer<PhysxInternalWrapper> physxWrapper =  m_physxWrapperContainer.findWrapperWithID(phyComp.physicsComponentID);
+
+            if (physxWrapper)
+            {
+                PxRigidDynamic* dynamic = static_cast<PxRigidDynamic*>(physxWrapper->physicsActor);
+
+                PxVec3 pxLinear = dynamic->getLinearVelocity();
+                PxVec3 pxAngular = dynamic->getAngularVelocity();
+
+                rbComp.data.setLinearVelocityDirect({ pxLinear.x,pxLinear.y,pxLinear.z });
+                rbComp.data.setAngularVelocityDirect({ pxAngular.x,pxAngular.y,pxAngular.z });
+            }
+        }
     }
     
     void PhysXPhysicsSystem::processPhysicsComponentEvents(ecs::entity ent, physics_component& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo)
@@ -251,7 +508,7 @@ namespace legion::physics
         const PhysxEnviromentInfo& physicsEnviromentInfo)
     {
         size_type physicsComponentID = physicsComponentToProcess.physicsComponentID;
-        auto& eventsGenerated = rigidbody.rigidbodyData.getGeneratedModifyEvents();
+        auto& eventsGenerated = rigidbody.data.getGeneratedModifyEvents();
 
         pointer<PhysxInternalWrapper> wrapperPtr = m_physxWrapperContainer.findWrapperWithID(physicsComponentID);
 
@@ -265,6 +522,44 @@ namespace legion::physics
             }
         }
 
-        rigidbody.rigidbodyData.resetModificationFlags();
+        rigidbody.data.resetModificationFlags();
+    }
+
+    void PhysXPhysicsSystem::processColliderModificationEvents(physics_component& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo)
+    {
+        size_type physicsComponentID = physicsComponentToProcess.physicsComponentID;
+        pointer<PhysxInternalWrapper> wrapperPtr = m_physxWrapperContainer.findWrapperWithID(physicsComponentID);
+
+        const auto& colliderModifyEvents = physicsComponentToProcess.physicsCompData.getGeneratedColliderModifyEvents();
+
+        auto& colliders = physicsComponentToProcess.physicsCompData.getColliders();
+
+        for (const collider_modification_data& modData : colliderModifyEvents)
+        {
+            const ColliderData& collider = colliders[modData.colliderIndex];
+            m_colliderActionFuncs[modData.modificationType].invoke(collider, modData, physicsEnviromentInfo, *wrapperPtr);
+        }
+
+        physicsComponentToProcess.physicsCompData.resetColliderModificationFlags();
+    }
+
+    void PhysXPhysicsSystem::processPhysicsEnviromentEvents(ecs::entity ent, physics_enviroment& physicsComponentToProcess, const PhysxEnviromentInfo& physicsEnviromentInfo)
+    {
+        size_type enviromentID = physicsComponentToProcess.physicsEnviromentID;
+        auto& eventsGenerated = physicsComponentToProcess.data.getGeneratedModifyEvents();
+
+        pointer<PhysxInternalWrapper> wrapperPtr = m_physxWrapperContainer.findWrapperWithID(enviromentID);
+
+        if (!wrapperPtr) { return; }
+
+        for (size_type bitPos = 0; bitPos < eventsGenerated.size(); ++bitPos)
+        {
+            if (eventsGenerated.test(bitPos))
+            {
+                m_enviromentComponentActionFuncs[bitPos].invoke(physicsComponentToProcess, physicsEnviromentInfo, *wrapperPtr, ent);
+            }
+        }
+
+        physicsComponentToProcess.data.resetModificationFlags();
     }
 }

@@ -10,60 +10,79 @@ namespace legion::physics
     {
     public:
 
-        inline void setMass(float mass)
+        void setMass(float mass)
         {
             m_mass = mass;
             m_modificationFlags.set(rigidbody_flag::rb_mass);
         }
 
-        inline void setInertiaTensor(const math::mat3& inertiaTensor)
+        L_ALWAYS_INLINE void setInertiaTensor(const math::mat3& inertiaTensor)
         {
             m_inertiaTensor = inertiaTensor;
             m_modificationFlags.set(rigidbody_flag::rb_inertia_tensor);
         }
         
-        inline void setVelocity(const math::vec3& velocity)
+        L_ALWAYS_INLINE void setVelocity(const math::vec3& velocity)
         {
             m_velocity = velocity;
             m_modificationFlags.set(rigidbody_flag::rb_velocity);
         }
 
-        inline void setAngularVelocity(const math::vec3& velocity)
+        L_ALWAYS_INLINE void setAngularVelocity(const math::vec3& velocity)
         {
             m_angularVelocity = velocity;
             m_modificationFlags.set(rigidbody_flag::rb_angular_velocity);
         }
         
-        inline void setLinearDrag(float linearDrag)
+        L_ALWAYS_INLINE void setLinearDrag(float linearDrag)
         {
             m_linearDrag = linearDrag;
             m_modificationFlags.set(rigidbody_flag::rb_linear_drag);
         }
 
-        inline void setAngularDrag(float angularDrag)
+        L_ALWAYS_INLINE void setAngularDrag(float angularDrag)
         {
             m_angularDrag = angularDrag;
             m_modificationFlags.set(rigidbody_flag::rb_angular_drag);
         }
         
-        inline float getMass() { return m_mass; }
+        L_ALWAYS_INLINE float getMass() const noexcept { return m_mass; }
 
-        inline math::mat3 getInertiaTensor() { return m_inertiaTensor; }
+        L_ALWAYS_INLINE math::mat3 getInertiaTensor() const noexcept { return m_inertiaTensor; }
 
-        inline math::vec3 getVelocity() { return m_velocity; }
+        L_ALWAYS_INLINE math::vec3 getVelocity() const noexcept { return m_velocity; }
 
-        inline math::vec3 getAngularVelocity() { return m_angularVelocity; }
+        L_ALWAYS_INLINE math::vec3 getAngularVelocity() const noexcept { return m_angularVelocity; }
 
-        inline float getLinearDrag() { return m_linearDrag; }
+        L_ALWAYS_INLINE float getLinearDrag() const noexcept { return m_linearDrag; }
 
-        inline float getAngularDrag() { return m_angularDrag; }
+        L_ALWAYS_INLINE float getAngularDrag() const noexcept { return m_angularDrag; }
 
-        inline const std::bitset<rigidbody_flag::rb_max>& getGeneratedModifyEvents() const
+        L_ALWAYS_INLINE float getDensity() const noexcept { return m_density; }
+
+        L_ALWAYS_INLINE const std::bitset<rigidbody_flag::rb_max>& getGeneratedModifyEvents() const
         {
             return m_modificationFlags;
         }
 
-        inline void resetModificationFlags() { m_modificationFlags.reset(); }
+        L_ALWAYS_INLINE void resetModificationFlags() { m_modificationFlags.reset(); }
+
+        //-------------------------------------------- internal use functions ------------------------------------------------//
+
+        /** @brief Internal use only. Sets the mass of the rigidbody without updating its bitset*/
+        L_ALWAYS_INLINE void setMassDirect(float newMass) noexcept { m_mass = newMass; }
+
+        /** @brief Internal use only. Sets the density of the rigidbody without updating its bitset.
+         * The currently active active physics engine should be responsible for setting this value */
+        L_ALWAYS_INLINE void setDensityDirect(float newDensity) noexcept { m_density = newDensity; }
+
+        /** @brief Internal use only. Sets the density of the rigidbody without updating its bitset.
+         * The currently active active physics engine should be responsible for setting this value */
+        L_ALWAYS_INLINE void setLinearVelocityDirect(const math::vec3& linearVelocity) noexcept { m_velocity = linearVelocity; }
+
+        /** @brief Internal use only. Sets the density of the rigidbody without updating its bitset.
+         * The currently active active physics engine should be responsible for setting this value */
+        L_ALWAYS_INLINE void setAngularVelocityDirect(const math::vec3& angularVelocity) noexcept { m_velocity = angularVelocity; }
 
     private:
 
@@ -75,6 +94,8 @@ namespace legion::physics
         float m_mass = 1.0f;
         float m_linearDrag;
         float m_angularDrag = 0.01f;
+
+        float m_density = 1.0f;
 
         std::bitset<rigidbody_flag::rb_max> m_modificationFlags;
     };
