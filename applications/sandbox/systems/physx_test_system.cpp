@@ -251,7 +251,7 @@ namespace legion::physics
         }
         //---------------------------------------------- Friction Test TEST -----------------------------------------------------//
 
-        auto ent = createStaticColliderWall(math::vec3(-15, 0.0f, 10.0f), legionLogoMat, math::vec3(10, 1, 40));
+        createStaticColliderWall(math::vec3(-15, 0.0f, 10.0f), legionLogoMat, math::vec3(10, 1, 40));
 
     }
 
@@ -393,7 +393,7 @@ namespace legion::physics
             auto middle = createDefaultMeshEntity(math::vec3(-12, 1.0f, -5.f), cubeH, concreteMat);
 
             auto& phyComp = *middle.add_component<physics_component>();
-            phyComp.physicsCompData.AddBoxCollider(math::vec3(1.0f));
+            phyComp.physicsCompData.addBoxCollider(math::vec3(1.0f));
             phyComp.physicsCompData.getColliders()[0].setMaterialHash(slip);
             middle.add_component<rigidbody>()->data.setVelocity(math::vec3(0,0,10.f));
         }
@@ -402,7 +402,7 @@ namespace legion::physics
             auto middle = createDefaultMeshEntity(math::vec3(-15, 1.0f, -5.f), cubeH, concreteMat);
 
             auto& phyComp = *middle.add_component<physics_component>();
-            phyComp.physicsCompData.AddBoxCollider(math::vec3(1.0f));
+            phyComp.physicsCompData.addBoxCollider(math::vec3(1.0f));
             phyComp.physicsCompData.getColliders()[0].setMaterialHash(medium);
 
             middle.add_component<rigidbody>()->data.setVelocity(math::vec3(0, 0, 10.f));
@@ -412,7 +412,7 @@ namespace legion::physics
             auto middle = createDefaultMeshEntity(math::vec3(-17, 1.0f, -5.f), cubeH, concreteMat);
 
             auto& phyComp = *middle.add_component<physics_component>();
-            phyComp.physicsCompData.AddBoxCollider(math::vec3(1.0f));
+            phyComp.physicsCompData.addBoxCollider(math::vec3(1.0f));
             phyComp.physicsCompData.getColliders()[0].setMaterialHash(normal);
 
             middle.add_component<rigidbody>()->data.setVelocity(math::vec3(0, 0, 10.f));
