@@ -302,7 +302,6 @@ namespace legion::physics
 
         capsule.setHeight(2.0f);
         capsule.setRadius(1.0f);
-        capsule.setSpeed(0.1f);
 
         auto ent = createStaticColliderWall(math::vec3(0, 0.0f, 0), legionLogoMat, math::vec3(20, 1, 40));
 
@@ -448,7 +447,12 @@ namespace legion::physics
         if (action.value)
         {
             CapsuleControllerData& data = m_characterControllerEnt.get_component<capsule_controller>()->data;
-            data.jump(math::vec3(0, 0.30f, 0));
+            auto gravityPrPtr = data.getPreset<gravity_preset>();
+
+            if (gravityPrPtr)
+            {
+                gravityPrPtr->gravityAcc += math::vec3(0, 0.30f, 0);
+            }
         }
     }
 

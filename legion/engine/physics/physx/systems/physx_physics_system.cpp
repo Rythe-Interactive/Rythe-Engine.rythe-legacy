@@ -308,7 +308,6 @@ namespace legion::physics
         m_colliderActionFuncs[collider_modification_flag::cm_set_new_box_extents] = &processSetBoxSize;
         m_colliderActionFuncs[collider_modification_flag::cm_set_new_sphere_radius] = &processSetSphereSize;
 
-
         m_capsuleActionFuncs[capsule_character_flag::cc_move_to] = &processCapsuleMoveTo;
 
         m_hashToPresetProcessFunc.insert({ typeHash<gravity_preset>(),&processGravityPreset });

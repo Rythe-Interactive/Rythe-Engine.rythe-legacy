@@ -32,22 +32,6 @@ namespace legion::physics
             m_currentDisplacement += displacement;
         }
 
-        void moveToUsingSpeed(const math::vec3& unitDirection)
-        {
-            m_modificationFlags.set(capsule_character_flag::cc_move_to, true);
-            m_currentDisplacement += (unitDirection * m_speed);
-        }
-
-        void teleportTo(const math::vec3& position)
-        {
-            m_modificationFlags.set(capsule_character_flag::cc_teleport_to, true);
-            m_currentlTeleportation = position;
-        }
-
-        void setSpeed(float speed) noexcept { m_speed = speed; }
-
-        float getSpeed() const noexcept { return m_speed; }
-
         void setRadius(float radius)
         {
             m_modificationFlags.set(capsule_character_flag::cc_set_radius, true);
@@ -131,21 +115,6 @@ namespace legion::physics
         }
 
         std::vector<controller_preset>& getControllerPresets() noexcept { return m_presets; }
-
-        void jump(const math::vec3& jumpForce)
-        {
-            auto gravityPresetPtr = getPreset<gravity_preset>();
-
-            if (gravityPresetPtr)
-            {
-                gravityPresetPtr->gravityAcc += jumpForce;
-            }
-            else
-            {
-                log::warn(
-                    "Jump not executed Because controller does not have a gravity preset! You can do this by calling CapsuleControllerData::addPreset<gravity_preset>");
-            }
-        }
 
     private:
 
