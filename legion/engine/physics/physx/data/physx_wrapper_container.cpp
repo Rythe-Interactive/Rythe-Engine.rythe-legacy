@@ -42,8 +42,7 @@ namespace legion::physics
     {
         if (m_wrapperIDSet.contains(id))
         {
-            core::pointer<PhysxObject> wrapper{ &m_physxWrappers[m_wrapperIDSet.index_of(id)] };
-            return pointer< PhysxObject>{ wrapper };
+            return pointer< PhysxObject>{ &m_physxWrappers[m_wrapperIDSet.index_of(id)] };
         }
 
         return { nullptr };
@@ -63,5 +62,4 @@ namespace legion::physics
 
     template class PhysxWrapperContainer<PhysxInternalWrapper>;
     template class PhysxWrapperContainer<PhysxCharacterWrapper>;
-
 }

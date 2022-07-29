@@ -49,9 +49,11 @@ namespace legion::physics
         float getHeight() const noexcept { return m_height; }
 
         const math::vec3& getCurrentDisplacement() const noexcept { return m_currentDisplacement; }
+
         void resetDisplacement() { m_currentDisplacement = math::vec3(0); }
 
         const std::bitset<capsule_character_flag::cc_max>& getModificationFlags() const noexcept { return m_modificationFlags; }
+
         void resetModificationFlags() { m_modificationFlags.reset(); }
 
         template<class preset>

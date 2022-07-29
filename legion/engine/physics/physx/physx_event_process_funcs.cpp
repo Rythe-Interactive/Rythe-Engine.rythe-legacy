@@ -7,7 +7,6 @@
 #include <physics/components/rigidbody.hpp>
 #include <physics/physx/physx_event_process_funcs.hpp>
 
-
 using namespace physx;
 
 namespace legion::physics

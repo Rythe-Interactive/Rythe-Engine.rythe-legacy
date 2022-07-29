@@ -86,7 +86,6 @@ namespace legion::physics {
 
         }
     };
-
     //-------------------------------------------- Debugging Related ---------------------------------------------//
 
     struct request_flip_physics_continuous final : public events::event<request_flip_physics_continuous>

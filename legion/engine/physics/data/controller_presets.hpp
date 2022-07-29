@@ -15,7 +15,4 @@ namespace legion::physics
         float forceAmount = 0.0f;
         float massMaximum = 0.0f;//if massMaximum is <= 0, all rigidbodies will be pushed regardless of mass
     }; //TODO: make it so that this preset can be set at any point of the appplication
-
-
-
 }
