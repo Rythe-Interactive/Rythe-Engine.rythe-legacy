@@ -9,14 +9,11 @@
 
 namespace legion::rendering
 {
-    class OldRenderer;
-
     /**@class camera
      * @brief Camera component
      */
     struct camera
     {
-        friend class OldRenderer;
         friend class Renderer;
 
         ecs::component<app::window> targetWindow = ecs::component<app::window>{ {}, ecs::world };

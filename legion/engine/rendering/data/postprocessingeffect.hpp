@@ -1,14 +1,11 @@
 #pragma once
 #include <rendering/data/vertexarray.hpp>
 #include <rendering/data/buffer.hpp>
-
-
 #include <rendering/data/framebuffer.hpp>
 #include <rendering/data/shader.hpp>
-
 #include <rendering/data/screen_quad.hpp>
 
-#include <rendering/pipeline/base/pipelinebase.hpp>
+#include <rendering/pipeline/base/pipeline.hpp>
 
 namespace legion::rendering
 {
@@ -31,7 +28,6 @@ namespace legion::rendering
         virtual void setup(app::window& context) LEGION_PURE;
         void renderQuad()
         {
-            OPTICK_EVENT();
             m_quad.render();
         }
     private:
@@ -39,7 +35,6 @@ namespace legion::rendering
         screen_quad m_quad;
     };
 
-    struct framebuffer;
     /**
      * @class PostProcessingEffect
      * @brief A base class for post processing effect.

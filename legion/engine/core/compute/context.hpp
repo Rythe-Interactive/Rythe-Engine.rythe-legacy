@@ -6,8 +6,6 @@
 #include <utility>
 #include <core/data/image.hpp>
 
-#include <Optick/optick.h>
-
 /**
  * @file context.hpp
  */
@@ -57,7 +55,6 @@ namespace legion::core::compute
         template <class T>
         static Buffer createBuffer(std::vector<T>& container, buffer_type type, std::string name = "")
         {
-            OPTICK_EVENT();
             return Buffer(
                 instance.m_context,
                 reinterpret_cast<byte*>(container.data()), // data as void-ptr
@@ -69,13 +66,11 @@ namespace legion::core::compute
 
         static Buffer createBuffer(byte* data, size_type size, buffer_type type, std::string name = "")
         {
-            OPTICK_EVENT();
             return Buffer(instance.m_context, data, size, type, std::forward<std::string>(name));
         }
 
         static Buffer createImage(image& img, buffer_type type, std::string name = "")
         {
-            OPTICK_EVENT();
             size_type width = static_cast<size_type>(img.resolution().x);
             size_type height = static_cast<size_type>(img.resolution().y);
             size_type depth = 0;
@@ -115,18 +110,15 @@ namespace legion::core::compute
 
         static Buffer createImageFromOpenGLImage(uint target, uint texture, buffer_type type, std::string name = "", uint mip_level = 0)
         {
-            OPTICK_EVENT();
             return Buffer(instance.m_context, target, texture, mip_level, type, std::move(name));
         }
 
         static Buffer createImageFromOpenGLBuffer(uint bufferid, buffer_type type, std::string name = "")
         {
-            OPTICK_EVENT();
             return Buffer(instance.m_context, bufferid, type, false, std::move(name));
         }
         static Buffer createImageFromOpenGLRenderBuffer(uint bufferid, buffer_type type, std::string name = "")
         {
-            OPTICK_EVENT();
             return Buffer(instance.m_context, bufferid, type, true, std::move(name));
         }
 

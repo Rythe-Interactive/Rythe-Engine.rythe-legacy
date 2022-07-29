@@ -7,7 +7,6 @@ namespace lgn = legion;
 
 struct RequestFlipPhysicsContinuousState : public lgn::app::input_action<RequestFlipPhysicsContinuousState> {};
 struct RequestSinglePhysicsTick : public lgn::app::input_action<RequestSinglePhysicsTick> {};
-struct RequestRaycastDebug : public lgn::app::input_action<RequestRaycastDebug> {};
 
 namespace legion::physics
 {

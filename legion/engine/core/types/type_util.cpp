@@ -5,8 +5,6 @@ namespace legion::core
 {
     id_type nameHash(const std::string& name)
     {
-        OPTICK_EVENT();
-
 #if defined(LEGION_MSVC) || defined(LEGION_CLANG_MSVC)
         static std::hash<std::string> hasher{};
         if (!name.empty() && name[name.size() - 1] == '\0')

@@ -60,7 +60,12 @@ namespace legion::rendering
     enum struct texture_mipmap : GLint
     {
         nearest = GL_NEAREST,
-        linear = GL_LINEAR
+        nearest_mipmap_nearest = GL_NEAREST_MIPMAP_NEAREST,
+        nearest_mipmap_linear = GL_NEAREST_MIPMAP_LINEAR,
+        linear = GL_LINEAR,
+        linear_mipmap_linear = GL_LINEAR_MIPMAP_LINEAR,
+        linear_mipmap_nearest = GL_LINEAR_MIPMAP_NEAREST
+
     };
 
     enum struct texture_wrap : GLint
@@ -94,6 +99,8 @@ namespace legion::rendering
         std::string path;
         texture_components channels;
         texture_type type;
+        bool immutable;
+        size_type mipCount;
         texture_format format;
         channel_format fileFormat;
 
@@ -126,11 +133,13 @@ namespace legion::rendering
     struct texture_import_settings
     {
         texture_type type;
+        bool immutable;
         channel_format fileFormat;
         texture_format intendedFormat;
         texture_components components;
         bool flipVertical;
         bool generateMipmaps;
+        size_type mipCount;
         texture_mipmap min;
         texture_mipmap mag;
         texture_wrap wrapR;
@@ -141,8 +150,8 @@ namespace legion::rendering
     /**@brief Default texture import settings.
      */
     constexpr texture_import_settings default_texture_settings{
-        texture_type::two_dimensional, channel_format::eight_bit, texture_format::rgba,
-        texture_components::rgba, true, true, texture_mipmap::linear, texture_mipmap::linear,
+        texture_type::two_dimensional, true, channel_format::eight_bit, texture_format::rgba_hdr,
+        texture_components::rgba, true, true, 0, texture_mipmap::linear_mipmap_linear, texture_mipmap::linear,
         texture_wrap::repeat, texture_wrap::repeat, texture_wrap::repeat };
 
     /**@class TextureCache
@@ -195,5 +204,7 @@ namespace legion::rendering
          * @param id Name hash
          */
         static texture_handle get_handle(id_type id);
+
+        static std::vector<texture_handle> get_all();
     };
 }

@@ -36,7 +36,6 @@ namespace legion::core::async
 
     void job_pool::complete_job()
     {
-        OPTICK_EVENT();
         if (this_job::m_id >= m_size)
             return;
         this_job::m_progress = m_progress->progress();

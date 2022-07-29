@@ -16,7 +16,6 @@ namespace legion::rendering
 
     framebuffer* RenderPipelineBase::addFramebuffer(const std::string& name, GLenum target)
     {
-        OPTICK_EVENT();
         id_type id = nameHash(name);
 
         if (m_framebuffers.contains(id))
@@ -34,14 +33,12 @@ namespace legion::rendering
 
     L_NODISCARD bool RenderPipelineBase::hasFramebuffer(const std::string& name, GLenum target)
     {
-        OPTICK_EVENT();
         id_type id = nameHash(name);
         return m_framebuffers.contains(id) && m_framebuffers[id].target() == target;
     }
 
     L_NODISCARD framebuffer* RenderPipelineBase::getFramebuffer(const std::string& name)
     {
-        OPTICK_EVENT();
         id_type id = nameHash(name);
         if(m_framebuffers.contains(id))
             return &m_framebuffers[id];
@@ -50,7 +47,6 @@ namespace legion::rendering
 
     framebuffer* RenderPipelineBase::addFramebuffer(id_type nameHash, GLenum target)
     {
-        OPTICK_EVENT();
         if (m_framebuffers.contains(nameHash))
         {
             if (m_framebuffers[nameHash].target() == target)
@@ -66,13 +62,11 @@ namespace legion::rendering
 
     L_NODISCARD bool RenderPipelineBase::hasFramebuffer(id_type nameHash, GLenum target)
     {
-        OPTICK_EVENT();
         return m_framebuffers.contains(nameHash) && m_framebuffers[nameHash].target() == target;
     }
 
     L_NODISCARD framebuffer* RenderPipelineBase::getFramebuffer(id_type nameHash)
     {
-        OPTICK_EVENT();
         if (m_framebuffers.contains(nameHash))
             return &m_framebuffers[nameHash];
         return nullptr;

@@ -55,12 +55,8 @@ namespace legion::core::filesystem
         return registry;
     }
 
-
-
     std::unordered_set<provider_registry::domain> provider_registry::domains()
     {
-        OPTICK_EVENT();
-
         //get map driver
         static auto& driver = get_driver();
 
@@ -76,7 +72,6 @@ namespace legion::core::filesystem
 
     bool provider_registry::has_domain(domain d)
     {
-        OPTICK_EVENT();
         //get map driver
         static auto& driver = get_driver();
 
@@ -87,7 +82,6 @@ namespace legion::core::filesystem
 
     void provider_registry::domain_add_resolver(domain d, resolver_ptr r)
     {
-        OPTICK_EVENT();
         //get map driver
         static auto& driver = get_driver();
 
@@ -98,7 +92,6 @@ namespace legion::core::filesystem
 
     std::vector<provider_registry::resolver_ptr> provider_registry::domain_get_resolvers(domain d)
     {
-        OPTICK_EVENT();
         //get map driver
         static auto& driver = get_driver();
         std::vector<resolver_ptr> resolvers;
@@ -135,7 +128,6 @@ namespace legion::core::filesystem
 
     provider_registry::resolver_sentinel provider_registry::domain_get_first_resolver(domain d)
     {
-        OPTICK_EVENT();
         if(has_domain(d))
         {
             return resolver_sentinel{0,d};
@@ -146,7 +138,6 @@ namespace legion::core::filesystem
 
     provider_registry::resolver_sentinel provider_registry::domain_get_prev_resolver(const resolver_sentinel& iterator)
     {
-        OPTICK_EVENT();
         if(iterator.index == 0){
             return resolver_sentinel{nullptr};
         } else {
@@ -156,7 +147,6 @@ namespace legion::core::filesystem
 
     provider_registry::resolver_sentinel provider_registry::domain_get_next_resolver(const resolver_sentinel& iterator)
     {
-        OPTICK_EVENT();
         //get map driver
         static auto& driver = get_driver();
         
@@ -174,7 +164,6 @@ namespace legion::core::filesystem
 
     provider_registry::resolver_ptr provider_registry::domain_get_resolver_at(const resolver_sentinel& iterator)
     {
-        OPTICK_EVENT();
         //check against sentinel value
         if(iterator == resolver_sentinel{nullptr}) return nullptr;
         

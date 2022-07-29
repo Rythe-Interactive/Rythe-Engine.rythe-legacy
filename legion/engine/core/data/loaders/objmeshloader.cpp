@@ -362,13 +362,11 @@ namespace legion::core
 
     common::result<asset_ptr> ObjMeshLoader::load(id_type nameHash, const fs::view& file, const import_cfg& settings)
     {
-        OPTICK_EVENT();
         return loadImpl(nameHash, file, settings, nullptr);
     }
 
     common::result<asset_ptr> ObjMeshLoader::loadAsync(id_type nameHash, const fs::view& file, const import_cfg& settings, progress_type& progress)
     {
-        OPTICK_EVENT();
         return loadImpl(nameHash, file, settings, &progress);
     }
 }

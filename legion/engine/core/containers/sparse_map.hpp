@@ -8,8 +8,6 @@
 #include <core/types/primitives.hpp>
 #include <core/containers/iterator_tricks.hpp>
 
-#include <Optick/optick.h>
-
 /**
  * @file sparse_map.hpp
  */
@@ -116,7 +114,6 @@ namespace legion::core
          */
         void reserve(size_type size)
         {
-            OPTICK_EVENT();
             if (size > m_capacity)
             {
                 m_dense_value.reserve(size);
@@ -134,7 +131,6 @@ namespace legion::core
          */
         L_NODISCARD size_type count(key_const_reference key) const
         {
-            OPTICK_EVENT();
             return contains(key);
         }
 
@@ -146,7 +142,6 @@ namespace legion::core
          */
         L_NODISCARD size_type count(key_type&& key) const
         {
-            OPTICK_EVENT();
             return contains(key);
         }
 #pragma endregion
@@ -158,12 +153,11 @@ namespace legion::core
          */
         L_NODISCARD bool contains(key_const_reference key) const
         {
-            OPTICK_EVENT();
             if (!m_sparse.count(key))
                 return false;
 
             const size_type& sparseval = m_sparse.at(key);
-            return sparseval >= 0 && sparseval < m_dense_key.size() && sparseval < m_size&& m_dense_key.at(sparseval) == key;
+            return (sparseval >= 0) && (sparseval < m_dense_key.size()) && (sparseval < m_size) && (m_dense_key.at(sparseval) == key);
         }
 
         /**@brief Checks whether a certain key is contained in the sparse_map.
@@ -172,12 +166,11 @@ namespace legion::core
          */
         L_NODISCARD bool contains(key_type&& key) const
         {
-            OPTICK_EVENT();
             if (!m_sparse.count(key))
                 return false;
 
             const size_type& sparseval = m_sparse.at(key);
-            return sparseval >= 0 && sparseval < m_dense_key.size() && sparseval < m_size&& m_dense_key.at(sparseval) == key;
+            return (sparseval >= 0) && (sparseval < m_dense_key.size()) && (sparseval < m_size) && (m_dense_key.at(sparseval) == key);
         }
 
         /**@brief Checks if all keys in sparse_map are inside this map as well.
@@ -187,7 +180,6 @@ namespace legion::core
         template<typename T>
         L_NODISCARD bool contains(const sparse_map<key_type, T>& other) const
         {
-            OPTICK_EVENT();
             if (other.m_size == 0)
                 return true;
 
@@ -208,11 +200,10 @@ namespace legion::core
          */
         L_NODISCARD bool equals(self_const_reference other) const
         {
-            OPTICK_EVENT();
             if (m_size == other.m_size)
             {
                 for (int i = 0; i < m_size; i++)
-                    if (!(other.contains(m_dense_key.at(i)) && get(m_dense_key.at(i)) == other.get(m_dense_key.at(i))))
+                    if (!(other.contains(m_dense_key.at(i)) && (get(m_dense_key.at(i)) == other.get(m_dense_key.at(i)))))
                         return false;
 
                 return true;
@@ -227,11 +218,10 @@ namespace legion::core
          */
         L_NODISCARD bool operator==(self_const_reference other) const
         {
-            OPTICK_EVENT();
             if (m_size == other.m_size)
             {
                 for (int i = 0; i < m_size; i++)
-                    if (!(other.contains(m_dense_key.at(i)) && get(m_dense_key.at(i)) == other.get(m_dense_key.at(i))))
+                    if (!(other.contains(m_dense_key.at(i)) && (get(m_dense_key.at(i)) == other.get(m_dense_key.at(i)))))
                         return false;
 
                 return true;
@@ -247,7 +237,6 @@ namespace legion::core
          */
         L_NODISCARD iterator find(value_const_reference val)
         {
-            OPTICK_EVENT();
             if (contains(val))
                 return begin() + m_sparse.at(val);
             return end();
@@ -259,7 +248,6 @@ namespace legion::core
          */
         L_NODISCARD const_iterator find(value_const_reference val) const
         {
-            OPTICK_EVENT();
             if (contains(val))
                 return begin() + m_sparse.at(val);
             return end();
@@ -274,7 +262,6 @@ namespace legion::core
          */
         std::pair<iterator, bool> insert(key_const_reference key, value_const_reference val)
         {
-            OPTICK_EVENT();
             if (!contains(key))
             {
                 if (m_size >= m_capacity)
@@ -297,7 +284,6 @@ namespace legion::core
          */
         std::pair<iterator, bool> insert(key_type&& key, value_const_reference val)
         {
-            OPTICK_EVENT();
             if (!contains(key))
             {
                 if (m_size >= m_capacity)
@@ -320,7 +306,6 @@ namespace legion::core
          */
         std::pair<iterator, bool> insert(key_const_reference key, value_type&& val)
         {
-            OPTICK_EVENT();
             if (!contains(key))
             {
                 if (m_size >= m_capacity)
@@ -343,7 +328,6 @@ namespace legion::core
          */
         std::pair<iterator, bool> insert(key_type&& key, value_type&& val)
         {
-            OPTICK_EVENT();
             if (!contains(key))
             {
                 if (m_size >= m_capacity)
@@ -368,7 +352,6 @@ namespace legion::core
         template<typename... Arguments>
         std::pair<iterator, bool> emplace(key_const_reference key, Arguments&&... arguments)
         {
-            OPTICK_EVENT();
             if (!contains(key))
             {
                 if (m_size >= m_capacity)
@@ -394,7 +377,6 @@ namespace legion::core
         template<typename... Arguments>
         std::pair<iterator, bool> emplace(key_type&& key, Arguments&&... arguments)
         {
-            OPTICK_EVENT();
             if (!contains(key))
             {
                 if (m_size >= m_capacity)
@@ -430,7 +412,6 @@ namespace legion::core
         template<typename... Arguments>
         std::pair<iterator, bool> try_emplace(key_const_reference key, Arguments&&... arguments)
         {
-            OPTICK_EVENT();
             if (!contains(key))
             {
                 if (m_size >= m_capacity)
@@ -456,7 +437,6 @@ namespace legion::core
         template<typename... Arguments>
         std::pair<iterator, bool> try_emplace(key_type&& key, Arguments&&... arguments)
         {
-            OPTICK_EVENT();
             if (!contains(key))
             {
                 if (m_size >= m_capacity)
@@ -484,7 +464,6 @@ namespace legion::core
          */
         value_reference operator[](key_type&& key)
         {
-            OPTICK_EVENT();
             size_type index;
             if (!contains(key))
             {
@@ -508,7 +487,6 @@ namespace legion::core
          */
         value_reference operator[](key_const_reference key)
         {
-            OPTICK_EVENT();
             size_type index;
             if (!contains(key))
             {
@@ -533,7 +511,6 @@ namespace legion::core
          */
         value_const_reference operator[](key_type&& key) const
         {
-            OPTICK_EVENT();
 #ifdef LGN_SAFE_MODE
             if (!contains(key))
                 throw std::out_of_range("Sparse map does not contain this key and is non modifiable.");
@@ -547,7 +524,6 @@ namespace legion::core
          */
         value_const_reference operator[](key_const_reference key) const
         {
-            OPTICK_EVENT();
 #ifdef LGN_SAFE_MODE
             if (!contains(key))
                 throw std::out_of_range("Sparse map does not contain this key and is non modifiable.");
@@ -563,7 +539,6 @@ namespace legion::core
          */
         inline value_reference at(key_type&& key)
         {
-            OPTICK_EVENT();
             return m_dense_value.at(m_sparse.at(key));
         }
 
@@ -572,7 +547,6 @@ namespace legion::core
          */
         inline value_reference at(key_const_reference key)
         {
-            OPTICK_EVENT();
             return m_dense_value.at(m_sparse.at(key));
         }
 
@@ -581,7 +555,6 @@ namespace legion::core
          */
         inline value_const_reference at(key_type&& key) const
         {
-            OPTICK_EVENT();
             return m_dense_value.at(m_sparse.at(key));
         }
 
@@ -590,7 +563,6 @@ namespace legion::core
          */
         inline value_const_reference at(key_const_reference key) const
         {
-            OPTICK_EVENT();
             return m_dense_value.at(m_sparse.at(key));
         }
 #pragma endregion
@@ -600,18 +572,20 @@ namespace legion::core
          */
         size_type erase(key_const_reference key)
         {
-            OPTICK_EVENT();
             if (contains(key))
             {
-                if (m_size - 1 != m_sparse.at(key))
+                auto& idx = m_sparse.at(key);
+                if (m_size - 1 != idx)
                 {
-                    m_dense_value.at(m_sparse.at(key)) = std::move(m_dense_value.at(m_size - 1));
-                    m_dense_key.at(m_sparse.at(key)) = std::move(m_dense_key.at(m_size - 1));
-                    m_sparse.at(m_dense_key.at(m_size - 1)) = std::move(m_sparse.at(key));
+                    auto prevKey = m_dense_key.at(m_size - 1);
+                    std::swap(m_dense_value.at(idx), m_dense_value.at(m_size - 1));
+                    std::swap(m_dense_key.at(idx), m_dense_key.at(m_size - 1));
+                    m_sparse.at(prevKey) = idx;
                 }
                 --m_size;
                 m_dense_value.resize(m_size);
                 m_dense_key.resize(m_size);
+                m_sparse.erase(key);
                 return true;
             }
             return false;

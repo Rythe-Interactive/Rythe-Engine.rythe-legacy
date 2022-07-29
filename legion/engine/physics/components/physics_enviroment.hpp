@@ -11,6 +11,4 @@ namespace legion::physics
         PhysicsEnviromentData data;
         size_t physicsEnviromentID = invalid_physics_enviroment;
     };
-
-
 }

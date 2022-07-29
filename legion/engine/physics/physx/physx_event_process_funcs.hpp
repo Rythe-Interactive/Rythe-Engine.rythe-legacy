@@ -46,6 +46,10 @@ namespace legion::physics
 
     void processSetPhysicsMaterial(const ColliderData& collider, const collider_modification_data& modData, const PhysxEnviromentInfo& sceneInfo,  PhysxInternalWrapper& wrapper);
 
+    void processSetBoxSize(const ColliderData& collider, const collider_modification_data& modData, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper);
+
+    void processSetSphereSize(const ColliderData& collider, const collider_modification_data& modData, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper);
+
     //----------------------------------------------------------- Physics Enviroment -------------------------------------------------------------------------//
 
     void processAddInfinitePlane(physics_enviroment& physicsEnviroment, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity);

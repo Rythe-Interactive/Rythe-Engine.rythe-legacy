@@ -35,7 +35,6 @@ namespace legion::rendering
 
     void vertexarray::setAttribPointer(const buffer& buf, uint index, size_type size, GLenum type, bool normalized, size_type stride, size_type offset)
     {
-        OPTICK_EVENT();
 #if defined(LEGION_DEBUG)
         if (buf.target() != GL_ARRAY_BUFFER)
         {
@@ -52,7 +51,12 @@ namespace legion::rendering
         glBindVertexArray(m_id);
         buf.bind();
         glEnableVertexAttribArray(index);
-        glVertexAttribPointer(index, size, type, normalized, stride, reinterpret_cast<GLvoid*>(offset));
+
+        if(type == GL_BYTE || type == GL_UNSIGNED_BYTE || type == GL_SHORT || type == GL_UNSIGNED_SHORT || type == GL_INT || type == GL_UNSIGNED_INT)
+            glVertexAttribIPointer(index, size, type, stride, reinterpret_cast<GLvoid*>(offset));
+        else
+            glVertexAttribPointer(index, size, type, normalized, stride, reinterpret_cast<GLvoid*>(offset));
+
         buf.release();
         glBindVertexArray(0);
     }

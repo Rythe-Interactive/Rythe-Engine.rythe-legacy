@@ -48,7 +48,7 @@ namespace legion::rendering
             m_callback = delegate<void(const std::string&, log::severity)>::template from<func_type>();
         }
 
-        static void cleanCache();
+        static void cleanCache(const fs::view& path);
 
         static bool process(const fs::view& file, bitfield8 compilerSettings, shader_ilo& ilo, std::unordered_map<std::string, shader_state>& state);
         static bool process(const fs::view& file, bitfield8 compilerSettings, shader_ilo& ilo, std::unordered_map<std::string, shader_state>& state, const std::vector<std::string>& defines);

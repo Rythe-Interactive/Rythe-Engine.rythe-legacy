@@ -4,20 +4,18 @@ namespace  legion::rendering
 {
     void MeshBatchingStage::setup(app::window& context)
     {
-        OPTICK_EVENT();
-        create_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<ecs::entity>, std::vector<math::mat4>>>>>("mesh batches");
+        create_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<id_type>, std::vector<math::mat4>>>>>("mesh batches");
     }
 
     void MeshBatchingStage::render(app::window& context, camera& cam, const camera::camera_input& camInput, time::span deltaTime)
     {
-        OPTICK_EVENT();
         (void)deltaTime;
         (void)camInput;
         (void)cam;
         (void)context;
 
         static id_type batchesId = nameHash("mesh batches");
-        auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<ecs::entity>, std::vector<math::mat4>>>>>(batchesId);
+        auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<id_type>, std::vector<math::mat4>>>>>(batchesId);
 
         static ecs::filter<position, rotation, scale, mesh_filter, mesh_renderer> renderablesQuery{};
 
@@ -25,7 +23,6 @@ namespace  legion::rendering
         auto& renderers = renderablesQuery.get<mesh_renderer>();
 
         {
-            OPTICK_EVENT("Clear instances");
             for (auto [material, models] : *batches)
                 for (auto [model, batch] : models)
                 {
@@ -35,20 +32,20 @@ namespace  legion::rendering
         }
 
         {
-            OPTICK_EVENT("Calculate instances");
-
-            std::vector<std::reference_wrapper<std::pair<std::vector<ecs::entity>, std::vector<math::mat4>>>> batchList;
+            std::vector<std::reference_wrapper<std::pair<std::vector<id_type>, std::vector<math::mat4>>>> batchList;
             for (size_type i = 0; i < renderablesQuery.size(); i++)
             {
-                OPTICK_EVENT("instance");
+                if (!renderablesQuery[i]->active)
+                    continue;
+
                 auto& batch = (*batches)[renderers[i].get().material][model_handle{ filters[i].get().shared_mesh.id() }];
                 if (batch.first.empty())
                     batchList.push_back(std::ref(batch));
-                batch.first.push_back(renderablesQuery[i]);
+                batch.first.push_back(renderablesQuery[i]->id);
                 batch.second.emplace_back();
             }
 
-            std::vector<ecs::entity> entityList;
+            std::vector<id_type> entityList;
             entityList.reserve(renderablesQuery.size());
             std::vector<std::reference_wrapper<math::mat4>> matrixList;
             matrixList.reserve(renderablesQuery.size());
@@ -77,7 +74,7 @@ namespace  legion::rendering
                         if (end > entityList.size())
                             end = entityList.size();
                         for (size_type i = start; i < end; i++)
-                            matrixList[i].get() = transform(entityList[i].get_component<transform>()).to_world_matrix();
+                            matrixList[i].get() = transform(ecs::Registry::getEntity(entityList[i]).get_component<transform>()).to_world_matrix();
                     }
                 ).wait();
             }

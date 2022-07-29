@@ -110,7 +110,6 @@ namespace legion::physics
             {
                 std::string filepath;
                 identifyPhysxDebugOutputFilepath(filepath);
-                log::debug("pth {0}", filepath.c_str());
                 m_isDebuggerInit = true;
                 m_pvd = PxCreatePvd(*foundation);
                 m_transport = PxDefaultPvdFileTransportCreate(filepath.c_str());
@@ -180,17 +179,11 @@ namespace legion::physics
         bindToEvent<events::component_destruction<physics_component>, &PhysXPhysicsSystem::markPhysicsWrapperPendingRemove>();
         bindToEvent<request_create_physics_material, &PhysXPhysicsSystem::onRequestCreatePhysicsMaterial>();
 
-        PhysicsComponentData::m_generateConvexColliderFunc = &PhysXPhysicsSystem::physxGenerateConvexMesh;
-        PhysicsHelpers::bindDebugRetrieveCheck([this](size_type hash, const char* materialName)->bool
-        {
-            auto iter = m_physicsMaterials.find(hash);
-            if (iter == m_physicsMaterials.end())
+         PhysicsComponentData::setConvexGeneratorDelegate([this](const std::vector<math::vec3>& vertices)->void*
             {
-                log::warn("tried to retrieve material {0}. This material does not exist", materialName);
-                return false;
-            }
-            return true;
-        });
+                return physxGenerateConvexMesh(vertices);
+            });
+
 
         //debugging related
         bindToEvent<request_flip_physics_continuous, &PhysXPhysicsSystem::flipPhysicsContinuousState>();
@@ -231,7 +224,7 @@ namespace legion::physics
 
         PxDefaultMemoryOutputStream buf;
         if (!PS::cooking->cookConvexMesh(convexDesc, buf))
-            return NULL;
+            return nullptr;
 
         PxDefaultMemoryInputData input(buf.getData(), buf.getSize());
         auto convex = PS::physxSDK->createConvexMesh(input);
@@ -248,8 +241,8 @@ namespace legion::physics
 
             PS::dispatcher = PxDefaultCpuDispatcherCreate(0); //deal with multithreading later on
 
-            #ifdef _DEBUG
-            PS::debugger.initializeDebugger(PS::foundation, DebuggerWrapper::transport_mode::file_output);
+            #ifdef LEGION_DEBUG
+            PS::debugger.initializeDebugger(PS::foundation, DebuggerWrapper::transport_mode::none);
             #endif
 
             PxTolerancesScale scale;
@@ -274,11 +267,11 @@ namespace legion::physics
         sceneDesc.flags |= PxSceneFlag::eENABLE_ACTIVE_ACTORS;
 
         m_physxScene = PS::physxSDK->createScene(sceneDesc);
-        PxMaterial* m_defaultMaterial = PS::physxSDK->createMaterial(0.5f, 0.5f, 0.6f);
-        m_physicsMaterials.insert({ defaultPhysicsMaterial,m_defaultMaterial });
+        
+        PxMaterial* defaultMaterial = PS::physxSDK->createMaterial(0.5f, 0.5f, 0.6f);
+        m_physicsMaterials.insert({ defaultMaterialHash,defaultMaterial });
 
-
-        #ifdef _DEBUG
+        #ifdef LEGION_DEBUG
         m_physxScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
         m_physxScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES, 1.0f);
         m_physxScene->setVisualizationParameter(PxVisualizationParameter::eBODY_MASS_AXES, 1.0f);
@@ -312,6 +305,9 @@ namespace legion::physics
         m_enviromentComponentActionFuncs[physics_enviroment_flag::pe_add_plane] = &processAddInfinitePlane;
 
         m_colliderActionFuncs[collider_modification_flag::cm_set_new_material] = &processSetPhysicsMaterial;
+        m_colliderActionFuncs[collider_modification_flag::cm_set_new_box_extents] = &processSetBoxSize;
+        m_colliderActionFuncs[collider_modification_flag::cm_set_new_sphere_radius] = &processSetSphereSize;
+
 
         m_capsuleActionFuncs[capsule_character_flag::cc_move_to] = &processCapsuleMoveTo;
 
@@ -375,7 +371,6 @@ namespace legion::physics
 
     void PhysXPhysicsSystem::executePreSimulationActions()
     {
-       
         //[1] Identify invalid entities and remove them from pxScene
         for (size_type idToRemove : m_wrapperPendingRemovalID)
         {
@@ -398,14 +393,6 @@ namespace legion::physics
                 m_physxWrapperContainer.createPhysxWrapper(physComp);
             }
         }
-
-        ecs::filter<capsule_controller, position> capsuleCharacterFilter2;
-        for (auto entity : capsuleCharacterFilter2)
-        {
-            auto& capsule = *entity.get_component<capsule_controller>();
-            math::vec3& entPos = *entity.get_component<position>();
-        }
-
         for (auto entity : physicsEnviromentFilter)
         {
             auto& physEnv = *entity.get_component<physics_enviroment>();

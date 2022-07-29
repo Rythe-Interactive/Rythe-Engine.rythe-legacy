@@ -161,6 +161,14 @@ type& operator=(const type&) noexcept = default;\
 type& operator=(type&&) noexcept = default;\
 ~type() = default;
 
+#define RULE_OF_5_CONSTEXPR_NOEXCEPT(type)\
+constexpr type() noexcept = default;\
+constexpr type(const type&) noexcept = default;\
+constexpr type(type&&) noexcept = default;\
+constexpr type& operator=(const type&) noexcept = default;\
+constexpr type& operator=(type&&) noexcept = default;\
+~type() = default;
+
 #define NO_DEF_CTOR_RULE5(type)\
 type(const type&) = default;\
 type(type&&) = default;\
@@ -222,12 +230,22 @@ type& operator=(type&&) noexcept = default;
      */
 #   define LEGION_DEBUG
 #   define LEGION_CONFIGURATION LEGION_DEBUG_VALUE
+
+#   if !defined(LEGION_VALIDATE)
+#       define LEGION_VALIDATE
+#   endif
 #else
     /**@def LEGION_RELEASE
      * @brief Defined in release mode.
      */
 #   define LEGION_RELEASE 
 #   define LEGION_CONFIGURATION LEGION_RELEASE_VALUE
+#endif
+
+#if defined(LEGION_VALIDATE)
+#   define LEGION_VALIDATION_LEVEL 1
+#else
+#   define LEGION_VALIDATION_LEVEL 0
 #endif
 
 #if (!defined(LEGION_LOW_POWER) && !defined(LEGION_HIGH_PERFORMANCE))
@@ -294,6 +312,22 @@ type& operator=(type&&) noexcept = default;
 #   include <sched.h>
 #   include <errno.h>
 #endif
+
+namespace legion::core
+{
+    enum class endian
+    {
+#ifdef LEGION_WINDOWS
+        little = 0,
+        big = 1,
+        native = little
+#else
+        little = __ORDER_LITTLE_ENDIAN__,
+        big = __ORDER_BIG_ENDIAN__,
+        native = __BYTE_ORDER__
+#endif
+    };
+}
 
 #pragma endregion
 

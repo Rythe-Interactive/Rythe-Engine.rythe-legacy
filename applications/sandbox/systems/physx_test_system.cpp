@@ -5,8 +5,6 @@
 
 namespace legion::physics
 {
-
-
     void PhysXTestSystem::setup()
     {
         using namespace legion::core::fs::literals;
@@ -109,10 +107,37 @@ namespace legion::physics
         {
             suzzaneRainTick(deltaTime);
         }
+
+        if (inflatableBlock.valid() && inflatableSphere.valid())
+        {
+            static float currentTime = 0.0f;
+            currentTime += deltaTime;
+
+            {
+                math::vec3 addedExtents{ math::abs(math::sin(math::deg2rad(45.0f * currentTime))) };
+                math::vec3 colliderExtents = math::vec3(0.5f) + addedExtents;
+                auto& blockPhyComp = *inflatableBlock.get_component<physics_component>();
+                blockPhyComp.physicsCompData.getColliders()[0].setBoxExtents(colliderExtents);
+
+
+                *inflatableBlock.get_component<scale>() = (colliderExtents * 2);
+            }
+
+            {
+                float radius = 0.5f + math::abs(math::sin(math::deg2rad(45.0f * currentTime)));
+                auto& blockPhyComp = *inflatableSphere.get_component<physics_component>();
+
+                blockPhyComp.physicsCompData.getColliders()[0].setSphereRadius(radius);
+
+                *inflatableSphere.get_component<scale>() = (radius * 2);
+            }
+        }
     }
 
     void PhysXTestSystem::setupCubeWorldTestScene()
     {
+        physics_material_hash hash = PhysicsHelpers::retrievePhysicsMaterialHash(m_defaultNonBouncy);
+
         math::quat rotX90 = math::rotate(math::pi<float>() / 2.0f, math::vec3(1, 0, 0));
         math::quat rotY90 = math::rotate(math::pi<float>() / 2.0f, math::vec3(0, 1, 0));
         math::quat rotZ90 = math::rotate(math::pi<float>() / 2.0f, math::vec3(0, 0, 1));
@@ -135,20 +160,20 @@ namespace legion::physics
         auto unrotatedBlock = createDefaultMeshEntity(math::vec3(0, 2, 0), cubeH, tileMat);
         {
             auto unrotatedBlockPC = unrotatedBlock.add_component<physics_component>();
-            unrotatedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1));
+            unrotatedBlockPC->physicsCompData.addBoxCollider(math::vec3(1));
             
             float headOffset = 0.5f;
             addRobotPartLambda(math::vec3(headOffset), math::vec3(0, 0.75f,0), unrotatedBlock,  math::identity<math::quat>(),cubeH);
-            unrotatedBlockPC->physicsCompData.AddBoxCollider(math::vec3(headOffset), math::vec3(0, 0.75f, 0), math::identity<math::quat>());
+            unrotatedBlockPC->physicsCompData.addBoxCollider(math::vec3(headOffset), math::vec3(0, 0.75f, 0), math::identity<math::quat>());
 
             addRobotPartLambda(math::vec3(1.0, 0.5, 0.5), math::vec3(1, 0.0f, 0), unrotatedBlock,  math::identity<math::quat>(), cubeH);
-            unrotatedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1.0, 0.5f, 0.5f),math::vec3(1,0,0), math::identity<math::quat>());
+            unrotatedBlockPC->physicsCompData.addBoxCollider(math::vec3(1.0, 0.5f, 0.5f),math::vec3(1,0,0), math::identity<math::quat>());
 
             addRobotPartLambda(math::vec3(1.0, 0.5, 0.5), math::vec3(-1, 0.0f, 0), unrotatedBlock,  math::identity<math::quat>(), cubeH);
-            unrotatedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1.0, 0.5f, 0.5f), math::vec3(-1, 0, 0), math::identity<math::quat>());
+            unrotatedBlockPC->physicsCompData.addBoxCollider(math::vec3(1.0, 0.5f, 0.5f), math::vec3(-1, 0, 0), math::identity<math::quat>());
 
             addRobotPartLambda(math::vec3(1.0f), math::vec3(0, -1.0f, 0), unrotatedBlock, math::identity<math::quat>(),sphereH);
-            unrotatedBlockPC->physicsCompData.AddSphereCollider(0.5f, math::vec3(0, -1, 0));
+            unrotatedBlockPC->physicsCompData.addSphereCollider(0.5f, math::vec3(0, -1, 0));
 
             auto& rb = *unrotatedBlock.add_component<rigidbody>();
             rb.data.setMass(5.0f);
@@ -158,7 +183,7 @@ namespace legion::physics
         auto shiftedBlock = createDefaultMeshEntity(math::vec3(0, 10, 0), cubeH, concreteMat);
         {
             auto shiftedBlockPC = shiftedBlock.add_component<physics_component>();
-            shiftedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1, 1, 1));
+            shiftedBlockPC->physicsCompData.addBoxCollider(math::vec3(1, 1, 1));
 
             shiftedBlock.add_component<rigidbody>();
         }
@@ -181,7 +206,7 @@ namespace legion::physics
             const std::vector<math::vec3>& verts = renderable.shared_mesh.ptr->vertices;
 
             auto& statuePhysicsComponent = *statue.add_component<physics_component>();
-            statuePhysicsComponent.physicsCompData.AddConvexCollider(verts, math::vec3(), math::identity<math::quat>());
+            statuePhysicsComponent.physicsCompData.addConvexCollider(verts, math::vec3(), math::identity<math::quat>());
         }
 
         {
@@ -190,11 +215,40 @@ namespace legion::physics
             const std::vector<math::vec3>& verts = renderable.shared_mesh.ptr->vertices;
 
             auto& suzannePhysicsComponent = *suzanne.add_component<physics_component>();
-            suzannePhysicsComponent.physicsCompData.AddConvexCollider(verts, math::vec3(), math::identity<math::quat>());
+            suzannePhysicsComponent.physicsCompData.addConvexCollider(verts, math::vec3(), math::identity<math::quat>());
 
             suzanne.add_component<rigidbody>();
         }
 
+        //---------------------------------------------- INFLATABLE TEST -----------------------------------------------------//
+
+        createStaticColliderWall(math::vec3(30, 0, 0), legionLogoMat, math::vec3(10, 1, 10));
+
+        createStaticColliderWall(math::vec3(25, 0, 0), legionLogoMat, math::vec3(10, 1, 10), rotZ90);
+
+        createStaticColliderWall(math::vec3(35, 0, 0), legionLogoMat, math::vec3(10, 1, 10), rotZ90);
+
+        createStaticColliderWall(math::vec3(30, 0, 5), legionLogoMat, math::vec3(10, 1, 10), rotX90);
+
+        {
+            inflatableBlock = createDefaultMeshEntity(math::vec3(27, 5.0f, 0), cubeH, tileMat);
+
+            auto& phyComp = *inflatableBlock.add_component<physics_component>();
+            phyComp.physicsCompData.addBoxCollider(math::vec3{ 1 });
+            phyComp.physicsCompData.getColliders()[0].setMaterialHash(hash);
+
+            inflatableBlock.add_component<rigidbody>();
+        }
+
+        {
+            inflatableSphere = createDefaultMeshEntity(math::vec3(33, 5.0f, 0), sphereH, tileMat);
+
+            auto& phyComp = *inflatableSphere.add_component<physics_component>();
+            phyComp.physicsCompData.addSphereCollider(0.5f, math::vec3{});
+            phyComp.physicsCompData.getColliders()[0].setMaterialHash(hash);
+
+            inflatableSphere.add_component<rigidbody>();
+        }
         //---------------------------------------------- Friction Test TEST -----------------------------------------------------//
 
         auto ent = createStaticColliderWall(math::vec3(-15, 0.0f, 10.0f), legionLogoMat, math::vec3(10, 1, 40));
@@ -210,9 +264,10 @@ namespace legion::physics
             createCubeStack(math::vec3(2.0f), 20, math::vec3(0,0, stackZ -= 10.0f));
         }
         
+
         ecs::entity bigSphere = createDefaultMeshEntity(math::vec3(0, 20, 100), sphereH, concreteMat);
         *bigSphere.add_component<scale>() = math::vec3(5.0f);
-        bigSphere.add_component<physics_component>()->physicsCompData.AddSphereCollider(5.0f, math::vec3());
+        bigSphere.add_component<physics_component>()->physicsCompData.addSphereCollider(5.0f, math::vec3());
 
         auto& rbData = (*bigSphere.add_component<rigidbody>()).data;
         rbData.setVelocity(math::vec3(0, -25, -100));
@@ -292,7 +347,7 @@ namespace legion::physics
 
         {
             auto shiftedBlockPC = shiftedBlock.add_component<physics_component>();
-            shiftedBlockPC->physicsCompData.AddBoxCollider(math::vec3(1, 1, 1));
+            shiftedBlockPC->physicsCompData.addBoxCollider(math::vec3(1, 1, 1));
 
             rigidbody& rb = *shiftedBlock.add_component<rigidbody>();
             rb.data.setVelocity(cameraDirection * 20.0f);
@@ -315,7 +370,7 @@ namespace legion::physics
 
         {
             auto shiftedBlockPC = shiftedBlock.add_component<physics_component>();
-            shiftedBlockPC->physicsCompData.AddSphereCollider(0.5f, math::vec3());
+            shiftedBlockPC->physicsCompData.addSphereCollider(0.5f, math::vec3());
 
             rigidbody& rb = *shiftedBlock.add_component<rigidbody>();
             rb.data.setVelocity(cameraDirection * 20.0f);
@@ -449,14 +504,14 @@ namespace legion::physics
         scaleH = scale;
 
         auto& phyComp = *ent.add_component<physics_component>();
-        phyComp.physicsCompData.AddBoxCollider(scale);
+        phyComp.physicsCompData.addBoxCollider(scale);
 
         return ent;
     }
 
     void PhysXTestSystem::suzzaneRainTick(legion::time::span deltaTime)
     {
-        size_type hash = PhysicsHelpers::retrievePhysicsMaterialHash("DefaultNonBouncy");
+        size_type hash = PhysicsHelpers::retrievePhysicsMaterialHash(m_defaultNonBouncy);
 
         m_currentInterval += deltaTime;
 
@@ -480,7 +535,7 @@ namespace legion::physics
             const std::vector<math::vec3>& verts = renderable.shared_mesh.ptr->vertices;
 
             auto& phyComp = *ent.add_component<physics_component>();
-            phyComp.physicsCompData.AddConvexCollider(verts, math::vec3(), math::identity<math::quat>());
+            phyComp.physicsCompData.addConvexCollider(verts, math::vec3(), math::identity<math::quat>());
             phyComp.physicsCompData.getColliders()[0].setMaterialHash(hash);
 
             ent.add_component<rigidbody>();
@@ -505,7 +560,7 @@ namespace legion::physics
                 *entity.get_component<scale>() = extents;
 
                 auto& physComp = *entity.add_component<physics_component>();
-                physComp.physicsCompData.AddBoxCollider(extents);
+                physComp.physicsCompData.addBoxCollider(extents);
 
                 entity.add_component<rigidbody>();
             }

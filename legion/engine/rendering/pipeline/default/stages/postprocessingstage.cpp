@@ -8,7 +8,6 @@ namespace legion::rendering
 
     void PostProcessingStage::setup(app::window& context)
     {
-        OPTICK_EVENT();
         using namespace legion::core::fs::literals;
 
         app::context_guard guard(context);
@@ -18,8 +17,8 @@ namespace legion::rendering
         m_drawFBO = framebuffer(GL_FRAMEBUFFER);
 
         m_swapTexture = TextureCache::create_texture("color_swap_image", math::ivec2(1, 1), {
-        texture_type::two_dimensional, channel_format::float_hdr, texture_format::rgba_hdr,
-        texture_components::rgb, true, true, texture_mipmap::linear, texture_mipmap::linear,
+        texture_type::two_dimensional, false, channel_format::float_hdr, texture_format::rgba_hdr,
+        texture_components::rgb, false, false, 0, texture_mipmap::linear, texture_mipmap::linear,
         texture_wrap::repeat, texture_wrap::repeat, texture_wrap::repeat });
 
         m_screenShader = ShaderCache::create_shader("screen shader", "engine://shaders/screenshader.shs"_view);
@@ -27,7 +26,6 @@ namespace legion::rendering
 
     void PostProcessingStage::render(app::window& context, camera& cam, const camera::camera_input& camInput, time::span deltaTime)
     {
-        OPTICK_EVENT();
         static id_type mainId = nameHash("main");
 
         auto fbo = getFramebuffer(mainId);
@@ -65,13 +63,9 @@ namespace legion::rendering
             return;
         }
 
-        //texture_handle texture = std::get<texture_handle>(colorAttachment);
-
-        bool stencil = false;
         auto depthAttachment = fbo->getAttachment(GL_DEPTH);
         if (std::holds_alternative<std::monostate>(depthAttachment))
         {
-            stencil = true;
             depthAttachment = fbo->getAttachment(GL_DEPTH_STENCIL);
         }
 
@@ -87,13 +81,9 @@ namespace legion::rendering
 
         for (auto& [_, effect] : m_effects)
         {
-            OPTICK_EVENT("Rendering effect");
-            OPTICK_TAG("Effect", effect->getName().c_str());
-
             if (!effect->isInitialized()) effect->init(context);
             for (auto& pass : effect->renderPasses)
             {
-                OPTICK_EVENT("Effect pass");
                 pass.invoke(*fbo, m_pipeline, cam, camInput, deltaTime);
             }
         }

@@ -46,8 +46,6 @@ namespace legion::physics
 
         void ApplyWarmStarting()
         {
-            OPTICK_EVENT();
-
             math::vec3 Ra = RefWorldContact - refRBCentroid;
             math::vec3 Rb = IncWorldContact - incRBCentroid;
 
@@ -60,8 +58,6 @@ namespace legion::physics
         */
         void resolveContactConstraint(float dt, int i)
         {
-            OPTICK_EVENT();
-
             //the idea behind this collision resolution strategy (Sequential Impulses) 
             //is we resolve the collision by giving an impulse towards both 
             //rigidbodies so that the collision would resolve itself in the next time step.
@@ -186,8 +182,6 @@ namespace legion::physics
 
         void resolveFrictionConstraint()
         {
-            OPTICK_EVENT();
-
             float frictionCoeff = diviner::rigidbody::calculateFriction(rbRef ? rbRef->friction : 0.3f, rbInc ? rbInc->friction : 0.3f);
             float frictionConstraint = totalLambda * frictionCoeff;
 
@@ -235,7 +229,6 @@ namespace legion::physics
         */
         void preCalculateEffectiveMass()
         {
-            OPTICK_EVENT();
             //calculate tangent vectors
 
             //--------------------------- pre calculate contact constraint effective mass -----------------------------------//

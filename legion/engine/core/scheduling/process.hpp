@@ -1,6 +1,5 @@
 #pragma once
-
-#include <Optick/optick.h>
+#include <unordered_set>
 
 #include <core/platform/platform.hpp>
 #include <core/types/primitives.hpp>
@@ -22,15 +21,16 @@ namespace legion::core::scheduling
 
         time::span m_interval;
         time::span m_timebuffer;
+        size_type m_maxIterations;
         bool m_fixedTimeStep;
 
     public:
         Process() noexcept = default;
 
         template<size_type charc>
-        Process(const char(&name)[charc], time::span interval = time::span::zero());
+        Process(const char(&name)[charc], time::span interval = time::span::zero(), size_type maxIterations = 5);
 
-        Process(const std::string& name, id_type nameHash, time::span interval = time::span::zero());
+        Process(const std::string& name, id_type nameHash, time::span interval = time::span::zero(), size_type maxIterations = 5);
 
         /**@brief Returns the hash of the name of the process.
          */
@@ -46,7 +46,7 @@ namespace legion::core::scheduling
         
         /**@brief Set the interval at which to execute the set operation.
          */
-        void setInterval(time::span interval) noexcept;
+        void setInterval(time::span interval, size_type maxIterations = 5) noexcept;
 
         std::unordered_set<id_type>& hooks() noexcept;
 

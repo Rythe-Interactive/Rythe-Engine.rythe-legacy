@@ -42,7 +42,6 @@ namespace legion::rendering
 
         void render()
         {
-            OPTICK_EVENT();
 #if defined(LEGION_DEBUG)
             if (!app::ContextHelper::getCurrentContext())
             {

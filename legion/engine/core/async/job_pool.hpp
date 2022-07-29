@@ -2,8 +2,6 @@
 #include <list>
 #include <memory>
 
-#include <Optick/optick.h>
-
 #include <core/async/async_operation.hpp>
 #include <core/containers/delegate.hpp>
 #include <core/containers/pointer.hpp>
@@ -64,7 +62,6 @@ namespace legion::core::async
             if (!jobPoolPtr)
                 return;
 
-            OPTICK_EVENT("legion::core::async::job_operation<T>::wait");
             while (!jobPoolPtr->is_done())
             {
                 switch (priority)

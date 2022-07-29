@@ -3,8 +3,6 @@
 #include "../gtc/constants.hpp"
 #include "../gtc/epsilon.hpp"
 
-#include <Optick/optick.h>
-
 namespace legion::core::math{
 namespace detail
 {
@@ -33,7 +31,6 @@ namespace detail
     template<typename T, qualifier Q>
     GLM_FUNC_QUALIFIER bool decompose(mat<4, 4, T, Q> const& ModelMatrix, vec<3, T, Q> & Scale, qua<T, Q> & Orientation, vec<3, T, Q> & Translation, vec<3, T, Q> & Skew, vec<4, T, Q> & Perspective)
     {
-        OPTICK_EVENT();
         mat<4, 4, T, Q> LocalMatrix(ModelMatrix);
 
         // Normalize the matrix.
@@ -190,7 +187,6 @@ namespace detail
     template<typename T, qualifier Q>
     GLM_FUNC_QUALIFIER void compose(mat<4, 4, T, Q>& ModelMatrix, const vec<3, T, Q>& Scale, const qua<T, Q>& Orientation, const vec<3, T, Q>& Translation)
     {
-        OPTICK_EVENT();
         ModelMatrix[3] = vec<4, T, Q>(Translation, 1);
         mat<3, 3, T, Q> rotationMat = toMat3(Orientation);
         ModelMatrix[0] = vec<4, T, Q>(rotationMat[0] * Scale[0], 0);
@@ -201,7 +197,6 @@ namespace detail
     template<typename T, qualifier Q>
     GLM_FUNC_DECL mat<4, 4, T, Q> compose(vec<3, T, Q> const& Scale, qua<T, Q> const& Orientation, vec<3, T, Q> const& Translation)
     {
-        OPTICK_EVENT();
         mat<4, 4, T, Q> ModelMatrix;
         ModelMatrix[3] = vec<4, T, Q>(Translation, 1);
         mat<3, 3, T, Q> rotationMat = toMat3(Orientation);
@@ -214,7 +209,6 @@ namespace detail
     template<typename T, qualifier Q>
     GLM_FUNC_QUALIFIER bool decompose(mat<4, 4, T, Q> const& ModelMatrix, vec<3, T, Q>& Scale, qua<T, Q>& Orientation, vec<3, T, Q>& Translation)
     {
-        OPTICK_EVENT();
         mat<4, 4, T, Q> LocalMatrix(ModelMatrix);
 
         // Normalize the matrix.
@@ -328,8 +322,6 @@ namespace detail
      template<typename T, qualifier Q>
     GLM_FUNC_QUALIFIER void extract_translation(mat<4, 4, T, Q> const& ModelMatrix, vec<3, T, Q>& Translation)
     {
-        OPTICK_EVENT();   
-
         // Take care of translation (easy).
         Translation = vec<3, T, Q>(ModelMatrix[3]);
     }
@@ -337,8 +329,6 @@ namespace detail
     template<typename T, qualifier Q>
     GLM_FUNC_QUALIFIER void extract_scale(mat<4, 4, T, Q> const& ModelMatrix, vec<3, T, Q>& Scale)
     {
-        OPTICK_EVENT();
-
         Scale[0] = length(ModelMatrix[0]);
         Scale[1] = length(ModelMatrix[1]);
         Scale[2] = length(ModelMatrix[2]);
@@ -347,7 +337,6 @@ namespace detail
     template<typename T, qualifier Q>
     GLM_FUNC_QUALIFIER void extract_orientation(mat<4, 4, T, Q> const& ModelMatrix, qua<T, Q>& Orientation)
     {
-        OPTICK_EVENT();
         mat<3, 3, T, Q> rotationMatrix{ normalize(ModelMatrix[0]), normalize(ModelMatrix[1]), normalize(ModelMatrix[2]) };
         Orientation = quat_cast(rotationMatrix);
     }

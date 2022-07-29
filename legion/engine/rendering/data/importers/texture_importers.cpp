@@ -8,8 +8,6 @@ namespace legion::rendering
 {
     common::result<texture, fs_error> stbi_texture_loader::load(const fs::basic_resource& resource, texture_import_settings&& settings)
     {
-        OPTICK_EVENT();
-
         // Prefetch data from the resource.
         const byte_vec& data = resource.get();
 
@@ -30,55 +28,85 @@ namespace legion::rendering
         // Load the image data using stb_image.
         switch (settings.fileFormat)
         {
-            default: [[fallthrough]];
-            case channel_format::eight_bit:
-            {
-                imageData = stbi_load_from_memory(data.data(), data.size(), &texSize.x, &texSize.y, reinterpret_cast<int*>(&components), static_cast<int>(settings.components));
-                break;
-            }
-            case channel_format::sixteen_bit:
-            {
-                imageData = stbi_load_16_from_memory(data.data(), data.size(), &texSize.x, &texSize.y, reinterpret_cast<int*>(&components), static_cast<int>(settings.components));
-                break;
-            }
-            case channel_format::float_hdr:
-            {
-                imageData = stbi_loadf_from_memory(data.data(), data.size(), &texSize.x, &texSize.y, reinterpret_cast<int*>(&components), static_cast<int>(settings.components));
-                break;
-            }
+        default: [[fallthrough]];
+        case channel_format::eight_bit:
+        {
+            imageData = stbi_load_from_memory(data.data(), data.size(), &texSize.x, &texSize.y, reinterpret_cast<int*>(&components), static_cast<int>(settings.components));
+            break;
         }
+        case channel_format::sixteen_bit:
+        {
+            imageData = stbi_load_16_from_memory(data.data(), data.size(), &texSize.x, &texSize.y, reinterpret_cast<int*>(&components), static_cast<int>(settings.components));
+            break;
+        }
+        case channel_format::float_hdr:
+        {
+            imageData = stbi_loadf_from_memory(data.data(), data.size(), &texSize.x, &texSize.y, reinterpret_cast<int*>(&components), static_cast<int>(settings.components));
+            break;
+        }
+        }
+
+        auto glTexType = static_cast<GLenum>(settings.type);
 
         // Allocate and bind the texture.
         glGenTextures(1, &texture.textureId);
-        glBindTexture(static_cast<GLenum>(settings.type), texture.textureId);
+        glBindTexture(glTexType, texture.textureId);
 
         // Handle mips
-        if (settings.generateMipmaps)
-        {
-            glTexParameteri(static_cast<GLenum>(settings.type), GL_TEXTURE_MIN_FILTER, static_cast<GLint>(settings.min));
-            glTexParameteri(static_cast<GLenum>(settings.type), GL_TEXTURE_MAG_FILTER, static_cast<GLint>(settings.mag));
-        }
+        glTexParameteri(glTexType, GL_TEXTURE_MIN_FILTER, static_cast<GLint>(settings.min));
+        glTexParameteri(glTexType, GL_TEXTURE_MAG_FILTER, static_cast<GLint>(settings.mag));
+        glTexParameteri(glTexType, GL_TEXTURE_BASE_LEVEL, 0);
 
         // Handle wrapping behavior.
-        glTexParameteri(static_cast<GLenum>(settings.type), GL_TEXTURE_WRAP_R, static_cast<GLint>(settings.wrapR));
-        glTexParameteri(static_cast<GLenum>(settings.type), GL_TEXTURE_WRAP_S, static_cast<GLint>(settings.wrapS));
-        glTexParameteri(static_cast<GLenum>(settings.type), GL_TEXTURE_WRAP_T, static_cast<GLint>(settings.wrapT));
+        glTexParameteri(glTexType, GL_TEXTURE_WRAP_R, static_cast<GLint>(settings.wrapR));
+        glTexParameteri(glTexType, GL_TEXTURE_WRAP_S, static_cast<GLint>(settings.wrapS));
+        glTexParameteri(glTexType, GL_TEXTURE_WRAP_T, static_cast<GLint>(settings.wrapT));
 
         // Construct the texture using the loaded data.
-        glTexImage2D(
-            static_cast<GLenum>(settings.type),
-            0,                          
-            static_cast<GLint>(settings.intendedFormat),
-            texSize.x,
-            texSize.y,
-            0,                          
-            components_to_format[static_cast<int>(settings.components)],
-            channels_to_glenum[static_cast<uint>(settings.fileFormat)],
-            imageData);
+        texture.immutable = settings.immutable;
+        if (settings.immutable)
+        {
+            texture.mipCount = settings.mipCount ? settings.mipCount : (settings.generateMipmaps ? math::log2(math::max(texSize.x, texSize.y)) : 1);
+            glTexParameteri(glTexType, GL_TEXTURE_MAX_LEVEL, texture.mipCount);
+            glTexStorage2D(
+                glTexType,
+                static_cast<GLint>(texture.mipCount),
+                static_cast<GLint>(settings.intendedFormat),
+                texSize.x,
+                texSize.y);
+
+            glTexSubImage2D(
+                glTexType,
+                0,
+                0,
+                0,
+                texSize.x,
+                texSize.y,
+                components_to_format[static_cast<int>(settings.components)],
+                channels_to_glenum[static_cast<uint>(settings.fileFormat)],
+                imageData);
+        }
+        else
+        {
+            texture.mipCount = settings.generateMipmaps ? math::log2(math::max(texSize.x, texSize.y)) : 1;
+            glTexParameteri(glTexType, GL_TEXTURE_MAX_LEVEL, texture.mipCount);
+            glTexImage2D(
+                static_cast<GLenum>(settings.type),
+                0,
+                static_cast<GLint>(settings.intendedFormat),
+                texSize.x,
+                texSize.y,
+                0,
+                components_to_format[static_cast<int>(settings.components)],
+                channels_to_glenum[static_cast<uint>(settings.fileFormat)],
+                imageData);
+        }
 
         // Generate mips.
         if (settings.generateMipmaps)
-            glGenerateMipmap(static_cast<GLenum>(settings.type));
+            glGenerateMipmap(glTexType);
+
+        glBindTexture(glTexType, 0);
 
         // Cleanup and return.
         stbi_image_free(imageData);

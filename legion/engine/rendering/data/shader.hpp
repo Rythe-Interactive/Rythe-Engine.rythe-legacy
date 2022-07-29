@@ -290,6 +290,10 @@ namespace legion::rendering
     private:
         mutable shader_variant* m_currentShaderVariant;
         mutable std::unordered_map<id_type, shader_variant> m_variants;
+
+        shader_import_settings m_importSettings;
+        id_type m_id;
+
     public:
         std::string name;
         std::string path;
@@ -320,94 +324,127 @@ namespace legion::rendering
         void bind_uniform_block(GLuint uniformBlockIndex, GLuint uniformBlockBinding) const;
 
         template<typename T>
-        uniform<T> get_uniform(const std::string& name)
+        uniform<T> get_uniform(const std::string& uniformName)
         {
-            OPTICK_EVENT();
+            auto id = nameHash(uniformName);
+
+#if defined(LEGION_VALIDATE)
             if (!m_currentShaderVariant)
             {
                 log::error("No current shader variant configured for shader {}", name);
                 return uniform<T>(nullptr);
             }
 
-            auto* ptr = dynamic_cast<uniform<T>*>(m_currentShaderVariant->uniforms[nameHash(name)].get());
+            if (!m_currentShaderVariant->uniforms.count(id))
+            {
+                log::error("Uniform of type {} does not exist with name {} in shader {}.", nameOfType<T>(), uniformName, name);
+                return uniform<T>(nullptr);
+            }
+#endif
+
+            auto* ptr = dynamic_cast<uniform<T>*>(m_currentShaderVariant->uniforms.at(id).get());
             if (ptr)
                 return *ptr;
-            log::error("Uniform of type {} does not exist with name {}.", nameOfType<T>(), name);
+
+            log::error("Uniform of type {} does not exist with name {} in shader {}.", nameOfType<T>(), uniformName, name);
             return uniform<T>(nullptr);
         }
 
         template<typename T>
-        bool has_uniform(const std::string& name)
+        bool has_uniform(const std::string& uniformName)
         {
-            OPTICK_EVENT();
+            auto id = nameHash(uniformName);
+
+#if defined(LEGION_VALIDATE)
             if (!m_currentShaderVariant)
             {
                 log::error("No current shader variant configured for shader {}", name);
                 return false;
             }
+#endif
 
-            auto id = nameHash(name);
-            return m_currentShaderVariant->uniforms.count(id) && dynamic_cast<uniform<T>*>(m_currentShaderVariant->uniforms[id].get()) != nullptr;
+            return m_currentShaderVariant->uniforms.count(id) && dynamic_cast<uniform<T>*>(m_currentShaderVariant->uniforms.at(id).get()) != nullptr;
         }
 
         template<typename T>
         uniform<T> get_uniform(id_type id)
         {
-            OPTICK_EVENT();
+#if defined(LEGION_VALIDATE)
             if (!m_currentShaderVariant)
             {
                 log::error("No current shader variant configured for shader {}", name);
                 return uniform<T>(nullptr);
             }
 
-            auto* ptr = dynamic_cast<uniform<T>*>(m_currentShaderVariant->uniforms[id].get());
+            if (!m_currentShaderVariant->uniforms.count(id))
+            {
+                log::error("Uniform of type {} does not exist with id {} in shader {}.", nameOfType<T>(), id, name);
+                return uniform<T>(nullptr);
+            }
+#endif
+
+            auto* ptr = dynamic_cast<uniform<T>*>(m_currentShaderVariant->uniforms.at(id).get());
             if (ptr)
                 return *ptr;
-            log::error("Uniform of type {} does not exist with id {}.", nameOfType<T>(), id);
+
+            log::error("Uniform of type {} does not exist with id {} in shader {}.", nameOfType<T>(), id, name);
             return uniform<T>(nullptr);
         }
 
         template<typename T>
         bool has_uniform(id_type id)
         {
-            OPTICK_EVENT();
+#if defined(LEGION_VALIDATE)
             if (!m_currentShaderVariant)
             {
                 log::error("No current shader variant configured for shader {}", name);
                 return false;
             }
+#endif
 
-            return m_currentShaderVariant->uniforms.count(id) && dynamic_cast<uniform<T>*>(m_currentShaderVariant->uniforms[id].get()) != nullptr;
+            return m_currentShaderVariant->uniforms.count(id) && dynamic_cast<uniform<T>*>(m_currentShaderVariant->uniforms.at(id).get()) != nullptr;
         }
 
         template<typename T>
         uniform<T> get_uniform_with_location(GLint location)
         {
-            OPTICK_EVENT();
+#if defined(LEGION_VALIDATE)
             if (!m_currentShaderVariant)
             {
                 log::error("No current shader variant configured for shader {}", name);
                 return uniform<T>(nullptr);
             }
 
-            auto* ptr = dynamic_cast<uniform<T>*>(m_currentShaderVariant->uniforms[m_currentShaderVariant->idOfLocation[location]].get());
+            if (!m_currentShaderVariant->idOfLocation.count(location) || !m_currentShaderVariant->uniforms.count(m_currentShaderVariant->idOfLocation.at(location)))
+            {
+                log::error("Uniform of type {} does not exist with location {} in shader {}.", nameOfType<T>(), location, name);
+                return uniform<T>(nullptr);
+            }
+#endif
+
+            auto* ptr = dynamic_cast<uniform<T>*>(m_currentShaderVariant->uniforms.at(m_currentShaderVariant->idOfLocation.at(location)).get());
             if (ptr)
                 return *ptr;
-            log::error("Uniform of type {} does not exist with location {}.", nameOfType<T>(), location);
+
+            log::error("Uniform of type {} does not exist with location {} in shader {}.", nameOfType<T>(), location, name);
             return uniform<T>(nullptr);
         }
 
         template<typename T>
         bool has_uniform_with_location(GLint location)
         {
-            OPTICK_EVENT();
             if (!m_currentShaderVariant)
             {
                 log::error("No current shader variant configured for shader {}", name);
                 return false;
             }
 
-            return m_currentShaderVariant->uniforms.count(m_currentShaderVariant->idOfLocation[location]) && dynamic_cast<uniform<T>*>(m_currentShaderVariant->uniforms[m_currentShaderVariant->idOfLocation[location]].get()) != nullptr;
+            if (!m_currentShaderVariant->idOfLocation.count(location))
+                return false;
+
+            auto id = m_currentShaderVariant->idOfLocation.at(location);
+
+            return m_currentShaderVariant->uniforms.count(id) && dynamic_cast<uniform<T>*>(m_currentShaderVariant->uniforms.at(id).get()) != nullptr;
         }
 
         attribute get_attribute(const std::string& name);
@@ -463,7 +500,10 @@ namespace legion::rendering
 
         attribute get_attribute(id_type attributeId);
 
-        void bind();
+        void destroy();
+        bool is_valid() const;
+
+        void bind() const;
         static void release();
 
         bool operator==(const shader_handle& other) const { return id == other.id; }
@@ -489,6 +529,7 @@ namespace legion::rendering
 
         static sparse_map<id_type, shader> m_shaders;
         static async::rw_spinlock m_shaderLock;
+        static std::unordered_set<id_type> m_checkedPaths;
 
         static shader* get_shader(id_type id);
 
@@ -500,52 +541,59 @@ namespace legion::rendering
 
         static shader_handle create_invalid_shader(const fs::view& file, shader_import_settings settings = default_shader_settings);
 
+        static void clear_modified_from_cache(const fs::view& path);
+
     public:
+        static void clear_checked_paths();
+
+        static void reload_shaders();
+
+        static void delete_shader(const std::string& name);
+        static void delete_shader(id_type id);
+
+        static bool has_shader(const std::string& name);
+        static bool has_shader(id_type id);
+
         static shader_handle create_shader(const std::string& name, const fs::view& file, shader_import_settings settings = default_shader_settings);
         static shader_handle create_shader(const fs::view& file, shader_import_settings settings = default_shader_settings);
         static shader_handle get_handle(const std::string& name);
         static shader_handle get_handle(id_type id);
+        static std::vector<shader_handle> get_all();
     };
 
     template<typename T>
     uniform<T> shader_handle::get_uniform(const std::string& name)
     {
-        OPTICK_EVENT();
         return ShaderCache::get_shader(id)->get_uniform<T>(name);
     }
 
     template<typename T>
     inline bool shader_handle::has_uniform(const std::string& name)
     {
-        OPTICK_EVENT();
         return ShaderCache::get_shader(id)->has_uniform<T>(name);
     }
 
     template<typename T>
     uniform<T> shader_handle::get_uniform(id_type uniformId)
     {
-        OPTICK_EVENT();
         return ShaderCache::get_shader(id)->get_uniform<T>(uniformId);
     }
 
     template<typename T>
     inline bool shader_handle::has_uniform(id_type uniformId)
     {
-        OPTICK_EVENT();
         return ShaderCache::get_shader(id)->has_uniform<T>(uniformId);
     }
 
     template<typename T>
     inline uniform<T> shader_handle::get_uniform_with_location(GLint location)
     {
-        OPTICK_EVENT();
         return ShaderCache::get_shader(id)->get_uniform_with_location<T>(location);
     }
 
     template<typename T>
     inline bool shader_handle::has_uniform_with_location(GLint location)
     {
-        OPTICK_EVENT();
         return ShaderCache::get_shader(id)->has_uniform_with_location<T>(location);
     }
 

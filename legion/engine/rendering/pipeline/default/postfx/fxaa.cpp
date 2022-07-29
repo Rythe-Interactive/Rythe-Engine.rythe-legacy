@@ -26,7 +26,6 @@ namespace legion::rendering
         fbo.bind();
         m_fxaaShader.bind();
 
-
         auto renderSize = color_texture.get_texture().size();
         m_fxaaShader.get_uniform<math::vec2>(texelSizeId).set_value(math::vec2(1.f / renderSize.x, 1.f / renderSize.y));
 

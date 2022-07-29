@@ -1,5 +1,4 @@
 #include <core/ecs/handles/entity.hpp>
-
 #include <core/ecs/registry.hpp>
 
 namespace legion::core::ecs
@@ -70,8 +69,40 @@ namespace legion::core::ecs
         return Registry::entityComposition(data->id);
     }
 
+    entity entity::copy()
+    {
+        return copy(world);
+    }
+
+    entity entity::copy(entity parent)
+    {
+        auto cpy = Registry::createEntity(data->name, parent);
+
+        cpy->active = data->active;
+
+        for (auto componentId : Registry::entityComposition(data->id))
+        {
+            Registry::createComponent(componentId, cpy, Registry::getComponent(componentId, *this));
+        }
+
+        for (auto& child : data->children)
+        {
+            child.copy(cpy);
+        }
+
+        return cpy;
+    }
+
     void entity::set_parent(id_type parent)
     {
+#if LEGION_VALIDATION_LEVEL
+        if (!valid())
+        {
+            log::error("Tried to set parent of invalid entity!");
+            return;
+        }
+#endif
+
         if (data->parent)
             data->parent->children.erase(*this);
 
@@ -87,6 +118,14 @@ namespace legion::core::ecs
 
     void entity::set_parent(entity parent)
     {
+#if LEGION_VALIDATION_LEVEL
+        if (!valid())
+        {
+            log::error("Tried to set parent of invalid entity!");
+            return;
+        }
+#endif
+
         if (data->parent)
             data->parent->children.erase(*this);
 
@@ -108,6 +147,13 @@ namespace legion::core::ecs
 
     void entity::add_child(entity child)
     {
+#if LEGION_VALIDATION_LEVEL
+        if (!valid())
+        {
+            log::error("Tried to add child to invalid entity!");
+            return;
+        }
+#endif
         child.set_parent(*this);
     }
 

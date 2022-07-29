@@ -4,7 +4,6 @@ namespace legion::core
 {
     void mesh::calculate_tangents(mesh* data)
     {
-        OPTICK_EVENT();
         // https://learnopengl.com/Advanced-Lighting/Normal-Mapping
         data->tangents.resize(data->normals.size());
 

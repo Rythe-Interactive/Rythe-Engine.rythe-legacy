@@ -12,39 +12,43 @@ namespace legion::rendering
     {
     private:
         shader_handle m_brightnessThresholdShader;
-        shader_handle m_gaussianBlurShader;
         shader_handle m_combineShader;
-        shader_handle m_historyMixShader;
 
         framebuffer m_pingpongFrameBuffers[2];
-        texture_handle m_pingpongTextureBuffers[2];
+
+        shader_handle m_resampleShader;
+        texture_handle m_downSampleTex[10];
 
         texture_import_settings settings{
               texture_type::two_dimensional,
+              false,
               channel_format::float_hdr,
               texture_format::rgba_hdr,
               texture_components::rgb,
-              true,
-              true,
+              false,
+              false,
+              0,
               texture_mipmap::linear,
               texture_mipmap::linear,
-              texture_wrap::mirror,
-              texture_wrap::mirror,
-              texture_wrap::mirror
+              texture_wrap::edge_clamp,
+              texture_wrap::edge_clamp,
+              texture_wrap::edge_clamp
         };
 
+        static size_type m_blurIterations;
+
     public:
+        static void setIterationCount(size_type count);
+
         /**
          * @brief setup The setup function of the post processing effect.
          * @param context The current context that is being used inside of the effect.
          */
         void setup(app::window& context) override;
 
-        void seperateOverdraw(framebuffer& fbo, texture_handle colortexture, texture_handle overdrawtexture);
+        void seperateOverdraw(framebuffer& fbo, texture_handle colortexture, texture_handle depthtexture, texture_handle overdrawtexture);
 
         texture_handle blurOverdraw(const math::ivec2& framebufferSize, texture_handle overdrawtexture);
-
-        void historyMixOverdraw(framebuffer& fbo, texture_handle overdrawtexture);
 
         void combineImages(framebuffer& fbo, texture_handle colortexture, texture_handle overdrawtexture);
 

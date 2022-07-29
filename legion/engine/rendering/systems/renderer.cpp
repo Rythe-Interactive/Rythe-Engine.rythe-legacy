@@ -1,6 +1,5 @@
 #include <rendering/systems/renderer.hpp>
 #include <rendering/debugrendering.hpp>
-#include <Optick/optick.h>
 
 namespace legion::rendering
 {
@@ -12,8 +11,6 @@ namespace legion::rendering
     {
         if (id == 131185) // Filter out annoying Nvidia message of: Buffer you made will use VRAM because you told us that you want it to allocate VRAM.
             return;
-
-        OPTICK_EVENT();
 
         static bool checkedNames = false;
 
@@ -109,7 +106,6 @@ namespace legion::rendering
 
     void Renderer::debugCallbackARB(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, L_MAYBEUNUSED const void* userParam)
     {
-        OPTICK_EVENT();
         static bool checkedNames = false;
 
         if (!checkedNames)
@@ -195,7 +191,6 @@ namespace legion::rendering
 
     void Renderer::debugCallbackAMD(GLuint id, GLenum category, GLenum severity, GLsizei length, const GLchar* message, L_MAYBEUNUSED void* userParam)
     {
-        OPTICK_EVENT();
         static bool checkedNames = false;
 
         if (!checkedNames)
@@ -260,7 +255,6 @@ namespace legion::rendering
 
     bool Renderer::initContext(const app::window& window)
     {
-        OPTICK_EVENT();
         if (!gladLoadGLLoader((GLADloadproc)app::ContextHelper::getProcAddress))
         {
             log::error("Failed to load OpenGL");
@@ -280,6 +274,11 @@ namespace legion::rendering
         else if (GLAD_GL_ARB_debug_output)
         {
             glDebugMessageCallbackARB(&Renderer::debugCallbackARB, nullptr);
+        }
+
+        if (!GLAD_GL_ARB_gpu_shader_int64)
+        {
+            log::error("Could not load extension \"ARB_gpu_shader_int64\" which is required for this renderer.");
         }
 
         log::info("loaded OpenGL version: {}.{}", GLVersion.major, GLVersion.minor);
@@ -327,16 +326,9 @@ namespace legion::rendering
 
     void Renderer::setup()
     {
-        OPTICK_EVENT();
-
         m_exiting.store(false, std::memory_order_relaxed);
 
-        bindToEvent<events::exit, &Renderer::onExit>();
-
-        createProcess<&Renderer::render>("Rendering");
-
         {
-            OPTICK_EVENT("Initialization");
             log::trace("Waiting on main window.");
 
             while (!ecs::world.has_component<app::window>())
@@ -359,10 +351,17 @@ namespace legion::rendering
             }
 
             if (!result)
+            {
                 log::error("Failed to initialize context.");
+                return;
+            }
             else
                 setThreadPriority();
         }
+
+        bindToEvent<events::exit, &Renderer::onExit>();
+
+        createProcess<&Renderer::render>("Rendering");
     }
 
     void Renderer::shutdown()
@@ -372,14 +371,11 @@ namespace legion::rendering
 
     void Renderer::onExit(events::exit& event)
     {
-        OPTICK_EVENT();
         m_exiting.store(true, std::memory_order_release);
     }
 
     void Renderer::render(time::span deltatime)
     {
-        OPTICK_EVENT();
-
         if (!m_pipelineProvider)
             return;
 
@@ -411,17 +407,18 @@ namespace legion::rendering
             if (viewportSize.x == 0 || viewportSize.y == 0)
                 continue;
 
-            position& camPos = ent.get_component<position>();
-            rotation& camRot = ent.get_component<rotation>();
-            scale& camScale = ent.get_component<scale>();
+            transform cameraTrans = ent.get_component<transform>();
 
-            math::mat4 view(1.f);
-            math::compose(view, camScale, camRot, camPos);
-            view = math::inverse(view);
+            math::mat4 view = cameraTrans.from_world_matrix();
 
             math::mat4 projection = cam.get_projection(((float)viewportSize.x) / viewportSize.y);
 
-            camera::camera_input cam_input_data(view, projection, camPos, camRot.forward(), cam.nearz, cam.farz, viewportSize);
+            position cameraPos;
+            rotation cameraRot;
+            scale cameraScal;
+            math::decompose(cameraTrans.to_world_matrix(), cameraScal, cameraRot, cameraPos);
+
+            camera::camera_input cam_input_data(view, projection, cameraPos, cameraRot.forward(), cam.nearz, cam.farz, viewportSize);
 
             if (!m_exiting.load(std::memory_order_relaxed))
             {
@@ -433,7 +430,6 @@ namespace legion::rendering
 
     L_NODISCARD RenderPipelineBase* Renderer::getPipeline(app::window& context)
     {
-        OPTICK_EVENT();
         if (!m_pipelineProvider)
             return nullptr;
 
@@ -450,7 +446,6 @@ namespace legion::rendering
 
     L_NODISCARD RenderPipelineBase* Renderer::getMainPipeline()
     {
-        OPTICK_EVENT();
         if (!m_pipelineProvider)
             return nullptr;
 

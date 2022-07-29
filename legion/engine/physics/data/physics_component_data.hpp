@@ -10,6 +10,8 @@ namespace legion::physics
 
     class PhysicsComponentData
     {
+        using GenerateConvexDelegate = delegate<void* (const std::vector<math::vec3>& vertices)>;
+
     public:
 
         PhysicsComponentData() = default;
@@ -48,31 +50,26 @@ namespace legion::physics
             return *this;
         }
 
-        inline static delegate<void* (const std::vector<math::vec3>& vertices)> m_generateConvexColliderFunc =
-            [](const std::vector<math::vec3>& vertices) -> void*
+        L_ALWAYS_INLINE void addBoxCollider(const math::vec3& extents, const math::vec3& offset, const math::quat& rotation)
         {
-            return nullptr;
-        };
-
-        L_ALWAYS_INLINE void AddBoxCollider(const math::vec3& extents, const math::vec3& offset, const math::quat& rotation)
-        {
-            if (extents.y == 0.0f)
+            if (extents.x == 0.0f || extents.y == 0.0f || extents.z == 0.0f)
             {
-                DebugBreak();
+                log::warn("PhysicsComponentData::addBoxCollider called with parameter 'extents' having an x,y, or z value equal to zero");
+                return;
             }
              
             m_colliders.push_back(ColliderData(m_colliderCount,{ &m_colliderModificationRequests },collider_type::box, offset, rotation));
-            m_colliders[m_colliderCount].setColliderToBox(extents * boxExtentSizeMultiplier);
+            m_colliders[m_colliderCount].setColliderToBoxCollider(extents * boxExtentSizeMultiplier);
 
             updateColliderRecords(physics_component_flag::pc_add_first_box, physics_component_flag::pc_add_next_box);
         }
 
-        L_ALWAYS_INLINE void AddBoxCollider(const math::vec3& extents)
+        L_ALWAYS_INLINE void addBoxCollider(const math::vec3& extents)
         {
-            AddBoxCollider(extents, math::vec3(0.0f), math::identity<math::quat>());
+            addBoxCollider(extents, math::vec3(0.0f), math::identity<math::quat>());
         }
 
-        void AddConvexCollider(const std::vector<math::vec3>& vertices, const math::vec3& offset, const math::quat& rotation)
+        void addConvexCollider(const std::vector<math::vec3>& vertices, const math::vec3& offset, const math::quat& rotation)
         {
             //convex colliders depend on an external vertex array, needs to be handled immediately 
             void* convexColliderPtr = m_generateConvexColliderFunc(vertices);
@@ -89,8 +86,14 @@ namespace legion::physics
             }
         }
         
-        L_ALWAYS_INLINE void AddSphereCollider(float radius, const math::vec3& offset)
+        L_ALWAYS_INLINE void addSphereCollider(float radius, const math::vec3& offset = math::vec3(0.0f))
         {
+           if (radius == 0.0f)
+           {
+                log::warn("PhysicsComponentData::addSphereCollider called with parameter radius equal to zero");
+                return;
+           }
+
            m_colliders.push_back(ColliderData(m_colliderCount, { &m_colliderModificationRequests }, collider_type::sphere, offset, math::identity<math::quat>() ));
            m_colliders[m_colliderCount].setColliderToSphereCollider(radius);
            updateColliderRecords(physics_component_flag::pc_add_first_sphere, physics_component_flag::pc_add_next_sphere);
@@ -114,6 +117,11 @@ namespace legion::physics
         L_ALWAYS_INLINE void resetModificationFlags() { m_modificationFlags.reset(); }
 
         L_ALWAYS_INLINE void resetColliderModificationFlags() { m_colliderModificationRequests.clear(); }
+        
+        static void setConvexGeneratorDelegate(GenerateConvexDelegate generateConvexFunc)
+        {
+            m_generateConvexColliderFunc = generateConvexFunc;
+        }
 
     private:
 
@@ -128,6 +136,13 @@ namespace legion::physics
 
         std::vector<ColliderData> m_colliders;
         std::vector<collider_modification_data> m_colliderModificationRequests;
+        
+        inline static GenerateConvexDelegate m_generateConvexColliderFunc =
+            [](const std::vector<math::vec3>& vertices) -> void*
+        {
+            log::warn("convex collider not generated because PhysicsComponentData::m_generateConvexColliderFunc not set ");
+            return nullptr;
+        };
 
         std::bitset<physics_component_flag::pc_max> m_modificationFlags;
 

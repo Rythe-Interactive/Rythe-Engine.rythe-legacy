@@ -319,7 +319,6 @@ namespace legion::physics
         materialToInitialize.set_param("albedoTex", rendering::TextureCache::create_texture(albedoFile));
         materialToInitialize.set_param("normalTex", rendering::TextureCache::create_texture(normalFile));
         materialToInitialize.set_param("roughnessTex", rendering::TextureCache::create_texture(roughnessFile));
-        materialToInitialize.set_param("skycolor", math::color(0.1f, 0.3f, 1.0f));
 
         litCount++;
     }

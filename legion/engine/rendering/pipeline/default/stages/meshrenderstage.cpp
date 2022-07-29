@@ -2,6 +2,7 @@
 #include <rendering/components/light.hpp>
 #include <rendering/data/buffer.hpp>
 #include <rendering/data/model.hpp>
+#include <rendering/components/renderable.hpp>
 
 namespace legion::rendering
 {
@@ -11,7 +12,6 @@ namespace legion::rendering
 
     void MeshRenderStage::render(app::window& context, camera& cam, const camera::camera_input& camInput, time::span deltaTime)
     {
-        OPTICK_EVENT();
         (void)deltaTime;
         (void)cam;
         static id_type mainId = nameHash("main");
@@ -19,13 +19,9 @@ namespace legion::rendering
         static id_type lightsId = nameHash("light buffer");
         static id_type lightCountId = nameHash("light count");
         static id_type matricesId = nameHash("model matrix buffer");
+        static id_type entityBufferId = nameHash("entity id buffer");
 
-        // Leave this for later implementation, no time rn. (Glyn)
-        // static id_type sceneColorId = nameHash("scene color history");
-        // static id_type sceneDepthId = nameHash("scene depth history");
-
-        //auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::unordered_set<ecs::entity>>>>(batchesId);
-        auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<ecs::entity>, std::vector<math::mat4>>>>>(batchesId);
+        auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<id_type>, std::vector<math::mat4>>>>>(batchesId);
         if (!batches)
             return;
 
@@ -39,6 +35,10 @@ namespace legion::rendering
 
         buffer* modelMatrixBuffer = get_meta<buffer>(matricesId);
         if (!modelMatrixBuffer)
+            return;
+
+        buffer* entityIdBuffer = get_meta<buffer>(entityBufferId);
+        if (!entityIdBuffer)
             return;
 
         auto* fbo = getFramebuffer(mainId);
@@ -76,6 +76,10 @@ namespace legion::rendering
         if (std::holds_alternative<texture_handle>(depthAttachment))
             sceneDepth = std::get<texture_handle>(depthAttachment);
 
+        texture_handle skyboxTex;
+        if (ecs::world.has_component<skybox_renderer>())
+            skyboxTex = ecs::world.get_component<skybox_renderer>()->material.get_param<texture_handle>(SV_SKYBOX);
+
         app::context_guard guard(context);
         if (!guard.contextIsValid())
         {
@@ -93,9 +97,9 @@ namespace legion::rendering
 
         fbo->bind();
 
-        for (auto [material, instancesPerMaterial] : *batches)
+        for (auto [m, instancesPerMaterial] : *batches)
         {
-            if (material.get_name() == "Test")
+            if (m.get_name() == "Test")
             {
                 for (auto [modelHandle, instances] : instancesPerMaterial)
                 {
@@ -104,7 +108,7 @@ namespace legion::rendering
                     if (modelHandle.id == invalid_id)
                     {
                         for (auto& ent : instances.first)
-                            log::warn("Invalid mesh found on entity {}.", ent->name);
+                            log::warn("Invalid mesh found on entity {}.", ecs::Registry::getEntity(ent)->name);
 
                         continue;
                     }
@@ -113,15 +117,25 @@ namespace legion::rendering
                     for (auto submesh : mesh.submeshes)
                     {
                         if (mesh.materials.empty())
-                            mater = material;
+                            mater = m;
                         else if (submesh.materialIndex == -1)
                             continue;
                         else
                             mater = mesh.materials[submesh.materialIndex];
 
-                        OPTICK_EVENT("Rendering material");
-                        auto materialName = mater.get_name();
-                        OPTICK_TAG("Material", materialName.c_str());
+                        auto shader = mater.get_shader();
+                        if (shader.is_valid() && shader.has_variant(mater.current_variant()))
+                        {
+                            auto& shaderState = shader.get_variant(mater.current_variant()).state;
+                            if ((shaderState.count(GL_BLEND) && (shaderState.at(GL_BLEND) != GL_FALSE)) ||
+                                (shaderState.count(GL_BLEND_SRC) && (shaderState.at(GL_BLEND_SRC) != GL_FALSE)) ||
+                                (shaderState.count(GL_BLEND_DST) && (shaderState.at(GL_BLEND_DST) != GL_FALSE)))
+                            {
+                                continue;
+                            }
+                        }
+                        else
+                            mater = invalid_material_handle;
 
                         camInput.bind(mater);
                         if (mater.has_param<uint>(SV_LIGHTCOUNT))
@@ -142,37 +156,26 @@ namespace legion::rendering
                         if (sceneDepth && mater.has_param<texture_handle>(SV_SCENEDEPTH))
                             mater.set_param<texture_handle>(SV_SCENEDEPTH, sceneDepth);
 
+                        if (skyboxTex && mater.has_param<texture_handle>(SV_SKYBOX))
+                            mater.set_param(SV_SKYBOX, skyboxTex);
+
                         mater.bind();
 
                         ModelCache::create_model(modelHandle.id);
-                        auto modelName = ModelCache::get_model_name(modelHandle.id);
-                        OPTICK_EVENT("Rendering instances");
-                        OPTICK_TAG("Model", modelName.c_str());
 
                         if (!mesh.buffered)
-                            modelHandle.buffer_data(*modelMatrixBuffer);
+                            modelHandle.buffer_data(*modelMatrixBuffer, *entityIdBuffer);
 
                         if (mesh.submeshes.empty())
                         {
-                            log::warn("Empty mesh found. Model name: {},  Model ID {}", modelName, modelHandle.get_mesh().id());
+                            log::warn("Empty mesh found. Model name: {},  Model ID {}", ModelCache::get_model_name(modelHandle.id), modelHandle.get_mesh().id());
                             continue;
                         }
 
-                        {
-                            OPTICK_EVENT("Buffering matrices");
-                            /*m_matrices.resize(instances.size());
-                            int i = 0;
-                            for (auto& ent : instances)
-                            {
-                                m_matrices[i] = transform(ent.get_component_handles<transform>()).get_local_to_world_matrix();
-                                i++;
-                            }*/
-
-                            modelMatrixBuffer->bufferData(instances.second);
-                        }
+                        entityIdBuffer->bufferData(instances.first);
+                        modelMatrixBuffer->bufferData(instances.second);
 
                         {
-                            OPTICK_EVENT("Draw call");
                             mesh.vertexArray.bind();
                             mesh.indexBuffer.bind();
                             lightsBuffer->bind();
@@ -189,9 +192,20 @@ namespace legion::rendering
                 continue;
             }
 
-            OPTICK_EVENT("Rendering material");
-            auto materialName = material.get_name();
-            OPTICK_TAG("Material", materialName.c_str());
+            material_handle material = m;
+            auto shader = material.get_shader();
+            if (shader.is_valid() && shader.has_variant(material.current_variant()))
+            {
+                auto& shaderState = shader.get_variant(material.current_variant()).state;
+                if ((shaderState.count(GL_BLEND) && (shaderState.at(GL_BLEND) != GL_FALSE)) ||
+                    (shaderState.count(GL_BLEND_SRC) && (shaderState.at(GL_BLEND_SRC) != GL_FALSE)) ||
+                    (shaderState.count(GL_BLEND_DST) && (shaderState.at(GL_BLEND_DST) != GL_FALSE)))
+                {
+                    continue;
+                }
+            }
+            else
+                material = invalid_material_handle;
 
             camInput.bind(material);
             if (material.has_param<uint>(SV_LIGHTCOUNT))
@@ -212,6 +226,9 @@ namespace legion::rendering
             if (sceneDepth && material.has_param<texture_handle>(SV_SCENEDEPTH))
                 material.set_param<texture_handle>(SV_SCENEDEPTH, sceneDepth);
 
+            if (skyboxTex && material.has_param<texture_handle>(SV_SKYBOX))
+                material.set_param(SV_SKYBOX, skyboxTex);
+
             material.bind();
 
             for (auto [modelHandle, instances] : instancesPerMaterial)
@@ -219,42 +236,28 @@ namespace legion::rendering
                 if (modelHandle.id == invalid_id)
                 {
                     for (auto& ent : instances.first)
-                        log::warn("Invalid mesh found on entity {}.", ent->name);
+                        log::warn("Invalid mesh found on entity {}.", ecs::Registry::getEntity(ent)->name);
 
                     continue;
                 }
 
                 ModelCache::create_model(modelHandle.id);
-                auto modelName = ModelCache::get_model_name(modelHandle.id);
-                OPTICK_EVENT("Rendering instances");
-                OPTICK_TAG("Model", modelName.c_str());
 
                 const model& mesh = modelHandle.get_model();
 
                 if (!mesh.buffered)
-                    modelHandle.buffer_data(*modelMatrixBuffer);
+                    modelHandle.buffer_data(*modelMatrixBuffer, *entityIdBuffer);
 
                 if (mesh.submeshes.empty())
                 {
-                    log::warn("Empty mesh found. Model name: {},  Model ID {}", modelName, modelHandle.get_mesh().id());
+                    log::warn("Empty mesh found. Model name: {},  Model ID {}", ModelCache::get_model_name(modelHandle.id), modelHandle.get_mesh().id());
                     continue;
                 }
 
-                {
-                    OPTICK_EVENT("Buffering matrices");
-                    /*m_matrices.resize(instances.size());
-                    int i = 0;
-                    for (auto& ent : instances)
-                    {
-                        m_matrices[i] = transform(ent.get_component_handles<transform>()).get_local_to_world_matrix();
-                        i++;
-                    }*/
-
-                    modelMatrixBuffer->bufferData(instances.second);
-                }
+                entityIdBuffer->bufferData(instances.first);
+                modelMatrixBuffer->bufferData(instances.second);
 
                 {
-                    OPTICK_EVENT("Draw call");
                     mesh.vertexArray.bind();
                     mesh.indexBuffer.bind();
                     lightsBuffer->bind();

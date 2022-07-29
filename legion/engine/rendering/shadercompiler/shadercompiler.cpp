@@ -1,6 +1,7 @@
+#include <lgnspre/gl_consts.hpp>
+
 #include <rendering/shadercompiler/shadercompiler.hpp>
 #include <rendering/util/settings.hpp>
-#include <lgnspre/gl_consts.hpp>
 #include <application/application.hpp>
 
 namespace legion::rendering
@@ -10,7 +11,6 @@ namespace legion::rendering
 
     std::string ShaderCompiler::get_view_path(const fs::view& view, bool mustBeFile)
     {
-        OPTICK_EVENT();
         using severity = log::severity;
 
         fs::navigator navigator(view.get_virtual_path());
@@ -54,16 +54,12 @@ namespace legion::rendering
 
     const std::string& ShaderCompiler::get_shaderlib_path()
     {
-        OPTICK_EVENT();
-        static std::string libPath;
-        if (libPath.empty())
-            libPath = get_view_path(fs::view("engine://shaderlib"), false);
+        static std::string libPath = get_view_path(fs::view("engine://shaderlib"), false);
         return libPath;
     }
 
     const std::string& ShaderCompiler::get_compiler_path()
     {
-        OPTICK_EVENT();
         static std::string compPath;
         if (compPath.empty())
             compPath = get_view_path(fs::view("engine://tools"), false) + fs::strpath_manip::separator() + "lgnspre" + fs::strpath_manip::separator() + "lgnspre";
@@ -72,7 +68,6 @@ namespace legion::rendering
 
     const std::string& ShaderCompiler::get_cachecleaner_path()
     {
-        OPTICK_EVENT();
         static std::string compPath;
         if (compPath.empty())
             compPath = get_view_path(fs::view("engine://tools"), false) + fs::strpath_manip::separator() + "lgnspre" + fs::strpath_manip::separator() + "lgncleancache";
@@ -81,7 +76,6 @@ namespace legion::rendering
 
     void ShaderCompiler::extract_state(std::string_view source, shader_state& state)
     {
-        OPTICK_EVENT();
         std::string_view rest = source;
         std::vector<std::pair<std::string, std::string>> stateInput;
         while (!rest.empty())
@@ -95,7 +89,11 @@ namespace legion::rendering
             auto line = rest.substr(0, seperator);
             auto space = line.find(' ');
             if (space != std::string::npos)
-                stateInput.push_back(std::make_pair(std::string(line.substr(0, space)), std::string(line.substr(space + 1))));
+            {
+                auto param = line.substr(space + 1);
+                auto paramSpace = param.find(' ');
+                stateInput.push_back(std::make_pair(std::string(line.substr(0, space)), std::string(param.substr(0, paramSpace))));
+            }
             else
                 stateInput.push_back(std::make_pair(std::string(line.substr(0, space)), std::string()));
 
@@ -114,6 +112,7 @@ namespace legion::rendering
         {
             funcTypesInitialized = true;
             funcTypes["DEPTH"] = GL_DEPTH_TEST;
+            funcTypes["DEPTH_WRITE"] = GL_DEPTH_WRITEMASK;
             funcTypes["CULL"] = GL_CULL_FACE;
             funcTypes["ALPHA_SOURCE"] = GL_BLEND_SRC;
             funcTypes["ALPHA_DEST"] = GL_BLEND_DST;
@@ -150,6 +149,23 @@ namespace legion::rendering
                     params["NOTEQUAL"] = GL_NOTEQUAL;
                     params["GEQUAL"] = GL_GEQUAL;
                     params["ALWAYS"] = GL_ALWAYS;
+                }
+
+                if (!params.count(par))
+                    continue;
+
+                param = params.at(par);
+            }
+            break;
+            case GL_DEPTH_WRITEMASK:
+            {
+                static std::unordered_map<std::string, GLenum> params; // Initialize parameter lookup table.
+                static bool initialized = false;
+                if (!initialized)
+                {
+                    initialized = true;
+                    params["OFF"] = GL_FALSE;
+                    params["ON"] = GL_TRUE;
                 }
 
                 if (!params.count(par))
@@ -202,12 +218,21 @@ namespace legion::rendering
                     params["ONE_MINUS_CONSTANT_ALPHA"] = GL_ONE_MINUS_CONSTANT_ALPHA;
                     params["SRC_ALPHA_SATURATE"] = GL_SRC_ALPHA_SATURATE;
                     params["OFF"] = GL_FALSE;
+                    params["OPAQUE"] = GL_FALSE;
+                    params["TRANSPARENT"] = GL_INTERNALFORMAT_PREFERRED;
                 }
 
                 if (!params.count(par))
                     continue;
 
                 param = params.at(par);
+
+                if (param == GL_INTERNALFORMAT_PREFERRED)
+                {
+                    state[GL_BLEND_SRC] = GL_SRC_ALPHA;
+                    state[GL_BLEND_DST] = GL_ONE_MINUS_SRC_ALPHA;
+                    continue;
+                }
             }
             break;
             case GL_DITHER:
@@ -240,7 +265,6 @@ namespace legion::rendering
 
     bool ShaderCompiler::extract_ilo(const std::string& variant, std::string_view source, uint64 shaderType, shader_ilo& ilo)
     {
-        OPTICK_EVENT();
         using severity = log::severity;
 
         GLuint glShaderType = detail::get_gl_type(shaderType);
@@ -276,13 +300,25 @@ namespace legion::rendering
             }
         }
 
-        ilo[variant].emplace_back(glShaderType, std::string(source));
+        auto versionIdx = source.find("#version");
+
+        if (versionIdx == std::string::npos)
+        {
+            m_callback("Shader processor error: no shader version", severity::error);
+            return false;
+        }
+
+        auto versionEnd = source.find_first_of('\n', versionIdx) + 1;
+
+        auto start = source.substr(0, versionEnd);
+        auto rest = source.substr(versionEnd);
+
+        ilo[variant].emplace_back(glShaderType, std::string(start) + "#extension GL_ARB_gpu_shader_int64 : enable\n" + std::string(rest));
         return true;
     }
 
     std::string ShaderCompiler::invoke_compiler(const fs::view& file, bitfield8 compilerSettings, const std::vector<std::string>& defines, const std::vector<std::string>& additionalIncludes)
     {
-        OPTICK_EVENT();
         using severity = log::severity;
 
         std::string filepath = get_view_path(file, true);
@@ -360,13 +396,12 @@ namespace legion::rendering
         return out;
     }
 
-    void ShaderCompiler::cleanCache()
+    void ShaderCompiler::cleanCache(const fs::view& path)
     {
-        OPTICK_EVENT();
         using severity = log::severity;
         std::string out, err;
 
-        std::string command = "\"" + get_cachecleaner_path() + "\" -I \"" + get_shaderlib_path() + "\" ./ --filter=shil";
+        std::string command = "\"" + get_cachecleaner_path() + "\" \"" + get_view_path(path, false) + "\" -I \"" + get_shaderlib_path() + "\" ./ --filter=shil";
 
         if (!ShellInvoke(command, out, err))
         {
@@ -388,7 +423,6 @@ namespace legion::rendering
 
     bool ShaderCompiler::process(const fs::view& file, bitfield8 compilerSettings, shader_ilo& ilo, std::unordered_map<std::string, shader_state>& state, const std::vector<std::string>& defines, const std::vector<std::string>& additionalIncludes)
     {
-        OPTICK_EVENT();
         using severity = log::severity;
 
         log::info("Compiling shader: {}", file.get_virtual_path());
@@ -440,10 +474,11 @@ namespace legion::rendering
                 // Default shader state in case nothing was specified by the shader.
                 shader_state& currentVariantState = state[variant];
                 currentVariantState[GL_DEPTH_TEST] = GL_LEQUAL;
+                currentVariantState[GL_DEPTH_WRITEMASK] = GL_TRUE;
                 currentVariantState[GL_CULL_FACE] = GL_BACK;
-                currentVariantState[GL_BLEND_SRC] = GL_SRC_ALPHA;
-                currentVariantState[GL_BLEND_DST] = GL_ONE_MINUS_SRC_ALPHA;
+                currentVariantState[GL_BLEND] = GL_FALSE;
                 currentVariantState[GL_DITHER] = GL_FALSE;
+                currentVariantState[GL_DEPTH_WRITEMASK] = GL_TRUE;
                 extract_state(source, currentVariantState);
             }
             else if (!extract_ilo(variant, source, shaderType, ilo))

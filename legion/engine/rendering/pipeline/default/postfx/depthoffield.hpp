@@ -6,6 +6,8 @@ namespace legion::rendering
     class DepthOfField : public PostProcessingEffect<DepthOfField>
     {
     private:
+        static std::atomic_bool m_autoFocus;
+
         //Shaders needed.
         shader_handle m_depthThresholdShader;
         shader_handle m_bokehShader;
@@ -26,11 +28,13 @@ namespace legion::rendering
         //Standard settings for creating textures.
         texture_import_settings settings{
               texture_type::two_dimensional,
+              false,
               channel_format::float_hdr,
               texture_format::rgba_hdr,
               texture_components::rgb,
-              true,
-              true,
+              false,
+              false,
+              0,
               texture_mipmap::linear,
               texture_mipmap::linear,
               texture_wrap::mirror,
@@ -38,6 +42,9 @@ namespace legion::rendering
               texture_wrap::mirror
         };
     public:
+
+        static void enableAutoFocus(bool enable) noexcept;
+
         /**
          * @brief setup The setup function of the post processing effect.
          * @param context The current context that is being used inside of the effect.
@@ -58,7 +65,7 @@ namespace legion::rendering
          * @param camInput The matrix data used to do everything 3D math-i.
          * @param position_texture The scene position texture collected from the framebuffer.
          */
-        void areaOfFocus(texture_handle& color_texture, const camera::camera_input& camInput, texture_handle& position_texture);
+        void areaOfFocus(const camera::camera_input& camInput, texture_handle& depth_texture);
         /**
          * @brief preFilter Pre-bokeh pass, also used to resize the color texture.
          * @param fbo The framebuffer used for this particular effect.

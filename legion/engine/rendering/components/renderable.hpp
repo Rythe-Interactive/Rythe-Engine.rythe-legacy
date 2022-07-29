@@ -4,6 +4,14 @@
 
 namespace legion::rendering
 {
+    struct skybox_renderer
+    {
+        material_handle material = invalid_material_handle;
+
+        skybox_renderer() = default;
+        explicit skybox_renderer(const material_handle& src) { material = src; }
+    };
+
     struct mesh_renderer
     {
     private:
@@ -14,7 +22,6 @@ namespace legion::rendering
         mesh_renderer(const material_handle& src, const model_handle& model) { material = src; m_tempHandle = model; }
         static void init(mesh_renderer& src, ecs::entity owner)
         {
-            OPTICK_EVENT();
             if (!owner.has_component<mesh_filter>())
             {
                 owner.add_component<mesh_filter>(mesh_filter(src.m_tempHandle.get_mesh()));

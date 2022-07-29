@@ -2,26 +2,29 @@
 #include <physics/events/events.hpp>
 namespace legion::physics
 {
-    delegate<bool(size_type, const char*)> PhysicsHelpers::m_debugMaterialRetrieveCheck =
-        [](size_type hash, const char* materialName)->bool {
-        log::warn("m_debugMaterialRetrieveCheck not set, make sure the currently active physics engine sets this delegate!");
-        return true;
-    };
+    std::vector<physics_material_hash> PhysicsHelpers::m_physicsMaterialHashes;
 
     void PhysicsHelpers::createPhysicsMaterial(float dynamicFriction, float staticFriction, float restitution, const char* name)
     {
         size_type hashResult = nameHash(name);
-        events::EventBus::raiseEvent< request_create_physics_material>(request_create_physics_material{ dynamicFriction,staticFriction,restitution,hashResult});
+
+        m_physicsMaterialHashes.push_back(hashResult);
+        events::EventBus::raiseEvent<request_create_physics_material>(request_create_physics_material{ dynamicFriction,staticFriction,restitution,hashResult});
     }
 
     size_type PhysicsHelpers::retrievePhysicsMaterialHash(const char* name)
     {
         size_type hashResult = nameHash(name);
 
-        #ifdef  _DEBUG
-        m_debugMaterialRetrieveCheck.invoke(hashResult, name);
-        #endif 
+        for (physics_material_hash materialHash : m_physicsMaterialHashes)
+        {
+            if (hashResult == materialHash)
+            {
+                return hashResult;
+            }
+        }
 
-        return hashResult;
+        log::warn("Attempted to retrieve non existing physics material with name {0}, default material was returned instead ",name);
+        return defaultMaterialHash;
     }
 }

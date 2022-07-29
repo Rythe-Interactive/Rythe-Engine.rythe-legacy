@@ -7,8 +7,6 @@ namespace legion::physics
     const std::vector<std::vector<physics_manifold_precursor>>& BroadphaseUniformGrid::collectPairs(
         std::vector<physics_manifold_precursor>&& manifoldPrecursors)
     {
-        OPTICK_EVENT();
-
         // Check if the amount of empty cells is higher than the threshhold. If it is, clear the cached data
         if (m_emptyCellDestroyThreshold > 0 && m_emptyCells.size() > m_emptyCellDestroyThreshold)
         {
@@ -18,8 +16,6 @@ namespace legion::physics
 
         for (auto& precursor : manifoldPrecursors)
         {
-            OPTICK_EVENT("Processing entity");
-
             math::vec3 pos;
             pos.x = precursor.worldTransform[3].x;
             pos.y = precursor.worldTransform[3].y;
@@ -65,8 +61,6 @@ namespace legion::physics
             math::ivec3 endCellIndex = calculateCellIndex(aabb.second);
 
             {
-                OPTICK_EVENT("Iterating overlapping cells");
-
                 // We store visitedCellIndex since the entities old occupied cells may change and may have to be removed
                 std::unordered_set<math::ivec3> visitedCells;
 
@@ -76,7 +70,6 @@ namespace legion::physics
                     {
                         for (int z = startCellIndex.z; z <= endCellIndex.z; ++z)
                         {
-                            OPTICK_EVENT("Inserting entity");
                             // Get current cell index
                             math::ivec3 currentCellIndex = math::ivec3(x, y, z);
                             // Store cell in visited
@@ -151,12 +144,10 @@ namespace legion::physics
         std::vector<physics_manifold_precursor>&& manifoldPrecursors)
     {
         std::vector<std::vector<physics_manifold_precursor>> groupings;
-        OPTICK_EVENT();
         std::unordered_map<math::ivec3, int> cellIndices;
+
         for (auto& precursor : manifoldPrecursors)
         {
-            OPTICK_EVENT("Processing entity");
-
             std::vector<legion::physics::PhysicsColliderPtr>& colliders = precursor.physicsComp->colliders;
             if (colliders.size() == 0) continue;
 
@@ -172,15 +163,12 @@ namespace legion::physics
             math::ivec3 endCellIndex = calculateCellIndex(aabb.second);
 
             {
-                OPTICK_EVENT("Iterating overlapping cells");
-
                 for (int x = startCellIndex.x; x <= endCellIndex.x; ++x)
                 {
                     for (int y = startCellIndex.y; y <= endCellIndex.y; ++y)
                     {
                         for (int z = startCellIndex.z; z <= endCellIndex.z; ++z)
                         {
-                            OPTICK_EVENT("Inserting entity");
                             math::ivec3 currentCellIndex = math::ivec3(x, y, z);
                             if (cellIndices.count(currentCellIndex))
                             {

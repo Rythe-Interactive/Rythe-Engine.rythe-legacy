@@ -15,9 +15,9 @@ namespace legion::rendering
         return ModelCache::get_model(id).buffered;
     }
 
-    void model_handle::buffer_data(const buffer& matrixBuffer) const
+    void model_handle::buffer_data(const buffer& matrixBuffer, const buffer& entityBuffer) const
     {
-        ModelCache::buffer_model(id, matrixBuffer);
+        ModelCache::buffer_model(id, matrixBuffer, entityBuffer);
     }
 
     void model_handle::overwrite_buffer(buffer& newBuffer, uint bufferID, bool perInstance) const
@@ -39,6 +39,11 @@ namespace legion::rendering
     {
         async::readonly_guard guard(m_modelLock);
         return m_models[id];
+    }
+
+    sparse_map<id_type, model> ModelCache::get_all_models()
+    {
+        return m_models;
     }
 
     std::string ModelCache::get_model_name(id_type id)
@@ -65,7 +70,7 @@ namespace legion::rendering
         }
     }
 
-    void ModelCache::buffer_model(id_type id, const buffer& matrixBuffer)
+    void ModelCache::buffer_model(id_type id, const buffer& matrixBuffer, const buffer& entityBuffer)
     {
         if (id == invalid_id)
             return;
@@ -93,6 +98,9 @@ namespace legion::rendering
 
         model.uvBuffer = buffer(GL_ARRAY_BUFFER, mesh_handle->uvs, GL_STATIC_DRAW);
         model.vertexArray.setAttribPointer(model.uvBuffer, SV_TEXCOORD0, 2, GL_FLOAT, false, 0, 0);
+
+        model.vertexArray.setAttribPointer(entityBuffer, SV_ENTITYID, 2, GL_UNSIGNED_INT, false, 0, 0);
+        model.vertexArray.setAttribDivisor(SV_ENTITYID, 1);
 
         model.vertexArray.setAttribPointer(matrixBuffer, SV_MODELMATRIX + 0, 4, GL_FLOAT, false, sizeof(math::mat4), 0 * sizeof(math::mat4::col_type));
         model.vertexArray.setAttribPointer(matrixBuffer, SV_MODELMATRIX + 1, 4, GL_FLOAT, false, sizeof(math::mat4), 1 * sizeof(math::mat4::col_type));
@@ -144,8 +152,12 @@ namespace legion::rendering
 
                 material_handle material = MaterialCache::create_material(name + "/" + mat.name, defaultLitShader);
 
-                if (mat.doubleSided)
+                if (mat.doubleSided && (mat.transparencyMode == transparency_mode::Blend))
+                    material.set_variant("double_sided_transparent");
+                else if (mat.doubleSided)
                     material.set_variant("double_sided");
+                else if (mat.transparencyMode == transparency_mode::Blend)
+                    material.set_variant("transparent");
 
                 material.set_param("alphaCutoff", mat.alphaCutoff);
 
@@ -233,7 +245,6 @@ namespace legion::rendering
                     material.set_param("useHeight", false);
                 }
 
-                material.setLoadOrSaveBit(false);
                 model.materials.push_back(material);
                 log::debug("Loaded embedded material {}/{}", name, mat.name);
             }
@@ -289,8 +300,12 @@ namespace legion::rendering
 
                 material_handle material = MaterialCache::create_material(name + "/" + mat.name, defaultLitShader);
 
-                if (mat.doubleSided)
+                if (mat.doubleSided && (mat.transparencyMode == transparency_mode::Blend))
+                    material.set_variant("double_sided_transparent");
+                else if (mat.doubleSided)
                     material.set_variant("double_sided");
+                else if (mat.transparencyMode == transparency_mode::Blend)
+                    material.set_variant("transparent");
 
                 material.set_param("alphaCutoff", mat.alphaCutoff);
 
@@ -378,7 +393,6 @@ namespace legion::rendering
                     material.set_param("useHeight", false);
                 }
 
-                material.setLoadOrSaveBit(false);
                 model.materials.push_back(material);
                 log::debug("Loaded embedded material {}/{}", name, mat.name);
             }
@@ -434,8 +448,12 @@ namespace legion::rendering
 
                 material_handle material = MaterialCache::create_material(name + "/" + mat.name, defaultLitShader);
 
-                if (mat.doubleSided)
+                if (mat.doubleSided && (mat.transparencyMode == transparency_mode::Blend))
+                    material.set_variant("double_sided_transparent");
+                else if (mat.doubleSided)
                     material.set_variant("double_sided");
+                else if (mat.transparencyMode == transparency_mode::Blend)
+                    material.set_variant("transparent");
 
                 material.set_param("alphaCutoff", mat.alphaCutoff);
 
@@ -523,7 +541,6 @@ namespace legion::rendering
                     material.set_param("useHeight", false);
                 }
 
-                material.setLoadOrSaveBit(false);
                 model.materials.push_back(material);
                 log::debug("Loaded embedded material {}/{}", name, mat.name);
             }
@@ -579,8 +596,12 @@ namespace legion::rendering
 
                 material_handle material = MaterialCache::create_material(meshName + "/" + mat.name, defaultLitShader);
 
-                if (mat.doubleSided)
+                if (mat.doubleSided && (mat.transparencyMode == transparency_mode::Blend))
+                    material.set_variant("double_sided_transparent");
+                else if (mat.doubleSided)
                     material.set_variant("double_sided");
+                else if (mat.transparencyMode == transparency_mode::Blend)
+                    material.set_variant("transparent");
 
                 material.set_param("alphaCutoff", mat.alphaCutoff);
 
@@ -668,7 +689,6 @@ namespace legion::rendering
                     material.set_param("useHeight", false);
                 }
 
-                material.setLoadOrSaveBit(false);
                 model.materials.push_back(material);
                 log::debug("Loaded embedded material {}/{}", meshName, mat.name);
             }
@@ -723,8 +743,12 @@ namespace legion::rendering
 
                 material_handle material = MaterialCache::create_material(name + "/" + mat.name, defaultLitShader);
 
-                if (mat.doubleSided)
+                if (mat.doubleSided && (mat.transparencyMode == transparency_mode::Blend))
+                    material.set_variant("double_sided_transparent");
+                else if (mat.doubleSided)
                     material.set_variant("double_sided");
+                else if (mat.transparencyMode == transparency_mode::Blend)
+                    material.set_variant("transparent");
 
                 material.set_param("alphaCutoff", mat.alphaCutoff);
 
@@ -812,7 +836,6 @@ namespace legion::rendering
                     material.set_param("useHeight", false);
                 }
 
-                material.setLoadOrSaveBit(false);
                 model.materials.push_back(material);
                 log::debug("Loaded embedded material {}/{}", name, mat.name);
             }
@@ -869,8 +892,12 @@ namespace legion::rendering
 
                 material_handle material = MaterialCache::create_material(meshName + "/" + mat.name, defaultLitShader);
 
-                if (mat.doubleSided)
+                if (mat.doubleSided && (mat.transparencyMode == transparency_mode::Blend))
+                    material.set_variant("double_sided_transparent");
+                else if (mat.doubleSided)
                     material.set_variant("double_sided");
+                else if (mat.transparencyMode == transparency_mode::Blend)
+                    material.set_variant("transparent");
 
                 material.set_param("alphaCutoff", mat.alphaCutoff);
 
@@ -958,7 +985,6 @@ namespace legion::rendering
                     material.set_param("useHeight", false);
                 }
 
-                material.setLoadOrSaveBit(false);
                 model.materials.push_back(material);
                 log::debug("Loaded embedded material {}/{}", meshName, mat.name);
             }

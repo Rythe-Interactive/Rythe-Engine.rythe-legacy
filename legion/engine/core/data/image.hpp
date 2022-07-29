@@ -73,6 +73,7 @@ namespace legion::core
         bool operator==(const image& other) const noexcept;
 
         byte* data() noexcept;
+        const byte* data() const noexcept;
 
     private:
         common::result<void> _apply_raw_impl() const;
@@ -85,30 +86,22 @@ namespace legion::core
         mutable std::optional<std::vector<math::color>> m_colors = std::nullopt;
     };
 
-    ReportAssetType(image);
-
-    namespace assets
+    template<>
+    struct assets::import_settings<image>
     {
-        template<>
-        struct import_settings<image>
-        {
-            bool detectFormat : 1;
-            bool detectComponents : 1;
-            bool flipVertical : 1;
-            channel_format fileFormat;
-            image_components components;
+        bool detectFormat : 1;
+        bool detectComponents : 1;
+        bool flipVertical : 1;
+        channel_format fileFormat;
+        image_components components;
 
-            constexpr import_settings(bool dform = true, bool dcomp = true, bool flipv = true, channel_format format = channel_format::eight_bit, image_components comp = image_components::rgba) noexcept :
-                detectFormat(dform),
-                detectComponents(dcomp),
-                flipVertical(flipv),
-                fileFormat(format),
-                components(comp)
-            {}
+        constexpr import_settings(bool dform = true, bool dcomp = true, bool flipv = true, channel_format format = channel_format::eight_bit, image_components comp = image_components::rgba) noexcept :
+            detectFormat(dform), detectComponents(dcomp), flipVertical(flipv), fileFormat(format), components(comp) {}
 
-            NO_DEF_CTOR_RULE5_NOEXCEPT(import_settings);
-        };
-    }
+        NO_DEF_CTOR_RULE5_NOEXCEPT(import_settings);
+    };
+
+    ReportAssetType(image);
 }
 
 #include <core/data/image.inl>

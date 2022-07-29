@@ -3,8 +3,6 @@
 #include <unordered_map>
 #include <memory>
 
-#include <Optick/optick.h>
-
 #include <core/containers/sparse_map.hpp>
 #include <core/containers/hashed_sparse_set.hpp>
 #include <core/types/types.hpp>
@@ -17,7 +15,6 @@
 #include <core/ecs/handles/entity.hpp>
 #include <core/ecs/handles/component.hpp>
 #include <core/ecs/data/entity_data.hpp>
-#include <core/ecs/prototypes/entity_prototype.hpp>
 #include <core/ecs/meta/meta.hpp>
 
 /**
@@ -90,14 +87,14 @@ namespace legion::core::ecs
         /**@brief Get a pointer to the family of a certain component type.
          */
         template<typename ComponentType, typename... Args>
-        L_NODISCARD static component_pool<ComponentType>* getFamily(Args&&... args);
+        L_NODISCARD static pointer<component_pool<ComponentType>> getFamily(Args&&... args);
 
         /**@brief Non templated way to get a pointer to the family of a certain component type.
-         * @note Will throw an exception if non of the templated functions have been called
+         * @note Will throw an exception if none of the templated functions have been called
          *       before for this component type due to the type not being registered yet.
          * @param typeId Local type hash of the component type.
          */
-        L_NODISCARD static component_pool_base* getFamily(id_type typeId);
+        L_NODISCARD static pointer<component_pool_base> getFamily(id_type typeId);
 
         L_NODISCARD static const std::string& getFamilyName(id_type id);
 
@@ -180,12 +177,19 @@ namespace legion::core::ecs
         template<typename ComponentType0, typename ComponentType1, typename... ComponentTypeN>
         static component_ref_tuple<ComponentType0, ComponentType1, ComponentTypeN...> createComponent(entity target, const ComponentType0& value0, const ComponentType1& value1, const ComponentTypeN&... valueN);
 
+        /**@brief Creates a new component of a certain type for a specific entity. Component is serialized from a prototype.
+         * @param target Entity to create the component for.
+         * @param prot Prototype to serialize component from.
+         * @return Reference to the created component.
+         */
+        static pointer<void> createComponent(id_type typeId, entity target, pointer<const void> component);
+
         /**@brief Creates a new component of a certain type for a specific entity.
          * @param typeId Type hash of component type to create.
          * @param target Entity to create the component for.
          * @return Pointer to the created component.
          */
-        static void* createComponent(id_type typeId, entity target);
+        static pointer<void> createComponent(id_type typeId, entity target);
 
         /**@brief Destroys a certain component on a specific entity.
          * @tparam ComponentType Type of the component to destroy.
@@ -237,7 +241,7 @@ namespace legion::core::ecs
          * @param target Entity to get the component from.
          * @return Pointer to the component.
          */
-        L_NODISCARD static void* getComponent(id_type typeId, entity target);
+        L_NODISCARD static pointer<void> getComponent(id_type typeId, entity target);
     };
 
     ReportSubSystem(Registry);
@@ -252,6 +256,5 @@ namespace legion::core::ecs
 #include <core/ecs/filters/filterregistry.inl>
 #include <core/ecs/handles/entity.inl>
 #include <core/ecs/handles/component.inl>
-#include <core/ecs/prototypes/entity_prototype.inl>
 #include <core/ecs/archetype/archetype.inl>
 

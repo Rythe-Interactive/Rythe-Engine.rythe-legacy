@@ -4,8 +4,8 @@
 namespace legion::core::scheduling
 {
     template<size_type charc>
-    inline L_ALWAYS_INLINE Process::Process(const char(&name)[charc], time::span interval) : m_name(name), m_nameHash(nameHash<charc>(name))
+    inline L_ALWAYS_INLINE Process::Process(const char(&name)[charc], time::span interval, size_type maxIterations) : m_name(name), m_nameHash(nameHash<charc>(name))
     {
-        setInterval(interval);
+        setInterval(interval, maxIterations);
     }
 }

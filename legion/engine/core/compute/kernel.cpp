@@ -8,7 +8,6 @@ namespace legion::core::compute
 {
     Kernel& Kernel::buildBufferNames()
     {
-        OPTICK_EVENT();
         size_type size;
         cl_uint num_args;
         std::string container;
@@ -40,14 +39,12 @@ namespace legion::core::compute
 
     Kernel& Kernel::readWriteMode(buffer_type t)
     {
-        OPTICK_EVENT();
         m_default_mode = t;
         return *this;
     }
 
     Kernel& Kernel::setBuffer(Buffer buffer)
     {
-        OPTICK_EVENT();
         //get name from buffer
         if (buffer.m_name.empty())
             log::warn("Encountered unnamed buffer! binding to a Kernel-location will fail!");
@@ -56,7 +53,6 @@ namespace legion::core::compute
 
     Kernel& Kernel::setBuffer(Buffer buffer, const std::string& name)
     {
-        OPTICK_EVENT();
         //translate name to index
         param_find([this, b = std::forward<Buffer>(buffer)](cl_uint index)
         {
@@ -67,21 +63,20 @@ namespace legion::core::compute
 
     Kernel& Kernel::setBuffer(Buffer buffer, cl_uint index)
     {
-        OPTICK_EVENT();
         //set kernel argument
         const cl_int ret = clSetKernelArg(m_func, index, buffer.m_data ? sizeof(cl_mem) : sizeof(cl_sampler), &buffer.m_memory_object);
 
         //check clSetKernelArg
         if (ret != CL_SUCCESS)
         {
-            log::error("clSetKernelArg {}", ret);
+            log::error("An error occurred with clSetKernelArg");
+            log::error(" Error Code {}: {}", ret, find_error(ret));
         }
         return *this;
     }
 
     Kernel& Kernel::enqueueBuffer(Buffer buffer, block_mode blocking)
     {
-        OPTICK_EVENT();
         /*
             we are writing to the device buffer
 
@@ -150,14 +145,16 @@ namespace legion::core::compute
         }
 
         if (ret != CL_SUCCESS)
-            log::error("clEnqueueXXXXBuffer {}", ret);
+        {
+            log::error("An error occurred with clEnqueueXXXXBuffer");
+            log::error(" Error Code {}: {}", ret, find_error(ret));
+        }
 
         return *this;
     }
 
     Kernel& Kernel::setAndEnqueueBuffer(Buffer buffer, block_mode blocking)
     {
-        OPTICK_EVENT();
         //get name from buffer
         if (buffer.m_name.empty())
             log::warn("Encountered unnamed buffer! binding to a Kernel-location will fail!");
@@ -167,7 +164,6 @@ namespace legion::core::compute
 
     Kernel& Kernel::setAndEnqueueBuffer(Buffer buffer, const std::string& name, block_mode blocking)
     {
-        OPTICK_EVENT();
         //translate name to index
         param_find([this, b = std::forward<Buffer>(buffer), blocking](cl_uint index)
         {
@@ -178,7 +174,6 @@ namespace legion::core::compute
 
     Kernel& Kernel::setAndEnqueueBuffer(Buffer buffer, cl_uint index, block_mode blocking)
     {
-        OPTICK_EVENT();
         //set and ... enqueue_buffer
         //nothing fun to see here
         enqueueBuffer(std::forward<Buffer>(buffer), blocking);
@@ -188,7 +183,6 @@ namespace legion::core::compute
 
     Kernel& Kernel::dispatch()
     {
-        OPTICK_EVENT();
         auto [globals, locals, size] = parse_dimensions();
         //enqueue the Kernel in the command queue
         cl_int ret = clEnqueueNDRangeKernel(
@@ -206,14 +200,14 @@ namespace legion::core::compute
         //check if the enqueue was successful
         if (ret != CL_SUCCESS)
         {
-            log::error("clEnqueueNDRangeKernel failed: {}", ret);
+            log::error("An error occurred with clEnqueueNDRangeKernel");
+            log::error(" Error Code {}: {}", ret, find_error(ret));
         }
         return *this;
     }
 
     void Kernel::finish() const
     {
-        OPTICK_EVENT();
         //execute all commands in the queue
         clFlush(m_queue);
 
@@ -223,7 +217,6 @@ namespace legion::core::compute
 
     size_t Kernel::getMaxWorkSize() const
     {
-        OPTICK_EVENT();
         size_t value;
 
         cl_int ret = clGetKernelWorkGroupInfo(m_func, Context::getDeviceId(), CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &value, nullptr);
@@ -247,7 +240,6 @@ namespace legion::core::compute
 
     Kernel& Kernel::local(size_type s)
     {
-        OPTICK_EVENT();
         //TODO(algo-ryth-mix) This should cap at CL_KERNEL_WORK_GROUP_SIZE 
         m_local_size = s;
         return *this;
@@ -255,26 +247,24 @@ namespace legion::core::compute
 
     Kernel& Kernel::global(dimension s)
     {
-        OPTICK_EVENT();
         m_global_size = s;
         return *this;
     }
+
     Kernel& Kernel::global(size_type s0, size_type s1)
     {
-        OPTICK_EVENT();
         m_global_size = d2{ s0,s1 };
         return *this;
     }
+
     Kernel& Kernel::global(size_type s0, size_type s1, size_type s2)
     {
-        OPTICK_EVENT();
         m_global_size = d3{ s0,s1,s2 };
         return *this;
     }
 
     Kernel& Kernel::setKernelArg(void* value, size_type size, const std::string& name)
     {
-        OPTICK_EVENT();
         //translate name to index
         param_find([this, size, v = std::forward<void*>(value)](cl_uint index)
         {
@@ -285,10 +275,11 @@ namespace legion::core::compute
 
     Kernel& Kernel::setKernelArg(void* value, size_type size, cl_uint index)
     {
-        OPTICK_EVENT();
-        if (clSetKernelArg(m_func, index, size, value) != CL_SUCCESS)
+        auto ret = clSetKernelArg(m_func, index, size, value);
+        if ( ret != CL_SUCCESS)
         {
             log::warn("clSetKernelArg failed for Arg at index {}", index);
+            log::error(" Error Code {}: {}", ret, find_error(ret));
         }
         return *this;
     }

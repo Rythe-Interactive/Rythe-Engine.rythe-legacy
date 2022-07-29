@@ -17,7 +17,6 @@ namespace legion::physics
     void EdgePenetrationQuery::populateContactList(physics_manifold& manifold,
         math::mat4& refTransform, math::mat4 incTransform, PhysicsCollider* refCollider)
     {
-        OPTICK_EVENT();
         //------------------- The contact points between 2 edges are the closest points between the 2 edges --------------------//
         //log::debug("EdgePenetrationQuery::populateContactList");
 

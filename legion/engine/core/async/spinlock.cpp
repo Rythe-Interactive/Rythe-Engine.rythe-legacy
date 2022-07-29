@@ -1,5 +1,4 @@
 #include <core/async/spinlock.hpp>
-#include <Optick/optick.h>
 
 namespace legion::core::async
 {
@@ -33,7 +32,6 @@ namespace legion::core::async
 
     void spinlock::lock() const noexcept
     {
-        OPTICK_EVENT();
         if (m_forceRelease)
             return;
 
@@ -46,7 +44,6 @@ namespace legion::core::async
 
         while (true)
         {
-            OPTICK_CATEGORY("Acquire spinlock", Optick::Category::Wait);
             if (!m_lock.exchange(true, std::memory_order_acquire))
                 break;
             while (m_lock.load(std::memory_order_relaxed))
@@ -58,7 +55,6 @@ namespace legion::core::async
 
     L_NODISCARD bool spinlock::try_lock() const noexcept
     {
-        OPTICK_EVENT();
         if (m_forceRelease)
             return true;
 
@@ -79,7 +75,6 @@ namespace legion::core::async
 
     void spinlock::unlock() const noexcept
     {
-        OPTICK_EVENT();
         if (m_forceRelease)
             return;
 
