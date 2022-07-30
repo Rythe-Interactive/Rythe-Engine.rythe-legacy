@@ -1,18 +1,31 @@
 #include "physx_wrapper_container.hpp"
+#include <physics/components/physics_component.hpp>
+#include <physics/components/physics_enviroment.hpp>
+#include <physics/components/capsule_controller.hpp>
+#include <physics/physx/data/physx_wrapper.hpp>
 
 namespace legion::physics
 {
-    PhysxInternalWrapper& PhysxWrapperContainer::createPhysxWrapper(physics_component& unregisteredPhysXWrapper)
+    template<class PhysxObject>
+    PhysxObject& PhysxWrapperContainer<PhysxObject>::createPhysxWrapper(physics_component& unregisteredPhysXWrapper)
     {
         return registerWrapperID(unregisteredPhysXWrapper.physicsComponentID);
     }
 
-    PhysxInternalWrapper& PhysxWrapperContainer::createPhysxWrapper(physics_enviroment& unregisteredPhysXWrapper)
+    template<class PhysxObject>
+    PhysxObject& PhysxWrapperContainer<PhysxObject>::createPhysxWrapper(physics_enviroment& unregisteredPhysXWrapper)
     {
         return registerWrapperID(unregisteredPhysXWrapper.physicsEnviromentID);
     }
 
-    void PhysxWrapperContainer::PopAndSwapRemoveWrapper(size_type id)
+    template<class PhysxObject>
+    PhysxObject& PhysxWrapperContainer<PhysxObject>::createPhysxWrapper(capsule_controller& unregisteredPhysXWrapper)
+    {
+        return registerWrapperID(unregisteredPhysXWrapper.id);
+    }
+
+    template<class PhysxObject>
+    void PhysxWrapperContainer<PhysxObject>::PopAndSwapRemoveWrapper(size_type id)
     {
         size_type index = m_wrapperIDSet.index_of(id);
 
@@ -24,18 +37,19 @@ namespace legion::physics
         }
     }
 
-    pointer<PhysxInternalWrapper> PhysxWrapperContainer::findWrapperWithID(size_type id)
+    template<class PhysxObject>
+    pointer<PhysxObject> PhysxWrapperContainer<PhysxObject>::findWrapperWithID(size_type id)
     {
         if (m_wrapperIDSet.contains(id))
         {
-            core::pointer<PhysxInternalWrapper> wrapper{ &m_physxWrappers[m_wrapperIDSet.index_of(id)] };
-            return pointer< PhysxInternalWrapper>{ wrapper };
+            return pointer< PhysxObject>{ &m_physxWrappers[m_wrapperIDSet.index_of(id)] };
         }
 
         return { nullptr };
     }
 
-    PhysxInternalWrapper& PhysxWrapperContainer::registerWrapperID(size_type& outID)
+    template<class PhysxObject>
+    PhysxObject& PhysxWrapperContainer<PhysxObject>::registerWrapperID(size_type& outID)
     {
         outID = nextID;
         m_wrapperIDSet.insert(nextID);
@@ -45,4 +59,7 @@ namespace legion::physics
         nextID++;
         return m_physxWrappers[m_physxWrappers.size() - 1];
     }
+
+    template class PhysxWrapperContainer<PhysxInternalWrapper>;
+    template class PhysxWrapperContainer<PhysxCharacterWrapper>;
 }

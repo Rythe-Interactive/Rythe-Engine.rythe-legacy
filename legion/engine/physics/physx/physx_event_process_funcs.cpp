@@ -3,6 +3,7 @@
 #include <physics/physx/physx_integration_helpers.hpp>
 #include <physics/events/events.hpp>
 #include <physics/components/physics_component.hpp>
+#include <physics/components/capsule_controller.hpp>
 #include <physics/components/rigidbody.hpp>
 #include <physics/physx/physx_event_process_funcs.hpp>
 
@@ -281,5 +282,31 @@ namespace legion::physics
         wrapper.physicsActor->userData = entity.data;
 
         sceneInfo.scene->addActor(*wrapper.physicsActor);
+    }
+
+    void processCapsuleMoveTo(PhysxCharacterWrapper& characterWrapper, capsule_controller& capsule)
+    {
+        CapsuleControllerData& capsuleData = capsule.data;
+
+        const math::vec3& disp = capsuleData.getCurrentDisplacement();
+        characterWrapper.characterController->move(PxVec3{ disp.x,disp.y,disp.z }, 0.0f, 0.016f, PxControllerFilters());
+        capsuleData.resetDisplacement();
+    }
+
+    void processGravityPreset(controller_preset& contPreset, PhysxCharacterWrapper& character, const PhysxEnviromentInfo& sceneInfo)
+    {
+        void* voidSpecifics = &contPreset.specifics;
+        gravity_preset* gravityPreset = static_cast<gravity_preset*>(voidSpecifics);
+
+        gravityPreset->gravityAcc += gravityPreset->gravityValue * sceneInfo.timeStep;
+
+        const math::vec3& displacement = gravityPreset->gravityAcc;
+        const PxU32 flag = character.characterController->move(
+            PxVec3(displacement.x, displacement.y, displacement.z), 0.0f, sceneInfo.timeStep, PxControllerFilters());
+
+        if (flag & PxControllerCollisionFlag::eCOLLISION_DOWN)
+        {
+            gravityPreset->gravityAcc = math::vec3(0.0f);
+        }
     }
 }

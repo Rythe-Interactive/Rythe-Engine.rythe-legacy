@@ -18,6 +18,7 @@ namespace legion::physics
     {
         physx::PxScene* scene = nullptr;
         physx::PxMaterial* defaultMaterial = nullptr;
+        float timeStep = 0.02f;
         std::unordered_map<size_type, physx::PxMaterial*>* physicsMaterials;
         float defaultRigidbodyDensity = 1.0f;
     };

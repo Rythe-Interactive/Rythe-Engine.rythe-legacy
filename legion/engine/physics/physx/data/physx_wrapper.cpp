@@ -1,5 +1,6 @@
 #include "physx_wrapper.hpp"
 #include <physx/PxPhysicsAPI.h>
+#include <physics/physx/data/controller_hit_feedback.inl>
 
 namespace legion::physics
 {
@@ -28,5 +29,25 @@ namespace legion::physics
         other.physicsActor = nullptr;
 
         return *this;
+    }
+
+    PhysxCharacterWrapper::PhysxCharacterWrapper() { }
+
+    PhysxCharacterWrapper::~PhysxCharacterWrapper() { }
+
+    PhysxCharacterWrapper& PhysxCharacterWrapper::operator= (PhysxCharacterWrapper&& other) noexcept
+    {
+        characterController = other.characterController;
+        controllerFeedback = std::move(other.controllerFeedback);
+
+        other.characterController = nullptr;
+
+        return *this;
+    }
+
+    PhysxCharacterWrapper::PhysxCharacterWrapper(PhysxCharacterWrapper&& other) noexcept
+        : characterController(other.characterController), controllerFeedback(std::move(other.controllerFeedback))
+    {
+        other.characterController = nullptr;
     }
 }

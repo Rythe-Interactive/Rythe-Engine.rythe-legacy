@@ -100,5 +100,4 @@ namespace legion::physics
     DECLARE_NEXT_COLLIDER_TEMPLATE_INSTANTIATION(PxSphereGeometry, float&);
     DECLARE_NEXT_COLLIDER_TEMPLATE_INSTANTIATION(PxBoxGeometry, const PxVec3&);
     DECLARE_NEXT_COLLIDER_TEMPLATE_INSTANTIATION(PxConvexMeshGeometry, PxConvexMesh*&);
-
 }

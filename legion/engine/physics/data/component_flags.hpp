@@ -53,4 +53,14 @@ namespace legion::physics
         height_field,
         not_set
     };
+
+    enum capsule_character_flag : size_type
+    {
+        cc_set_radius,
+        cc_set_height,
+        cc_teleport_to,
+        cc_move_to,
+        cc_set_gravity,
+        cc_max
+    };
 }
