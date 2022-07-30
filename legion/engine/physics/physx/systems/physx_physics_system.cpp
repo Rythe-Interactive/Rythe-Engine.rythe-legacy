@@ -41,8 +41,8 @@ namespace legion::physics
         //file name is date and time of file creation, placed in the logs folder of sandbox
         outFileName = "./logs/";
         outFileName += std::to_string(now->tm_year + 1900) + "-";
-        outFileName += std::to_string(now->tm_mon + 1)+ "-";
-        outFileName += std::to_string(now->tm_mday) + "-";
+        outFileName += std::to_string(now->tm_mon + 1) + "-";
+        outFileName += std::to_string(now->tm_mday)+ "-";
         outFileName += std::to_string(now->tm_hour) + "-";
         outFileName += std::to_string(now->tm_min) + "-";
         outFileName += std::to_string(now->tm_sec);
@@ -168,6 +168,7 @@ namespace legion::physics
         }
 
         bindEventsToEventProcessors();
+
         bindToEvent<events::component_destruction<physics_component>, &PhysXPhysicsSystem::markPhysicsWrapperPendingRemove>();
         bindToEvent<request_create_physics_material, &PhysXPhysicsSystem::onRequestCreatePhysicsMaterial>();
 
