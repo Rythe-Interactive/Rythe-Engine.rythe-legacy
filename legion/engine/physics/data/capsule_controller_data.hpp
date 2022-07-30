@@ -26,35 +26,35 @@ namespace legion::physics
     {
     public:
 
-        void moveTo(const math::vec3& displacement)
+        L_ALWAYS_INLINE void moveTo(const math::vec3& displacement)
         {
             m_modificationFlags.set(capsule_character_flag::cc_move_to, true);
             m_currentDisplacement += displacement;
         }
 
-        void setRadius(float radius)
+        L_ALWAYS_INLINE void setRadius(float radius)
         {
             m_modificationFlags.set(capsule_character_flag::cc_set_radius, true);
             m_radius = radius;
         }
 
-        float getRadius() const noexcept { return m_radius; }
+        L_ALWAYS_INLINE float getRadius() const noexcept { return m_radius; }
 
-        void setHeight(float height)
+        L_ALWAYS_INLINE void setHeight(float height)
         {
             m_modificationFlags.set(capsule_character_flag::cc_set_height, true);
             m_height = height;
         }
 
-        float getHeight() const noexcept { return m_height; }
+        L_ALWAYS_INLINE float getHeight() const noexcept { return m_height; }
 
-        const math::vec3& getCurrentDisplacement() const noexcept { return m_currentDisplacement; }
+        L_ALWAYS_INLINE const math::vec3& getCurrentDisplacement() const noexcept { return m_currentDisplacement; }
 
-        void resetDisplacement() { m_currentDisplacement = math::vec3(0); }
+        L_ALWAYS_INLINE void resetDisplacement() { m_currentDisplacement = math::vec3(0); }
 
-        const std::bitset<capsule_character_flag::cc_max>& getModificationFlags() const noexcept { return m_modificationFlags; }
+        L_ALWAYS_INLINE const std::bitset<capsule_character_flag::cc_max>& getModificationFlags() const noexcept { return m_modificationFlags; }
 
-        void resetModificationFlags() { m_modificationFlags.reset(); }
+        L_ALWAYS_INLINE void resetModificationFlags() { m_modificationFlags.reset(); }
 
         template<class preset>
         pointer<const preset> getReadOnlyPreset() const
@@ -116,7 +116,7 @@ namespace legion::physics
             return { static_cast<preset*>(specificsPtr) };
         }
 
-        std::vector<controller_preset>& getControllerPresets() noexcept { return m_presets; }
+        L_ALWAYS_INLINE std::vector<controller_preset>& getControllerPresets() noexcept { return m_presets; }
 
     private:
 

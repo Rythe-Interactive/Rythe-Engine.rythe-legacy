@@ -1,6 +1,5 @@
 #include "physx_physics_system.hpp"
 #include <physx/PxPhysicsAPI.h>
-#include <filesystem>
 #include <physics/components/rigidbody.hpp>
 #include <physics/components/physics_enviroment.hpp>
 #include <physics/components/capsule_controller.hpp>
@@ -42,7 +41,7 @@ namespace legion::physics
         //file name is date and time of file creation, placed in the logs folder of sandbox
         outFileName = "./logs/";
         outFileName += std::to_string(now->tm_year + 1900) + "-";
-        outFileName += std::to_string(now->tm_mon + 1) + "-";
+        outFileName += std::to_string(now->tm_mon + 1)+ "-";
         outFileName += std::to_string(now->tm_mday) + "-";
         outFileName += std::to_string(now->tm_hour) + "-";
         outFileName += std::to_string(now->tm_min) + "-";
@@ -172,11 +171,10 @@ namespace legion::physics
         bindToEvent<events::component_destruction<physics_component>, &PhysXPhysicsSystem::markPhysicsWrapperPendingRemove>();
         bindToEvent<request_create_physics_material, &PhysXPhysicsSystem::onRequestCreatePhysicsMaterial>();
 
-         PhysicsComponentData::setConvexGeneratorDelegate([this](const std::vector<math::vec3>& vertices)->void*
+        PhysicsComponentData::setConvexGeneratorDelegate([this](const std::vector<math::vec3>& vertices)->void*
             {
                 return physxGenerateConvexMesh(vertices);
             });
-
 
         //debugging related
         bindToEvent<request_flip_physics_continuous, &PhysXPhysicsSystem::flipPhysicsContinuousState>();
