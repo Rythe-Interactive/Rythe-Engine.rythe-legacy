@@ -72,41 +72,18 @@ namespace legion::physics
 
         void onPresBackward(MoveBackward& action)
         {
-            if (action.value)
-            {
-                moveBools[move_dir::backward] = true;
-            }
-            else
-            {
-                moveBools[move_dir::backward] = false;
-            }
+            moveBools[move_dir::backward] = action.pressed();
         }
 
         void onPressLeft(MoveLeft& action)
         {
-            if (action.value)
-            {
-                moveBools[move_dir::left] = true;
-            }
-            else
-            {
-                moveBools[move_dir::left] = false;
-            }
+            moveBools[move_dir::left] = action.pressed();
         }
 
         void onPressRight(MoveRight& action)
         {
-            if (action.value)
-            {
-                moveBools[move_dir::right] = true;
-            }
-            else
-            {
-                moveBools[move_dir::right] = false;
-            }
+            moveBools[move_dir::right] = action.pressed();
         }
-
-
 
         //-------------------------- Scene Setup Helpers ---------------------------------------//
 
