@@ -581,7 +581,7 @@ namespace legion::physics
         desc.behaviorCallback = nullptr;
 
         //initialize controller hit callbacks based on presets
-        if (auto readOnlyPreset = capsuleData.getReadOnlyPreset<rigidbody_force_feedback>())
+        if (auto readOnlyPreset = capsuleData.getPreset<rigidbody_force_feedback>())
         {
             outCharacterWrapper.controllerFeedback->
                 setShapeHitDelegate(initializeDefaultRigidbodyToCharacterResponse(readOnlyPreset->forceAmount, readOnlyPreset->massMaximum));

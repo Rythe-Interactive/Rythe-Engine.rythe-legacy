@@ -67,15 +67,7 @@ namespace legion::physics
 
         void onPressForward(MoveForward& action)
         {
-            if (action.value)
-            {
-                moveBools[move_dir::forward] = true;
-            }
-            else
-            {
-                moveBools[move_dir::forward] = false;
-            }
-            
+            moveBools[move_dir::forward] = action.pressed();
         }
 
         void onPresBackward(MoveBackward& action)

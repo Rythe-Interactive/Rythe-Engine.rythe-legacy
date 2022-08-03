@@ -57,7 +57,7 @@ namespace legion::physics
         L_ALWAYS_INLINE void resetModificationFlags() { m_modificationFlags.reset(); }
 
         template<class preset>
-        pointer<const preset> getReadOnlyPreset() const
+        pointer<const preset> getPreset() const noexcept
         {
             static size_type searchHash = typeHash<preset>();
 
@@ -74,7 +74,7 @@ namespace legion::physics
         }
 
         template<class preset>
-        pointer<preset> getPreset() 
+        pointer<preset> getPreset() noexcept
         {
             static size_type searchHash = typeHash<preset>();
 
@@ -107,8 +107,14 @@ namespace legion::physics
 
             controller_preset newPreset;
             newPreset.hash = searchHash;
-            //memcpy here would be fine since preset is of standard layout
-            memcpy(&newPreset.specifics, &presetSpecifics, sizeof(preset)); 
+
+            static_assert(std::is_same<gravity_preset, preset>::value
+                || std::is_same<rigidbody_force_feedback, preset>::value, "The template parameter used to call CapsuleControllerData::addPreset is not a recognized preset");
+
+            if constexpr (std::is_same<gravity_preset, preset>::value)
+                newPreset.specifics.gravityPreset = presetSpecifics;
+            else
+                newPreset.specifics.forcePreset = presetSpecifics;
 
             m_presets.push_back(newPreset);
 
@@ -117,6 +123,8 @@ namespace legion::physics
         }
 
         L_ALWAYS_INLINE std::vector<controller_preset>& getControllerPresets() noexcept { return m_presets; }
+
+        L_ALWAYS_INLINE const std::vector<controller_preset>& getControllerPresets() const noexcept { return m_presets; }
 
     private:
 
