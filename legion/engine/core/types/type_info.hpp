@@ -9,40 +9,68 @@
 
 namespace legion::core
 {
-    struct base_type_info
+    struct type_info_base
     {
 
     };
 
     template<typename ObjectType>
-    struct type_info : base_type_info
+    struct type_info : type_info_base
     {
-        id_type typeId = typeHash<ObjectType>();
-        std::string typeName = nameOfType<ObjectType>();
-        //std::string nameSpace;
+    public:
+        using nameHash = id_type;
+        using typeHash = id_type;
+        id_type typeId;
+        std::string typeName;
+
+    private:
         std::vector<id_type> parents;
         std::vector<id_type> children;
-        //std::unordered_map<id_type, std::unique_ptr<base_type_info>> templateParameters;
-        //std::unordered_map<id_type, std::unique_ptr<base_type_info>> attributes;
-        //std::unordered_map<id_type, std::unique_ptr<base_type_info>> members;
-        //std::unordered_map<id_type, std::unique_ptr<base_type_info>> functions;
-        type_info();
+        //std::unordered_map<nameHash, typeHash> templateParameters;
+        //std::unordered_map<nameHash, typeHash> attributes;
+        std::unordered_map<nameHash, typeHash> members;
+        //std::unordered_map<nameHash, typeHash> functions;
+
+    public:
+        type_info()
+        {
+            typeId = typeHash<ObjectType>();
+            typeName = nameOfType<ObjectType>();
+        };
         ~type_info();
-        template<typename type>
+
+        template<typename ChildType>
         void addChild();
-        template<typename type>
+        void addChild(id_type typeId);
+        template<typename ParentType>
         void addParent();
+        void addParent(id_type typeId);
+
+        template<typename MemberType>
+        void addMember(const std::string& name);
+        void addMember(const std::string& name, id_type typeId);
+
+        template<typename MemberType>
+        pointer<type_info<MemberType>> getMember(const std::string& name);
+        pointer<type_info_base> getMember(const std::string& name);
+
+        const std::string& to_string()
+        {
+            return "Type Name: " + typeName +
+                   "Type ID: " + typeId;
+        }
     };
 
     class TypeInfoRegistry
     {
     private:
-        static std::unordered_map<id_type, std::unique_ptr<base_type_info>> registry;
+        static std::unordered_map<id_type, std::unique_ptr<type_info_base>> registry;
     public:
         template<typename ObjectType>
         static pointer<type_info<ObjectType>> registerType();
         template<typename ObjectType>
         static pointer<type_info<ObjectType>> getTypeInfo();
+        static pointer<type_info_base> getTypeInfo(id_type typeId);
     };
 }
 

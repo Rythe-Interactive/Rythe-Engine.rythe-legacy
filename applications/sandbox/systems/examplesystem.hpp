@@ -13,6 +13,11 @@ struct [[reflectable]] example_comp
     int value = 1;
 };
 
+struct [[reflectable]] example_child
+{
+    float value2 = 2;
+};
+
 struct tonemap_action : public lgn::app::input_action<tonemap_action> {};
 struct switch_skybox_action : public lgn::app::input_action<switch_skybox_action> {};
 struct auto_exposure_action : public lgn::app::input_action<auto_exposure_action> {};
@@ -58,6 +63,12 @@ public:
         auto* pipeline = dynamic_cast<gfx::DefaultPipeline*>(gfx::Renderer::getMainPipeline());
         if (pipeline)
             pipeline->attachStage<MouseHover>();
+
+        auto& example_info = *TypeInfoRegistry::registerType<example_comp>();
+        TypeInfoRegistry::registerType<example_child>();
+        example_info.addChild<example_child>();
+        
+        
 
         app::window& win = ecs::world.get_component<app::window>();
         app::context_guard guard(win);
