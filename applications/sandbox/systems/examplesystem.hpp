@@ -66,9 +66,11 @@ public:
 
         auto& example_info = *TypeInfoRegistry::registerType<example_comp>();
         TypeInfoRegistry::registerType<example_child>();
-        example_info.addChild<example_child>();
-        
-        
+        example_info.add_child<example_child>();
+        auto s = example_info.to_string();
+        log::debug("Example Type Info:\n {}", s);
+
+
 
         app::window& win = ecs::world.get_component<app::window>();
         app::context_guard guard(win);
@@ -305,7 +307,7 @@ public:
         }
 
         srl::load<srl::bson, ecs::entity>(fs::view("assets://scenes/scene1.bson"), "scene");
- 
+
         bindToEvent<events::exit, &ExampleSystem::onExit>();
     }
 
@@ -353,10 +355,10 @@ public:
             if (!enabled)
                 gfx::Tonemapping::setExposure(defaultExposure);
 
-            log::debug("Auto exposure {}", enabled? "enabled" : "disabled");
+            log::debug("Auto exposure {}", enabled ? "enabled" : "disabled");
         }
     }
-    
+
     void onTonemapSwitch(tonemap_action& event)
     {
         using namespace legion;

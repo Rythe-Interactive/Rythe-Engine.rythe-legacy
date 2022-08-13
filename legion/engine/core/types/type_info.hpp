@@ -9,13 +9,21 @@
 
 namespace legion::core
 {
+    class TypeInfoRegistry;
     struct type_info_base
     {
+    public:
+        id_type typeId;
+        std::string typeName;
 
+        type_info_base() = default;
+        virtual ~type_info_base() = default;
+
+        virtual std::string to_string() LEGION_PURE;
     };
 
     template<typename ObjectType>
-    struct type_info : type_info_base
+    struct type_info : public type_info_base
     {
     public:
         using nameHash = id_type;
@@ -34,30 +42,36 @@ namespace legion::core
     public:
         type_info()
         {
-            typeId = typeHash<ObjectType>();
+            typeId = make_hash<ObjectType>().id();
             typeName = nameOfType<ObjectType>();
         };
-        ~type_info();
+        virtual ~type_info() = default;
 
         template<typename ChildType>
-        void addChild();
-        void addChild(id_type typeId);
+        void add_child();
+        void add_child(id_type typeId);
         template<typename ParentType>
-        void addParent();
-        void addParent(id_type typeId);
+        void add_parent();
+        void add_parent(id_type typeId);
 
         template<typename MemberType>
-        void addMember(const std::string& name);
-        void addMember(const std::string& name, id_type typeId);
+        void add_member(const std::string& name);
+        void add_member(const std::string& name, id_type typeId);
 
         template<typename MemberType>
-        pointer<type_info<MemberType>> getMember(const std::string& name);
-        pointer<type_info_base> getMember(const std::string& name);
+        pointer<type_info<MemberType>> get_member(const std::string& name);
+        pointer<type_info_base> get_member(const std::string& name);
 
-        const std::string& to_string()
+        virtual std::string to_string() override
         {
-            return "Type Name: " + typeName +
-                   "Type ID: " + typeId;
+            std::string outPut = "Type Name: " + typeName +
+                "\nType ID: " + std::to_string(typeId) +
+                "\n\tChildren:\n";
+            for (size_t i = 0; i < children.size(); i++)
+            {
+                outPut.append("\t" + TypeInfoRegistry::getTypeInfo(children[i])->to_string() + "\n");
+            }
+            return outPut;
         }
     };
 

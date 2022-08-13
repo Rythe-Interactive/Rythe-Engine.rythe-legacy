@@ -5,47 +5,57 @@ namespace legion::core
 {
     template<typename ObjectType>
     template<typename ChildType>
-    void type_info<ObjectType>::addChild()
+    void type_info<ObjectType>::add_child()
     {
-        children.push_back(make_hash<ChildType>);
+        auto typeId = make_hash<ChildType>().id();
+        if (std::count(children.begin(), children.end(), typeId) > 0)
+            return;
+        children.push_back(typeId);
         auto& child = *TypeInfoRegistry::getTypeInfo<ChildType>();
-        child.addParent<ObjectType>();
+        child.add_parent<ObjectType>();
     }
 
     template<typename ObjectType>
-    void type_info<ObjectType>::addChild(id_type typeId)
+    void type_info<ObjectType>::add_child(id_type typeId)
     {
+        if (std::count(children.begin(), children.end(), typeId) > 0)
+            return;
         children.push_back(typeId);
-        TypeInfoRegistry::getTypeInfo(typeId)->addParent<ObjectType>();
+        TypeInfoRegistry::getTypeInfo(typeId)->add_parent<ObjectType>();
     }
 
     template<typename ObjectType>
     template<typename ParentType>
-    void type_info<ObjectType>::addParent()
+    void type_info<ObjectType>::add_parent()
     {
-        parents.push_back(make_hash<ParentType>());
-        auto* parent = *TypeInfoRegistry::getTypeInfo<ParentType>();
-        parent.addChild<ObjectType>();
-    }
-
-    template<typename ObjectType>
-    void type_info<ObjectType>::addParent(id_type typeId)
-    {
+        auto typeId = make_hash<ParentType>().id();
+        if (std::count(parents.begin(), parents.end(), typeId) > 0)
+            return;
         parents.push_back(typeId);
-        TypeInfoRegistry::getTypeInfo(typeId)->addChild<ObjectType>();
+        auto& parent = *TypeInfoRegistry::getTypeInfo<ParentType>();
+        parent.add_child<ObjectType>();
+    }
+
+    template<typename ObjectType>
+    void type_info<ObjectType>::add_parent(id_type typeId)
+    {
+        if (std::count(parents.begin(), parents.end(), typeId) > 0)
+            return;
+        parents.push_back(typeId);
+        TypeInfoRegistry::getTypeInfo(typeId)->add_child<ObjectType>();
     }
 
     template<typename ObjectType>
     template<typename MemberType>
-    void type_info<ObjectType>::addMember(const std::string& name)
+    void type_info<ObjectType>::add_member(const std::string& name)
     {
         auto nameHash = make_hash(name).value();
-        auto typeId = make_hash<MemberType>().id();
+        id_type typeId = make_hash<MemberType>().id();
         members.try_emplace(nameHash, typeId);
     }
 
     template<typename ObjectType>
-    void type_info<ObjectType>::addMember(const std::string& name, id_type typeId)
+    void type_info<ObjectType>::add_member(const std::string& name, id_type typeId)
     {
         auto nameHash = make_hash(name).value();
         members.try_emplace(nameHash, typeId);
@@ -53,20 +63,20 @@ namespace legion::core
 
     template<typename ObjectType>
     template<typename MemberType>
-    pointer<type_info<MemberType>> type_info<ObjectType>::getMember(const std::string& name)
+    pointer<type_info<MemberType>> type_info<ObjectType>::get_member(const std::string& name)
     {
         auto nameHash = make_hash(name).value();
         if (members.count(nameHash))
-            return TypeInfoRegistry::getTypeInfo<MemberType>() ;
+            return TypeInfoRegistry::getTypeInfo<MemberType>();
         return { nullptr };
     }
 
     template<typename ObjectType>
-    pointer<type_info_base> type_info<ObjectType>::getMember(const std::string& name)
+    pointer<type_info_base> type_info<ObjectType>::get_member(const std::string& name)
     {
         auto nameHash = make_hash(name).value();
         if (members.count(nameHash))
-            return TypeInfoRegistry::getTypeInfo(members[nameHash]) ;
+            return TypeInfoRegistry::getTypeInfo(members[nameHash]);
         return { nullptr };
     }
 
