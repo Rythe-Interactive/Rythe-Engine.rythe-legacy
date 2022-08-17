@@ -64,13 +64,14 @@ public:
         if (pipeline)
             pipeline->attachStage<MouseHover>();
 
+        TypeInfoRegistry::registerType<int>();
+        TypeInfoRegistry::registerType<float>();
         auto& example_info = *TypeInfoRegistry::registerType<example_comp>();
-        TypeInfoRegistry::registerType<example_child>();
+        example_info.add_member<int>("value");
+        TypeInfoRegistry::registerType<example_child>()->add_member<float>("value2");
         example_info.add_child<example_child>();
         auto s = example_info.to_string();
-        log::debug("Example Type Info:\n {}", s);
-
-
+        log::debug("Example Type Info:\n{}", s);
 
         app::window& win = ecs::world.get_component<app::window>();
         app::context_guard guard(win);
