@@ -584,6 +584,18 @@ namespace legion::core
             return { common::success, warnings };
         }
 
+        static common::result<void, void> handleGltfSkeleton(mesh& meshData, const std::vector<int>& joints, const tinygltf::Mesh& mesh, const math::mat4& transform)
+        {
+            std::vector<std::string> warnings;
+            size_type jointIndex = 0;
+            for (auto joint : joints)
+            {
+
+            }
+
+            return { common::success, warnings };
+        }
+
         static common::result<void, void> handleGltfNode(mesh& meshData, const tinygltf::Model& model, const tinygltf::Node& node, const math::mat4& parentTransf)
         {
             std::vector<std::string> warnings;
@@ -592,9 +604,17 @@ namespace legion::core
 
             const size_type meshIdx = static_cast<size_type>(node.mesh);
 
+
             if (node.mesh >= 0 && meshIdx < model.meshes.size())
             {
                 auto result = handleGltfMesh(meshData, model, model.meshes[meshIdx], transf);
+                warnings.insert(warnings.end(), result.warnings().begin(), result.warnings().end());
+            }
+
+            const size_type skinIdx = static_cast<size_type>(node.skin);
+            if (node.skin >= 0 && skinIdx < model.skins.size())
+            {
+                auto result = handleGltfSkeleton(meshData, model.skins[node.skin].joints, model.meshes[meshIdx], transf);
                 warnings.insert(warnings.end(), result.warnings().begin(), result.warnings().end());
             }
 

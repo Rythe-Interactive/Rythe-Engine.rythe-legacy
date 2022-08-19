@@ -14,13 +14,17 @@ namespace legion::core
         math::mat4 localBindTransform;//represents a joints transformation from its parent
         math::mat4 invBindTransform;//represents the transformation from the joint to the root
 
+        inline void add_child(joint child)
+        {
+            children.push_back(child);
+        }
 
-        inline void calcInverseBindTransform(math::mat4 parentBindTransform)
+        inline void calc_inv_bind_transform(math::mat4 parentBindTransform)
         {
             math::mat4 bindTransform = parentBindTransform * localBindTransform;
             invBindTransform = math::inverse(bindTransform);
             for (joint child : children)
-                child.calcInverseBindTransform(bindTransform);
+                child.calc_inv_bind_transform(bindTransform);
         }
     };
 }

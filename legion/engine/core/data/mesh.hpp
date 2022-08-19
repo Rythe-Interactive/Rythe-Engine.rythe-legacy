@@ -2,6 +2,7 @@
 #include <core/types/primitives.hpp>
 #include <core/math/math.hpp>
 #include <core/data/image.hpp>
+#include <core/data/joint.hpp>
 
 /**
  * @file mesh.hpp
@@ -70,6 +71,7 @@ namespace legion::core
         std::vector<math::vec3> weights;
         std::vector<uint> indices;
         std::vector<material_data> materials;
+        joint rootJoint;
 
         winding_order windingOrder;
 

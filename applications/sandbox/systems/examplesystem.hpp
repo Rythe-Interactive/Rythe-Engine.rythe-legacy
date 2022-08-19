@@ -44,6 +44,8 @@ public:
         app::window& win = ecs::world.get_component<app::window>();
         app::context_guard guard(win);
 
+        gfx::ModelCache::create_model("RiggedModel",fs::view("assets://models/RiggedFigure.gltf"));
+
         auto model = gfx::ModelCache::create_model("Sphere", fs::view("assets://models/sphere.obj"));
 
         auto material = gfx::MaterialCache::create_material("White", fs::view("assets://shaders/color.shs"));
