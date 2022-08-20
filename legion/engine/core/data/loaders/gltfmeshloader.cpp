@@ -584,13 +584,18 @@ namespace legion::core
             return { common::success, warnings };
         }
 
-        static common::result<void, void> handleGltfSkeleton(mesh& meshData, const std::vector<int>& joints, const tinygltf::Mesh& mesh, const math::mat4& transform)
+        static common::result<void, void> handleGltfJoint(mesh& meshData, joint& parentJoint, const tinygltf::Model& model, const tinygltf::Mesh& mesh, const tinygltf::Node& node/*, const math::mat4& parentTransform*/)
         {
             std::vector<std::string> warnings;
-            size_type jointIndex = 0;
-            for (auto joint : joints)
-            {
+            //auto localTransf = parentTransform * detail::getGltfNodeTransform(node);
 
+            for (int idx : node.children)
+            {
+                joint child = { model.nodes[idx].name, idx, meshData.invBindMats[idx] };
+                child.animatedTransform = detail::getGltfNodeTransform(model.nodes[idx]);
+                joint& childJoint = parentJoint.children.emplace_back(child);
+                auto result = detail::handleGltfJoint(meshData, childJoint, model, mesh, model.nodes[idx]/*, localTransf*/);
+                warnings.insert(warnings.end(), result.warnings().begin(), result.warnings().end());
             }
 
             return { common::success, warnings };
@@ -612,10 +617,22 @@ namespace legion::core
             }
 
             const size_type skinIdx = static_cast<size_type>(node.skin);
+
             if (node.skin >= 0 && skinIdx < model.skins.size())
             {
-                auto result = handleGltfSkeleton(meshData, model.skins[node.skin].joints, model.meshes[meshIdx], transf);
+                const size_type rootJointId = model.skins[skinIdx].joints[0];
+                const tinygltf::Node& rootNode = model.nodes[rootJointId];
+                //auto localTransf = transform * detail::getGltfNodeTransform(rootNode);
+                detail::handleGltfBuffer(model, model.accessors[model.skins[skinIdx].inverseBindMatrices], meshData.invBindMats);
+
+                meshData.rootJoint = { rootNode.name,rootJointId,meshData.invBindMats[rootJointId] };
+                std::vector<joint>& jointChildren = meshData.rootJoint.children;
+
+                auto result = detail::handleGltfJoint(meshData, meshData.rootJoint, model, model.meshes[meshIdx], rootNode/*, localTransf*/);
                 warnings.insert(warnings.end(), result.warnings().begin(), result.warnings().end());
+
+                //auto result = handleGltfSkeleton(meshData, model, model.skins[node.skin], model.meshes[meshIdx]/*, transf*/);
+                //warnings.insert(warnings.end(), result.warnings().begin(), result.warnings().end());
             }
 
             for (auto& nodeIdx : node.children)

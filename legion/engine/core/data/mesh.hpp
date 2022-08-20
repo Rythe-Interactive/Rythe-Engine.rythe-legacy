@@ -71,6 +71,7 @@ namespace legion::core
         std::vector<math::vec3> weights;
         std::vector<uint> indices;
         std::vector<material_data> materials;
+        std::vector<math::mat4> invBindMats;
         joint rootJoint;
 
         winding_order windingOrder;

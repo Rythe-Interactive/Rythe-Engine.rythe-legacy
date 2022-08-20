@@ -44,12 +44,16 @@ public:
         app::window& win = ecs::world.get_component<app::window>();
         app::context_guard guard(win);
 
-        gfx::ModelCache::create_model("RiggedModel",fs::view("assets://models/RiggedFigure.gltf"));
+        auto material = gfx::MaterialCache::create_material("White", fs::view("assets://shaders/color.shs"));
+        material.set_param("color", math::colors::green);
 
         auto model = gfx::ModelCache::create_model("Sphere", fs::view("assets://models/sphere.obj"));
 
-        auto material = gfx::MaterialCache::create_material("White", fs::view("assets://shaders/color.shs"));
-        material.set_param("color", math::colors::white);
+        auto rig = gfx::ModelCache::create_model("RiggedModel", fs::view("assets://models/RiggedFigure.gltf"));
+        auto joint = rig.get_mesh()->rootJoint;
+        debugSkeleton(joint, model, material);
+
+
         /*{
             auto ent = createEntity("Sun");
             ent.add_component(gfx::light::directional(math::color(1, 1, 0.8f), 10.f));
@@ -97,15 +101,15 @@ public:
         material.set_param("normalTex", rendering::TextureCache::create_texture(fs::view("assets://textures/iron/rustediron-normal.png")));
         material.set_param("roughnessTex", rendering::TextureCache::create_texture(fs::view("assets://textures/iron/rustediron-roughness.png")));
 
-        {
-            auto ent = createEntity(material.get_name());
-            ent.add_component<example_comp>();
-            auto [pos, rot, scal] = ent.add_component<transform>();
-            pos = math::vec3(0.f, 0.f, 0.f);
-            scal = math::vec3(3.f);
-            rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
-            ent.add_component(gfx::mesh_renderer(material, model));
-        }
+        //{
+        //    auto ent = createEntity(material.get_name());
+        //    ent.add_component<example_comp>();
+        //    auto [pos, rot, scal] = ent.add_component<transform>();
+        //    pos = math::vec3(0.f, 0.f, 0.f);
+        //    scal = math::vec3(3.f);
+        //    rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
+        //    ent.add_component(gfx::mesh_renderer(material, model));
+        //}
 
         material = gfx::MaterialCache::create_material("rock", fs::view("assets://shaders/pbr.shs"));
 
@@ -115,15 +119,15 @@ public:
         material.set_param(SV_EMISSIVE, rendering::TextureCache::create_texture(fs::view("assets://textures/detailedRock/Rock020_1K_emissive.png")));
         material.set_param(SV_HEIGHTSCALE, 1.f);
 
-        {
-            auto ent = createEntity(material.get_name());
-            ent.add_component<example_comp>();
-            auto [pos, rot, scal] = ent.add_component<transform>();
-            pos = math::vec3(0.f, 0.f, 4.f);
-            rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
-            scal = math::vec3(3.f);
-            ent.add_component(gfx::mesh_renderer(material, model));
-        }
+        //{
+        //    auto ent = createEntity(material.get_name());
+        //    ent.add_component<example_comp>();
+        //    auto [pos, rot, scal] = ent.add_component<transform>();
+        //    pos = math::vec3(0.f, 0.f, 4.f);
+        //    rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
+        //    scal = math::vec3(3.f);
+        //    ent.add_component(gfx::mesh_renderer(material, model));
+        //}
 
         material = gfx::MaterialCache::create_material("copper", fs::view("assets://shaders/pbr.shs"));
 
@@ -133,15 +137,15 @@ public:
         material.set_param(SV_EMISSIVE, rendering::TextureCache::create_texture(fs::view("assets://textures/copper/copper-emissive-2048.png")));
         material.set_param(SV_HEIGHTSCALE, 1.f);
 
-        {
-            auto ent = createEntity(material.get_name());
-            ent.add_component<example_comp>();
-            auto [pos, rot, scal] = ent.add_component<transform>();
-            pos = math::vec3(0.f, 0.f, 8.f);
-            rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
-            scal = math::vec3(3.f);
-            ent.add_component(gfx::mesh_renderer(material, model));
-        }
+        //{
+        //    auto ent = createEntity(material.get_name());
+        //    ent.add_component<example_comp>();
+        //    auto [pos, rot, scal] = ent.add_component<transform>();
+        //    pos = math::vec3(0.f, 0.f, 8.f);
+        //    rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
+        //    scal = math::vec3(3.f);
+        //    ent.add_component(gfx::mesh_renderer(material, model));
+        //}
 
         material = gfx::MaterialCache::create_material("wood", fs::view("engine://shaders/default_lit.shs"));
 
@@ -165,15 +169,15 @@ public:
         material.set_param("normalTex", rendering::TextureCache::create_texture(fs::view("assets://textures/wood/Wood035_1K_Normal.png")));
         material.set_param("roughnessTex", rendering::TextureCache::create_texture(fs::view("assets://textures/wood/Wood035_1K_Roughness.png")));
 
-        {
-            auto ent = createEntity(material.get_name());
-            ent.add_component<example_comp>();
-            auto [pos, rot, scal] = ent.add_component<transform>();
-            pos = math::vec3(0.f, 4.f, 0.f);
-            rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
-            scal = math::vec3(3.f);
-            ent.add_component(gfx::mesh_renderer(material, model));
-        }
+        //{
+        //    auto ent = createEntity(material.get_name());
+        //    ent.add_component<example_comp>();
+        //    auto [pos, rot, scal] = ent.add_component<transform>();
+        //    pos = math::vec3(0.f, 4.f, 0.f);
+        //    rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
+        //    scal = math::vec3(3.f);
+        //    ent.add_component(gfx::mesh_renderer(material, model));
+        //}
 
         material = gfx::MaterialCache::create_material("paint", fs::view("assets://shaders/pbr.shs"));
 
@@ -183,15 +187,15 @@ public:
         material.set_param(SV_EMISSIVE, rendering::TextureCache::create_texture(fs::view("assets://textures/paint/paint-peeling-emissive-2048.png")));
         material.set_param(SV_HEIGHTSCALE, 1.f);
 
-        {
-            auto ent = createEntity(material.get_name());
-            ent.add_component<example_comp>();
-            auto [pos, rot, scal] = ent.add_component<transform>();
-            pos = math::vec3(0.f, 4.f, 4.f);
-            rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
-            scal = math::vec3(3.f);
-            ent.add_component(gfx::mesh_renderer(material, model));
-        }
+        //{
+        //    auto ent = createEntity(material.get_name());
+        //    ent.add_component<example_comp>();
+        //    auto [pos, rot, scal] = ent.add_component<transform>();
+        //    pos = math::vec3(0.f, 4.f, 4.f);
+        //    rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
+        //    scal = math::vec3(3.f);
+        //    ent.add_component(gfx::mesh_renderer(material, model));
+        //}
 
         material = gfx::MaterialCache::create_material("tiles", fs::view("engine://shaders/default_lit.shs"));
 
@@ -213,15 +217,15 @@ public:
         material.set_param("normalTex", rendering::TextureCache::create_texture(fs::view("assets://textures/tile/tileNormal.png")));
         material.set_param("roughnessTex", rendering::TextureCache::create_texture(fs::view("assets://textures/tile/tileRoughness.png")));
 
-        {
-            auto ent = createEntity(material.get_name());
-            ent.add_component<example_comp>();
-            auto [pos, rot, scal] = ent.add_component<transform>();
-            pos = math::vec3(0.f, 4.f, 8.f);
-            rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
-            scal = math::vec3(3.f);
-            ent.add_component(gfx::mesh_renderer(material, model));
-        }
+        //{
+        //    auto ent = createEntity(material.get_name());
+        //    ent.add_component<example_comp>();
+        //    auto [pos, rot, scal] = ent.add_component<transform>();
+        //    pos = math::vec3(0.f, 4.f, 8.f);
+        //    rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
+        //    scal = math::vec3(3.f);
+        //    ent.add_component(gfx::mesh_renderer(material, model));
+        //}
 
         material = gfx::MaterialCache::create_material("slate", fs::view("assets://shaders/pbr.shs"));
 
@@ -231,15 +235,15 @@ public:
         material.set_param(SV_EMISSIVE, rendering::TextureCache::create_texture(fs::view("assets://textures/slate/slate-emissive-2048.png")));
         material.set_param(SV_HEIGHTSCALE, 1.f);
 
-        {
-            auto ent = createEntity(material.get_name());
-            ent.add_component<example_comp>();
-            auto [pos, rot, scal] = ent.add_component<transform>();
-            pos = math::vec3(0.f, 8.f, 0.f);
-            rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
-            scal = math::vec3(3.f);
-            ent.add_component(gfx::mesh_renderer(material, model));
-        }
+        //{
+        //    auto ent = createEntity(material.get_name());
+        //    ent.add_component<example_comp>();
+        //    auto [pos, rot, scal] = ent.add_component<transform>();
+        //    pos = math::vec3(0.f, 8.f, 0.f);
+        //    rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
+        //    scal = math::vec3(3.f);
+        //    ent.add_component(gfx::mesh_renderer(material, model));
+        //}
 
         material = gfx::MaterialCache::create_material("bricks", fs::view("engine://shaders/default_lit.shs"));
 
@@ -264,15 +268,15 @@ public:
         material.set_param("heightTex", rendering::TextureCache::create_texture(fs::view("assets://textures/brick/brickDisplacement.png")));
         material.set_param("heightScale", 0.1f);
 
-        {
-            auto ent = createEntity(material.get_name());
-            ent.add_component<example_comp>();
-            auto [pos, rot, scal] = ent.add_component<transform>();
-            pos = math::vec3(0.f, 8.f, 4.f);
-            rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
-            scal = math::vec3(3.f);
-            ent.add_component(gfx::mesh_renderer(material, model));
-        }
+        //{
+        //    auto ent = createEntity(material.get_name());
+        //    ent.add_component<example_comp>();
+        //    auto [pos, rot, scal] = ent.add_component<transform>();
+        //    pos = math::vec3(0.f, 8.f, 4.f);
+        //    rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
+        //    scal = math::vec3(3.f);
+        //    ent.add_component(gfx::mesh_renderer(material, model));
+        //}
 
         material = gfx::MaterialCache::create_material("default", fs::view("assets://shaders/pbr.shs"));
 
@@ -282,15 +286,15 @@ public:
         material.set_param(SV_EMISSIVE, rendering::TextureCache::create_texture(fs::view("engine://resources/default/emissive")));
         material.set_param(SV_HEIGHTSCALE, 1.f);
 
-        {
-            auto ent = createEntity(material.get_name());
-            ent.add_component<example_comp>();
-            auto [pos, rot, scal] = ent.add_component<transform>();
-            pos = math::vec3(0.f, 8.f, 8.f);
-            rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
-            scal = math::vec3(3.f);
-            ent.add_component(gfx::mesh_renderer(material, model));
-        }
+        //{
+        //    auto ent = createEntity(material.get_name());
+        //    ent.add_component<example_comp>();
+        //    auto [pos, rot, scal] = ent.add_component<transform>();
+        //    pos = math::vec3(0.f, 8.f, 8.f);
+        //    rot = math::angleAxis(math::half_pi<float>(), math::vec3::up);
+        //    scal = math::vec3(3.f);
+        //    ent.add_component(gfx::mesh_renderer(material, model));
+        //}
 
         bindToEvent<events::exit, &ExampleSystem::onExit>();
     }
@@ -298,6 +302,23 @@ public:
     void shutdown()
     {
         lgn::log::debug("ExampleSystem shutdown");
+    }
+
+    void debugSkeleton(legion::joint& parentJoint, legion::model_handle& _model, legion::material_handle& mat)
+    {
+        using namespace legion;
+        auto ent = createEntity(parentJoint.name);
+        position& pos = ent.add_component<position>();
+        rotation& rot = ent.add_component<rotation>();
+        scale& scal = ent.add_component<scale>();
+        math::decompose(math::inverse(parentJoint.invBindTransform), scal, rot, pos);
+        pos *= math::vec3(5.f);
+        scal = math::vec3(.1f);
+        ent.add_component(gfx::mesh_renderer(mat, _model));
+        for (joint& j : parentJoint.children)
+        {
+            debugSkeleton(j, _model, mat);
+        }
     }
 
     void onShaderReload(reload_shaders_action& event)
