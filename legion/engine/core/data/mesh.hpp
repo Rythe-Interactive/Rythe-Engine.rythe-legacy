@@ -73,6 +73,7 @@ namespace legion::core
         std::vector<material_data> materials;
         std::vector<math::mat4> invBindMats;
         joint rootJoint;
+        int idxOffset;
 
         winding_order windingOrder;
 

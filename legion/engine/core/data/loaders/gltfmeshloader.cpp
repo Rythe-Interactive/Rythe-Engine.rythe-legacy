@@ -591,7 +591,7 @@ namespace legion::core
 
             for (int idx : node.children)
             {
-                joint child = { model.nodes[idx].name, idx, meshData.invBindMats[idx] };
+                joint child = { model.nodes[idx].name, idx, meshData.invBindMats[idx - meshData.idxOffset] };
                 child.animatedTransform = detail::getGltfNodeTransform(model.nodes[idx]);
                 joint& childJoint = parentJoint.children.emplace_back(child);
                 auto result = detail::handleGltfJoint(meshData, childJoint, model, mesh, model.nodes[idx]/*, localTransf*/);
@@ -620,6 +620,7 @@ namespace legion::core
 
             if (node.skin >= 0 && skinIdx < model.skins.size())
             {
+                meshData.idxOffset = model.skins[node.skin].skeleton;
                 const size_type rootJointId = model.skins[skinIdx].joints[0];
                 const tinygltf::Node& rootNode = model.nodes[rootJointId];
                 //auto localTransf = transform * detail::getGltfNodeTransform(rootNode);

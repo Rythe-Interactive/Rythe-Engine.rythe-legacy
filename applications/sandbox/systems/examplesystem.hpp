@@ -51,7 +51,17 @@ public:
 
         auto rig = gfx::ModelCache::create_model("RiggedModel", fs::view("assets://models/RiggedFigure.gltf"));
         auto joint = rig.get_mesh()->rootJoint;
-        debugSkeleton(joint, model, material);
+        auto ent = debugSkeleton(joint, model, material);
+
+        //auto torso2 = joint.children[0];
+        //auto torso3 = torso2.children[0];
+        //position position1;
+        //position position2;
+        //rotation r;
+        //scale s;
+        //math::decompose(math::inverse(joint.invBindTransform), s, r, position1);
+        //math::decompose(math::inverse(torso2.invBindTransform), s, r, position2);
+        //debug::drawLine(position1, position2, math::colors::blue, 1.f, 10000.f);
 
 
         /*{
@@ -304,21 +314,30 @@ public:
         lgn::log::debug("ExampleSystem shutdown");
     }
 
-    void debugSkeleton(legion::joint& parentJoint, legion::model_handle& _model, legion::material_handle& mat)
+    legion::ecs::entity& debugSkeleton(legion::joint& parentJoint, legion::model_handle& _model, legion::material_handle& mat)
     {
         using namespace legion;
         auto ent = createEntity(parentJoint.name);
-        position& pos = ent.add_component<position>();
-        rotation& rot = ent.add_component<rotation>();
-        scale& scal = ent.add_component<scale>();
-        math::decompose(math::inverse(parentJoint.invBindTransform), scal, rot, pos);
-        pos *= math::vec3(5.f);
-        scal = math::vec3(.1f);
+        ent.add_component<transform>();
+        position& pos = ent.get_component<position>();
+        rotation& rot = ent.get_component<rotation>();
+        scale& scal = ent.get_component<scale>();
         ent.add_component(gfx::mesh_renderer(mat, _model));
+        math::decompose(math::inverse(parentJoint.invBindTransform), scal, rot, pos);
+        scal = math::vec3(.05f);
+
         for (joint& j : parentJoint.children)
         {
             debugSkeleton(j, _model, mat);
+            ////ent.add_child(c);
+            //position c_pos;
+            //rotation c_rot;
+            //scale c_scal;
+
+            //math::decompose(math::inverse(j.invBindTransform), c_scal, c_rot, c_pos);
+            //debug::drawLine(pos, c_pos, math::colors::blue, 1.0f, 10000.f);
         }
+        return ent;
     }
 
     void onShaderReload(reload_shaders_action& event)
@@ -552,75 +571,6 @@ public:
             firstFrame = false;
         }
 
-        {
-            ecs::filter<rotation, example_comp> filter;
-            for (auto& ent : filter)
-            {
-                ent.get_component<rotation>().get() *= math::angleAxis(math::two_pi<float>() * 0.1f * deltaTime, math::vec3::up);
-            }
-        }
-
-        ecs::filter<position, velocity, example_comp> filter;
-
-        float dt = deltaTime;
-        if (dt > 0.07f)
-            return;
-
-        if (filter.size())
-        {
-            auto poolSize = (schd::Scheduler::jobPoolSize() + 1);
-            size_type jobSize = math::iround(math::ceil(filter.size() / static_cast<float>(poolSize)));
-
-            queueJobs(poolSize, [&](id_type jobId)
-                {
-                    auto start = jobId * jobSize;
-                    auto end = start + jobSize;
-                    if (end > filter.size())
-                        end = filter.size();
-
-                    for (size_type i = start; i < end; i++)
-                    {
-                        auto& pos = filter[i].get_component<position>().get();
-                        auto& vel = filter[i].get_component<velocity>().get();
-
-                        if (vel == math::vec3::zero)
-                            vel = math::normalize(pos);
-
-                        math::vec3 perp;
-
-                        perp = math::normalize(math::cross(vel, math::vec3::up));
-
-                        math::vec3 rotated = (math::axisAngleMatrix(vel, math::perlin(pos) * math::pi<float>()) * math::vec4(perp.x, perp.y, perp.z, 0)).xyz();
-                        rotated.y -= 0.5f;
-                        rotated = math::normalize(rotated);
-
-                        vel = math::normalize(vel + rotated * dt);
-
-                        if (math::abs(vel.y) >= 0.9f)
-                        {
-                            auto rand = math::circularRand(1.f);
-                            vel.y = 0.9f;
-                            vel = math::normalize(vel + math::vec3(rand.x, 0.f, rand.y));
-                        }
-
-                        pos += vel * 0.3f * dt;
-                    }
-                }
-            ).wait();
-        }
-
-        time64 delta = schd::Clock::lastTickDuration();
-
-        if (frames < times.size())
-        {
-            times[frames] = delta;
-            frames++;
-            totalTime += delta;
-        }
-        else
-        {
-
-            //raiseEvent<events::exit>();
-        }
+        auto rig = gfx::ModelCache::get_mesh("RiggedModel")->rootJoint;
     }
 };
