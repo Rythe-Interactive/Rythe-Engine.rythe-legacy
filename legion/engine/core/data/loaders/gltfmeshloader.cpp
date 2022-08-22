@@ -588,10 +588,12 @@ namespace legion::core
         {
             std::vector<std::string> warnings;
             //auto localTransf = parentTransform * detail::getGltfNodeTransform(node);
-
+            auto joints = model.skins[0].joints;
             for (int idx : node.children)
             {
-                joint child = { model.nodes[idx].name, idx, meshData.invBindMats[idx - meshData.idxOffset] };
+                auto itr = std::find(joints.begin(), joints.end(), idx);
+                int matIdx = itr - joints.begin();
+                joint child = { model.nodes[idx].name, idx, meshData.invBindMats[matIdx]};
                 child.animatedTransform = detail::getGltfNodeTransform(model.nodes[idx]);
                 joint& childJoint = parentJoint.children.emplace_back(child);
                 auto result = detail::handleGltfJoint(meshData, childJoint, model, mesh, model.nodes[idx]/*, localTransf*/);

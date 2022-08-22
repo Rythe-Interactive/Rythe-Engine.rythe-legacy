@@ -324,18 +324,19 @@ public:
         scale& scal = ent.get_component<scale>();
         ent.add_component(gfx::mesh_renderer(mat, _model));
         math::decompose(math::inverse(parentJoint.invBindTransform), scal, rot, pos);
+        //pos *= math::vec3(5.f);
         scal = math::vec3(.05f);
 
         for (joint& j : parentJoint.children)
         {
             debugSkeleton(j, _model, mat);
             ////ent.add_child(c);
-            //position c_pos;
-            //rotation c_rot;
-            //scale c_scal;
-
-            //math::decompose(math::inverse(j.invBindTransform), c_scal, c_rot, c_pos);
-            //debug::drawLine(pos, c_pos, math::colors::blue, 1.0f, 10000.f);
+            position c_pos;
+            rotation c_rot;
+            scale c_scal;
+            math::decompose(math::inverse(j.invBindTransform), c_scal, c_rot, c_pos);
+            //c_pos *= math::vec3(5.f);
+            debug::drawLine(pos, c_pos, math::colors::blue, 1.0f, 10000.f);
         }
         return ent;
     }
