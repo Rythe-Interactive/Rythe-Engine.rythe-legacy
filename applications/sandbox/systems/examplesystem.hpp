@@ -51,7 +51,13 @@ public:
 
         auto rig = gfx::ModelCache::create_model("RiggedModel", fs::view("assets://models/RiggedFigure.gltf"));
         auto joint = rig.get_mesh()->rootJoint;
-        auto ent = debugSkeleton(joint, model, material);
+        auto ent = debugSkeleton(joint, model, material, math::vec3(0.f), math::deg2rad(-90.f));
+
+        rig = gfx::ModelCache::create_model("RiggedModel2", fs::view("assets://models/RiggedFigureBlender.gltf"));
+        joint = rig.get_mesh()->rootJoint;
+        ent = debugSkeleton(joint, model, material, math::vec3(2.f, 0.f, 0.f), math::deg2rad(-90.f));
+        //scale& scal = ent.get_component<scale>();
+        //scal = math::vec3(.05f);
 
         //auto torso2 = joint.children[0];
         //auto torso3 = torso2.children[0];
@@ -314,27 +320,31 @@ public:
         lgn::log::debug("ExampleSystem shutdown");
     }
 
-    legion::ecs::entity& debugSkeleton(legion::joint& parentJoint, legion::model_handle& _model, legion::material_handle& mat)
+    legion::ecs::entity& debugSkeleton(legion::joint& parentJoint, legion::model_handle& _model, legion::material_handle& mat, legion::math::vec3 offset = legion::math::vec3(0.f), float angle = 0.f)
     {
         using namespace legion;
         auto ent = createEntity(parentJoint.name);
-        ent.add_component<transform>();
+        transform transf = ent.add_component<transform>();
         position& pos = ent.get_component<position>();
         rotation& rot = ent.get_component<rotation>();
         scale& scal = ent.get_component<scale>();
         ent.add_component(gfx::mesh_renderer(mat, _model));
-        math::decompose(math::inverse(parentJoint.invBindTransform), scal, rot, pos);
+        math::decompose(/*transf.to_world_matrix() * */math::inverse(parentJoint.invBindTransform), scal, rot, pos);
+        pos += offset;
+        pos = math::rotateX(pos, angle);
         //pos *= math::vec3(5.f);
         scal = math::vec3(.05f);
 
         for (joint& j : parentJoint.children)
         {
-            debugSkeleton(j, _model, mat);
-            ////ent.add_child(c);
+            auto c = debugSkeleton(j, _model, mat, offset, angle);
+            /*    ent.add_child(c);*/
             position c_pos;
             rotation c_rot;
             scale c_scal;
             math::decompose(math::inverse(j.invBindTransform), c_scal, c_rot, c_pos);
+            c_pos += offset;
+            c_pos = math::rotateX(c_pos, angle);
             //c_pos *= math::vec3(5.f);
             debug::drawLine(pos, c_pos, math::colors::blue, 1.0f, 10000.f);
         }

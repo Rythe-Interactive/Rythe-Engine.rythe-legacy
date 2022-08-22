@@ -625,7 +625,7 @@ namespace legion::core
                 meshData.idxOffset = model.skins[node.skin].skeleton;
                 const size_type rootJointId = model.skins[skinIdx].joints[0];
                 const tinygltf::Node& rootNode = model.nodes[rootJointId];
-                //auto localTransf = transform * detail::getGltfNodeTransform(rootNode);
+
                 detail::handleGltfBuffer(model, model.accessors[model.skins[skinIdx].inverseBindMatrices], meshData.invBindMats);
 
                 meshData.rootJoint = { rootNode.name,rootJointId,meshData.invBindMats[rootJointId] };
@@ -633,9 +633,6 @@ namespace legion::core
 
                 auto result = detail::handleGltfJoint(meshData, meshData.rootJoint, model, model.meshes[meshIdx], rootNode/*, localTransf*/);
                 warnings.insert(warnings.end(), result.warnings().begin(), result.warnings().end());
-
-                //auto result = handleGltfSkeleton(meshData, model, model.skins[node.skin], model.meshes[meshIdx]/*, transf*/);
-                //warnings.insert(warnings.end(), result.warnings().begin(), result.warnings().end());
             }
 
             for (auto& nodeIdx : node.children)
