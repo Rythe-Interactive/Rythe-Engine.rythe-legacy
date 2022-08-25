@@ -166,7 +166,7 @@ public:
 
                         perp = math::normalize(math::cross(vel, math::float3::up));
 
-                        math::float3 rotated = (math::axisAngleMatrix(vel, math::perlin(pos) * math::pi<float>()) * math::float4(perp.x, perp.y, perp.z, 0)).xyz();
+                        math::float3 rotated = (math::axisAngleMatrix(vel, math::perlin(pos) * math::pi()) * math::float4(perp.x, perp.y, perp.z, 0)).xyz();
                         rotated.y -= 0.5f;
                         rotated = math::normalize(rotated);
 
@@ -174,7 +174,7 @@ public:
 
                         if (math::abs(vel.y) >= 0.9f)
                         {
-                            auto rand = math::circularRand(1.f);
+                            auto rand = math::circular_rand(1.f);
                             vel.y = 0.9f;
                             vel = math::normalize(vel + math::float3(rand.x, 0.f, rand.y));
                         }

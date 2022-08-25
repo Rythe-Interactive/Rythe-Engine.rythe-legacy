@@ -55,7 +55,7 @@ namespace legion::core::math
         };
     }
 
-    template<typename vec_type, typename Scalar, ::std::enable_if_t<is_vector_v<vec_type>&& vec_type::size != 1, bool>>
+    template<typename vec_type, typename Scalar, ::std::enable_if_t<is_vector_v<vec_type>&& vec_type::size != 1 && !is_vector_v<Scalar>, bool>>
     L_NODISCARD vec_type linear_rand(Scalar min, Scalar max) noexcept
     {
         return detail::compute_linear_rand<vec_type>::compute(static_cast<typename vec_type::scalar>(min), static_cast<typename vec_type::scalar>(max));
@@ -65,6 +65,7 @@ namespace legion::core::math
     L_NODISCARD auto linear_rand(const vec_type0& min, const vec_type1& max) noexcept
     {
         using scalar = lowest_precision_t<typename vec_type0::scalar, typename vec_type1::scalar>;
-        return detail::compute_linear_rand<vector<scalar, vec_type0::size>>::compute(min, max);
+        constexpr size_type size = math::min(vec_type0::size, vec_type1::size);
+        return detail::compute_linear_rand<vector<scalar, size>>::compute(min, max);
     }
 }

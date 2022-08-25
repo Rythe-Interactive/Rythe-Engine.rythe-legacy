@@ -1,5 +1,6 @@
 #pragma once
 #include <core/math/random/linear_rand.hpp>
+#include <core/math/constants.hpp>
 
 namespace legion::core::math
 {

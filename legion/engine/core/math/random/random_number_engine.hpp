@@ -33,7 +33,7 @@ namespace legion::core::math
 
     class rythe_default_engine : public random_number_engine_base
     {
-        static thread_local std::mt19937_64 engine;
+        static thread_local uint64 m_seed;
 
     public:
         virtual void seed(size_type seed) noexcept override;

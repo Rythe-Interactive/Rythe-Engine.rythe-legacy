@@ -8,8 +8,8 @@ namespace legion::core::math
     {
         static_assert(::std::is_arithmetic_v<Scalar>, "Input scalar type to spherical_rand is neither a scalar nor any other supported type.");
 
-        Scalar theta = linear_rand(Scalar(0), Scalar(6.283185307179586476925286766559f));
-        Scalar z = linear_rand(Scalar(-1.0f), Scalar(1.0f));
+        Scalar theta = linear_rand(static_cast<Scalar>(0), tau<Scalar>());
+        Scalar z = linear_rand(static_cast<Scalar>(-1), static_cast<Scalar>(1));
         Scalar phi = acos(z);
         Scalar x = sin(phi) * cos(theta);
         Scalar y = sin(phi) * sin(theta);
@@ -22,8 +22,8 @@ namespace legion::core::math
     {
         using Scalar = typename vec_type::scalar;
 
-        Scalar theta = linear_rand(Scalar(0), Scalar(6.283185307179586476925286766559f));
-        Scalar z = linear_rand(Scalar(-1.0f), Scalar(1.0f));
+        Scalar theta = linear_rand(static_cast<Scalar>(0), tau<Scalar>());
+        Scalar z = linear_rand(static_cast<Scalar>(-1), static_cast<Scalar>(1));
         Scalar phi = acos(z);
         Scalar x = sin(phi) * cos(theta);
         Scalar y = sin(phi) * sin(theta);
