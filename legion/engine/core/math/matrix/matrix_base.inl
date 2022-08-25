@@ -26,6 +26,22 @@ namespace legion::core::math
     }
 
     template<typename Scalar, size_type RowCount, size_type ColCount>
+    constexpr matrix<Scalar, RowCount, ColCount>::matrix(scalar s, uniform_matrix_signal) noexcept
+    {
+        for (size_type i = 0; i < row_count; i++)
+            for (size_type j = 0; j < col_count; j++)
+                rows[i][j] = s;
+    }
+
+    template<typename Scalar, size_type RowCount, size_type ColCount>
+    constexpr matrix<Scalar, RowCount, ColCount>::matrix(scalar s, identity_matrix_signal) noexcept
+    {
+        for (size_type i = 0; i < row_count; i++)
+            for (size_type j = 0; j < col_count; j++)
+                rows[i][j] = i == j ? s : static_cast<scalar>(0);
+    }
+
+    template<typename Scalar, size_type RowCount, size_type ColCount>
     template<typename Scal, ::std::enable_if_t<!::std::is_same_v<Scalar, Scal>, bool>>
     constexpr matrix<Scalar, RowCount, ColCount>::matrix(const matrix<Scal, row_count, col_count>& other) noexcept
     {

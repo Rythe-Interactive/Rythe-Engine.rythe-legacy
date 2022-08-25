@@ -199,6 +199,60 @@ namespace legion::core::math
 
     namespace detail
     {
+        template<typename T, size_type v>
+        struct _uniform_value_impl_;
+
+        template<typename Scalar, size_type Size, size_type v>
+        struct _uniform_value_impl_<vector<Scalar, Size>, v>
+        {
+            constexpr static auto value = vector<Scalar, Size>(static_cast<Scalar>(v));
+        };
+
+        template<typename Scalar, size_type Size, size_type... args, size_type v>
+        struct _uniform_value_impl_<swizzle<Scalar, Size, args...>, v>
+        {
+            constexpr static auto value = vector<Scalar, Size>(static_cast<Scalar>(v));
+        };
+
+        template<typename Scalar, size_type v>
+        struct _uniform_value_impl_<aligned_vector3<Scalar>, v>
+        {
+            constexpr static auto value = aligned_vector3<Scalar>(static_cast<Scalar>(v));
+        };
+
+        template<typename Scalar, size_type RowCount, size_type ColCount, size_type ColIdx, size_type v>
+        struct _uniform_value_impl_<column<Scalar, RowCount, ColCount, ColIdx>, v>
+        {
+            constexpr static auto value = vector<Scalar, RowCount>(static_cast<Scalar>(v));
+        };
+
+        template<typename Scalar, size_type v>
+        struct _uniform_value_impl_<quaternion<Scalar>, v>
+        {
+            constexpr static auto value = quaternion<Scalar>(static_cast<Scalar>(v), static_cast<Scalar>(v), static_cast<Scalar>(v), static_cast<Scalar>(v));
+        };
+
+        template<typename Scalar, size_type RowCount, size_type ColCount, size_type v>
+        struct _uniform_value_impl_<matrix<Scalar, RowCount, ColCount>, v>
+        {
+            constexpr static auto value = matrix<Scalar, RowCount, ColCount>(static_cast<Scalar>(v), uniform_matrix_signal{});
+        };
+    }
+
+    template<typename T, size_type v>
+    struct uniform_value : detail::_uniform_value_impl_<remove_cvr_t<T>, v> {};
+
+    template<typename T>
+    constexpr auto zero = uniform_value<T, 0>::value;
+
+    template<typename T>
+    constexpr auto one = uniform_value<T, 1>::value;
+
+    template<typename T, size_type v>
+    constexpr auto uniform_value_v = uniform_value<T, v>::value;
+
+    namespace detail
+    {
         template<typename FPType>
         struct _epsilon_fp_impl
         {

@@ -210,6 +210,9 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="math\exponential\inverse_sqrt.hpp" />
     <ClInclude Include="math\geometric\inverse.hpp" />
     <ClInclude Include="math\geometric\normalize_dot.hpp" />
+    <ClInclude Include="math\interpolation\interpolation.hpp" />
+    <ClInclude Include="math\interpolation\lerp.hpp" />
+    <ClInclude Include="math\interpolation\map.hpp" />
     <ClInclude Include="math\logic\all.hpp" />
     <ClInclude Include="math\logic\any.hpp" />
     <ClInclude Include="math\logic\greater.hpp" />
@@ -404,6 +407,10 @@ del /q ".\xcopyexclude"</Command>
     <None Include="math\geometric\normalize.inl" />
     <None Include="math\geometric\normalize_quaternion.inl" />
     <None Include="math\geometric\normalize_vector.inl" />
+    <None Include="math\interpolation\lerp.inl" />
+    <None Include="math\interpolation\lerp_vector.inl" />
+    <None Include="math\interpolation\map.inl" />
+    <None Include="math\interpolation\map_vector.inl" />
     <None Include="math\matrix\adjoint.inl" />
     <None Include="math\matrix\decompose.inl" />
     <None Include="math\matrix\determinant.inl" />

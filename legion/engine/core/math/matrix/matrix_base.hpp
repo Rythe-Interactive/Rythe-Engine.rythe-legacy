@@ -7,6 +7,9 @@ namespace legion::core::math
 {
     struct matrix_base {};
 
+    struct uniform_matrix_signal {};
+    struct identity_matrix_signal {};
+
     template<typename Scalar, size_type RowCount, size_type ColCount>
     struct matrix : matrix_base
     {
@@ -31,6 +34,8 @@ namespace legion::core::math
 
         constexpr matrix(const matrix&) noexcept = default;
         explicit constexpr matrix(scalar s) noexcept;
+        explicit constexpr matrix(scalar s, uniform_matrix_signal) noexcept;
+        explicit constexpr matrix(scalar s, identity_matrix_signal) noexcept;
 
         template<typename Scal, ::std::enable_if_t<!::std::is_same_v<scalar, Scal>, bool> = true>
         constexpr explicit matrix(const matrix<Scal, row_count, col_count>&other) noexcept;

@@ -9,9 +9,9 @@ namespace legion::core::math
     constexpr vector<scalar, 1>::vector(scalar s) noexcept : x(s) {}
 
     template<typename scalar>
-    const vector<scalar, 1> one = vector<scalar, 1>(static_cast<scalar>(1));
+    const vector<scalar, 1> vector<scalar, 1>::one = vector<scalar, 1>(static_cast<scalar>(1));
     template<typename scalar>
-    const vector<scalar, 1> zero = vector<scalar, 1>(static_cast<scalar>(0));
+    const vector<scalar, 1> vector<scalar, 1>::zero = vector<scalar, 1>(static_cast<scalar>(0));
 
     template<typename scalar>
     constexpr vector<scalar, 1>::operator scalar() const noexcept { return x; }
