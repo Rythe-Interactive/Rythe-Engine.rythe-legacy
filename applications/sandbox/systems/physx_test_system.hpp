@@ -7,6 +7,15 @@ namespace lgn = legion;
 
 struct ShootPhysXBox : public lgn::app::input_action<ShootPhysXBox> {};
 struct ShootPhysXSphere : public lgn::app::input_action<ShootPhysXSphere> {};
+struct ShootFrictionAndForceCubes : public lgn::app::input_action<ShootFrictionAndForceCubes> {};
+
+struct MoveForward : public lgn::app::input_action<MoveForward> {};
+struct MoveBackward : public lgn::app::input_action<MoveBackward> {};
+
+struct MoveLeft : public lgn::app::input_action<MoveLeft> {};
+struct MoveRight: public lgn::app::input_action<MoveRight> {};
+
+struct CharacterJump : public lgn::app::input_action<CharacterJump> {};
 
 struct self_destruct_component
 {
@@ -30,13 +39,51 @@ namespace legion::physics
 
         void setupBoxAndStackTestScene();
 
+        void setupCharacterControllerTestScene();
+
         //------------------------ Rigidbody Shooter -------------------------------------------//
 
         void shootPhysXCubes(ShootPhysXBox& action);
 
         void shootPhysXSphere(ShootPhysXSphere& action);
 
+        void shootFrictionTest(ShootFrictionAndForceCubes& action);
+
         void getCameraPositionAndDirection(math::vec3& cameraDirection, math::vec3& cameraPosition);
+
+
+        //------------------------ Character Controls -------------------------------------------//
+
+        void MoveCharacter(const math::vec3& displacement);
+
+        void OnCharacterJump(CharacterJump& action);
+
+        enum move_dir : size_type
+        {
+            forward, backward, left, right,max
+        };
+
+        std::array<bool, move_dir::max> moveBools;
+
+        void onPressForward(MoveForward& action)
+        {
+            moveBools[move_dir::forward] = action.pressed();
+        }
+
+        void onPresBackward(MoveBackward& action)
+        {
+            moveBools[move_dir::backward] = action.pressed();
+        }
+
+        void onPressLeft(MoveLeft& action)
+        {
+            moveBools[move_dir::left] = action.pressed();
+        }
+
+        void onPressRight(MoveRight& action)
+        {
+            moveBools[move_dir::right] = action.pressed();
+        }
 
         //-------------------------- Scene Setup Helpers ---------------------------------------//
 
@@ -52,7 +99,7 @@ namespace legion::physics
 
         void suzzaneRainTick(legion::time::span deltaTime);
 
-        void createCubeStack(const math::vec3& extents, size_t stackSize, const math::vec3& startPos);
+        void createCubeStack(const math::vec3& extents, size_t stackSize, const math::vec3& startPos,int stopAfterStack = -1);
 
 
         //--------------------------- Rendering Variables ---------------------------------------//
@@ -87,5 +134,7 @@ namespace legion::physics
 
         ecs::entity inflatableBlock;
         ecs::entity inflatableSphere;
+        
+        ecs::entity m_characterControllerEnt;
     };
 }

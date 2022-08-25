@@ -27,10 +27,10 @@
     <ClCompile Include="systems\physx_test_system.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="renderstages\mousehover.cpp">
+    <ClCompile Include="systems\physics_debugging_system.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="systems\physics_debugging_system.cpp">
+    <ClCompile Include="renderstages\mousehover.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

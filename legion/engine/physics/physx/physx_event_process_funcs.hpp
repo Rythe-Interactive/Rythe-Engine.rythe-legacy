@@ -5,7 +5,6 @@
 #include <physics/components/physics_component.hpp>
 #include <physics/components/physics_enviroment.hpp>
 
-
 namespace physx
 {
     class PxScene;
@@ -13,8 +12,10 @@ namespace physx
 
 namespace legion::physics
 {
+    class capsule_controller;
     class rigidbody;
-
+    struct controller_preset;
+    
     //----------------------------------------------------------- Rigidbody -------------------------------------------------------------------------//
 
     void processAngularDragModification(rigidbody& rigidbody, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity);
@@ -52,4 +53,12 @@ namespace legion::physics
     //----------------------------------------------------------- Physics Enviroment -------------------------------------------------------------------------//
 
     void processAddInfinitePlane(physics_enviroment& physicsEnviroment, const PhysxEnviromentInfo& sceneInfo, PhysxInternalWrapper& wrapper, ecs::entity entity);
+
+    //----------------------------------------------------------- Capsule Controller -------------------------------------------------------------------------//
+
+    void processCapsuleMoveTo(PhysxCharacterWrapper& characterWrapper, capsule_controller& capsule);
+
+    //----------------------------------------------------------- Controller Preset -------------------------------------------------------------------------//
+
+    void processGravityPreset(controller_preset& contPreset, PhysxCharacterWrapper& character,const PhysxEnviromentInfo& sceneInfo);
 }

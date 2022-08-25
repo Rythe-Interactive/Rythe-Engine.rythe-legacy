@@ -4,10 +4,13 @@
 namespace physx
 {
     class PxActor;
+    class PxController;
 }
 
 namespace legion::physics
 {
+    class ControllerHitFeedback;
+
     enum class physics_body_type
     {
         none,
@@ -32,5 +35,22 @@ namespace legion::physics
         PhysxInternalWrapper& operator= (const PhysxInternalWrapper& other) = delete;
 
         PhysxInternalWrapper(const PhysxInternalWrapper& other) = delete;
+    };
+
+    struct PhysxCharacterWrapper
+    {
+        physx::PxController* characterController = nullptr;
+        std::unique_ptr<ControllerHitFeedback> controllerFeedback;
+
+        PhysxCharacterWrapper();
+        ~PhysxCharacterWrapper();
+
+        PhysxCharacterWrapper& operator= (PhysxCharacterWrapper& other) = delete;
+
+        PhysxCharacterWrapper(PhysxCharacterWrapper& other) = delete;
+
+        PhysxCharacterWrapper& operator= (PhysxCharacterWrapper&& other) noexcept;
+
+        PhysxCharacterWrapper(PhysxCharacterWrapper&& other) noexcept;
     };
 }
