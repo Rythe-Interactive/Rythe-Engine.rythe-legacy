@@ -213,6 +213,7 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="math\interpolation\interpolation.hpp" />
     <ClInclude Include="math\interpolation\lerp.hpp" />
     <ClInclude Include="math\interpolation\map.hpp" />
+    <ClInclude Include="math\interpolation\smoothstep.hpp" />
     <ClInclude Include="math\logic\all.hpp" />
     <ClInclude Include="math\logic\any.hpp" />
     <ClInclude Include="math\logic\greater.hpp" />
@@ -239,6 +240,8 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="math\matrix\column\column_base.hpp" />
     <ClInclude Include="math\random\circular_rand.hpp" />
     <ClInclude Include="math\random\spherical_rand.hpp" />
+    <ClInclude Include="math\trigonometric\cos.hpp" />
+    <ClInclude Include="math\trigonometric\sin.hpp" />
     <ClInclude Include="math\util\meta.hpp" />
     <ClInclude Include="math\quaternion\utils.inl" />
     <ClInclude Include="math\quaternion\quaternion.hpp" />
@@ -411,6 +414,8 @@ del /q ".\xcopyexclude"</Command>
     <None Include="math\interpolation\lerp_vector.inl" />
     <None Include="math\interpolation\map.inl" />
     <None Include="math\interpolation\map_vector.inl" />
+    <None Include="math\interpolation\smoothstep.inl" />
+    <None Include="math\interpolation\smoothstep_vector.inl" />
     <None Include="math\matrix\adjoint.inl" />
     <None Include="math\matrix\decompose.inl" />
     <None Include="math\matrix\determinant.inl" />
@@ -420,6 +425,12 @@ del /q ".\xcopyexclude"</Command>
     <None Include="math\random\linear_rand.inl" />
     <None Include="math\random\randomnumbergenerator.inl" />
     <None Include="math\random\spherical_rand.inl" />
+    <None Include="math\trigonometric\cos.inl" />
+    <None Include="math\trigonometric\cos_vector.inl" />
+    <None Include="math\trigonometric\sin.inl" />
+    <None Include="math\trigonometric\sin_vector.inl" />
+    <None Include="math\trigonometric\tan.inl" />
+    <None Include="math\trigonometric\tan_vector.inl" />
     <None Include="math\vector\swizzle\swizzle.inl" />
     <None Include="math\vector\vector1.inl" />
     <None Include="math\vector\vector3.inl" />

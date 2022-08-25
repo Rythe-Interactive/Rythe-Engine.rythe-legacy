@@ -10,13 +10,13 @@
 
 namespace legion::core::math
 {
-    // tan
+    // cos
     template<typename T>
-    L_NODISCARD L_ALWAYS_INLINE auto tan(T&& v) noexcept;
+    L_NODISCARD L_ALWAYS_INLINE auto cos(T&& v) noexcept;
 
-    // atan
+    // acos
     template<typename T>
-    L_NODISCARD L_ALWAYS_INLINE auto atan(T&& v) noexcept;
+    L_NODISCARD L_ALWAYS_INLINE auto acos(T&& v) noexcept;
 }
 
-#include <core/math/trigonometric/tan.inl>
+#include <core/math/trigonometric/cos.inl>

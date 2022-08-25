@@ -74,6 +74,15 @@ namespace legion::core::math
     namespace detail
     {
         template<typename T>
+        L_NODISCARD constexpr auto _extract_item_(T&& v, size_type i)
+        {
+            if constexpr (is_vector_v<T>)
+                return v[i];
+            else
+                return ::std::forward<T>(v);
+        }
+
+        template<typename T>
         auto _make_vector_impl()
         {
             if constexpr (is_vector_v<T>)

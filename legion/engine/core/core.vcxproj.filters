@@ -239,7 +239,10 @@
     <ClInclude Include="math\random\circular_rand.hpp" />
     <ClInclude Include="math\interpolation\interpolation.hpp" />
     <ClInclude Include="math\interpolation\lerp.hpp" />
+    <ClInclude Include="math\interpolation\smoothstep.hpp" />
     <ClInclude Include="math\interpolation\map.hpp" />
+    <ClInclude Include="math\trigonometric\sin.hpp" />
+    <ClInclude Include="math\trigonometric\cos.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="platform\cpp.hint" />
@@ -304,5 +307,13 @@
     <None Include="math\interpolation\lerp_vector.inl" />
     <None Include="math\interpolation\map.inl" />
     <None Include="math\interpolation\map_vector.inl" />
+    <None Include="math\interpolation\smoothstep.inl" />
+    <None Include="math\interpolation\smoothstep_vector.inl" />
+    <None Include="math\trigonometric\sin.inl" />
+    <None Include="math\trigonometric\sin_vector.inl" />
+    <None Include="math\trigonometric\tan.inl" />
+    <None Include="math\trigonometric\tan_vector.inl" />
+    <None Include="math\trigonometric\cos_vector.inl" />
+    <None Include="math\trigonometric\cos.inl" />
   </ItemGroup>
 </Project>

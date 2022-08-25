@@ -6,15 +6,6 @@ namespace legion::core::math::detail
     template<typename T>
     struct compute_map;
 
-    template<typename T>
-    L_NODISCARD constexpr auto _extract_item_(T&& v, size_type i)
-    {
-        if constexpr (is_vector_v<T>)
-            return v[i];
-        else
-            return ::std::forward<T>(v);
-    }
-
     template<typename Scalar, size_type Size>
     struct compute_map<vector<Scalar, Size>>
     {
