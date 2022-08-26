@@ -86,17 +86,27 @@ namespace legion::core::math
         auto _make_vector_impl()
         {
             if constexpr (is_vector_v<T>)
-            {
                 return vector<typename T::scalar, T::size>{};
+            else if constexpr (::std::is_arithmetic_v<T>)
+                return vector<T, 1>{};
+            else
+                return vector<void, 0>{};
+        }
+
+        template<typename T>
+        auto _decay_vector_impl()
+        {
+            if constexpr (is_vector_v<T>)
+            {
+                if constexpr (T::size == 1)
+                    return typename T::scalar{};
+                else
+                    return vector<typename T::scalar, T::size>{};
             }
             else if constexpr (::std::is_arithmetic_v<T>)
-            {
-                return vector<T, 1>{};
-            }
+                return T{};
             else
-            {
                 return vector<void, 0>{};
-            }
         }
     }
 
@@ -108,6 +118,24 @@ namespace legion::core::math
 
     template<typename T>
     using make_vector_t = typename make_vector<T>::type;
+
+    template<typename T>
+    struct is_vector_or_scalar
+    {
+        constexpr static bool value = !::std::is_same_v<void, typename make_vector_t<T>::scalar>;
+    };
+
+    template<typename T>
+    constexpr static bool is_vector_or_scalar_v = is_vector_or_scalar<T>::value;
+
+    template<typename T>
+    struct decay_vector
+    {
+        using type = remove_cvr_t<decltype(detail::_decay_vector_impl<remove_cvr_t<T>>())>;
+    };
+
+    template<typename T>
+    using decay_vector_t = typename decay_vector<T>::type;
 
     namespace detail
     {

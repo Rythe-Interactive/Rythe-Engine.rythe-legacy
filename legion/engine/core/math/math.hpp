@@ -8,7 +8,9 @@
 #include <core/math/basic/basic_funcs.hpp>
 #include <core/math/exponential/exponential.hpp>
 #include <core/math/geometric/geometric.hpp>
+#include <core/math/interpolation/interpolation.hpp>
 #include <core/math/logic/logic.hpp>
+#include <core/math/noise/noise.hpp>
 #include <core/math/random/random.hpp>
 #include <core/math/trigonometric/trigonometric.hpp>
 #include <core/math/util/util.hpp>
