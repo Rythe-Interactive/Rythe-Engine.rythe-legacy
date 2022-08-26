@@ -453,6 +453,7 @@
     <ClInclude Include="ecs\data\component_type.hpp" />
     <ClInclude Include="async\lock_guard.hpp" />
     <ClInclude Include="data\joint.hpp" />
+    <ClInclude Include="data\animation.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="platform\cpp.hint" />

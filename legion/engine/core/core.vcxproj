@@ -167,6 +167,7 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="containers\sparse_set.hpp" />
     <ClInclude Include="containers\vector_view.hpp" />
     <ClInclude Include="core.hpp" />
+    <ClInclude Include="data\animation.hpp" />
     <ClInclude Include="data\data.hpp" />
     <ClInclude Include="data\image.hpp" />
     <ClInclude Include="data\joint.hpp" />
