@@ -1,6 +1,7 @@
 #pragma once
 #include <core/assets/assets.hpp>
 #include <core/data/mesh.hpp>
+#include <core/data/animation.hpp>
 
 namespace legion::core
 {

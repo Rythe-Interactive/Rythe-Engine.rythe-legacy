@@ -3,6 +3,7 @@
 #include <core/math/math.hpp>
 #include <core/data/image.hpp>
 #include <core/data/joint.hpp>
+#include <core/data/animation.hpp>
 
 /**
  * @file mesh.hpp
@@ -73,6 +74,7 @@ namespace legion::core
         std::vector<material_data> materials;
         std::vector<math::mat4> invBindMats;
         joint rootJoint;
+        animation clip;
 
         winding_order windingOrder;
 

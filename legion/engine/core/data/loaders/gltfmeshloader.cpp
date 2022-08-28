@@ -868,6 +868,56 @@ namespace legion::core
             };
         }
 
+        animation& clip = meshData.clip;
+        if (model.animations.size() > 0)
+        {
+            auto anim = model.animations[0];
+            auto channelCount = anim.channels.size();
+            for (size_type idx = 0; idx < channelCount; idx++)
+            {
+                auto channel = anim.channels[idx];
+                int targetNode = channel.target_node;
+                auto path = channel.target_path;
+                auto sampler = anim.samplers[channel.sampler];
+                std::vector<float> times;
+                detail::handleGltfBuffer<float>(model, model.accessors[sampler.input], times);
+
+                clip.length = times.back() - times.front();
+
+                std::vector<math::vec3> translations;
+                std::vector<math::quat> rotations;
+                std::vector<math::vec3> scales;
+
+                if (path._Equal("translation"))
+                    detail::handleGltfBuffer<math::vec3>(model, model.accessors[sampler.output], translations);
+                else if (path._Equal("rotation"))
+                    detail::handleGltfBuffer<math::quat>(model, model.accessors[sampler.output], rotations);
+                else if (path._Equal("scale"))
+                    detail::handleGltfBuffer<math::vec3>(model, model.accessors[sampler.output], scales);
+                if (clip.frames.size() != times.size())
+                    clip.frames.resize(times.size());
+
+                for (float t : times)
+                {
+                    auto it = find(times.begin(), times.end(), t);
+                    auto timeIdx = it - times.begin();
+
+                    key_frame& frame = clip.frames[timeIdx];
+                    frame.timeStamp = t;
+                    if (frame.pose.count(targetNode) < 1)
+                        frame.pose.emplace(targetNode, joint_transform());
+                    joint_transform& transf = frame.pose[targetNode];
+
+                    if (path._Equal("translation"))
+                        transf.translation = translations[timeIdx];
+                    else if (path._Equal("rotation"))
+                        transf.rotation = rotations[timeIdx];
+                    else if (path._Equal("scale"))
+                        transf.scale = scales[timeIdx];
+                }
+            }
+        }
+
         for (auto& nodeIdx : model.scenes[sceneToLoad].nodes)
         {
             if (nodeIdx < 0)
