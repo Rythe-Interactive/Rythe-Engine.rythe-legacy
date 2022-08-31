@@ -42,6 +42,8 @@
     <ClCompile Include="data\loaders\gltfmeshloader.cpp" />
     <ClCompile Include="time\main_clock.cpp" />
     <ClCompile Include="defaults\coremodule.cpp" />
+    <ClCompile Include="data\joint.cpp" />
+    <ClCompile Include="animations\animationsystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="async\async.hpp" />
@@ -454,6 +456,7 @@
     <ClInclude Include="async\lock_guard.hpp" />
     <ClInclude Include="data\joint.hpp" />
     <ClInclude Include="data\animation.hpp" />
+    <ClInclude Include="animations\animationsystem.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="platform\cpp.hint" />

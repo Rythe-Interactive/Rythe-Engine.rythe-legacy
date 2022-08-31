@@ -124,6 +124,7 @@ del /q ".\xcopyexclude"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="animations\animationsystem.hpp" />
     <ClInclude Include="assets\asset.hpp" />
     <ClInclude Include="assets\assetloader.hpp" />
     <ClInclude Include="assets\assetcache.hpp" />
@@ -539,6 +540,7 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="types\type_util.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="animations\animationsystem.cpp" />
     <ClCompile Include="async\async_operation.cpp" />
     <ClCompile Include="async\job_pool.cpp" />
     <ClCompile Include="async\rw_spinlock.cpp" />
@@ -549,6 +551,7 @@ del /q ".\xcopyexclude"</Command>
     <ClCompile Include="compute\high_level\function.cpp" />
     <ClCompile Include="compute\kernel.cpp" />
     <ClCompile Include="data\image.cpp" />
+    <ClCompile Include="data\joint.cpp" />
     <ClCompile Include="data\loaders\gltfmeshloader.cpp" />
     <ClCompile Include="data\loaders\objmeshloader.cpp" />
     <ClCompile Include="data\loaders\stbimageloader.cpp" />

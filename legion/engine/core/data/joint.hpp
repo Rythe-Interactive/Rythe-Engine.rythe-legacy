@@ -17,16 +17,11 @@ namespace legion::core
         joint(std::string name, id_type id, math::mat4 invBindTransform, math::mat4 animatedTransform) : id(id), name(name), invBindTransform(invBindTransform), animatedTransform(animatedTransform) {}
         ~joint() = default;
 
-        void apply_pose(std::unordered_map<size_type, math::mat4> currentPose, math::mat4 parentTransf)
-        {
-            math::mat4 localTransf = currentPose[id];
-            math::mat4 transf = parentTransf * localTransf;
-            for (joint& j : children)
-            {
-                j.apply_pose(currentPose, transf);
-            }
-            transf = transf * invBindTransform;
-            animatedTransform = transf;
-        }
+        void apply_pose(std::unordered_map<size_type, math::mat4> currentPose, math::mat4 parentTransf);
+    };
+
+    struct skeleton
+    {
+        joint rootJoint;
     };
 }

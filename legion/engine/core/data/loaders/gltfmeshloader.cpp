@@ -868,7 +868,7 @@ namespace legion::core
             };
         }
 
-        animation& clip = meshData.clip;
+        animation_clip& clip = meshData.clip;
         if (model.animations.size() > 0)
         {
             auto anim = model.animations[0];

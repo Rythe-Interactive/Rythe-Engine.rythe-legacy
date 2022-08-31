@@ -306,7 +306,6 @@ public:
         lgn::log::debug("ExampleSystem shutdown");
     }
 
-
     void debug_skeleton(legion::core::joint& parentJoint, legion::core::math::vec3 offset = legion::core::math::vec3(0.f), float angle = 0.f, legion::core::math::color debugColor = legion::core::math::colors::blue)
     {
         using namespace legion;
@@ -562,7 +561,8 @@ public:
         }
 
         auto riggedMesh = gfx::ModelCache::get_mesh("RiggedModel");
-        auto& rig = riggedMesh->rootJoint;
+        auto& rig = riggedMesh->skeleton.rootJoint;
+        /*
         auto clip = riggedMesh->clip;
 
         static int frame = 0;
@@ -582,7 +582,7 @@ public:
         {
             currentPose.emplace(id, j_transf.pose_lerp(nextFrame.pose[id], progress));
         }
-        rig.apply_pose(currentPose, math::mat4(1.f));
-        debug_skeleton(rig, math::vec3(0.f));
+        rig.apply_pose(currentPose, math::mat4(1.f));*/
+        debug_skeleton(rig, math::vec3(0.f), math::deg2rad(-90.f));
     }
 };

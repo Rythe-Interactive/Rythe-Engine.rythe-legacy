@@ -1,6 +1,7 @@
 #pragma once
 #include <core/types/types.hpp>
 #include <core/math/math.hpp>
+#include <core/data/joint.hpp>
 
 namespace legion::core
 {
@@ -25,10 +26,23 @@ namespace legion::core
         std::unordered_map<size_type, joint_transform> pose;
     };
 
-    struct animation
+    struct animation_clip
     {
-        std::vector<key_frame> frames;
         float length;
+        std::vector<key_frame> frames;
+    };
+
+    struct animator
+    {
+    public:
+        animation_clip clip;
+        skeleton rig;
+        float animTime = 0.0f;
+        float progress = 0.0f;
+        float frame = 0;
+        key_frame previousFrame;
+        key_frame nextFrame;
+        std::unordered_map<size_type, math::mat4> currentPose;
     };
 
 }
