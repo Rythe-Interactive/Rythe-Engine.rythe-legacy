@@ -28,7 +28,7 @@ namespace legion::core::math::detail
     L_NODISCARD L_ALWAYS_INLINE auto _inverse_smoothstep_derivative_impl_(T&& v) noexcept
     {
         using scalar = remove_cvr_t<T>;
-        auto denom = static_cast<scalar>(3) / sqrt(-(v - 1) * v);
+        const auto denom = static_cast<scalar>(3) / sqrt(-(v - 1) * v);
         return cos(asin(static_cast<scalar>(2)*v-static_cast<scalar>(1))/static_cast<scalar>(3)) / denom;
     }
 }

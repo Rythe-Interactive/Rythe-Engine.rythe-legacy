@@ -14,22 +14,23 @@ namespace legion::core::math::detail
     L_NODISCARD L_ALWAYS_INLINE constexpr auto _quintic_derivative_impl_(T&& v) noexcept
     {
         using scalar = remove_cvr_t<T>;
-        return static_cast<scalar>(30) * v * v * (v * (v - static_cast<scalar>(2)) + static_cast<scalar>(1));
+        const auto sqr = v - static_cast<scalar>(1);
+        return static_cast<scalar>(30) * sqr * sqr * v * v;
     }
 
     template<typename T>
     L_NODISCARD L_ALWAYS_INLINE auto _inverse_quintic_impl_(T&& v) noexcept
     {
         using scalar = remove_cvr_t<T>;
-        return static_cast<scalar>(0.5) - sin(asin(static_cast<scalar>(1) - static_cast<scalar>(2) * v) / static_cast<scalar>(3));
+        //return static_cast<scalar>(0.5) - sin(asin(static_cast<scalar>(1) - static_cast<scalar>(2) * v) / static_cast<scalar>(3));
     }
 
     template<typename T>
     L_NODISCARD L_ALWAYS_INLINE auto _inverse_quintic_derivative_impl_(T&& v) noexcept
     {
         using scalar = remove_cvr_t<T>;
-        auto denom = static_cast<scalar>(3) / sqrt(-(v - 1) * v);
-        return cos(asin(static_cast<scalar>(2)*v-static_cast<scalar>(1))/static_cast<scalar>(3)) / denom;
+        //auto denom = static_cast<scalar>(3) / sqrt(-(v - 1) * v);
+        //return cos(asin(static_cast<scalar>(2)*v-static_cast<scalar>(1))/static_cast<scalar>(3)) / denom;
     }
 }
 
