@@ -213,6 +213,7 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="math\interpolation\interpolation.hpp" />
     <ClInclude Include="math\interpolation\lerp.hpp" />
     <ClInclude Include="math\interpolation\map.hpp" />
+    <ClInclude Include="math\interpolation\quintic.hpp" />
     <ClInclude Include="math\interpolation\smoothstep.hpp" />
     <ClInclude Include="math\logic\all.hpp" />
     <ClInclude Include="math\logic\any.hpp" />
@@ -416,6 +417,8 @@ del /q ".\xcopyexclude"</Command>
     <None Include="math\interpolation\lerp_vector.inl" />
     <None Include="math\interpolation\map.inl" />
     <None Include="math\interpolation\map_vector.inl" />
+    <None Include="math\interpolation\quintic.inl" />
+    <None Include="math\interpolation\quintic_vector.inl" />
     <None Include="math\interpolation\smoothstep.inl" />
     <None Include="math\interpolation\smoothstep_vector.inl" />
     <None Include="math\matrix\adjoint.inl" />

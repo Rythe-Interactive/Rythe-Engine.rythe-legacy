@@ -243,6 +243,7 @@
     <ClInclude Include="math\interpolation\map.hpp" />
     <ClInclude Include="math\trigonometric\sin.hpp" />
     <ClInclude Include="math\trigonometric\cos.hpp" />
+    <ClInclude Include="math\interpolation\quintic.hpp" />
     <ClInclude Include="math\noise\noise.hpp" />
     <ClInclude Include="math\noise\perlin.hpp" />
   </ItemGroup>
@@ -317,6 +318,8 @@
     <None Include="math\trigonometric\tan_vector.inl" />
     <None Include="math\trigonometric\cos_vector.inl" />
     <None Include="math\trigonometric\cos.inl" />
+    <None Include="math\interpolation\quintic_vector.inl" />
+    <None Include="math\interpolation\quintic.inl" />
     <None Include="math\noise\perlin.inl" />
   </ItemGroup>
 </Project>
