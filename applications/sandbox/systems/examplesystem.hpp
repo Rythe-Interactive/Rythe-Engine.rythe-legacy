@@ -15,6 +15,7 @@ struct example_comp
 struct tonemap_action : public lgn::app::input_action<tonemap_action> {};
 struct reload_shaders_action : public lgn::app::input_action<reload_shaders_action> {};
 struct switch_skybox_action : public lgn::app::input_action<switch_skybox_action> {};
+struct toggle_anim_action : public lgn::app::input_action<toggle_anim_action> {};
 
 class ExampleSystem final : public legion::System<ExampleSystem>
 {
@@ -22,6 +23,7 @@ class ExampleSystem final : public legion::System<ExampleSystem>
     lgn::time64 totalTime = 0;
     lgn::time::stopwatch<lgn::time64> timer;
     std::array<lgn::time64, 18000> times;
+    bool toggle_anim = false;
 
 public:
     void setup()
@@ -33,9 +35,12 @@ public:
         app::InputSystem::createBinding<tonemap_action>(app::inputmap::method::F2);
         app::InputSystem::createBinding<reload_shaders_action>(app::inputmap::method::F3);
         app::InputSystem::createBinding<switch_skybox_action>(app::inputmap::method::F4);
+        app::InputSystem::createBinding<toggle_anim_action>(app::inputmap::method::F8);
+
         bindToEvent<tonemap_action, &ExampleSystem::onTonemapSwitch>();
         bindToEvent<reload_shaders_action, &ExampleSystem::onShaderReload>();
         bindToEvent<switch_skybox_action, &ExampleSystem::onSkyboxSwitch>();
+        bindToEvent<toggle_anim_action, &ExampleSystem::onToggleAnim>();
 
         auto* pipeline = dynamic_cast<gfx::DefaultPipeline*>(gfx::Renderer::getMainPipeline());
         if (pipeline)
@@ -49,7 +54,14 @@ public:
 
         auto model = gfx::ModelCache::create_model("Sphere", fs::view("assets://models/sphere.obj"));
 
-        gfx::ModelCache::create_model("RiggedModel", fs::view("assets://models/RiggedFigure.gltf"));
+        auto riggedMesh = gfx::ModelCache::create_model("RiggedModel", fs::view("assets://models/BrainStem.gltf"));
+
+        //{
+        //    auto ent = createEntity("Rigged Model");
+        //    ent.add_component<transform>();
+        //    ent.add_component(gfx::mesh_renderer(material, riggedMesh));
+        //    //ent.add_component<animator>();
+        //}
 
         //rig = gfx::ModelCache::create_model("RiggedModel2", fs::view("assets://models/RiggedFigureBlender.gltf"));
         //joint = rig.get_mesh()->rootJoint;
@@ -306,25 +318,20 @@ public:
         lgn::log::debug("ExampleSystem shutdown");
     }
 
-    void debug_skeleton(legion::core::joint& parentJoint, legion::core::math::vec3 offset = legion::core::math::vec3(0.f), float angle = 0.f, legion::core::math::color debugColor = legion::core::math::colors::blue)
+    void debug_skeleton(legion::core::joint& parentJoint, legion::core::math::color debugColor = legion::core::math::colors::blue)
     {
         using namespace legion;
         math::vec3 pos;
         math::quat rot;
         math::vec3 scal;
         math::decompose(parentJoint.animatedTransform, scal, rot, pos);
-        pos += offset;
-        pos = math::rotateX(pos, angle);
-        scal = math::vec3(.05f);
         for (joint& j : parentJoint.children)
         {
-            debug_skeleton(j, offset, angle, debugColor);
+            debug_skeleton(j, debugColor);
             math::vec3 c_pos;
             math::quat c_rot;
             math::vec3 c_scal;
             math::decompose(j.animatedTransform, c_scal, c_rot, c_pos);
-            c_pos += offset;
-            c_pos = math::rotateX(c_pos, angle);
             debug::drawLine(pos, c_pos, debugColor, 1.0f);
         }
     }
@@ -442,6 +449,15 @@ public:
         }
     }
 
+    void onToggleAnim(toggle_anim_action& event)
+    {
+        using namespace legion;
+        if (event.pressed())
+        {
+            toggle_anim = !toggle_anim;
+        }
+    }
+
     void onExit(L_MAYBEUNUSED lgn::events::exit& event)
     {
         using namespace legion;
@@ -551,8 +567,6 @@ public:
                     debug::drawLine((worldMat * math::vec4(edge.first.x, edge.first.y, edge.first.z, 1.f)).xyz(), (worldMat * math::vec4(edge.second.x, edge.second.y, edge.second.z, 1.f)).xyz(), math::colors::green);
             }
         }
-
-
         static bool firstFrame = true;
         if (firstFrame)
         {
@@ -562,27 +576,43 @@ public:
 
         auto riggedMesh = gfx::ModelCache::get_mesh("RiggedModel");
         auto& rig = riggedMesh->skeleton.rootJoint;
-        /*
+
+        //if (GuiTestSystem::selected != invalid_id)
+        //{
+            //auto ent = GuiTestSystem::selected;
         auto clip = riggedMesh->clip;
+        //transform transf = ent.get_component<transform>();
 
         static int frame = 0;
+
         static float animTime = 0.0f;
-        animTime += .02f;
-        float length = clip.length;
-
-        if (animTime > length)
-            animTime = 0;
-
-        auto previousFrame = clip.frames[frame];
-        auto nextFrame = clip.frames[frame == clip.frames.size() - 1 ? 0 : frame + 1];
-
-        float progress = (animTime - previousFrame.timeStamp) / (nextFrame.timeStamp - previousFrame.timeStamp);
-        std::unordered_map<size_type, math::mat4> currentPose;
-        for (auto& [id, j_transf] : previousFrame.pose)
+        if (toggle_anim)
         {
-            currentPose.emplace(id, j_transf.pose_lerp(nextFrame.pose[id], progress));
+            animTime += deltaTime/2.f;
+            float length = clip.length;
+
+            auto previousFrame = clip.frames[frame];
+            if (frame == clip.frames.size() - 1)
+            {
+                frame = -1;
+                animTime = 0;
+                toggle_anim = false;
+            }
+            auto nextFrame = clip.frames[frame + 1];
+
+            float progress = (animTime - previousFrame.timeStamp) / (nextFrame.timeStamp - previousFrame.timeStamp);
+            std::unordered_map<size_type, math::mat4> currentPose;
+            for (auto& [id, j_transf] : previousFrame.pose)
+            {
+                currentPose.emplace(id, j_transf.pose_lerp(nextFrame.pose[id], progress));
+            }
+
+            if (progress >= 1)
+                frame++;
+
+            rig.apply_pose(currentPose, rig.localBindTransform);
         }
-        rig.apply_pose(currentPose, math::mat4(1.f));*/
-        debug_skeleton(rig, math::vec3(0.f), math::deg2rad(-90.f));
+        //}
+        debug_skeleton(rig);
     }
 };

@@ -30,13 +30,14 @@ namespace legion::core
     {
         float length;
         std::vector<key_frame> frames;
+        math::mat4 rootMat;
     };
 
     struct animator
     {
     public:
         animation_clip clip;
-        skeleton rig;
+
         float animTime = 0.0f;
         float progress = 0.0f;
         float frame = 0;

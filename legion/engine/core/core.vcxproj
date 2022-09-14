@@ -172,6 +172,7 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="data\data.hpp" />
     <ClInclude Include="data\image.hpp" />
     <ClInclude Include="data\joint.hpp" />
+    <ClInclude Include="data\loaders\gltfanimationloader.hpp" />
     <ClInclude Include="data\loaders\gltfmeshloader.hpp" />
     <ClInclude Include="data\loaders\objmeshloader.hpp" />
     <ClInclude Include="data\loaders\stbimageloader.hpp" />

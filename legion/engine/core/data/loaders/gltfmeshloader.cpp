@@ -590,13 +590,17 @@ namespace legion::core
             auto joints = model.skins[0].joints;
             for (int idx : node.children)
             {
-                auto itr = std::find(joints.begin(), joints.end(), idx);
-                int matIdx = itr - joints.begin();
                 auto localTransf = detail::getGltfNodeTransform(model.nodes[idx]);
                 auto jointTransf = parentTransf * localTransf;
-                joint child = { model.nodes[idx].name, idx, meshData.invBindMats[matIdx], jointTransf };
+                auto node = model.nodes[idx];
+                joint child;
+                child.name = node.name;
+                child.id = idx;
+                child.localBindTransform = localTransf;
+                child.animatedTransform = jointTransf;
                 joint& childJoint = parentJoint.children.emplace_back(child);
-                auto result = detail::handleGltfJoint(meshData, childJoint, model, mesh, model.nodes[idx], jointTransf);
+
+                auto result = detail::handleGltfJoint(meshData, childJoint, model, mesh, node, jointTransf);
                 warnings.insert(warnings.end(), result.warnings().begin(), result.warnings().end());
             }
 
@@ -625,12 +629,15 @@ namespace legion::core
                 const size_type rootJointId = model.skins[skinIdx].joints[0];
                 const tinygltf::Node& rootNode = model.nodes[rootJointId];
 
-                detail::handleGltfBuffer(model, model.accessors[model.skins[skinIdx].inverseBindMatrices], meshData.invBindMats);
+                math::mat4 rootMat = transf * detail::getGltfNodeTransform(rootNode);
+                auto& rootJoint = meshData.skeleton.rootJoint;
+                rootJoint.name = rootNode.name;
+                rootJoint.id = rootJointId;
+                rootJoint.localBindTransform = rootMat;
+                rootJoint.animatedTransform = rootMat;
 
-                meshData.rootJoint = { rootNode.name, rootJointId, meshData.invBindMats[rootJointId] ,detail::getGltfNodeTransform(node) * detail::getGltfNodeTransform(rootNode) };
-                std::vector<joint>& jointChildren = meshData.rootJoint.children;
-
-                auto result = detail::handleGltfJoint(meshData, meshData.rootJoint, model, model.meshes[meshIdx], rootNode, detail::getGltfNodeTransform(node) * detail::getGltfNodeTransform(rootNode));
+                auto result = detail::handleGltfJoint(meshData, meshData.skeleton.rootJoint, model, model.meshes[meshIdx], rootNode, rootMat);
+                meshData.skeleton.rootJoint.calcInverseBindTransform(rootMat);
                 warnings.insert(warnings.end(), result.warnings().begin(), result.warnings().end());
             }
 

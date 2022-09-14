@@ -40,7 +40,6 @@ namespace legion::core
             }
 
             rig.apply_pose(currentPose, math::mat4(1.f));
-            //debug_skeleton(rig, math::vec3(0.f), math::deg2rad(-90.f));
         }
     }
 
