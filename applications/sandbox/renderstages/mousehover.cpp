@@ -204,7 +204,9 @@ void MouseHover::render(app::window& context, gfx::camera& cam, const gfx::camer
             const model& mesh = modelHandle.get_model();
 
             if (!mesh.buffered)
+            {
                 modelHandle.buffer_data(*modelMatrixBuffer, *entityIdBuffer);
+            }
 
             if (mesh.submeshes.empty())
             {

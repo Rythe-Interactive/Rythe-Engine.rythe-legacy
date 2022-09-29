@@ -8,6 +8,7 @@
 #include "../systems/diviner_physics_test_system.hpp"
 #include "../systems/physx_test_system.hpp"
 #include "../systems/physics_debugging_system.hpp"
+#include <core/animations/animationsystem.hpp>
 
 class ExampleModule : public legion::Module
 {
@@ -30,6 +31,7 @@ public:
         reportSystem<ExampleSystem>();
         reportSystem<GuiTestSystem>();
         reportSystem<physics::PhysicsDebuggingSystem>();
+        reportSystem<AnimationSystem>();
 
         registerComponentType<self_destruct_component>();
     }

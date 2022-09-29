@@ -2,6 +2,7 @@
 #include <core/types/types.hpp>
 #include <core/math/math.hpp>
 #include <core/data/joint.hpp>
+#include <core/assets/assets.hpp>
 
 namespace legion::core
 {
@@ -28,22 +29,30 @@ namespace legion::core
 
     struct animation_clip
     {
+        std::string name;
         float length;
         std::vector<key_frame> frames;
-        math::mat4 rootMat;
     };
 
     struct animator
     {
     public:
-        animation_clip clip;
+        animator() = default;
+        animator(std::string clipName) : activeClip(assets::AssetCache<animation_clip>().get(clipName)) {};
+        ~animator() = default;
 
-        float animTime = 0.0f;
+        assets::asset<animation_clip> activeClip;
+        assets::asset<skeleton> skeleton;
+
+        float time = 0.0f;
         float progress = 0.0f;
         float frame = 0;
+        bool play = false;
         key_frame previousFrame;
         key_frame nextFrame;
         std::unordered_map<size_type, math::mat4> currentPose;
     };
+
+    ReportAssetType(animation_clip);
 
 }

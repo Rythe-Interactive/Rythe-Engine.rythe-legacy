@@ -40,6 +40,8 @@
     <ClCompile Include="pipeline\default\defaultpipeline.cpp" />
     <ClCompile Include="pipeline\default\postfx\bloom.cpp" />
     <ClCompile Include="pipeline\default\postfx\fxaa.cpp" />
+    <ClCompile Include="pipeline\default\stages\skinnedmeshbatchingstage.cpp" />
+    <ClCompile Include="pipeline\default\stages\skinnedmeshrenderstage.cpp" />
     <ClCompile Include="pipeline\default\stages\skybox.cpp" />
     <ClCompile Include="pipeline\default\postfx\tonemapping.cpp" />
     <ClCompile Include="pipeline\default\stages\clearstage.cpp" />
@@ -66,6 +68,8 @@
     <ClInclude Include="pipeline\base\pipeline.hpp" />
     <ClInclude Include="pipeline\default\postfx\fxaa.hpp" />
     <ClInclude Include="pipeline\default\postfx\bloom.hpp" />
+    <ClInclude Include="pipeline\default\stages\skinnedmeshbatchingstage.hpp" />
+    <ClInclude Include="pipeline\default\stages\skinnedmeshrenderstage.hpp" />
     <ClInclude Include="pipeline\default\stages\skybox.hpp" />
     <ClInclude Include="pipeline\default\postfx\tonemapping.hpp" />
     <ClInclude Include="pipeline\default\stages\debugrenderstage.hpp" />

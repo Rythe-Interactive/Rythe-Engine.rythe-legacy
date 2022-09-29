@@ -20,6 +20,33 @@ namespace legion::core
         virtual void free(image& asset) override { delete[] asset.data(); }
     };
 
+    class GltfAnimLoader : public assets::AssetLoader<animation_clip>
+    {
+    public:
+        using base = assets::AssetLoader<animation_clip>;
+        using base::asset_ptr;
+        using base::import_cfg;
+        using base::progress_type;
+
+        virtual bool canLoad(const fs::view& file) override { return false; }
+
+        virtual common::result<asset_ptr> load(id_type nameHash, const fs::view& file, const import_cfg& settings) override { return legion_exception_msg("Tried to use a faux loader"); }
+    };
+
+
+    class GltfSkeletonLoader : public assets::AssetLoader<skeleton>
+    {
+    public:
+        using base = assets::AssetLoader<skeleton>;
+        using base::asset_ptr;
+        using base::import_cfg;
+        using base::progress_type;
+
+        virtual bool canLoad(const fs::view& file) override { return false; }
+
+        virtual common::result<asset_ptr> load(id_type nameHash, const fs::view& file, const import_cfg& settings) override { return legion_exception_msg("Tried to use a faux loader"); }
+    };
+
     class GltfMeshLoader : public assets::AssetLoader<mesh>
     {
     public:

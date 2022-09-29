@@ -1,0 +1,38 @@
+#version 450
+
+generate(vertex, fragment)
+
+#include <stdio.shinc>
+
+shader(vertex)
+{
+    uniform mat4 jointTransforms[50];
+
+    void main(void)
+    {
+        vec4 totalLocalPos = vec4(0.0);
+        vec4 totalNormal = vec4(0.0);
+
+        for(int i = 0; i < 3; i++)
+        {
+            mat4 jointTransform = jointTransforms[jointIndeces[i]];
+
+            vec4 posePosition = jointTransform * vec4(stdin(position), 0.0);
+            totalLocalPos += posePosition * weights[i];
+
+            vec4 worldNormal = jointTransform * vec4(stdin(normal), 1.0);
+            totalNormal += worldNormal * weights[i];
+        }
+        gl_Position = ModelToScreenSpacePosition(totalLocalPos.xyz);
+        PropagateStdIO(totalLocalPos.xyz, totalNormal.xyz);
+    }
+}
+
+shader(fragment)
+{
+    uniform vec4 color = vec4(1.0);
+    void main(void)
+    {
+        SubmitOutput(color);
+    }
+}

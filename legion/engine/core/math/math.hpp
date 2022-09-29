@@ -6,3 +6,4 @@
 #include <core/math/color.hpp>
 #include <core/math/close_enough.hpp>
 #include <core/math/geometry.hpp>
+#include <core/math/glm/gtc/type_ptr.hpp>

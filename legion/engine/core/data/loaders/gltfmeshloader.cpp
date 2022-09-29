@@ -11,26 +11,6 @@ namespace legion::core
 {
     namespace detail
     {
-        static assets::asset<image> loadGLTFImage(const tinygltf::Image& img)
-        {
-            std::string name = img.name + img.uri;
-
-            const auto hash = nameHash(name);
-
-            auto handle = assets::get<image>(hash);
-            if (handle)
-                return handle;
-
-            byte* imgData = new byte[img.image.size()]; // faux_gltf_image_loader will delete upon destruction.
-            memcpy(imgData, img.image.data(), img.image.size());
-
-            return assets::AssetCache<image>::createAsLoader<GltfFauxImageLoader>(hash, img.name, "",
-                // Image constructor parameters.
-                math::ivec2(img.width, img.height),
-                img.pixel_type == TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE ? channel_format::eight_bit : img.pixel_type == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT ? channel_format::sixteen_bit : channel_format::float_hdr,
-                img.component == 1 ? image_components::grey : img.component == 2 ? image_components::grey_alpha : img.component == 3 ? image_components::rgb : image_components::rgba,
-                data_view<byte>{ imgData, img.image.size(), 0 });
-        }
 
         /**
          * @brief Function to copy tinygltf buffer data into the correct mesh data vector
@@ -156,7 +136,7 @@ namespace legion::core
                         const float* x = reinterpret_cast<const float*>(&valueBuffer.data[valuePos]);
                         const float* y = reinterpret_cast<const float*>(&valueBuffer.data[valuePos + sizeof(float)]);
                         const float* z = reinterpret_cast<const float*>(&valueBuffer.data[valuePos + 2 * sizeof(float)]);
-                        data.at(dataStart + *idx) = (transform * math::vec4(*x, *y, *z, 1)).xyz();
+                        data.at(dataStart + *idx) = (transform * math::vec4(*x, *y, *z, 1.f)).xyz();
 
                         indexPos += indexStride;
                         valuePos += valueStride;
@@ -528,6 +508,16 @@ namespace legion::core
                         auto result = detail::handleGltfVertexColor(model, accessor, accessor.type, accessor.componentType, meshData.colors);
                         warnings.insert(warnings.end(), result.warnings().begin(), result.warnings().end());
                     }
+                    else if (attrib.first.compare("JOINTS_0") == 0)
+                    {
+                        // Vertex joint data
+                        detail::handleGltfBuffer<math::vec3>(model, accessor, meshData.jointIDs);
+                    }
+                    else if (attrib.first.compare("WEIGHTS_0") == 0)
+                    {
+                        // Vertex weight data
+                        detail::handleGltfBuffer<math::vec3>(model, accessor, meshData.weights);
+                    }
                     else
                     {
                         warnings.push_back("More data to be found in gltf. Data can be accesed through: " + attrib.first);
@@ -584,7 +574,7 @@ namespace legion::core
             return { common::success, warnings };
         }
 
-        static common::result<void, void> handleGltfJoint(mesh& meshData, joint& parentJoint, const tinygltf::Model& model, const tinygltf::Mesh& mesh, const tinygltf::Node& node, const math::mat4& parentTransf)
+        static common::result<void, void> handleGltfJoint(joint& parentJoint, const tinygltf::Model& model, const tinygltf::Node& node, const math::mat4& parentTransf)
         {
             std::vector<std::string> warnings;
             auto joints = model.skins[0].joints;
@@ -600,10 +590,109 @@ namespace legion::core
                 child.animatedTransform = jointTransf;
                 joint& childJoint = parentJoint.children.emplace_back(child);
 
-                auto result = detail::handleGltfJoint(meshData, childJoint, model, mesh, node, jointTransf);
+                auto result = detail::handleGltfJoint(childJoint, model, node, jointTransf);
                 warnings.insert(warnings.end(), result.warnings().begin(), result.warnings().end());
             }
 
+            return { common::success, warnings };
+        }
+
+
+        static assets::asset<image> loadGLTFImage(const tinygltf::Image& img)
+        {
+            std::string name = img.name + img.uri;
+
+            const auto hash = nameHash(name);
+
+            auto handle = assets::get<image>(hash);
+            if (handle)
+                return handle;
+
+            byte* imgData = new byte[img.image.size()]; // faux_gltf_image_loader will delete upon destruction.
+            memcpy(imgData, img.image.data(), img.image.size());
+
+            return assets::AssetCache<image>::createAsLoader<GltfFauxImageLoader>(hash, img.name, "",
+                // Image constructor parameters.
+                math::ivec2(img.width, img.height),
+                img.pixel_type == TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE ? channel_format::eight_bit : img.pixel_type == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT ? channel_format::sixteen_bit : channel_format::float_hdr,
+                img.component == 1 ? image_components::grey : img.component == 2 ? image_components::grey_alpha : img.component == 3 ? image_components::rgb : image_components::rgba,
+                data_view<byte>{ imgData, img.image.size(), 0 });
+        }
+
+        static assets::asset<animation_clip> loadGLTFAnim(const tinygltf::Model& model, const tinygltf::Animation& anim)
+        {
+            animation_clip clip;
+            clip.name = anim.name;
+            const auto hash = nameHash(clip.name);
+
+            auto channelCount = anim.channels.size();
+            for (size_type idx = 0; idx < channelCount; idx++)
+            {
+                auto channel = anim.channels[idx];
+                int targetNode = channel.target_node;
+                auto path = channel.target_path;
+                auto sampler = anim.samplers[channel.sampler];
+
+                std::vector<float> times;
+                detail::handleGltfBuffer<float>(model, model.accessors[sampler.input], times);
+
+                clip.length = times.back() - times.front();
+
+                std::vector<math::vec3> translations;
+                std::vector<math::quat> rotations;
+                std::vector<math::vec3> scales;
+
+                if (path._Equal("translation"))
+                    detail::handleGltfBuffer<math::vec3>(model, model.accessors[sampler.output], translations);
+                else if (path._Equal("rotation"))
+                    detail::handleGltfBuffer<math::quat>(model, model.accessors[sampler.output], rotations);
+                else if (path._Equal("scale"))
+                    detail::handleGltfBuffer<math::vec3>(model, model.accessors[sampler.output], scales);
+                if (clip.frames.size() != times.size())
+                    clip.frames.resize(times.size());
+
+                for (float t : times)
+                {
+                    auto it = find(times.begin(), times.end(), t);
+                    auto timeIdx = it - times.begin();
+
+                    key_frame& frame = clip.frames[timeIdx];
+                    frame.timeStamp = t;
+                    if (frame.pose.count(targetNode) < 1)
+                        frame.pose.emplace(targetNode, joint_transform());
+                    joint_transform& transf = frame.pose[targetNode];
+
+                    if (path._Equal("translation"))
+                        transf.translation = translations[timeIdx];
+                    else if (path._Equal("rotation"))
+                        transf.rotation = rotations[timeIdx];
+                    else if (path._Equal("scale"))
+                        transf.scale = scales[timeIdx];
+                }
+            }
+            return assets::AssetCache<animation_clip>::createAsLoader<GltfAnimLoader>(hash, anim.name, "", clip);
+        }
+
+        static common::result<void, void> loadGLTFSkeleton(const tinygltf::Model& model, int skinIdx, math::mat4 transf)
+        {
+            std::vector<std::string> warnings;
+            skeleton skel;
+            auto joints = model.skins[skinIdx].joints;
+            const size_type rootJointId = joints[0];
+            const tinygltf::Node& rootNode = model.nodes[rootJointId];
+            const auto hash = nameHash(rootNode.name);
+
+            math::mat4 rootMat = transf * detail::getGltfNodeTransform(rootNode);
+            auto& rootJoint = skel.rootJoint;
+            rootJoint.name = rootNode.name;
+            rootJoint.id = rootJointId;
+            rootJoint.localBindTransform = rootMat;
+            rootJoint.animatedTransform = rootMat;
+
+            auto result = detail::handleGltfJoint(skel.rootJoint, model, rootNode, rootMat);
+            skel.rootJoint.calc_inverse_bind_transf(rootMat);
+            assets::AssetCache<skeleton>::createAsLoader<GltfSkeletonLoader>(hash, rootNode.name, "", skel);
+            warnings.insert(warnings.end(), result.warnings().begin(), result.warnings().end());
             return { common::success, warnings };
         }
 
@@ -626,18 +715,7 @@ namespace legion::core
 
             if (node.skin >= 0 && skinIdx < model.skins.size())
             {
-                const size_type rootJointId = model.skins[skinIdx].joints[0];
-                const tinygltf::Node& rootNode = model.nodes[rootJointId];
-
-                math::mat4 rootMat = transf * detail::getGltfNodeTransform(rootNode);
-                auto& rootJoint = meshData.skeleton.rootJoint;
-                rootJoint.name = rootNode.name;
-                rootJoint.id = rootJointId;
-                rootJoint.localBindTransform = rootMat;
-                rootJoint.animatedTransform = rootMat;
-
-                auto result = detail::handleGltfJoint(meshData, meshData.skeleton.rootJoint, model, model.meshes[meshIdx], rootNode, rootMat);
-                meshData.skeleton.rootJoint.calcInverseBindTransform(rootMat);
+                auto result = detail::loadGLTFSkeleton(model, skinIdx, transf);
                 warnings.insert(warnings.end(), result.warnings().begin(), result.warnings().end());
             }
 
@@ -875,54 +953,9 @@ namespace legion::core
             };
         }
 
-        animation_clip& clip = meshData.clip;
-        if (model.animations.size() > 0)
+        for (size_type animIdx = 0; animIdx < model.animations.size(); animIdx++)
         {
-            auto anim = model.animations[0];
-            auto channelCount = anim.channels.size();
-            for (size_type idx = 0; idx < channelCount; idx++)
-            {
-                auto channel = anim.channels[idx];
-                int targetNode = channel.target_node;
-                auto path = channel.target_path;
-                auto sampler = anim.samplers[channel.sampler];
-                std::vector<float> times;
-                detail::handleGltfBuffer<float>(model, model.accessors[sampler.input], times);
-
-                clip.length = times.back() - times.front();
-
-                std::vector<math::vec3> translations;
-                std::vector<math::quat> rotations;
-                std::vector<math::vec3> scales;
-
-                if (path._Equal("translation"))
-                    detail::handleGltfBuffer<math::vec3>(model, model.accessors[sampler.output], translations);
-                else if (path._Equal("rotation"))
-                    detail::handleGltfBuffer<math::quat>(model, model.accessors[sampler.output], rotations);
-                else if (path._Equal("scale"))
-                    detail::handleGltfBuffer<math::vec3>(model, model.accessors[sampler.output], scales);
-                if (clip.frames.size() != times.size())
-                    clip.frames.resize(times.size());
-
-                for (float t : times)
-                {
-                    auto it = find(times.begin(), times.end(), t);
-                    auto timeIdx = it - times.begin();
-
-                    key_frame& frame = clip.frames[timeIdx];
-                    frame.timeStamp = t;
-                    if (frame.pose.count(targetNode) < 1)
-                        frame.pose.emplace(targetNode, joint_transform());
-                    joint_transform& transf = frame.pose[targetNode];
-
-                    if (path._Equal("translation"))
-                        transf.translation = translations[timeIdx];
-                    else if (path._Equal("rotation"))
-                        transf.rotation = rotations[timeIdx];
-                    else if (path._Equal("scale"))
-                        transf.scale = scales[timeIdx];
-                }
-            }
+            detail::loadGLTFAnim(model, model.animations[animIdx]);
         }
 
         for (auto& nodeIdx : model.scenes[sceneToLoad].nodes)

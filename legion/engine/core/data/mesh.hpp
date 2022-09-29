@@ -73,8 +73,6 @@ namespace legion::core
         std::vector<uint> indices;
         std::vector<material_data> materials;
         std::vector<math::mat4> invBindMats;
-        skeleton skeleton;
-        animation_clip clip;
 
         winding_order windingOrder;
 

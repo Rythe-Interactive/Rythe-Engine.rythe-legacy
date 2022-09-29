@@ -21,6 +21,9 @@ namespace legion::core
         assets::AssetCache<image>::addLoader<GltfFauxImageLoader>();
         assets::AssetCache<image>::addLoader<StbImageLoader>();
 
+        assets::AssetCache<animation_clip>::addLoader<GltfAnimLoader>();
+        assets::AssetCache<skeleton>::addLoader<GltfSkeletonLoader>();
+
         createProcessChain("Update");
     }
 

@@ -62,4 +62,33 @@ namespace legion::rendering
             return get<mesh_renderer>().material;
         }
     };
+
+    struct skinned_mesh_renderer
+    {
+    private:
+        model_handle m_tempHandle = invalid_model_handle;
+    public:
+        skinned_mesh_renderer() = default;
+        explicit skinned_mesh_renderer(const material_handle& src) { material = src; }
+        skinned_mesh_renderer(const material_handle& src, const model_handle& model) { material = src; m_tempHandle = model; }
+        static void init(skinned_mesh_renderer& src, ecs::entity owner)
+        {
+            if (!owner.has_component<mesh_filter>())
+            {
+                owner.add_component<mesh_filter>(mesh_filter(src.m_tempHandle.get_mesh()));
+            }
+        }
+
+        material_handle material = invalid_material_handle;
+        assets::asset<skeleton> m_skeleton;
+    };
+
+    struct skinned_mesh_data
+    {
+        math::mat4 rootMat;
+        std::vector<math::mat4> jointTransforms;
+        std::vector<math::vec3> weights;
+        std::vector<math::vec3> jointIndeces;
+    };
+
 }

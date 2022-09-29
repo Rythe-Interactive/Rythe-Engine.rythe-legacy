@@ -44,6 +44,8 @@
     <ClCompile Include="pipeline\default\postfx\depthoffield.cpp" />
     <ClCompile Include="pipeline\default\stages\skybox.cpp" />
     <ClCompile Include="pipeline\default\stages\transparencyrenderstage.cpp" />
+    <ClCompile Include="pipeline\default\stages\skinnedmeshrenderstage.cpp" />
+    <ClCompile Include="pipeline\default\stages\skinnedmeshbatchingstage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="components\camera.hpp" />
@@ -91,6 +93,8 @@
     <ClInclude Include="pipeline\default\postfx\depthoffield.hpp" />
     <ClInclude Include="pipeline\default\stages\skybox.hpp" />
     <ClInclude Include="pipeline\default\stages\transparencyrenderstage.hpp" />
+    <ClInclude Include="pipeline\default\stages\skinnedmeshrenderstage.hpp" />
+    <ClInclude Include="pipeline\default\stages\skinnedmeshbatchingstage.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\buffer.inl" />

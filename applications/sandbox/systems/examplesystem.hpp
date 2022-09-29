@@ -56,17 +56,15 @@ public:
 
         auto riggedMesh = gfx::ModelCache::create_model("RiggedModel", fs::view("assets://models/BrainStem.gltf"));
 
-        //{
-        //    auto ent = createEntity("Rigged Model");
-        //    ent.add_component<transform>();
-        //    ent.add_component(gfx::mesh_renderer(material, riggedMesh));
-        //    //ent.add_component<animator>();
-        //}
-
-        //rig = gfx::ModelCache::create_model("RiggedModel2", fs::view("assets://models/RiggedFigureBlender.gltf"));
-        //joint = rig.get_mesh()->rootJoint;
-        //ent = debugSkeleton(joint, model, material, math::vec3(3.f, 0.f, 0.f), math::deg2rad(-90.f), math::colors::red);
-
+        {
+            material = gfx::MaterialCache::create_material("Animated", fs::view("assets://shaders/animatedmesh.shs"));
+            auto ent = createEntity("Rigged Model");
+            ent.add_component<transform>();
+            gfx::skinned_mesh_renderer& skinned = ent.add_component(gfx::skinned_mesh_renderer(material, riggedMesh));
+            animator& anim = ent.add_component<animator>(animator{ "Anim_0" });
+            anim.skeleton = assets::AssetCache<skeleton>::get("Node_3");
+            skinned.m_skeleton = anim.skeleton;
+        }
 
         /*{
             auto ent = createEntity("Sun");
@@ -454,7 +452,13 @@ public:
         using namespace legion;
         if (event.pressed())
         {
-            toggle_anim = !toggle_anim;
+            auto& ent = GuiTestSystem::selected;
+            if (ent != invalid_id)
+                if (ent.has_component<animator>())
+                {
+                    animator& anim = ent.get_component<animator>();
+                    anim.play = !anim.play;
+                }
         }
     }
 
@@ -574,45 +578,13 @@ public:
             firstFrame = false;
         }
 
-        auto riggedMesh = gfx::ModelCache::get_mesh("RiggedModel");
-        auto& rig = riggedMesh->skeleton.rootJoint;
-
-        //if (GuiTestSystem::selected != invalid_id)
-        //{
-            //auto ent = GuiTestSystem::selected;
-        auto clip = riggedMesh->clip;
-        //transform transf = ent.get_component<transform>();
-
-        static int frame = 0;
-
-        static float animTime = 0.0f;
-        if (toggle_anim)
+        if (GuiTestSystem::selected != invalid_id)
         {
-            animTime += deltaTime/2.f;
-            float length = clip.length;
-
-            auto previousFrame = clip.frames[frame];
-            if (frame == clip.frames.size() - 1)
+            if (GuiTestSystem::selected.has_component<animator>())
             {
-                frame = -1;
-                animTime = 0;
-                toggle_anim = false;
+                auto& rig = GuiTestSystem::selected.get_component<animator>()->skeleton->rootJoint;
+                debug_skeleton(rig);
             }
-            auto nextFrame = clip.frames[frame + 1];
-
-            float progress = (animTime - previousFrame.timeStamp) / (nextFrame.timeStamp - previousFrame.timeStamp);
-            std::unordered_map<size_type, math::mat4> currentPose;
-            for (auto& [id, j_transf] : previousFrame.pose)
-            {
-                currentPose.emplace(id, j_transf.pose_lerp(nextFrame.pose[id], progress));
-            }
-
-            if (progress >= 1)
-                frame++;
-
-            rig.apply_pose(currentPose, rig.localBindTransform);
         }
-        //}
-        debug_skeleton(rig);
     }
 };

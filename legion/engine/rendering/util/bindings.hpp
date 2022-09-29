@@ -13,11 +13,13 @@
 /* in 4  */  #define SV_POSITION       SV_TEXCOORD3 + 1
 /* in 5  */  #define SV_COLOR          SV_POSITION + 1
 /* in 6  */  #define SV_NORMAL         SV_COLOR + 1     
-/* in 7  */  #define SV_TANGENT        SV_NORMAL + 1      
-/* in 8  */  #define SV_ENTITYID       SV_TANGENT + 1      
-/* in 9  */  #define SV_MODELMATRIX    SV_ENTITYID + 1 
+/* in 7  */  #define SV_TANGENT        SV_NORMAL + 1
+/* in 7  */  #define SV_INDECES        SV_TANGENT + 1
+/* in 8  */  #define SV_WEIGHTS        SV_INDECES + 1  
+/* in 9  */  #define SV_ENTITYID       SV_WEIGHTS + 1
+/* in 10  */  #define SV_MODELMATRIX    SV_ENTITYID + 1 
 
-/* uniform 10  */  #define SV_VIEW           SV_MODELMATRIX + 1
+/* uniform 10  */  #define SV_VIEW           SV_MODELMATRIX + 4
 /* uniform 11 */  #define SV_PROJECT        SV_VIEW + 1
 /* uniform 12 */  #define SV_CAMPOS         SV_PROJECT + 1
 /* uniform 13 */  #define SV_VIEWDIR        SV_CAMPOS + 1
@@ -65,6 +67,8 @@ namespace legion::rendering::detail
             defines.push_back("SV_COLOR=" +        std::to_string(SV_COLOR));
             defines.push_back("SV_NORMAL=" +       std::to_string(SV_NORMAL));
             defines.push_back("SV_TANGENT=" +      std::to_string(SV_TANGENT));
+            defines.push_back("SV_INDECES=" +      std::to_string(SV_INDECES));
+            defines.push_back("SV_WEIGHTS=" +      std::to_string(SV_WEIGHTS));
             defines.push_back("SV_ENTITYID=" +     std::to_string(SV_ENTITYID));
             defines.push_back("SV_MODELMATRIX=" +  std::to_string(SV_MODELMATRIX));
 

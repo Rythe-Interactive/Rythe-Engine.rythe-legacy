@@ -1,6 +1,7 @@
 #pragma once
 #include <core/types/types.hpp>
 #include <core/math/math.hpp>
+#include <core/assets/assets.hpp>
 
 namespace legion::core
 {
@@ -18,13 +19,20 @@ namespace legion::core
         joint(std::string name, id_type id, math::mat4 localBindTransform, math::mat4 animatedTransform) : id(id), name(name), localBindTransform(localBindTransform), animatedTransform(animatedTransform) {}
         ~joint() = default;
 
-        void calcInverseBindTransform(math::mat4 parentBindTransf);
+        void calc_inverse_bind_transf(math::mat4 parentBindTransf);
 
         void apply_pose(std::unordered_map<size_type, math::mat4> currentPose, math::mat4 parentTransf);
+        void apply_pose(std::vector<math::mat4> currentPose, math::mat4 parentTransf);
+        std::vector<math::mat4> get_joint_transforms();
+        id_type get_max_id();
+        void get_joint_internal(std::vector<math::mat4>& list);
     };
 
     struct skeleton
     {
         joint rootJoint;
+        std::vector<math::mat4> jointTransforms;
     };
+
+    ReportAssetType(skeleton);
 }

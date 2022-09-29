@@ -28,6 +28,8 @@ namespace legion::rendering
         buffer uvBuffer;
         buffer tangentBuffer;
         buffer indexBuffer;
+        buffer jointIdBuffer;
+        buffer weightBuffer;
 
         std::vector<material_handle> materials;
 
