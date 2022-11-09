@@ -1,11 +1,11 @@
-#include <core/math/noise/perlin.hpp>
+#include <core/math/noise/value.hpp>
 #pragma once
 
 namespace legion::core::math
 {
     namespace detail
     {
-        constexpr uint8 _perlin_permutation_[] = { 151,160,137,91,90,15,                    // Hash lookup table as defined by Ken Perlin.  This is a randomly
+        constexpr uint8 _value_permutation_[] = { 151,160,137,91,90,15,                    // Hash lookup table as defined by Ken Perlin.  This is a randomly
             131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,    // arranged array of all numbers from 0-255 inclusive.
             190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
             88,237,149,56,87,174,20,125,136,171,168, 68,175,74,165,71,134,139,48,27,166,
@@ -20,6 +20,8 @@ namespace legion::core::math
             138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180
         };
 
+        const uint primeC = 0b11000010101100101010111000111101;
+
         template<typename scalar>
         L_NODISCARD L_ALWAYS_INLINE constexpr scalar _grad_impl_(uint8 hash, scalar x, scalar y, scalar z) noexcept
         {
@@ -30,19 +32,21 @@ namespace legion::core::math
         }
 
         template<typename scalar>
-        L_NODISCARD L_ALWAYS_INLINE constexpr scalar _perlin_1d_impl_(scalar value, scalar* derivative) noexcept
+        L_NODISCARD L_ALWAYS_INLINE constexpr scalar _value_1d_impl_(scalar value, scalar* derivative) noexcept
+        {
+            int32 p = ifloor<int32>(value.x));
+            float32 v = static_cast<uint32>(hash.Eat(p)) & 255;
+            return v * (2.f / 255.f) - 1.f;
+        }
+
+        template<typename scalar, typename VectorType>
+        L_NODISCARD L_ALWAYS_INLINE constexpr scalar _value_2d_impl_(VectorType value, vector<scalar, 2>* derivative) noexcept
         {
 
         }
 
         template<typename scalar, typename VectorType>
-        L_NODISCARD L_ALWAYS_INLINE constexpr scalar _perlin_2d_impl_(VectorType value, vector<scalar, 2>* derivative) noexcept
-        {
-
-        }
-
-        template<typename scalar, typename VectorType>
-        L_NODISCARD L_ALWAYS_INLINE constexpr scalar _perlin_3d_impl_(VectorType value, vector<scalar, 3>* derivative) noexcept
+        L_NODISCARD L_ALWAYS_INLINE constexpr scalar _value_3d_impl_(VectorType value, vector<scalar, 3>* derivative) noexcept
         {
             const auto floored = ifloor<int32>(value);
             const auto iv = vector<scalar, 3>(floored.x & 255, floored.y & 255, floored.z & 255);
@@ -51,23 +55,23 @@ namespace legion::core::math
             const auto coords = smoothstep(fv);
             const auto coordsDerivative = smoothstep_derivative(fv);
 
-            const uint8 A = (_perlin_permutation_[iv.x & 255] + iv.y) & 255;
-            const uint8 B = (_perlin_permutation_[(iv.x + 1) & 255] + iv.y) & 255;
+            const uint8 A = (_value_permutation_[iv.x & 255] + iv.y) & 255;
+            const uint8 B = (_value_permutation_[(iv.x + 1) & 255] + iv.y) & 255;
 
-            const uint8 AA = (_perlin_permutation_[A] + iv.z) & 255;
-            const uint8 AB = (_perlin_permutation_[(A + 1) & 255] + iv.z) & 255;
+            const uint8 AA = (_value_permutation_[A] + iv.z) & 255;
+            const uint8 AB = (_value_permutation_[(A + 1) & 255] + iv.z) & 255;
 
-            const uint8 BA = (_perlin_permutation_[B] + iv.z) & 255;
-            const uint8 BB = (_perlin_permutation_[(B + 1) & 255] + iv.z) & 255;
+            const uint8 BA = (_value_permutation_[B] + iv.z) & 255;
+            const uint8 BB = (_value_permutation_[(B + 1) & 255] + iv.z) & 255;
 
-            const auto p0 = _grad_impl_(_perlin_permutation_[AA], fv.x, fv.y, fv.z);
-            const auto p1 = _grad_impl_(_perlin_permutation_[BA], fv.x - 1, fv.y, fv.z);
-            const auto p2 = _grad_impl_(_perlin_permutation_[AB], fv.x, fv.y - 1, fv.z);
-            const auto p3 = _grad_impl_(_perlin_permutation_[BB], fv.x - 1, fv.y - 1, fv.z);
-            const auto p4 = _grad_impl_(_perlin_permutation_[(AA + 1) & 255], fv.x, fv.y, fv.z - 1);
-            const auto p5 = _grad_impl_(_perlin_permutation_[(BA + 1) & 255], fv.x - 1, fv.y, fv.z - 1);
-            const auto p6 = _grad_impl_(_perlin_permutation_[(AB + 1) & 255], fv.x, fv.y - 1, fv.z - 1);
-            const auto p7 = _grad_impl_(_perlin_permutation_[(BB + 1) & 255], fv.x - 1, fv.y - 1, fv.z - 1);
+            const auto p0 = _grad_impl_(_value_permutation_[AA], fv.x, fv.y, fv.z);
+            const auto p1 = _grad_impl_(_value_permutation_[BA], fv.x - 1, fv.y, fv.z);
+            const auto p2 = _grad_impl_(_value_permutation_[AB], fv.x, fv.y - 1, fv.z);
+            const auto p3 = _grad_impl_(_value_permutation_[BB], fv.x - 1, fv.y - 1, fv.z);
+            const auto p4 = _grad_impl_(_value_permutation_[(AA + 1) & 255], fv.x, fv.y, fv.z - 1);
+            const auto p5 = _grad_impl_(_value_permutation_[(BA + 1) & 255], fv.x - 1, fv.y, fv.z - 1);
+            const auto p6 = _grad_impl_(_value_permutation_[(AB + 1) & 255], fv.x, fv.y - 1, fv.z - 1);
+            const auto p7 = _grad_impl_(_value_permutation_[(BB + 1) & 255], fv.x - 1, fv.y - 1, fv.z - 1);
 
             const auto q0 = lerp(p0, p1, u);
             const auto q1 = lerp(p2, p3, u);
@@ -75,40 +79,40 @@ namespace legion::core::math
             const auto q3 = lerp(p6, p7, u);
 
             const auto r0 = lerp(q0, q1, v);
-            const auto r1 = lerp(q2, q3, v); 
+            const auto r1 = lerp(q2, q3, v);
 
-            return perlin_detail::Lerp(r0, r1, w);
+            return value_detail::Lerp(r0, r1, w);
         }
     }
 
     template<typename VectorType>
-    L_NODISCARD L_ALWAYS_INLINE constexpr auto perlin(VectorType&& value) noexcept
+    L_NODISCARD L_ALWAYS_INLINE constexpr auto value(VectorType&& value) noexcept
     {
         constexpr size_type dimensions = make_vector_t<VectorType>::size;
         using scalar = typename make_vector_t<VectorType>::scalar;
         static_assert(is_vector_or_scalar_v<VectorType> && make_vector_t<VectorType>::size <= 3, "Input type must be a vector of size 3 or lower.");
         if constexpr (dimensions == 1)
-            return detail::_perlin_1d_impl_(value, nullptr);
+            return detail::_value_1d_impl_(value, nullptr);
         else if constexpr (dimensions == 2)
-            return detail::_perlin_2d_impl_(::std::forward<VectorType>(value), nullptr);
+            return detail::_value_2d_impl_(::std::forward<VectorType>(value), nullptr);
         else if constexpr (dimensions == 3)
-            return detail::_perlin_3d_impl_(::std::forward<VectorType>(value), nullptr);
+            return detail::_value_3d_impl_(::std::forward<VectorType>(value), nullptr);
         else
             return typename make_vector_t<VectorType>::scalar{};
     }
 
     template<typename VectorType>
-    L_NODISCARD L_ALWAYS_INLINE constexpr auto perlin(VectorType&& value, decay_vector_t<VectorType>& derivative) noexcept
+    L_NODISCARD L_ALWAYS_INLINE constexpr auto value(VectorType&& value, decay_vector_t<VectorType>& derivative) noexcept
     {
         constexpr size_type dimensions = make_vector_t<VectorType>::size;
         using scalar = typename make_vector_t<VectorType>::scalar;
         static_assert(is_vector_or_scalar_v<VectorType> && make_vector_t<VectorType>::size <= 3, "Input type must be a vector of size 3 or lower.");
         if constexpr (dimensions == 1)
-            return detail::_perlin_1d_impl_(value, &derivative);
+            return detail::_value_1d_impl_(value, &derivative);
         else if constexpr (dimensions == 2)
-            return detail::_perlin_2d_impl_(::std::forward<VectorType>(value), &derivative);
+            return detail::_value_2d_impl_(::std::forward<VectorType>(value), &derivative);
         else if constexpr (dimensions == 3)
-            return detail::_perlin_3d_impl_(::std::forward<VectorType>(value), &derivative);
+            return detail::_value_3d_impl_(::std::forward<VectorType>(value), &derivative);
         else
             return typename make_vector_t<VectorType>::scalar{};
     }

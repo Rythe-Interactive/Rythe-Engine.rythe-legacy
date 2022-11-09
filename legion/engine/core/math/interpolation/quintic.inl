@@ -1,5 +1,6 @@
 #include <core/math/interpolation/quintic.hpp>
 #pragma once
+#include <array>
 
 namespace legion::core::math::detail
 {
@@ -22,15 +23,32 @@ namespace legion::core::math::detail
     L_NODISCARD L_ALWAYS_INLINE auto _inverse_quintic_impl_(T&& v) noexcept
     {
         using scalar = remove_cvr_t<T>;
-        //return static_cast<scalar>(0.5) - sin(asin(static_cast<scalar>(1) - static_cast<scalar>(2) * v) / static_cast<scalar>(3));
+
+        // TODO: find an inverse with a smaller average error.
+        return static_cast<scalar>(0.5) - sin(asin(sin(asin(static_cast<scalar>(1) - static_cast<scalar>(2) * v) * static_cast<scalar>(0.032)) * static_cast<scalar>(7.62)) * static_cast<scalar>(0.63)) * static_cast<scalar>(1.78);
+
+        // Numerical integration
+        constexpr size_type stepCount = 10;
+
+        scalar pos = static_cast<scalar>(0.5);
+        auto offsetFromCenter = v - pos;
+        auto stepSize = offsetFromCenter / static_cast<scalar>(stepCount);
+
+        scalar result = 0;
+        for (size_type i = 0; i < stepCount; i++)
+        {
+            result += _inverse_quintic_derivative_impl_(pos) * static_cast<scalar>(stepSize < static_cast<scalar>(0) ? -1 : 1);
+            pos += stepSize;
+        }
+        return result;
     }
 
     template<typename T>
-    L_NODISCARD L_ALWAYS_INLINE auto _inverse_quintic_derivative_impl_(T&& v) noexcept
+    L_NODISCARD L_ALWAYS_INLINE constexpr auto _inverse_quintic_derivative_impl_(T&& v) noexcept
     {
         using scalar = remove_cvr_t<T>;
-        //auto denom = static_cast<scalar>(3) / sqrt(-(v - 1) * v);
-        //return cos(asin(static_cast<scalar>(2)*v-static_cast<scalar>(1))/static_cast<scalar>(3)) / denom;
+        constexpr auto sqr = static_cast<scalar>(1) - v;
+        return static_cast<scalar>(1) / (static_cast<scalar>(30) * sqr * sqr * v * v);
     }
 }
 
