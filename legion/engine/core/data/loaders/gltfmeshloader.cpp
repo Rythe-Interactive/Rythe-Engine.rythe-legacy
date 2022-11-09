@@ -19,7 +19,7 @@ namespace legion::core
          * @param bufferView - the tinygltf::BufferView containing information about data size and offset
          * @param data - std::Vector<T> where the buffer is going to be copied into. The vector will be resized to vector.size()+(tinygltf data size)
          */
-        template<typename T>
+        template<typename T, typename ReadAs = T>
         static void handleGltfBuffer(const tinygltf::Model& model, const tinygltf::Accessor& accessor, std::vector<T>& data)
         {
             const tinygltf::BufferView& bufferView = model.bufferViews.at(static_cast<size_type>(accessor.bufferView));
@@ -32,7 +32,7 @@ namespace legion::core
             data.reserve(dataStart + accessor.count);
 
             for (size_t i = bufferStart; i < bufferEnd; i += stride)
-                data.push_back(*reinterpret_cast<const T*>(&buffer.data[i]));
+                data.push_back(static_cast<T>(*reinterpret_cast<const ReadAs*>(&buffer.data[i])));
 
             if (accessor.sparse.isSparse)
             {
@@ -48,7 +48,7 @@ namespace legion::core
                 const auto& valueView = model.bufferViews.at(static_cast<size_type>(values.bufferView));
                 const auto& valueBuffer = model.buffers.at(static_cast<size_type>(valueView.buffer));
                 const size_type valueStart = valueView.byteOffset + static_cast<size_type>(values.byteOffset);
-                const size_type valueStride = (valueView.byteStride == 0 ? sizeof(T) : valueView.byteStride);
+                const size_type valueStride = (valueView.byteStride == 0 ? sizeof(ReadAs) : valueView.byteStride);
 
                 size_type indexPos = indexStart;
                 size_type valuePos = valueStart;
@@ -56,7 +56,7 @@ namespace legion::core
                 for (int i = 0; i < sparse.count; i++)
                 {
                     const uint16* idx = reinterpret_cast<const uint16*>(&indexBuffer.data[indexPos]);
-                    data.at(dataStart + *idx) = *reinterpret_cast<const T*>(&valueBuffer.data[valuePos]);
+                    data.at(dataStart + *idx) = static_cast<T>(*reinterpret_cast<const ReadAs*>(&valueBuffer.data[valuePos]));
 
                     indexPos += indexStride;
                     valuePos += valueStride;
@@ -511,12 +511,12 @@ namespace legion::core
                     else if (attrib.first.compare("JOINTS_0") == 0)
                     {
                         // Vertex joint data
-                        detail::handleGltfBuffer<math::vec3>(model, accessor, meshData.jointIDs);
+                        detail::handleGltfBuffer<math::uvec4, math::u16vec4>(model, accessor, meshData.jointIDs);
                     }
                     else if (attrib.first.compare("WEIGHTS_0") == 0)
                     {
                         // Vertex weight data
-                        detail::handleGltfBuffer<math::vec3>(model, accessor, meshData.weights);
+                        detail::handleGltfBuffer<math::vec4>(model, accessor, meshData.weights);
                     }
                     else
                     {
@@ -530,6 +530,8 @@ namespace legion::core
                 meshData.normals.reserve(vertexCount);
                 meshData.uvs.reserve(vertexCount);
                 meshData.colors.reserve(vertexCount);
+                meshData.jointIDs.reserve(vertexCount);
+                meshData.weights.reserve(vertexCount);
 
                 for (size_type i = smallestBufferSize; i < vertexCount; ++i)
                 {
@@ -541,6 +543,12 @@ namespace legion::core
 
                     if (meshData.colors.size() == i)
                         meshData.colors.push_back(core::math::colors::white);
+
+                    if (meshData.jointIDs.size() == i)
+                        meshData.jointIDs.push_back(math::vec4(0, 0, 0, 0));
+
+                    if (meshData.weights.size() == i)
+                        meshData.weights.push_back(math::vec4(0, 0, 0, 0));
                 }
 
                 // Find the indices of our mesh and copy them into meshData.indices
@@ -574,7 +582,7 @@ namespace legion::core
             return { common::success, warnings };
         }
 
-        static common::result<void, void> handleGltfJoint(joint& parentJoint, const tinygltf::Model& model, const tinygltf::Node& node, const math::mat4& parentTransf)
+        static common::result<void, void> handleGltfJoint(joint& parentJoint, const tinygltf::Model& model, const tinygltf::Node& node, const math::mat4& parentTransf, id_type idxOffset)
         {
             std::vector<std::string> warnings;
             auto joints = model.skins[0].joints;
@@ -586,11 +594,13 @@ namespace legion::core
                 joint child;
                 child.name = node.name;
                 child.id = idx;
-                child.localBindTransform = localTransf;
+                child.idOffset = idxOffset;
+                log::debug("Joint IDX{}", child.id);
+                child.localBindTransform = jointTransf;
                 child.animatedTransform = jointTransf;
                 joint& childJoint = parentJoint.children.emplace_back(child);
 
-                auto result = detail::handleGltfJoint(childJoint, model, node, jointTransf);
+                auto result = detail::handleGltfJoint(childJoint, model, node, jointTransf, idxOffset);
                 warnings.insert(warnings.end(), result.warnings().begin(), result.warnings().end());
             }
 
@@ -670,7 +680,7 @@ namespace legion::core
                         transf.scale = scales[timeIdx];
                 }
             }
-            return assets::AssetCache<animation_clip>::createAsLoader<GltfAnimLoader>(hash, anim.name, "", clip);
+            return assets::AssetCache<animation_clip>::createAsLoader<GltfAnimLoader>(hash, "Anim1", "", clip);
         }
 
         static common::result<void, void> loadGLTFSkeleton(const tinygltf::Model& model, int skinIdx, math::mat4 transf)
@@ -686,12 +696,16 @@ namespace legion::core
             auto& rootJoint = skel.rootJoint;
             rootJoint.name = rootNode.name;
             rootJoint.id = rootJointId;
+            rootJoint.idOffset = rootJointId;
+            log::debug("Root IDX{}", rootJointId);
             rootJoint.localBindTransform = rootMat;
             rootJoint.animatedTransform = rootMat;
-
-            auto result = detail::handleGltfJoint(skel.rootJoint, model, rootNode, rootMat);
-            skel.rootJoint.calc_inverse_bind_transf(rootMat);
-            assets::AssetCache<skeleton>::createAsLoader<GltfSkeletonLoader>(hash, rootNode.name, "", skel);
+            //std::vector<math::mat4> invBindMats;
+            //detail::handleGltfBuffer(model, model.accessors[model.skins[skinIdx].inverseBindMatrices], invBindMats);
+            auto result = detail::handleGltfJoint(skel.rootJoint, model, rootNode, rootMat, rootJointId);
+            //skel.rootJoint.set_inv_bind_mats(invBindMats);
+            skel.rootJoint.calc_inverse_bind_transf(math::mat4(1.0f));
+            assets::AssetCache<skeleton>::createAsLoader<GltfSkeletonLoader>(hash, rootJoint.name, "", skel);
             warnings.insert(warnings.end(), result.warnings().begin(), result.warnings().end());
             return { common::success, warnings };
         }

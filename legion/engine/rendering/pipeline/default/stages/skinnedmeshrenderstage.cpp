@@ -8,6 +8,10 @@ namespace legion::rendering
 {
     void SkinnedMeshRenderStage::setup(app::window& context)
     {
+        app::context_guard guard(context);
+        buffer& jointsBuffer = *create_meta<buffer>("joint transforms");
+        jointsBuffer = buffer(GL_SHADER_STORAGE_BUFFER, sizeof(math::mat4) * 50, nullptr, GL_DYNAMIC_DRAW);
+        jointsBuffer.bindBufferBase(1);
     }
 
     void SkinnedMeshRenderStage::render(app::window& context, camera& cam, const camera::camera_input& camInput, time::span deltaTime)
@@ -20,6 +24,7 @@ namespace legion::rendering
         static id_type lightCountId = nameHash("light count");
         static id_type matricesId = nameHash("model matrix buffer");
         static id_type entityBufferId = nameHash("entity id buffer");
+        static id_type jointTransformsId = nameHash("joint transforms");
 
         auto* batches = get_meta<sparse_map<material_handle, sparse_map<model_handle, std::pair<std::vector<id_type>, std::vector<skinned_mesh_data>>>>>(batchesId);
         if (!batches)
@@ -39,6 +44,10 @@ namespace legion::rendering
 
         buffer* entityIdBuffer = get_meta<buffer>(entityBufferId);
         if (!entityIdBuffer)
+            return;
+
+        buffer* jointsBuffer = get_meta<buffer>(jointTransformsId);
+        if (!jointsBuffer)
             return;
 
         auto* fbo = getFramebuffer(mainId);
@@ -180,19 +189,18 @@ namespace legion::rendering
                         }
                         modelMatrixBuffer->bufferData(mats);
 
-
-                        skinned_mesh_data data = instances.second[0];
-
-                        GLuint programId = shader.get_variant(mater.current_variant()).programId;
-                        int jointLoc = glGetUniformLocation(programId, "jointTransforms");
-                        glUniformMatrix4fv(jointLoc, data.jointTransforms.size(), GL_FALSE, math::value_ptr(data.jointTransforms[0]));
-
                         {
                             mesh.vertexArray.bind();
                             mesh.indexBuffer.bind();
                             lightsBuffer->bind();
+                            jointsBuffer->bind();
+
+                            skinned_mesh_data data = instances.second[0];
+                            jointsBuffer->bufferData(data.jointTransforms);
+
                             glDrawElementsInstanced(GL_TRIANGLES, (GLuint)submesh.indexCount, GL_UNSIGNED_INT, (GLvoid*)(submesh.indexOffset * sizeof(uint)), (GLsizei)instances.second.size());
 
+                            jointsBuffer->release();
                             lightsBuffer->release();
                             mesh.indexBuffer.release();
                             mesh.vertexArray.release();
@@ -274,19 +282,22 @@ namespace legion::rendering
                 }
                 modelMatrixBuffer->bufferData(mats);
 
-                skinned_mesh_data skinData = instances.second[0];
 
-                GLuint programId = shader.get_variant(material.current_variant()).programId;
-                int jointLoc = glGetUniformLocation(programId, "jointTransforms");
-                glUniformMatrix4fv(jointLoc, skinData.jointTransforms.size(), GL_FALSE, math::value_ptr(skinData.jointTransforms[0]));
+
 
                 {
                     mesh.vertexArray.bind();
                     mesh.indexBuffer.bind();
                     lightsBuffer->bind();
+                    jointsBuffer->bind();
+
+                    skinned_mesh_data data = instances.second[0];
+                    jointsBuffer->bufferData(data.jointTransforms);
+
                     for (auto submesh : mesh.submeshes)
                         glDrawElementsInstanced(GL_TRIANGLES, (GLuint)submesh.indexCount, GL_UNSIGNED_INT, (GLvoid*)(submesh.indexOffset * sizeof(uint)), (GLsizei)instances.second.size());
 
+                    jointsBuffer->release();
                     lightsBuffer->release();
                     mesh.indexBuffer.release();
                     mesh.vertexArray.release();

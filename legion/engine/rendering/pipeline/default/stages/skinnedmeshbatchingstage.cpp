@@ -66,26 +66,53 @@ namespace  legion::rendering
             {
                 auto poolSize = (schd::Scheduler::jobPoolSize() + 1) * 2;
                 size_type jobSize = math::iround(math::ceil(entityList.size() / static_cast<float>(poolSize)));
-
-                queueJobs(poolSize, [&](id_type jobId)
+                for (size_type i = 0; i < entityList.size(); i++)
+                {
+                    auto ent = ecs::Registry::getEntity(entityList[i]);
+                    skinnedMeshData[i].get().rootMat = transform(ent.get_component<transform>()).to_world_matrix();
+                    if (ent.has_component<animator>())
                     {
-                        auto start = jobId * jobSize;
-                        auto end = start + jobSize;
-                        if (end > entityList.size())
-                            end = entityList.size();
-                        for (size_type i = start; i < end; i++)
+                        animator& anim = ent.get_component<animator>();
+                        auto skeleton = anim.skeleton;
+                        if (skeleton)
                         {
-                            auto ent = ecs::Registry::getEntity(entityList[i]);
-                            skinnedMeshData[i].get().rootMat = transform(ent.get_component<transform>()).to_world_matrix();
-                            auto mesh = ent.get_component<mesh_filter>()->shared_mesh;
-                            skinnedMeshData[i].get().jointIndeces = std::vector<math::vec3>(mesh->jointIDs);
-                            skinnedMeshData[i].get().weights = std::vector<math::vec3>(mesh->weights);
-                            auto skinnedRenderer = ent.get_component<skinned_mesh_renderer>();
-                            assets::asset<skeleton> skeleton = skinnedRenderer->m_skeleton;
                             skinnedMeshData[i].get().jointTransforms = std::vector<math::mat4>(skeleton->rootJoint.get_joint_transforms());
                         }
+                        else
+                        {
+                            log::debug("skeleton is null");
+                        }
                     }
-                ).wait();
+                }
+                //queueJobs(poolSize, [&](id_type jobId)
+                //    {
+                //        auto start = jobId * jobSize;
+                //        auto end = start + jobSize;
+                //        if (end > entityList.size())
+                //            end = entityList.size();
+                //        for (size_type i = start; i < end; i++)
+                //        {
+                //            auto ent = ecs::Registry::getEntity(entityList[i]);
+                //            skinnedMeshData[i].get().rootMat = transform(ent.get_component<transform>()).to_world_matrix();
+                //            if (ent.has_component<animator>())
+                //            {
+                //                auto anim = ent.get_component<animator>();
+                //                if (anim)
+                //                {
+                //                    auto skeleton = anim->skeleton;
+                //                    if (!skeleton)
+                //                    {
+                //                        skinnedMeshData[i].get().jointTransforms = std::vector<math::mat4>(skeleton->rootJoint.get_joint_transforms());
+                //                    }
+                //                    else
+                //                    {
+                //                        log::debug("skeleton is null");
+                //                    }
+                //                }
+                //            }
+                //        }
+                //    }
+                //).wait();
             }
         }
     }

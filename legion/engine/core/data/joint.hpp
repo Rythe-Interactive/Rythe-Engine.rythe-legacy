@@ -8,6 +8,7 @@ namespace legion::core
     struct joint
     {
         id_type id;
+        id_type idOffset;
         std::string name;
         std::vector<joint> children;
         math::mat4 animatedTransform;//represents a joints transformation from old to new position
@@ -20,9 +21,9 @@ namespace legion::core
         ~joint() = default;
 
         void calc_inverse_bind_transf(math::mat4 parentBindTransf);
+        void set_inv_bind_mats(std::vector<math::mat4>& invBindMats);
 
         void apply_pose(std::unordered_map<size_type, math::mat4> currentPose, math::mat4 parentTransf);
-        void apply_pose(std::vector<math::mat4> currentPose, math::mat4 parentTransf);
         std::vector<math::mat4> get_joint_transforms();
         id_type get_max_id();
         void get_joint_internal(std::vector<math::mat4>& list);

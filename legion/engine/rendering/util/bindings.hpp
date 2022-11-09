@@ -19,7 +19,7 @@
 /* in 9  */  #define SV_ENTITYID       SV_WEIGHTS + 1
 /* in 10  */  #define SV_MODELMATRIX    SV_ENTITYID + 1 
 
-/* uniform 10  */  #define SV_VIEW           SV_MODELMATRIX + 4
+/* uniform 10  */  #define SV_VIEW           SV_MODELMATRIX + 4 
 /* uniform 11 */  #define SV_PROJECT        SV_VIEW + 1
 /* uniform 12 */  #define SV_CAMPOS         SV_PROJECT + 1
 /* uniform 13 */  #define SV_VIEWDIR        SV_CAMPOS + 1

@@ -100,10 +100,10 @@ namespace legion::rendering
         model.vertexArray.setAttribPointer(model.uvBuffer, SV_TEXCOORD0, 2, GL_FLOAT, false, 0, 0);
 
         model.jointIdBuffer = buffer(GL_ARRAY_BUFFER, mesh_handle->jointIDs, GL_STATIC_DRAW);
-        model.vertexArray.setAttribPointer(model.jointIdBuffer, SV_INDECES, 3, GL_INT, false, 0, 0);
+        model.vertexArray.setAttribPointer(model.jointIdBuffer, SV_INDECES, 4, GL_UNSIGNED_INT, false, 0, 0);
 
         model.weightBuffer = buffer(GL_ARRAY_BUFFER, mesh_handle->weights, GL_STATIC_DRAW);
-        model.vertexArray.setAttribPointer(model.weightBuffer, SV_WEIGHTS, 3, GL_FLOAT, true, 0, 0);
+        model.vertexArray.setAttribPointer(model.weightBuffer, SV_WEIGHTS, 4, GL_FLOAT, false, 0, 0);
 
         model.vertexArray.setAttribPointer(entityBuffer, SV_ENTITYID, 2, GL_UNSIGNED_INT, false, 0, 0);
         model.vertexArray.setAttribDivisor(SV_ENTITYID, 1);

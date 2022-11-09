@@ -61,9 +61,10 @@ public:
             auto ent = createEntity("Rigged Model");
             ent.add_component<transform>();
             gfx::skinned_mesh_renderer& skinned = ent.add_component(gfx::skinned_mesh_renderer(material, riggedMesh));
-            animator& anim = ent.add_component<animator>(animator{ "Anim_0" });
-            anim.skeleton = assets::AssetCache<skeleton>::get("Node_3");
-            skinned.m_skeleton = anim.skeleton;
+            auto clips = assets::AssetCache<animation_clip>().getAll();
+            animator& anim = ent.add_component<animator>(animator{ "" });
+            auto rigs = assets::AssetCache<skeleton>().getAll();
+            anim.skeleton = assets::AssetCache<skeleton>::get("");
         }
 
         /*{
@@ -577,14 +578,14 @@ public:
             timer.start();
             firstFrame = false;
         }
-
-        if (GuiTestSystem::selected != invalid_id)
-        {
-            if (GuiTestSystem::selected.has_component<animator>())
-            {
-                auto& rig = GuiTestSystem::selected.get_component<animator>()->skeleton->rootJoint;
-                debug_skeleton(rig);
-            }
-        }
+        debug_skeleton(assets::AssetCache<skeleton>().get("")->rootJoint);
+        //if (GuiTestSystem::selected != invalid_id)
+        //{
+        //    if (GuiTestSystem::selected.has_component<animator>())
+        //    {
+        //        auto& rig = GuiTestSystem::selected.get_component<animator>()->skeleton->rootJoint;
+        //        debug_skeleton(rig);
+        //    }
+        //}
     }
 };

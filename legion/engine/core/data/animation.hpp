@@ -38,6 +38,7 @@ namespace legion::core
     {
     public:
         animator() = default;
+        animator(assets::asset<animation_clip> clip, assets::asset<skeleton> rig) : activeClip(clip), skeleton(rig) {};
         animator(std::string clipName) : activeClip(assets::AssetCache<animation_clip>().get(clipName)) {};
         ~animator() = default;
 

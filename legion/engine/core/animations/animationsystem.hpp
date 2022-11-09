@@ -12,7 +12,7 @@ namespace legion::core
     public:
         void setup();
         void update(time::span deltaTime);
-        void apply_pose(joint& parentJoint, std::unordered_map<size_type, math::mat4> currentPose, math::mat4 parentTransf);
+        //void apply_pose(joint& parentJoint, std::unordered_map<size_type, math::mat4> currentPose, math::mat4 parentTransf);
         void shutdown();
     };
 }

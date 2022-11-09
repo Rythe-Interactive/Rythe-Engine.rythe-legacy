@@ -68,8 +68,8 @@ namespace legion::core
         std::vector<math::vec3> normals;
         std::vector<math::vec2> uvs;
         std::vector<math::vec3> tangents;
-        std::vector<math::vec3> jointIDs;
-        std::vector<math::vec3> weights;
+        std::vector<math::uvec4> jointIDs;
+        std::vector<math::vec4> weights;
         std::vector<uint> indices;
         std::vector<material_data> materials;
         std::vector<math::mat4> invBindMats;
