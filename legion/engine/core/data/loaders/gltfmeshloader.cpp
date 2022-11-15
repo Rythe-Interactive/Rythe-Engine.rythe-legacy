@@ -582,14 +582,14 @@ namespace legion::core
             return { common::success, warnings };
         }
 
-        static common::result<void, void> handleGltfJoint(joint& parentJoint, const tinygltf::Model& model, const tinygltf::Node& node, const math::mat4& parentTransf, id_type idxOffset)
+        static common::result<void, void> handleGltfJoint(joint& parentJoint, const tinygltf::Model& model, const tinygltf::Node& node, id_type idxOffset)
         {
             std::vector<std::string> warnings;
             auto joints = model.skins[0].joints;
             for (int idx : node.children)
             {
                 auto localTransf = detail::getGltfNodeTransform(model.nodes[idx]);
-                auto jointTransf = parentTransf * localTransf;
+                auto jointTransf = parentJoint.localBindTransform * localTransf;
                 auto node = model.nodes[idx];
                 joint child;
                 child.name = node.name;
@@ -600,7 +600,7 @@ namespace legion::core
                 child.animatedTransform = jointTransf;
                 joint& childJoint = parentJoint.children.emplace_back(child);
 
-                auto result = detail::handleGltfJoint(childJoint, model, node, jointTransf, idxOffset);
+                auto result = detail::handleGltfJoint(childJoint, model, node, idxOffset);
                 warnings.insert(warnings.end(), result.warnings().begin(), result.warnings().end());
             }
 
@@ -633,7 +633,7 @@ namespace legion::core
         {
             animation_clip clip;
             clip.name = anim.name;
-            const auto hash = nameHash(clip.name);
+            const auto hash = nameHash("Anim");
 
             auto channelCount = anim.channels.size();
             for (size_type idx = 0; idx < channelCount; idx++)
@@ -680,7 +680,7 @@ namespace legion::core
                         transf.scale = scales[timeIdx];
                 }
             }
-            return assets::AssetCache<animation_clip>::createAsLoader<GltfAnimLoader>(hash, "Anim1", "", clip);
+            return assets::AssetCache<animation_clip>::createAsLoader<GltfAnimLoader>(hash, "Anim", "", clip);
         }
 
         static common::result<void, void> loadGLTFSkeleton(const tinygltf::Model& model, int skinIdx, math::mat4 transf)
@@ -690,22 +690,23 @@ namespace legion::core
             auto joints = model.skins[skinIdx].joints;
             const size_type rootJointId = joints[0];
             const tinygltf::Node& rootNode = model.nodes[rootJointId];
-            const auto hash = nameHash(rootNode.name);
-
-            math::mat4 rootMat = transf * detail::getGltfNodeTransform(rootNode);
+            const auto hash = nameHash("Rig");
+            auto localTransf = detail::getGltfNodeTransform(model.nodes[rootJointId]);
+            auto rootTransf = (transf) * localTransf;
             auto& rootJoint = skel.rootJoint;
             rootJoint.name = rootNode.name;
             rootJoint.id = rootJointId;
             rootJoint.idOffset = rootJointId;
             log::debug("Root IDX{}", rootJointId);
-            rootJoint.localBindTransform = rootMat;
-            rootJoint.animatedTransform = rootMat;
+            rootJoint.localBindTransform = rootTransf;
+            rootJoint.animatedTransform = rootTransf;
+
+            auto result = detail::handleGltfJoint(skel.rootJoint, model, rootNode, rootJointId);
             //std::vector<math::mat4> invBindMats;
             //detail::handleGltfBuffer(model, model.accessors[model.skins[skinIdx].inverseBindMatrices], invBindMats);
-            auto result = detail::handleGltfJoint(skel.rootJoint, model, rootNode, rootMat, rootJointId);
             //skel.rootJoint.set_inv_bind_mats(invBindMats);
-            skel.rootJoint.calc_inverse_bind_transf(math::mat4(1.0f));
-            assets::AssetCache<skeleton>::createAsLoader<GltfSkeletonLoader>(hash, rootJoint.name, "", skel);
+            skel.rootJoint.calc_inverse_bind_transf(rootTransf);
+            assets::AssetCache<skeleton>::createAsLoader<GltfSkeletonLoader>(hash, "Rig", "", skel);
             warnings.insert(warnings.end(), result.warnings().begin(), result.warnings().end());
             return { common::success, warnings };
         }
@@ -714,7 +715,8 @@ namespace legion::core
         {
             std::vector<std::string> warnings;
 
-            auto transf = parentTransf * detail::getGltfNodeTransform(node);
+            auto localTransf = detail::getGltfNodeTransform(node);
+            auto transf = parentTransf * localTransf;
 
             const size_type meshIdx = static_cast<size_type>(node.mesh);
 

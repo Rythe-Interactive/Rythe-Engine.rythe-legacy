@@ -7,7 +7,7 @@ namespace legion::core
         math::mat4 bindTransf = parentBindTransf * localBindTransform;
         invBindTransform = math::inverse(bindTransf);
         for (joint& j : children)
-            j.calc_inverse_bind_transf(bindTransf);
+            j.calc_inverse_bind_transf(localBindTransform);
     }
 
     void joint::set_inv_bind_mats(std::vector<math::mat4>& invBindMats)
@@ -20,12 +20,10 @@ namespace legion::core
     void joint::apply_pose(std::unordered_map<size_type, math::mat4> currentPose, math::mat4 parentTransf)
     {
         math::mat4 localTransf = currentPose[id];
-        math::mat4 transf = parentTransf * localTransf;
+        math::mat4 transf = parentTransf * localBindTransform * localTransf;
         for (joint& j : children)
             j.apply_pose(currentPose, transf);
-
-        transf = transf * invBindTransform;
-        animatedTransform = transf;
+        animatedTransform = transf * invBindTransform;
     }
 
     std::vector<math::mat4> joint::get_joint_transforms()

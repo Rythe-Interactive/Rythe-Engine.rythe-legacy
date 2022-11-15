@@ -15,24 +15,31 @@ shader(vertex)
 
     void main(void)
     {
-        vec4 totalLocalPos = vec4(0.0);
-        vec4 totalNormal = vec4(0.0);
+        // vec4 totalLocalPos = vec4(0.0);
+        // vec4 totalNormal = vec4(0.0);
 
-        for(int i = 0; i < 4; i++)
-        {
-            mat4 jointTransform = jointTransforms[jointIndeces[i]];
+        // for(int i = 0; i < 4; i++)
+        // {
+        //     mat4 jointTransform = jointTransforms[jointIndeces[i]];
 
-            vec4 posePosition = jointTransform * vec4(stdin(position), 1.0);
-            totalLocalPos += posePosition * weights[i];
+        //     vec4 posePosition = jointTransform * vec4(stdin(position), 1.0);
+        //     totalLocalPos += posePosition * weights[i];
 
-            vec4 worldNormal = jointTransform * vec4(stdin(normal), 1.0);
-            totalNormal += worldNormal * weights[i];
-        }
+        //     vec4 worldNormal = jointTransform * vec4(stdin(normal), 1.0);
+        //     totalNormal += worldNormal * weights[i];
+        // }
+
+        mat4 skinMat =
+            weights.x * jointTransforms[int(jointIndeces.x)] +
+            weights.y * jointTransforms[int(jointIndeces.y)] +
+            weights.z * jointTransforms[int(jointIndeces.z)] +
+            weights.w * jointTransforms[int(jointIndeces.w)];
+        vec4 worldPosition = skinMat * vec4(stdin(position), 1.0);
  
-
-        PropagateStdIO(totalLocalPos.xyz, totalNormal.xyz);
-        gl_Position = WorldToScreenSpacePosition(totalLocalPos.xyz);
-        lgn_stdio.vertexcolor = vec4(jointIndeces.x,0.0,0.0,1.0);
+        gl_Position = WorldToScreenSpacePosition(worldPosition.xyz);
+        PropagateStdIO();
+        lgn_stdio.wvertex = worldPosition.xyz;
+        lgn_stdio.vertexcolor = vec4(vec3(jointIndeces),1.0);
     }
 }
 
@@ -41,6 +48,6 @@ shader(fragment)
     uniform vec4 color = vec4(1.0);
     void main(void)
     {
-        SubmitOutput(vec4(stdin(vertexcolor.rrr)/vec3(18),1.0));
+        SubmitOutput(vec4(vec3(stdin(vertexcolor.xyz)/vec3(18.0)),1.0));
     }
 }

@@ -39,7 +39,7 @@ namespace legion::core
                 anim.frame++;
 
             transform transf = ent.get_component<transform>();
-            rig.apply_pose(currentPose, math::mat4(1.0f));
+            rig.apply_pose(currentPose, math::mat4(1.f));
             if (!anim.play)
                 continue;
             anim.time += deltaTime / 2.f;

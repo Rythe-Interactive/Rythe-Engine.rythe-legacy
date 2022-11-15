@@ -54,17 +54,17 @@ public:
 
         auto model = gfx::ModelCache::create_model("Sphere", fs::view("assets://models/sphere.obj"));
 
-        auto riggedMesh = gfx::ModelCache::create_model("RiggedModel", fs::view("assets://models/BrainStem.gltf"));
+        auto riggedMesh = gfx::ModelCache::create_model("RiggedModel", fs::view("assets://models/RiggedSimple.gltf"));
 
         {
             material = gfx::MaterialCache::create_material("Animated", fs::view("assets://shaders/animatedmesh.shs"));
             auto ent = createEntity("Rigged Model");
             ent.add_component<transform>();
             gfx::skinned_mesh_renderer& skinned = ent.add_component(gfx::skinned_mesh_renderer(material, riggedMesh));
-            auto clips = assets::AssetCache<animation_clip>().getAll();
-            animator& anim = ent.add_component<animator>(animator{ "" });
-            auto rigs = assets::AssetCache<skeleton>().getAll();
-            anim.skeleton = assets::AssetCache<skeleton>::get("");
+            //auto clips = assets::AssetCache<animation_clip>().getAll();
+            animator& anim = ent.add_component<animator>(animator{ assets::AssetCache<animation_clip>::get("Anim"), assets::AssetCache<skeleton>::get("Rig") });
+            //auto rigs = assets::AssetCache<skeleton>().getAll();
+            //anim.skeleton = assets::AssetCache<skeleton>::get("Bone");
         }
 
         /*{
@@ -323,15 +323,17 @@ public:
         math::vec3 pos;
         math::quat rot;
         math::vec3 scal;
-        math::decompose(parentJoint.animatedTransform, scal, rot, pos);
+        math::decompose(parentJoint.localBindTransform, scal, rot, pos);
+        auto jointCount = parentJoint.get_max_id() - parentJoint.idOffset;
         for (joint& j : parentJoint.children)
         {
             debug_skeleton(j, debugColor);
             math::vec3 c_pos;
             math::quat c_rot;
             math::vec3 c_scal;
-            math::decompose(j.animatedTransform, c_scal, c_rot, c_pos);
+            math::decompose(j.localBindTransform, c_scal, c_rot, c_pos);
             debug::drawLine(pos, c_pos, debugColor, 1.0f);
+            debug::drawLine(math::vec3(0.0f), c_pos, math::color((float)(j.id - j.idOffset) / (float)jointCount, (float)(j.id - j.idOffset) / (float)jointCount, (float)(j.id - j.idOffset) / (float)jointCount), 1.0f);
         }
     }
 
@@ -578,7 +580,7 @@ public:
             timer.start();
             firstFrame = false;
         }
-        debug_skeleton(assets::AssetCache<skeleton>().get("")->rootJoint);
+        debug_skeleton(assets::AssetCache<skeleton>().get("Rig")->rootJoint);
         //if (GuiTestSystem::selected != invalid_id)
         //{
         //    if (GuiTestSystem::selected.has_component<animator>())

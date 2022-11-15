@@ -32,6 +32,8 @@ namespace legion::core
     struct skeleton
     {
         joint rootJoint;
+        size_type jointCount = 0;
+        std::vector<joint> joints;
         std::vector<math::mat4> jointTransforms;
     };
 

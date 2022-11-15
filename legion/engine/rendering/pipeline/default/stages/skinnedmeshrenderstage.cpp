@@ -282,18 +282,16 @@ namespace legion::rendering
                 }
                 modelMatrixBuffer->bufferData(mats);
 
-
-
-
                 {
                     mesh.vertexArray.bind();
                     mesh.indexBuffer.bind();
                     lightsBuffer->bind();
                     jointsBuffer->bind();
 
-                    skinned_mesh_data data = instances.second[0];
+                    skinned_mesh_data& data = instances.second[0];
                     jointsBuffer->bufferData(data.jointTransforms);
 
+                    //log::debug("Number of Submeshes: {}", mesh.submeshes.size());
                     for (auto submesh : mesh.submeshes)
                         glDrawElementsInstanced(GL_TRIANGLES, (GLuint)submesh.indexCount, GL_UNSIGNED_INT, (GLvoid*)(submesh.indexOffset * sizeof(uint)), (GLsizei)instances.second.size());
 

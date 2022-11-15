@@ -76,6 +76,7 @@ namespace  legion::rendering
                         auto skeleton = anim.skeleton;
                         if (skeleton)
                         {
+                            //skinnedMeshData[i].get().rootMat = skeleton->rootJoint.localBindTransform;
                             skinnedMeshData[i].get().jointTransforms = std::vector<math::mat4>(skeleton->rootJoint.get_joint_transforms());
                         }
                         else
