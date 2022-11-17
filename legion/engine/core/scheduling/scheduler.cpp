@@ -224,7 +224,7 @@ namespace legion::core::scheduling
                 {
                     bestPollTime = pollTime;
                     bestAvg = avg;
-                    pollTime += (math::linearRand<int8>(0, 1) ? 0.05f : -0.05f);
+                    pollTime += (math::linear_rand<bool>(0, 1) ? 0.05f : -0.05f);
                     pollTime = math::mod(pollTime + 1.f, 1.f);
                 }
                 else if (math::close_enough(bestPollTime, pollTime))
@@ -232,7 +232,7 @@ namespace legion::core::scheduling
                     if (avg < static_cast<uint>(static_cast<float>(bestAvg) * 0.9f))
                         bestAvg = 0;
 
-                    pollTime += (math::linearRand<int8>(0, 1) ? 0.05f : -0.05f);
+                    pollTime += (math::linear_rand<bool>(0, 1) ? 0.05f : -0.05f);
                     pollTime = math::mod(pollTime + 1.f, 1.f);
                 }
                 else

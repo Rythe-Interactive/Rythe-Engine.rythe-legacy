@@ -9,13 +9,13 @@ namespace legion::physics
 
     struct HalfEdgeFace
     {
-        math::vec3 normal;
-        math::vec3 centroid;
+        math::float3 normal;
+        math::float3 centroid;
 
         HalfEdgeEdge* startEdge = nullptr;
         ColliderFaceToVert* faceToVert = nullptr; 
         
-        HalfEdgeFace(HalfEdgeEdge* newStartEdge, math::vec3 newNormal);
+        HalfEdgeFace(HalfEdgeEdge* newStartEdge, math::float3 newNormal);
 
         /**@brief Given that the face has a startEdge,a normal, and a centroid,
          * initializes the face so that it can be used for collision detection in a convex hull
@@ -40,9 +40,9 @@ namespace legion::physics
          */
         void inverse();
 
-        void DEBUG_DrawFace(const math::mat4& transform, const math::color& debugColor,  float time = 20.0f);
+        void DEBUG_DrawFace(const math::float4x4& transform, const math::color& debugColor,  float time = 20.0f);
 
-        void DEBUG_DirectionDrawFace(const math::mat4& transform, const math::color& debugColor, float time = 20.0f);
+        void DEBUG_DirectionDrawFace(const math::float4x4& transform, const math::color& debugColor, float time = 20.0f);
 
         ~HalfEdgeFace();
     };

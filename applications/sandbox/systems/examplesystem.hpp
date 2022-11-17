@@ -34,7 +34,7 @@ public:
             auto ent = createEntity("Sun");
             ent.add_component(gfx::light::directional(math::color(1, 1, 0.8f), 10.f));
             auto [pos, rot, scal] = ent.add_component<transform>();
-            rot = rotation::lookat(math::vec3::zero, math::vec3(-1, -1, -1));
+            rot = rotation::look_at(math::float3::zero, math::float3(-1, -1, -1));
         }
 
 #if defined(LEGION_DEBUG)
@@ -46,7 +46,7 @@ public:
             auto ent = createEntity();
 
             auto [pos, rot, scal] = ent.add_component<transform>();
-            pos = math::sphericalRand(5.f);
+            pos = math::spherical_rand(5.f);
             scal = scale(0.1f, 0.1f, 0.1f);
 
             ent.add_component<example_comp, velocity>();
@@ -159,14 +159,14 @@ public:
                         auto& pos = filter[i].get_component<position>().get();
                         auto& vel = filter[i].get_component<velocity>().get();
 
-                        if (vel == math::vec3::zero)
+                        if (vel == math::float3::zero)
                             vel = math::normalize(pos);
 
-                        math::vec3 perp;
+                        math::float3 perp;
 
-                        perp = math::normalize(math::cross(vel, math::vec3::up));
+                        perp = math::normalize(math::cross(vel, math::float3::up));
 
-                        math::vec3 rotated = (math::axisAngleMatrix(vel, math::perlin(pos) * math::pi<float>()) * math::vec4(perp.x, perp.y, perp.z, 0)).xyz();
+                        math::float3 rotated = (math::axisAngleMatrix(vel, math::perlin(pos) * math::pi()) * math::float4(perp.x, perp.y, perp.z, 0)).xyz();
                         rotated.y -= 0.5f;
                         rotated = math::normalize(rotated);
 
@@ -174,9 +174,9 @@ public:
 
                         if (math::abs(vel.y) >= 0.9f)
                         {
-                            auto rand = math::circularRand(1.f);
+                            auto rand = math::circular_rand(1.f);
                             vel.y = 0.9f;
-                            vel = math::normalize(vel + math::vec3(rand.x, 0.f, rand.y));
+                            vel = math::normalize(vel + math::float3(rand.x, 0.f, rand.y));
                         }
 
                         pos += vel * 0.3f * dt;

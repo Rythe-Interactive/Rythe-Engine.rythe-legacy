@@ -5,7 +5,7 @@
 
 namespace legion::physics
 {
-    HalfEdgeEdge::HalfEdgeEdge(math::vec3 newEdgePositionPtr) : edgePosition{ newEdgePositionPtr } {}
+    HalfEdgeEdge::HalfEdgeEdge(math::float3 newEdgePositionPtr) : edgePosition{ newEdgePositionPtr } {}
 
     void HalfEdgeEdge::setNextAndPrevEdge(HalfEdgeEdge* newPrevEdge, HalfEdgeEdge* newNextEdge)
     {
@@ -31,20 +31,20 @@ namespace legion::physics
         edge->pairingEdge = this;
     }
 
-    math::vec3 HalfEdgeEdge::getLocalNormal() const
+    math::float3 HalfEdgeEdge::getLocalNormal() const
     {
         return face->normal;
     }
 
     void HalfEdgeEdge::calculateRobustEdgeDirection() 
     {
-        math::vec3 firstNormal = face->normal;
-        math::vec3 secondNormal = pairingEdge->face->normal;
+        math::float3 firstNormal = face->normal;
+        math::float3 secondNormal = pairingEdge->face->normal;
 
         robustEdgeDirection = math::cross(firstNormal, secondNormal);
     }
 
-    bool HalfEdgeEdge::isVertexVisible(const math::vec3& vert,float epsilon)
+    bool HalfEdgeEdge::isVertexVisible(const math::float3& vert,float epsilon)
     {
         float distanceToPlane =
             math::pointToPlane(vert, face->centroid, face->normal);
@@ -52,51 +52,51 @@ namespace legion::physics
         return distanceToPlane > epsilon;
     }
 
-    bool HalfEdgeEdge::isEdgeHorizonFromVertex(const math::vec3& vert, float epsilon)
+    bool HalfEdgeEdge::isEdgeHorizonFromVertex(const math::float3& vert, float epsilon)
     {
         return isVertexVisible(vert,epsilon) && !pairingEdge->isVertexVisible(vert,epsilon);
     }
 
-    void HalfEdgeEdge::DEBUG_drawEdge(const math::mat4& transform, const math::color& debugColor, float time, float width)
+    void HalfEdgeEdge::DEBUG_drawEdge(const math::float4x4& transform, const math::color& debugColor, float time, float width)
     {
-        math::vec3 worldStart = transform * math::vec4(edgePosition, 1);
-        math::vec3 worldEnd = transform * math::vec4(nextEdge->edgePosition, 1);
+        math::float3 worldStart = transform * math::float4(edgePosition, 1);
+        math::float3 worldEnd = transform * math::float4(nextEdge->edgePosition, 1);
 
         debug::drawLine(worldStart, worldEnd, debugColor, width, time, true);
     }
 
-    void HalfEdgeEdge::DEBUG_drawInsetEdge(const math::vec3 spacing, const math::color& debugColor, float time, float width)
+    void HalfEdgeEdge::DEBUG_drawInsetEdge(const math::float3 spacing, const math::color& debugColor, float time, float width)
     {
-        math::vec3 worldCentroid = face->centroid + spacing;
+        math::float3 worldCentroid = face->centroid + spacing;
 
-        math::vec3 worldStart = edgePosition + spacing;
-        math::vec3 startDifference = (worldCentroid - worldStart) * 0.1f;
+        math::float3 worldStart = edgePosition + spacing;
+        math::float3 startDifference = (worldCentroid - worldStart) * 0.1f;
 
-        math::vec3 worldEnd = nextEdge->edgePosition + spacing;
-        math::vec3 endDifference = (worldCentroid - worldEnd) * 0.1f;
+        math::float3 worldEnd = nextEdge->edgePosition + spacing;
+        math::float3 endDifference = (worldCentroid - worldEnd) * 0.1f;
 
         debug::drawLine(worldStart + startDifference, worldEnd + endDifference, debugColor, width, time, true);
     }
 
-    void HalfEdgeEdge::DEBUG_directionDrawEdge(const math::mat4& transform, const math::color& debugColor, float time, float width)
+    void HalfEdgeEdge::DEBUG_directionDrawEdge(const math::float4x4& transform, const math::color& debugColor, float time, float width)
     {
-        math::vec3 worldStart = transform * math::vec4(edgePosition, 1);
-        math::vec3 worldEnd = transform * math::vec4(nextEdge->edgePosition, 1);
+        math::float3 worldStart = transform * math::float4(edgePosition, 1);
+        math::float3 worldEnd = transform * math::float4(nextEdge->edgePosition, 1);
 
-        math::vec3 worldCentroid = transform * math::vec4(face->centroid, 1);
+        math::float3 worldCentroid = transform * math::float4(face->centroid, 1);
 
-        math::vec3 startDifference = (worldCentroid - worldStart) * 0.1f;
-        math::vec3 endDifference = (worldCentroid - worldEnd) * 0.1f;
+        math::float3 startDifference = (worldCentroid - worldStart) * 0.1f;
+        math::float3 endDifference = (worldCentroid - worldEnd) * 0.1f;
 
         debug::drawLine(worldStart + startDifference, worldEnd + endDifference, debugColor, width, time, true);
 
-        math::vec3 pointStart = worldStart + startDifference;
-        math::vec3 diff = worldEnd + endDifference - (worldStart + startDifference);
+        math::float3 pointStart = worldStart + startDifference;
+        math::float3 diff = worldEnd + endDifference - (worldStart + startDifference);
 
         debug::drawLine(pointStart + diff * 0.75f, worldCentroid, math::colors::red, width, time, true);
     }
 
-    void HalfEdgeEdge::suicidalMergeWithPairing(std::vector<math::vec3>& unmergedVertices, math::vec3& normal, float scalingEpsilon)
+    void HalfEdgeEdge::suicidalMergeWithPairing(std::vector<math::float3>& unmergedVertices, math::float3& normal, float scalingEpsilon)
     {
         //[1] identify connecting edges of this face and merge face and connect them together
         //[2] Handle possible issue where merging this face and merge faces causes the new face to have 2 edges with the same neighbors
@@ -189,7 +189,7 @@ namespace legion::physics
 
             face->startEdge = prevFromPFC;
 
-            std::vector<math::vec3> vertices;
+            std::vector<math::float3> vertices;
             auto collectVertices = [&vertices](HalfEdgeEdge* currentEdge) { vertices.push_back(currentEdge->edgePosition); };
             face->forEachEdge(collectVertices);
 
@@ -207,7 +207,7 @@ namespace legion::physics
         {
             face->forEachEdge(setEdgeFace);
 
-            math::vec3 norm;
+            math::float3 norm;
             if (PhysicsStatics::isNewellFacesCoplanar(face, prevFromCurrent->pairingEdge->face, prevFromCurrent, scalingEpsilon, norm,2))
             {
                 handleDoubleAdjacentMergeResult(prevFromCurrent, prevFromCurrentConnection);
@@ -218,7 +218,7 @@ namespace legion::physics
         {
             face->forEachEdge(setEdgeFace);
 
-            math::vec3 norm;
+            math::float3 norm;
             if (PhysicsStatics::isNewellFacesCoplanar(face, nextFromCurrent->pairingEdge->face, nextFromCurrentConnection, scalingEpsilon, norm,2))
             {
                 handleDoubleAdjacentMergeResult(nextFromCurrentConnection, nextFromCurrent);

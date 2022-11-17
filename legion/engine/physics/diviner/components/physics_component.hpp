@@ -14,7 +14,7 @@ namespace legion::physics
 
         bool isTrigger =false;
 
-        math::vec3 localCenterOfMass{};
+        math::float3 localCenterOfMass{};
 
         //physics bitmask
 
@@ -26,7 +26,7 @@ namespace legion::physics
         /** @brief Generates a convex collider from the list of vertices given.
          * @param vertices the vertices used to generate the convex hull. The centroid of these vertices is the origin.
         */
-        std::shared_ptr<ConvexCollider> constructConvexHullFromVertices(const std::vector<math::vec3>& vertices);
+        std::shared_ptr<ConvexCollider> constructConvexHullFromVertices(const std::vector<math::float3>& vertices);
 
         /** @brief Instantiates a ConvexCollider and calls ConstructBoxWithMesh on it and passes the given mesh. This
          * ConvexCollider is then added to the list of PhysicsColliders

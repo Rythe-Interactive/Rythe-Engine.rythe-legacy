@@ -7,116 +7,40 @@
 
 namespace legion::core
 {
-    struct position : public math::vec3
+    struct position : public math::float3
     {
-        position() : math::vec3(0, 0, 0) {}
-        position(const position&) = default;
-        position(position&&) = default;
-        position(const math::vec3& src) : math::vec3(src) {}
-        position(float x, float y, float z) : math::vec3(x, y, z) {}
-        position(float v) : math::vec3(v) {}
-        position& operator=(const position&) = default;
-        position& operator=(position&&) = default;
-        position& operator=(const math::vec3& src)
-        {
-            x = src.x;
-            y = src.y;
-            z = src.z;
-            return *this;
-        }
-        position& operator=(math::vec3&& src)
-        {
-            x = src.x;
-            y = src.y;
-            z = src.z;
-            return *this;
-        }
+        position(const math::float3& src) : math::float3(src) {}
+        position& operator=(const math::float3& src) { math::float3::operator=(src); return *this; }
+        position& operator=(math::float3&& src) { math::float3::operator=(src); return *this; }
+
+        using math::float3::vector;
+        using math::float3::operator=;
+        using math::float3::operator[];
     };
 
     struct rotation : public math::quat
     {
-        rotation() : math::quat(1, 0, 0, 0) {}
-        rotation(float w, float x, float y, float z) : math::quat(w, x, y, z) {}
-        rotation(const rotation&) = default;
-        rotation(rotation&&) = default;
         rotation(const math::quat& src) : math::quat(src) {}
-        rotation& operator=(const rotation&) = default;
-        rotation& operator=(rotation&&) = default;
-        rotation& operator=(const math::quat& src)
-        {
-            x = src.x;
-            y = src.y;
-            z = src.z;
-            w = src.w;
-            return *this;
-        }
-        rotation& operator=(math::quat&& src)
-        {
-            x = src.x;
-            y = src.y;
-            z = src.z;
-            w = src.w;
-            return *this;
-        }
+        rotation& operator=(const math::quat& src) { math::quat::operator=(src); return *this; }
+        rotation& operator=(math::quat&& src) { math::quat::operator=(src); return *this; }
 
-        L_NODISCARD math::vec3 right() const
-        {
-            OPTICK_EVENT();
-            return math::toMat3(*this) * math::vec3::right;
-        }
+        using math::quat::quaternion;
+        using math::quat::operator=;
+        using math::quat::operator[];
 
-        L_NODISCARD math::vec3 up() const
-        {
-            OPTICK_EVENT();
-            return math::toMat3(*this) * math::vec3::up;
-        }
-
-        L_NODISCARD math::vec3 forward() const
-        {
-            OPTICK_EVENT();
-            return math::toMat3(*this) * math::vec3::forward;
-        }
-
-        L_NODISCARD math::mat3 matrix() const
-        {
-            OPTICK_EVENT();
-            return math::toMat3(*this);
-        }
-
-        L_NODISCARD static rotation lookat(math::vec3 position, math::vec3 center, math::vec3 up = math::vec3::up);
+        L_NODISCARD static rotation angle_axis(scalar angle, const vec_type& vec) noexcept { return math::quat::angle_axis(angle, vec); }
+        L_NODISCARD static rotation look_at(const vec_type& pos, const vec_type& center, const vec_type& up = vec_type::up) noexcept { return math::quat::look_at(pos, center, up); }
     };
 
-    L_NODISCARD inline rotation rotation::lookat(math::vec3 position, math::vec3 center, math::vec3 up)
+    struct scale : public math::float3
     {
-        OPTICK_EVENT();
-        return math::conjugate(math::normalize(math::toQuat(math::lookAt(position, center, up))));
-    }
+        scale(const math::float3& src) : math::float3(src) {}
+        scale& operator=(const math::float3& src) { math::float3::operator=(src); return *this; }
+        scale& operator=(math::float3&& src) { math::float3::operator=(src); return *this; }
 
-    struct scale : public math::vec3
-    {
-        scale() : math::vec3(1, 1, 1) {}
-        scale(float x, float y, float z) : math::vec3(x, y, z) {}
-        scale(float v) : math::vec3(v) {}
-        scale(const scale&) = default;
-        scale(scale&&) = default;
-        scale(const math::vec3& src) : math::vec3(src) {}
-        scale& operator=(const scale&) = default;
-        scale& operator=(scale&&) = default;
-        scale& operator=(const math::vec3& src)
-        {
-            x = src.x;
-            y = src.y;
-            z = src.z;
-            return *this;
-        }
-        scale& operator=(math::vec3&& src)
-        {
-            x = src.x;
-            y = src.y;
-            z = src.z;
-            return *this;
-        }
-
+        using math::float3::vector;
+        using math::float3::operator=;
+        using math::float3::operator[];
     };
 
     struct transform : public ecs::archetype<position, rotation, scale>
@@ -124,12 +48,12 @@ namespace legion::core
         using base = ecs::archetype<position, rotation, scale>;
         using base::archetype;
 
-        L_NODISCARD math::mat4 from_world_matrix()
+        L_NODISCARD math::float4x4 from_world_matrix()
         {
             return math::inverse(to_world_matrix());
         }
 
-        L_NODISCARD math::mat4 to_world_matrix()
+        L_NODISCARD math::float4x4 to_world_matrix()
         {
             OPTICK_EVENT();
             if (owner->parent)
@@ -141,12 +65,12 @@ namespace legion::core
             return to_parent_matrix();
         }
 
-        L_NODISCARD math::mat4 from_parent_matrix()
+        L_NODISCARD math::float4x4 from_parent_matrix()
         {
             return math::inverse(to_parent_matrix());
         }
 
-        L_NODISCARD math::mat4 to_parent_matrix()
+        L_NODISCARD math::float4x4 to_parent_matrix()
         {
             OPTICK_EVENT();
             auto [position, rotation, scale] = values();
@@ -155,30 +79,15 @@ namespace legion::core
 
     };
 
-    struct velocity : public math::vec3
+    struct velocity : public math::float3
     {
-        velocity() : math::vec3(0, 0, 0) {}
-        velocity(const velocity&) = default;
-        velocity(velocity&&) = default;
-        velocity(const math::vec3& src) : math::vec3(src) {}
-        velocity(float x, float y, float z) : math::vec3(x, y, z) {}
-        velocity(float v) : math::vec3(v) {}
-        velocity& operator=(const velocity&) = default;
-        velocity& operator=(velocity&&) = default;
-        velocity& operator=(const math::vec3& src)
-        {
-            x = src.x;
-            y = src.y;
-            z = src.z;
-            return *this;
-        }
-        velocity& operator=(math::vec3&& src)
-        {
-            x = src.x;
-            y = src.y;
-            z = src.z;
-            return *this;
-        }
+        velocity(const math::float3& src) : math::float3(src) {}
+        velocity& operator=(const math::float3& src) { math::float3::operator=(src); return *this; }
+        velocity& operator=(math::float3&& src) { math::float3::operator=(src); return *this; }
+
+        using math::float3::vector;
+        using math::float3::operator=;
+        using math::float3::operator[];
     };
 
     struct mesh_filter
@@ -192,12 +101,6 @@ namespace legion::core
         bool operator==(const mesh_filter& other) const { return shared_mesh == other.shared_mesh; }
     };
 }
-
-//ManualReflector(legion::core::position, x, y, z);
-//ManualReflector(legion::core::rotation, x, y, z, w);
-//ManualReflector(legion::core::scale, x, y, z);
-//ManualReflector(legion::core::velocity, x, y, z);
-//ManualReflector(legion::core::mesh_filter, shared_mesh);
 
 #if !defined(DOXY_EXCLUDE)
 namespace std // NOLINT(cert-dcl58-cpp)
@@ -261,7 +164,7 @@ namespace fmt
                 ctx.out(),
 
                 presentation == 'f' ? "{:f}" : "{:e}",
-                static_cast<math::vec3>(p));
+                static_cast<math::float3>(p));
         }
     };
 
@@ -286,7 +189,7 @@ namespace fmt
                 ctx.out(),
 
                 presentation == 'f' ? "{:f}" : "{:e}",
-                static_cast<math::vec3>(p));
+                static_cast<math::float3>(p));
         }
     };
 
@@ -336,7 +239,7 @@ namespace fmt
                 ctx.out(),
 
                 presentation == 'f' ? "{:f}" : "{:e}",
-                static_cast<math::vec3>(s));
+                static_cast<math::float3>(s));
         }
     };
 }

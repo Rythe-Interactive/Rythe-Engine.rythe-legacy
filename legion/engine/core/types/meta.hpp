@@ -37,7 +37,7 @@ namespace legion::core
     };                                                                                                                  \
                                                                                                                         \
     template<typename C, typename F>                                                                                    \
-    constexpr bool CONCAT(has_, CONCAT(x, _v)) = CONCAT(has_, x)<C, F>::value;                                   \
+    constexpr bool CONCAT(has_, CONCAT(x, _v)) = CONCAT(has_, x)<C, F>::value;                                          \
                                                                                                                         \
     template<typename, typename T>                                                                                      \
     struct CONCAT(has_static_, x) {                                                                                     \

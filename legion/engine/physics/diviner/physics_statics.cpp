@@ -5,7 +5,7 @@
 namespace legion::physics
 {
     bool PhysicsStatics::FindSeperatingAxisByExtremePointProjection(ConvexCollider* convexA
-        , ConvexCollider* convexB, const math::mat4& transformA, const math::mat4& transformB,
+        , ConvexCollider* convexB, const math::float4x4& transformA, const math::float4x4& transformB,
         PointerEncapsulator<HalfEdgeFace>& refFace,
         float& maximumSeperation, bool shouldDebug )
     {
@@ -13,12 +13,12 @@ namespace legion::physics
 
         for (auto face : convexB->GetHalfEdgeFaces())
         {
-            math::vec3 seperatingAxis = math::normalize(transformB * math::vec4((face->normal), 0));
+            math::float3 seperatingAxis = math::normalize(transformB * math::float4((face->normal), 0));
 
-            math::vec3 transformedPositionB = transformB * math::vec4(face->centroid, 1);
+            math::float3 transformedPositionB = transformB * math::float4(face->centroid, 1);
 
             //get extreme point of other face in normal direction
-            math::vec3 worldSupportPoint; 
+            math::float3 worldSupportPoint; 
             GetSupportPointNoTransform(transformedPositionB, -seperatingAxis,
                 convexA, transformA, worldSupportPoint);
 
@@ -44,7 +44,7 @@ namespace legion::physics
         return false;
     }
 
-    float PhysicsStatics::GetSupportPoint(const std::vector<math::vec3>& vertices, const math::vec3& direction,math::vec3& outVec)
+    float PhysicsStatics::GetSupportPoint(const std::vector<math::float3>& vertices, const math::float3& direction,math::float3& outVec)
     {
         float currentMaximumSupportPoint = std::numeric_limits<float>::lowest();
 
@@ -62,18 +62,18 @@ namespace legion::physics
         return currentMaximumSupportPoint;
     }
 
-    void PhysicsStatics::GetSupportPointNoTransform(math::vec3 planePosition, math::vec3 direction, ConvexCollider* collider, const math::mat4& colliderTransform
-        , math::vec3& worldSupportPoint)
+    void PhysicsStatics::GetSupportPointNoTransform(math::float3 planePosition, math::float3 direction, ConvexCollider* collider, const math::float4x4& colliderTransform
+        , math::float3& worldSupportPoint)
     {
         float largestDistanceInDirection = std::numeric_limits<float>::lowest();
-        planePosition = math::inverse(colliderTransform) * math::vec4(planePosition, 1);
-        direction = math::inverse(colliderTransform) * math::vec4(direction, 0);
+        planePosition = math::inverse(colliderTransform) * math::float4(planePosition, 1);
+        direction = math::inverse(colliderTransform) * math::float4(direction, 0);
 
         const auto& vertices = collider->GetVertices();
 
         for (size_type vertexIndex = 0 ; vertexIndex < vertices.size(); ++vertexIndex)
         {
-            math::vec3 transformedVert = math::vec4(vertices.at(vertexIndex), 1);
+            math::float3 transformedVert = math::float4(vertices.at(vertexIndex), 1);
 
             float dotResult = math::dot(transformedVert - planePosition, direction);
 
@@ -84,17 +84,17 @@ namespace legion::physics
             }
         }
 
-        worldSupportPoint = colliderTransform * math::vec4(worldSupportPoint, 1);
+        worldSupportPoint = colliderTransform * math::float4(worldSupportPoint, 1);
     }
 
-    bool PhysicsStatics::FindSeperatingAxisByGaussMapEdgeCheck(ConvexCollider* convexA, ConvexCollider* convexB, const math::mat4& transformA,
-        const math::mat4& transformB, PointerEncapsulator<HalfEdgeEdge>& refEdge, PointerEncapsulator<HalfEdgeEdge>& incEdge,
-        math::vec3& seperatingAxisFound, float& maximumSeperation, bool shouldDebug)
+    bool PhysicsStatics::FindSeperatingAxisByGaussMapEdgeCheck(ConvexCollider* convexA, ConvexCollider* convexB, const math::float4x4& transformA,
+        const math::float4x4& transformB, PointerEncapsulator<HalfEdgeEdge>& refEdge, PointerEncapsulator<HalfEdgeEdge>& incEdge,
+        math::float3& seperatingAxisFound, float& maximumSeperation, bool shouldDebug)
     {
         float currentMaximumSeperation = std::numeric_limits<float>::lowest();
 
-        math::vec3 centroidDir = transformA * math::vec4(convexA->GetLocalCentroid(), 0);
-        math::vec3 positionA = math::vec3(transformA[3]) + centroidDir;
+        math::float3 centroidDir = transformA * math::float4(convexA->GetLocalCentroid(), 0);
+        math::float3 positionA = math::float3(transformA[3]) + centroidDir;
 
         for (const auto faceA : convexA->GetHalfEdgeFaces())
         {
@@ -128,8 +128,8 @@ namespace legion::physics
                         if (attemptBuildMinkowskiFace(edgeA, edgeB, transformA, transformB))
                         {
                             //get world edge direction
-                            math::vec3 edgeADirection = transformA * math::vec4(edgeA->getRobustEdgeDirection(), 0);
-                            math::vec3 edgeBDirection = transformB * math::vec4(edgeB->getRobustEdgeDirection(), 0);
+                            math::float3 edgeADirection = transformA * math::float4(edgeA->getRobustEdgeDirection(), 0);
+                            math::float3 edgeBDirection = transformB * math::float4(edgeB->getRobustEdgeDirection(), 0);
 
                             edgeADirection = math::normalize( edgeADirection );
                             edgeBDirection = math::normalize( edgeBDirection );
@@ -141,11 +141,11 @@ namespace legion::physics
                                 continue;
                             }
 
-                            math::vec3 seperatingAxis = math::normalize(math::cross(edgeADirection, edgeBDirection));
+                            math::float3 seperatingAxis = math::normalize(math::cross(edgeADirection, edgeBDirection));
 
                             //get world edge position
-                            math::vec3 edgeAtransformedPosition = transformA * math::vec4(edgeA->edgePosition, 1);
-                            math::vec3 edgeBtransformedPosition = transformB * math::vec4(edgeB->edgePosition, 1);
+                            math::float3 edgeAtransformedPosition = transformA * math::float4(edgeA->edgePosition, 1);
+                            math::float3 edgeBtransformedPosition = transformB * math::float4(edgeB->edgePosition, 1);
 
                             //check if its pointing in the right direction 
                             if (math::dot(seperatingAxis, edgeAtransformedPosition - positionA) < 0)
@@ -179,17 +179,17 @@ namespace legion::physics
         return false;
     }
 
-    bool PhysicsStatics::DetectConvexSphereCollision(ConvexCollider* convexA, const math::mat4& transformA, math::vec3 sphereWorldPosition, float sphereRadius,
+    bool PhysicsStatics::DetectConvexSphereCollision(ConvexCollider* convexA, const math::float4x4& transformA, math::float3 sphereWorldPosition, float sphereRadius,
         float& maximumSeperation)
     {
         //-----------------  check if the seperating axis is the line generated between the centroid of the hull and sphereWorldPosition ------------------//
 
-        math::vec3 worldHullCentroid = transformA * math::vec4(convexA->GetLocalCentroid(), 1);
-        math::vec3 centroidSeperatingAxis = math::normalize(worldHullCentroid - sphereWorldPosition);
+        math::float3 worldHullCentroid = transformA * math::float4(convexA->GetLocalCentroid(), 1);
+        math::float3 centroidSeperatingAxis = math::normalize(worldHullCentroid - sphereWorldPosition);
 
-        math::vec3 seperatingPlanePosition = sphereWorldPosition + centroidSeperatingAxis * sphereRadius;
+        math::float3 seperatingPlanePosition = sphereWorldPosition + centroidSeperatingAxis * sphereRadius;
 
-        math::vec3 worldSupportPoint;
+        math::float3 worldSupportPoint;
         GetSupportPoint(seperatingPlanePosition, -centroidSeperatingAxis, convexA, transformA, worldSupportPoint);
 
         float seperation = math::dot(worldSupportPoint - seperatingPlanePosition, centroidSeperatingAxis);
@@ -206,8 +206,8 @@ namespace legion::physics
 
         for (auto faceA : convexA->GetHalfEdgeFaces())
         {
-            math::vec3 worldFaceCentroid = transformA * math::vec4(faceA->centroid, 1);
-            math::vec3 worldFaceNormal = math::normalize(transformA * math::vec4(faceA->normal, 0));
+            math::float3 worldFaceCentroid = transformA * math::float4(faceA->centroid, 1);
+            math::float3 worldFaceNormal = math::normalize(transformA * math::float4(faceA->normal, 0));
 
             float seperation = PointDistanceToPlane(worldFaceNormal, worldFaceCentroid, seperatingPlanePosition );
 
@@ -227,55 +227,55 @@ namespace legion::physics
         return true;
     }
 
-    std::pair<math::vec3, math::vec3> PhysicsStatics::ConstructAABBFromTransformedVertices(const std::vector<math::vec3>& vertices, const math::mat4& transform)
+    std::pair<math::float3, math::float3> PhysicsStatics::ConstructAABBFromTransformedVertices(const std::vector<math::float3>& vertices, const math::float4x4& transform)
     {
-        math::vec3 min, max;
-        math::vec3 worldPos = transform[3];
+        math::float3 min, max;
+        math::float3 worldPos = transform[3];
 
-        math::vec3 outVec;
+        math::float3 outVec;
         //up
-        math::vec3 invTransUp = math::normalize(math::inverse(transform) * math::vec4(0, 1, 0, 0));
+        math::float3 invTransUp = math::normalize(math::inverse(transform) * math::float4(0, 1, 0, 0));
         GetSupportPoint(vertices, invTransUp, outVec);
-        max.y = (transform * math::vec4( outVec,1)).y;
+        max.y = (transform * math::float4( outVec,1)).y;
 
         //down
-        math::vec3 invTransDown = math::normalize(math::inverse(transform) * math::vec4(0, -1, 0, 0));
+        math::float3 invTransDown = math::normalize(math::inverse(transform) * math::float4(0, -1, 0, 0));
         GetSupportPoint(vertices, invTransDown, outVec);
-        min.y = (transform * math::vec4(outVec, 1)).y;
+        min.y = (transform * math::float4(outVec, 1)).y;
 
         //right
-        math::vec3 invTransRight = math::normalize(math::inverse(transform) * math::vec4(1, 0, 0, 0));
+        math::float3 invTransRight = math::normalize(math::inverse(transform) * math::float4(1, 0, 0, 0));
         GetSupportPoint(vertices, invTransRight, outVec);
-        max.x = (transform * math::vec4(outVec, 1)).x;
+        max.x = (transform * math::float4(outVec, 1)).x;
 
         //left
-        math::vec3 invTransLeft = math::normalize(math::inverse(transform) * math::vec4(-1, 0, 0, 0));
+        math::float3 invTransLeft = math::normalize(math::inverse(transform) * math::float4(-1, 0, 0, 0));
         GetSupportPoint(vertices, invTransLeft, outVec);
-        min.x = (transform * math::vec4(outVec, 1)).x;
+        min.x = (transform * math::float4(outVec, 1)).x;
 
         //forward
-        math::vec3 invTransForward = math::normalize(math::inverse(transform) * math::vec4(0, 0, 1, 0));
+        math::float3 invTransForward = math::normalize(math::inverse(transform) * math::float4(0, 0, 1, 0));
         GetSupportPoint(vertices, invTransForward, outVec);
-        max.z = (transform * math::vec4(outVec, 1)).z;
+        max.z = (transform * math::float4(outVec, 1)).z;
 
         //backward
-        math::vec3 invTransBackward = math::normalize(math::inverse(transform) * math::vec4(0, 0, -1, 0));
+        math::float3 invTransBackward = math::normalize(math::inverse(transform) * math::float4(0, 0, -1, 0));
         GetSupportPoint(vertices, invTransBackward, outVec);
-        min.z = (transform * math::vec4(outVec, 1)).z;
+        min.z = (transform * math::float4(outVec, 1)).z;
 
       
 
         return std::make_pair(min, max);
     }
 
-    std::pair<math::vec3, math::vec3> PhysicsStatics::CombineAABB(const std::pair<math::vec3, math::vec3>& first, const std::pair<math::vec3, math::vec3>& second)
+    std::pair<math::float3, math::float3> PhysicsStatics::CombineAABB(const std::pair<math::float3, math::float3>& first, const std::pair<math::float3, math::float3>& second)
     {
         auto& firstLow = first.first;
         auto& firstHigh = first.second;
         auto& secondLow = second.first;
         auto& secondHigh = second.second;
-        math::vec3 lowBounds = secondLow;
-        math::vec3 highBounds = secondHigh;
+        math::float3 lowBounds = secondLow;
+        math::float3 highBounds = secondHigh;
         if (firstLow.x < secondLow.x)   lowBounds.x    = firstLow.x;
         if (firstLow.y < secondLow.y)   lowBounds.y    = firstLow.y;
         if (firstLow.z < secondLow.z)   lowBounds.z    = firstLow.z;
@@ -286,12 +286,12 @@ namespace legion::physics
         return std::make_pair(lowBounds, highBounds);
     }
 
-    float PhysicsStatics::FindClosestPointToLineInterpolant(const math::vec3& startPoint, const math::vec3& lineDirection, const math::vec3& pointPosition)
+    float PhysicsStatics::FindClosestPointToLineInterpolant(const math::float3& startPoint, const math::float3& lineDirection, const math::float3& pointPosition)
     {
         return ( math::dot(lineDirection,pointPosition) - math::dot(lineDirection,startPoint) ) / math::dot(lineDirection,lineDirection);
     }
 
-    math::vec3 PhysicsStatics::FindClosestPointToLineSegment(const math::vec3& start, const math::vec3& end, const math::vec3& pointPosition)
+    math::float3 PhysicsStatics::FindClosestPointToLineSegment(const math::float3& start, const math::float3& end, const math::float3& pointPosition)
     {
         float interpolant = FindClosestPointToLineInterpolant(start, end - start, pointPosition);
         interpolant = math::clamp(interpolant, 0.0f, 1.0f);
@@ -299,7 +299,7 @@ namespace legion::physics
         return start + (end - start) * interpolant;
     }
 
-    std::shared_ptr<ConvexCollider> PhysicsStatics::generateConvexHull(const std::vector<math::vec3>& vertices)
+    std::shared_ptr<ConvexCollider> PhysicsStatics::generateConvexHull(const std::vector<math::float3>& vertices)
     {
         //[1] Calculated a scaled epsilon based on the extents of the hull. This ensures that epsilon takes the size of the hull into account.
         //[2] Calculate a visibility epsilon that determines if a vertex should be merged to the hull or not.
@@ -313,7 +313,7 @@ namespace legion::physics
         //[1] Calculated a scaled epsilon based on the extents of the hull. This ensures that epsilon takes the size of the hull into account.
         const static float initialEpsilon = math::sqrt( math::epsilon<float>() );
 
-        math::vec3 maxInDimension(std::numeric_limits<float>::lowest());
+        math::float3 maxInDimension(std::numeric_limits<float>::lowest());
 
         for (const auto& vert : vertices)
         {
@@ -344,19 +344,19 @@ namespace legion::physics
         faces.reserve(4);
 
         //[3] Calculate the support points in x,y,z,-x,-y,-z axis of the given vertices in order to create the initial hull
-        std::array<math::vec3, 6> supportVertices;
+        std::array<math::float3, 6> supportVertices;
 
         //Get support points in -x and x
-        GetSupportPoint(vertices, math::vec3(1, 0, 0), supportVertices.at(0));
-        GetSupportPoint(vertices, math::vec3(-1, 0, 0), supportVertices.at(1));
+        GetSupportPoint(vertices, math::float3(1, 0, 0), supportVertices.at(0));
+        GetSupportPoint(vertices, math::float3(-1, 0, 0), supportVertices.at(1));
 
         //Get support points in -y and y
-        GetSupportPoint(vertices, math::vec3(0, 1, 0), supportVertices.at(2));
-        GetSupportPoint(vertices, math::vec3(0, -1, 0), supportVertices.at(3));
+        GetSupportPoint(vertices, math::float3(0, 1, 0), supportVertices.at(2));
+        GetSupportPoint(vertices, math::float3(0, -1, 0), supportVertices.at(3));
 
         //Get support points in -z and z
-        GetSupportPoint(vertices, math::vec3(0, 0, 1), supportVertices.at(4));
-        GetSupportPoint(vertices, math::vec3(0, 0, -1), supportVertices.at(5));
+        GetSupportPoint(vertices, math::float3(0, 0, 1), supportVertices.at(4));
+        GetSupportPoint(vertices, math::float3(0, 0, -1), supportVertices.at(5));
 
         //[4] Create the initial hull given the calculated support points
         if (!buildInitialHull(vertices, supportVertices, faces))
@@ -412,10 +412,10 @@ namespace legion::physics
         return convexCollider;
     }
 
-    void PhysicsStatics::calculateNewellPlane(const std::vector<math::vec3>& v, math::vec3& outPlaneNormal, float& distToCentroid)
+    void PhysicsStatics::calculateNewellPlane(const std::vector<math::float3>& v, math::float3& outPlaneNormal, float& distToCentroid)
     {
-        math::vec3 centroid{0,0,0};
-        outPlaneNormal = math::vec3();
+        math::float3 centroid{0,0,0};
+        outPlaneNormal = math::float3();
 
         for (int i = v.size() - 1, j = 0; j < v.size(); i = j, j++)
         {
@@ -431,30 +431,30 @@ namespace legion::physics
 
     }
 
-    bool PhysicsStatics::attemptBuildMinkowskiFace(HalfEdgeEdge* edgeA, HalfEdgeEdge* edgeB, const math::mat4& transformA, const math::mat4& transformB)
+    bool PhysicsStatics::attemptBuildMinkowskiFace(HalfEdgeEdge* edgeA, HalfEdgeEdge* edgeB, const math::float4x4& transformA, const math::float4x4& transformB)
     {
-        const math::vec3 transformedA1 = transformA *
-            math::vec4(edgeA->getLocalNormal(), 0);
+        const math::float3 transformedA1 = transformA *
+            math::float4(edgeA->getLocalNormal(), 0);
 
-        const math::vec3 transformedA2 = transformA *
-            math::vec4(edgeA->pairingEdge->getLocalNormal(), 0);
+        const math::float3 transformedA2 = transformA *
+            math::float4(edgeA->pairingEdge->getLocalNormal(), 0);
 
-        const math::vec3 transformedEdgeDirectionA =  math::normalize(transformA * math::vec4(edgeA->getRobustEdgeDirection(), 0));
+        const math::float3 transformedEdgeDirectionA =  math::normalize(transformA * math::float4(edgeA->getRobustEdgeDirection(), 0));
 
-        const math::vec3 transformedB1 = transformB *
-            math::vec4(edgeB->getLocalNormal(), 0);
+        const math::float3 transformedB1 = transformB *
+            math::float4(edgeB->getLocalNormal(), 0);
 
-        const math::vec3 transformedB2 = transformB *
-            math::vec4(edgeB->pairingEdge->getLocalNormal(), 0);
+        const math::float3 transformedB2 = transformB *
+            math::float4(edgeB->pairingEdge->getLocalNormal(), 0);
 
-        const math::vec3 transformedEdgeDirectionB = math::normalize(transformB * math::vec4(edgeB->getRobustEdgeDirection(), 0));
+        const math::float3 transformedEdgeDirectionB = math::normalize(transformB * math::float4(edgeB->getRobustEdgeDirection(), 0));
 
         return isMinkowskiFace(transformedA1, transformedA2, -transformedB1, -transformedB2
             , (transformedEdgeDirectionA), (transformedEdgeDirectionB));
     }
 
-    bool PhysicsStatics::isMinkowskiFace(const math::vec3& transformedA1, const math::vec3& transformedA2, const math::vec3& transformedB1,
-        const math::vec3& transformedB2, const math::vec3& planeANormal, const math::vec3& planeBNormal)
+    bool PhysicsStatics::isMinkowskiFace(const math::float3& transformedA1, const math::float3& transformedA2, const math::float3& transformedB1,
+        const math::float3& transformedB2, const math::float3& planeANormal, const math::float3& planeBNormal)
     {
         //------------------------ Check if normals created by arcA seperate normals of B --------------------------------------//
         
@@ -482,14 +482,14 @@ namespace legion::physics
 
         //------------------------ Check if arcA and arcB are in the same hemisphere --------------------------------------------//
 
-        math::vec3 abNormal = math::cross(transformedA2, transformedB2);
+        math::float3 abNormal = math::cross(transformedA2, transformedB2);
 
         float planeABDotA1 = math::dot(abNormal, transformedA1);
         float planeABDotB1 = math::dot(abNormal, transformedB1);
 
         float dotMultiplyResultAB = planeABDotA1 * planeABDotB1;
 
-        if (dotMultiplyResultAB < 0.0f || math::epsilonEqual(dotMultiplyResultAB,0.0f,math::epsilon<float>()))
+        if (dotMultiplyResultAB < 0.0f || math::close_enough(dotMultiplyResultAB,0.0f))
         {
             return false;
         }
@@ -497,8 +497,8 @@ namespace legion::physics
         return true;
     }
 
-    bool PhysicsStatics::buildInitialHull(const std::vector<math::vec3>& vertices,
-        std::array<math::vec3,6>& supportVertices, std::vector<HalfEdgeFace*>& faces )
+    bool PhysicsStatics::buildInitialHull(const std::vector<math::float3>& vertices,
+        std::array<math::float3,6>& supportVertices, std::vector<HalfEdgeFace*>& faces )
     {
         //Summary:
         //[1] Find the 2 most distant vertices in 'support Vertices'
@@ -512,17 +512,17 @@ namespace legion::physics
 
         float mostDistant = std::numeric_limits<float>::lowest();
 
-        math::vec3& firstDistant = supportVertices.at(0);
-        math::vec3& secondDistant = supportVertices.at(1);
+        math::float3& firstDistant = supportVertices.at(0);
+        math::float3& secondDistant = supportVertices.at(1);
 
         //Iterate through support vertices to find the combination of vertices that represent the 2 most distant points
         for (size_type i = 0; i < supportVertices.size(); i++)
         {
-            math::vec3& first = supportVertices.at(i);
+            math::float3& first = supportVertices.at(i);
 
             for (size_type j = i+1; j < supportVertices.size()-1; j++)
             {
-                math::vec3& second = supportVertices.at(j);
+                math::float3& second = supportVertices.at(j);
 
                 float currentDistance2 = math::distance2(first, second);
 
@@ -537,9 +537,9 @@ namespace legion::physics
 
         //[2] Find the vertex most distant from the line created by the 2 most distance vertices
 
-        math::vec3 firstToSecond = math::normalize(secondDistant - firstDistant);
+        math::float3 firstToSecond = math::normalize(secondDistant - firstDistant);
 
-        const math::vec3* thirdDistant = nullptr;
+        const math::float3* thirdDistant = nullptr;
         mostDistant = std::numeric_limits<float>::lowest();
 
         //Iterate through 'vertices' to find the vertex most distant from line 
@@ -554,7 +554,7 @@ namespace legion::physics
             }
 
             //Find closest point between vertex and line segment
-            math::vec3 closestPoint = PhysicsStatics::FindClosestPointToLineSegment(firstDistant, secondDistant, vertex);
+            math::float3 closestPoint = PhysicsStatics::FindClosestPointToLineSegment(firstDistant, secondDistant, vertex);
 
             float currentDistance = math::distance2(closestPoint, vertex);
 
@@ -594,10 +594,10 @@ namespace legion::physics
 
         //Iterate through vertices to the a point to plane check
         mostDistant = std::numeric_limits<float>::lowest();
-        const math::vec3* firstEyePoint = nullptr;
+        const math::float3* firstEyePoint = nullptr;
 
-        math::vec3 planePosition = initialFace->centroid;
-        math::vec3 planeNormal = initialFace->normal;
+        math::float3 planePosition = initialFace->centroid;
+        math::float3 planeNormal = initialFace->normal;
 
         for (auto& vertex : vertices)
         {
@@ -644,14 +644,14 @@ namespace legion::physics
         initialFace->forEachEdgeReverse(collectEdges);
 
         //For each edge create a new face that connects the initial face with the eyePoint
-        math::vec3 eyePoint = *firstEyePoint;
+        math::float3 eyePoint = *firstEyePoint;
 
         createHalfEdgeFaceFromEyePoint(eyePoint, reverseHalfEdgeList,faces);
 
         return true;
     }
 
-    void PhysicsStatics::createHalfEdgeFaceFromEyePoint(const math::vec3 eyePoint, const std::vector<HalfEdgeEdge*>& reversedEdges, std::vector<HalfEdgeFace*>& createdFaces)
+    void PhysicsStatics::createHalfEdgeFaceFromEyePoint(const math::float3 eyePoint, const std::vector<HalfEdgeEdge*>& reversedEdges, std::vector<HalfEdgeFace*>& createdFaces)
     {
         HalfEdgeEdge* pairingToConnectTo = nullptr;
         HalfEdgeEdge* initialPairing = nullptr;
@@ -676,7 +676,7 @@ namespace legion::physics
             pairing->setPairingEdge(edge);
 
             //initialize new face
-            math::vec3 faceNormal = math::normalize(math::cross(nextPairing->edgePosition - pairing->edgePosition,
+            math::float3 faceNormal = math::normalize(math::cross(nextPairing->edgePosition - pairing->edgePosition,
                 prevPairing->edgePosition - pairing->edgePosition));
 
             HalfEdgeFace* face = new HalfEdgeFace(pairing, faceNormal);
@@ -714,10 +714,10 @@ namespace legion::physics
         return false;
     }
 
-    void PhysicsStatics::partitionVerticesToList(const std::vector<math::vec3> vertices,
+    void PhysicsStatics::partitionVerticesToList(const std::vector<math::float3> vertices,
         std::list<ColliderFaceToVert>& outFacesWithOutsideVerts)
     {
-        for (const math::vec3& vertex : vertices)
+        for (const math::float3& vertex : vertices)
         {
             ColliderFaceToVert* bestFaceToVert = nullptr;
             float bestMatchDistance = std::numeric_limits<float>::lowest();
@@ -742,7 +742,7 @@ namespace legion::physics
         }
     }
 
-    void PhysicsStatics::findHorizonEdgesFromFaces(const math::vec3& eyePoint, std::vector<HalfEdgeFace*>& faces,
+    void PhysicsStatics::findHorizonEdgesFromFaces(const math::float3& eyePoint, std::vector<HalfEdgeFace*>& faces,
         std::vector<HalfEdgeEdge*>& outHorizonEdges, float scalingEpsilon)
     {
         //[1] Find first horizon edge
@@ -793,7 +793,7 @@ namespace legion::physics
 
     }
 
-    void PhysicsStatics::mergeVertexToHull(const math::vec3& eyePoint,std::list<ColliderFaceToVert>& facesWithOutsideVerts,
+    void PhysicsStatics::mergeVertexToHull(const math::float3& eyePoint,std::list<ColliderFaceToVert>& facesWithOutsideVerts,
         float scalingEpsilon)
     {
         //[1] identify faces that can see the 'eyePoint' and remove them from list
@@ -805,7 +805,7 @@ namespace legion::physics
         //[6] Repartition vertices that were placed in the unmergedVertices vector.
         //[7] Delete all faces that were removed at step [1]
 
-        std::vector<math::vec3> unmergedVertices;
+        std::vector<math::float3> unmergedVertices;
         std::vector<HalfEdgeFace*> facesToBeRemoved;
           
         //[1] identify faces that can see the 'eyePoint' and remove them from list
@@ -813,8 +813,8 @@ namespace legion::physics
         {
             HalfEdgeFace* face = listIter->face;
 
-            const math::vec3& planeCentroid = face->centroid;
-            const math::vec3& planeNormal = face->normal;
+            const math::float3& planeCentroid = face->centroid;
+            const math::float3& planeNormal = face->normal;
 
             float distanceToPlane = PointDistanceToPlane(planeNormal, planeCentroid, eyePoint);
 
@@ -883,7 +883,7 @@ namespace legion::physics
                     HalfEdgeEdge* pairingEdge = edge->pairingEdge;
                     HalfEdgeFace* currentFace = edge->face;
 
-                    math::vec3 newNormal;
+                    math::float3 newNormal;
 
                     if (isNewellFacesCoplanar(currentFace, pairingEdge->face, edge,
                         scalingEpsilon, newNormal,1) || isFacesConcave(edge->face, pairingEdge->face))
@@ -963,10 +963,10 @@ namespace legion::physics
     }
 
     bool PhysicsStatics::isNewellFacesCoplanar(HalfEdgeFace* first, HalfEdgeFace* second,
-        HalfEdgeEdge* connectingEdge, float scalingEpsilon,  math::vec3& outNormal,int skipCount)
+        HalfEdgeEdge* connectingEdge, float scalingEpsilon,  math::float3& outNormal,int skipCount)
     {
         //each face will at least have 3 vertices
-        std::vector<math::vec3> NewellPolygon;
+        std::vector<math::float3> NewellPolygon;
         NewellPolygon.reserve(6);
 
         auto firstOriginal = first->startEdge;

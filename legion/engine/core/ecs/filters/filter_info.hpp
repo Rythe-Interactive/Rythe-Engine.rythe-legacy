@@ -52,7 +52,7 @@ namespace legion::core::ecs
         template<typename component_type0, typename component_type1, typename... component_typeN>
         constexpr static id_type generateId() noexcept
         {
-            return combine_hash(make_hash<component_type0>(), generateId<component_type1, component_typeN...>());
+            return hash_combine(make_hash<component_type0>(), generateId<component_type1, component_typeN...>());
         }
 
     public:

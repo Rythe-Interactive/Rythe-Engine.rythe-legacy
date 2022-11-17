@@ -7,14 +7,14 @@
 namespace legion::physics
 {
     ConvexConvexPenetrationQuery::ConvexConvexPenetrationQuery(HalfEdgeFace* pRefFace, HalfEdgeFace* pIncFace,
-        math::vec3& pFaceCentroid, math::vec3& pNormal, float pPenetration, bool pIsARef)
+        math::float3& pFaceCentroid, math::float3& pNormal, float pPenetration, bool pIsARef)
         :  PenetrationQuery(pFaceCentroid,pNormal,pPenetration,pIsARef),refFace(pRefFace), incFace(pIncFace)
     {
         debugID = "ConvexConvexPenetrationQuery";
     }
 
-    void ConvexConvexPenetrationQuery::populateContactList(physics_manifold& manifold, math::mat4& refTransform
-        , math::mat4 incTransform, PhysicsCollider* refCollider)
+    void ConvexConvexPenetrationQuery::populateContactList(physics_manifold& manifold, math::float4x4& refTransform
+        , math::float4x4 incTransform, PhysicsCollider* refCollider)
     {
         auto incCollider = isARef ? manifold.colliderB : manifold.colliderA;
         float largestDotResult = std::numeric_limits<float>::lowest();
@@ -23,7 +23,7 @@ namespace legion::physics
 
         for (auto face : incCollider->GetHalfEdgeFaces())
         {
-            math::vec3 worldFaceNormal = incTransform * math::vec4(face->normal, 0);
+            math::float3 worldFaceNormal = incTransform * math::float4(face->normal, 0);
             float currentDotResult = math::dot(-normal, worldFaceNormal);
             if (currentDotResult > largestDotResult)
             {
@@ -39,8 +39,8 @@ namespace legion::physics
 
         auto sendToInitialOutput = [&outputContactPoints,&incTransform](HalfEdgeEdge* edge)
         {
-            math::vec3 localVertexPosition = edge->edgePosition;
-            math::vec3 worldVertex = incTransform * math::vec4(localVertexPosition, 1);
+            math::float3 localVertexPosition = edge->edgePosition;
+            math::float3 worldVertex = incTransform * math::float4(localVertexPosition, 1);
 
             outputContactPoints.push_back(ContactVertex(worldVertex,edge->label));
         };
@@ -51,8 +51,8 @@ namespace legion::physics
         auto clipNeigboringFaceWithOutput = [&refTransform,&outputContactPoints](HalfEdgeEdge* edge)
         {
             HalfEdgeFace* neighborFace = edge->pairingEdge->face;
-            math::vec3 planePosition = refTransform * math::vec4(neighborFace->centroid, 1);
-            math::vec3 planeNormal = refTransform * math::vec4(neighborFace->normal, 0);
+            math::float3 planePosition = refTransform * math::float4(neighborFace->centroid, 1);
+            math::float3 planeNormal = refTransform * math::float4(neighborFace->normal, 0);
 
             auto inputContactList = outputContactPoints;
             outputContactPoints.clear();
@@ -70,7 +70,7 @@ namespace legion::physics
 
             if (distanceToCollisionPlane < constants::contactOffset)
             {
-                math::vec3 referenceContact = incidentContact.position - normal * distanceToCollisionPlane;
+                math::float3 referenceContact = incidentContact.position - normal * distanceToCollisionPlane;
 
                 physics_contact contact;
                 contact.refCollider = refCollider;

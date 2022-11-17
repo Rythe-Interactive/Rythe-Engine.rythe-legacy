@@ -1,8 +1,21 @@
 #pragma once
 
-#include <core/math/glm/glm_include.hpp>
+#include <core/math/vector/vector.hpp>
+#include <core/math/quaternion/quaternion.hpp>
+#include <core/math/matrix/matrix.hpp>
+
+#include <core/math/arithmetic/arithmetic.hpp>
+#include <core/math/basic/basic_funcs.hpp>
+#include <core/math/exponential/exponential.hpp>
+#include <core/math/geometric/geometric.hpp>
+#include <core/math/interpolation/interpolation.hpp>
+#include <core/math/logic/logic.hpp>
+#include <core/math/noise/noise.hpp>
+#include <core/math/random/random.hpp>
+#include <core/math/trigonometric/trigonometric.hpp>
+#include <core/math/util/util.hpp>
+
 #include <core/math/constants.hpp>
 #include <core/math/trigonometry.hpp>
 #include <core/math/color.hpp>
-#include <core/math/close_enough.hpp>
 #include <core/math/geometry.hpp>

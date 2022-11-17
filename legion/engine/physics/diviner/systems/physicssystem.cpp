@@ -21,7 +21,7 @@ namespace legion::physics
 
     void PhysicsSystem::setup()
     {
-        m_broadPhase = std::make_unique<BroadphaseUniformGridNoCaching>(math::vec3(3, 3, 3));
+        m_broadPhase = std::make_unique<BroadphaseUniformGridNoCaching>(math::float3(3, 3, 3));
         createProcess<&PhysicsSystem::fixedUpdate>("Physics", m_timeStep);
     }
 

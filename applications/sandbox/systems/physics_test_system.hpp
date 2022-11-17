@@ -50,11 +50,11 @@ namespace legion::physics
 
         //SCENE HELPERS
 
-        void createQuickhullTestObject(math::vec3 position, rendering::model_handle cubeH, rendering::material_handle TextureH,math::mat3 inertia = math::mat3(6.0f));
+        void createQuickhullTestObject(math::float3 position, rendering::model_handle cubeH, rendering::material_handle TextureH,math::float3x3 inertia = math::float3x3(6.0f));
 
         void PopulateFollowerList(ecs::entity physicsEnt,int index);
        
-        void addStaircase(math::vec3 position,float breadthMult = 1.0f,float widthMult = 27.0f);
+        void addStaircase(math::float3 position,float breadthMult = 1.0f,float widthMult = 27.0f);
 
         //FUNCTION BINDED ACTIONS
 
@@ -73,13 +73,13 @@ namespace legion::physics
         void drawPhysicsColliders();
 
         void createStack(int widthCount, int breadthCount, int heightCount,
-            math::vec3 firstBlockPos, math::vec3 offset, rendering::model_handle cubeH,
+            math::float3 firstBlockPos, math::float3 offset, rendering::model_handle cubeH,
             rendering::material_handle materials, physics::cube_collider_params cubeParams,
-            bool useQuickhull = false, bool rigidbody = true, float mass = 1.0f, math::mat3 inverseInertia = math::mat3(6.f));
+            bool useQuickhull = false, bool rigidbody = true, float mass = 1.0f, math::float3x3 inverseInertia = math::float3x3(6.f));
 
-        void createBoxEntity(math::vec3 position, rendering::model_handle cubeH,
+        void createBoxEntity(math::float3 position, rendering::model_handle cubeH,
             rendering::material_handle materials, physics::cube_collider_params cubeParams,
-            bool useQuickhull = false, bool rigidbody = true, float mass = 1.0f, math::mat3 inverseInertia = math::mat3(6.f));
+            bool useQuickhull = false, bool rigidbody = true, float mass = 1.0f, math::float3x3 inverseInertia = math::float3x3(6.f));
 
         rendering::material_handle textureH;
         rendering::material_handle woodTextureH;

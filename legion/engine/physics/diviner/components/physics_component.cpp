@@ -7,7 +7,7 @@ namespace legion::physics
 {
     void physicsComponent::calculateNewLocalCenterOfMass()
     {
-        localCenterOfMass = math::vec3::zero;
+        localCenterOfMass = math::float3::zero;
 
         for (auto collider : colliders)
         {
@@ -17,7 +17,7 @@ namespace legion::physics
         localCenterOfMass /= static_cast<float>(colliders.size());
     }
 
-    std::shared_ptr<ConvexCollider> physicsComponent::constructConvexHullFromVertices(const std::vector<math::vec3>& vertices)
+    std::shared_ptr<ConvexCollider> physicsComponent::constructConvexHullFromVertices(const std::vector<math::float3>& vertices)
     {
         auto collider = PhysicsStatics::generateConvexHull(vertices);
 
