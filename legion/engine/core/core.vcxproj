@@ -239,9 +239,9 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="math\matrix\matrix4.hpp" />
     <ClInclude Include="math\matrix\matrix_base.hpp" />
     <ClInclude Include="math\matrix\column\column_base.hpp" />
+    <ClInclude Include="math\noise\common.hpp" />
     <ClInclude Include="math\noise\noise.hpp" />
     <ClInclude Include="math\noise\perlin.hpp" />
-    <ClInclude Include="math\noise\spacial_hash.hpp" />
     <ClInclude Include="math\noise\value.hpp" />
     <ClInclude Include="math\random\circular_rand.hpp" />
     <ClInclude Include="math\random\spherical_rand.hpp" />
@@ -428,7 +428,6 @@ del /q ".\xcopyexclude"</Command>
     <None Include="math\matrix\determinant.inl" />
     <None Include="math\matrix\matrix_base.inl" />
     <None Include="math\noise\perlin.inl" />
-    <None Include="math\noise\spacial_hash.inl" />
     <None Include="math\noise\value.inl" />
     <None Include="math\quaternion\matrix_quat_conv.inl" />
     <None Include="math\random\circular_rand.inl" />

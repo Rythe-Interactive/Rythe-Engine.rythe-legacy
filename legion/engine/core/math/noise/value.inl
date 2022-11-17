@@ -1,118 +1,163 @@
 #include <core/math/noise/value.hpp>
 #pragma once
 
-namespace legion::core::math
+namespace legion::core::math::noise
 {
     namespace detail
     {
-        constexpr uint8 _value_permutation_[] = { 151,160,137,91,90,15,                    // Hash lookup table as defined by Ken Perlin.  This is a randomly
-            131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,    // arranged array of all numbers from 0-255 inclusive.
-            190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
-            88,237,149,56,87,174,20,125,136,171,168, 68,175,74,165,71,134,139,48,27,166,
-            77,146,158,231,83,111,229,122,60,211,133,230,220,105,92,41,55,46,245,40,244,
-            102,143,54, 65,25,63,161, 1,216,80,73,209,76,132,187,208, 89,18,169,200,196,
-            135,130,116,188,159,86,164,100,109,198,173,186, 3,64,52,217,226,250,124,123,
-            5,202,38,147,118,126,255,82,85,212,207,206,59,227,47,16,58,17,182,189,28,42,
-            223,183,170,213,119,248,152, 2,44,154,163, 70,221,153,101,155,167, 43,172,9,
-            129,22,39,253, 19,98,108,110,79,113,224,232,178,185, 112,104,218,246,97,228,
-            251,34,242,193,238,210,144,12,191,179,162,241, 81,51,145,235,249,14,239,107,
-            49,192,214, 31,181,199,106,157,184, 84,204,176,115,121,50,45,127, 4,150,254,
-            138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180
-        };
-
-        const uint primeC = 0b11000010101100101010111000111101;
-
-        template<typename scalar>
-        L_NODISCARD L_ALWAYS_INLINE constexpr scalar _grad_impl_(uint8 hash, scalar x, scalar y, scalar z) noexcept
+        template<typename scalar, typename int_scalar = int_least<sizeof(scalar)>>
+        L_NODISCARD L_ALWAYS_INLINE constexpr scalar _value_1d_impl_(int_scalar seed, scalar value) noexcept
         {
-            const uint8 h = hash & 15;
-            const auto u = h < 8 ? x : y;
-            const auto v = h < 4 ? y : (h == 12 || h == 14 ? x : z);
-            return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
+            int_scalar floored = ifloor<int_scalar>(value);
+            int_scalar start = floored * primes<int_scalar>.x;
+
+            return lerp(detail::hash_normalize<scalar>(seed, start), detail::hash_normalize<scalar>(seed, start + primes<int_scalar>::x), smoothstep(value - static_cast<scalar>(floored)));
         }
 
-        template<typename scalar>
-        L_NODISCARD L_ALWAYS_INLINE constexpr scalar _value_1d_impl_(scalar value, scalar* derivative) noexcept
+        template<typename scalar, typename int_scalar = int_least<sizeof(scalar)>>
+        L_NODISCARD L_ALWAYS_INLINE constexpr scalar _value_1d_impl_(int_scalar seed, scalar value, scalar& derivative) noexcept
         {
-            int32 p = ifloor<int32>(value.x));
-            float32 v = static_cast<uint32>(hash.Eat(p)) & 255;
-            return v * (2.f / 255.f) - 1.f;
+            int_scalar floored = ifloor<int_scalar>(value);
+            int_scalar start = floored * primes<int_scalar>.x;
+
+            scalar _t = value - static_cast<scalar>(floored);
+            scalar t = smoothstep(_t);
+            scalar dt = smoothstep_derivative(_t);
+
+            scalar gradStart = detail::hash_normalize<scalar>(seed, start);
+            scalar gradEnd = detail::hash_normalize<scalar>(seed, start + primes<int_scalar>::x);
+
+            derivative = (gradEnd - gradStart) * dt;
+
+            return lerp(gradStart, gradEnd, t);
         }
 
-        template<typename scalar, typename VectorType>
-        L_NODISCARD L_ALWAYS_INLINE constexpr scalar _value_2d_impl_(VectorType value, vector<scalar, 2>* derivative) noexcept
+        template<typename scalar, typename int_scalar = int_least<sizeof(scalar)>, typename VectorType>
+        L_NODISCARD L_ALWAYS_INLINE constexpr scalar _value_2d_impl_(int_scalar seed, VectorType value) noexcept
         {
+            using scalar2 = vector<scalar, 2>;
+            using int_scalar2 = vector<int_scalar, 2>;
+
+            int_scalar2 floored = ifloor<int_scalar>(value);
+            int_scalar2 start = floored * primes<int_scalar>.xy;
+            int_scalar2 end = start + primes<int_scalar>.xy;
+
+            scalar2 t = smoothstep(value - static_cast<scalar2>(floored));
+
+            scalar2 horizontal = lerp(detail::hash_normalize<scalar>(seed, start,                       int_scalar2(start.x, end.y)),
+                                      detail::hash_normalize<scalar>(seed, int_scalar2(end.x, start.y), end), t.x);
+
+            return lerp(horizontal.x, horizontal.y, t.y);
+        }
+
+        template<typename scalar, typename int_scalar = int_least<sizeof(scalar)>, typename VectorType>
+        L_NODISCARD L_ALWAYS_INLINE constexpr scalar _value_2d_impl_(int_scalar seed, VectorType value, vector<scalar, 2>& derivative) noexcept
+        {
+            using scalar2 = vector<scalar, 2>;
+            using int_scalar2 = vector<int_scalar, 2>;
+
+            int_scalar2 floored = ifloor<int_scalar>(value);
+            int_scalar2 start = floored * primes<int_scalar>.xy;
+            int_scalar2 end = start + primes<int_scalar>.xy;
+
+            scalar2 _t = value - static_cast<scalar2>(floored);
+            scalar2 t = smoothstep(_t);
+            scalar2 dt = smoothstep_derivative(_t);
+
+            scalar2 ac = detail::hash_normalize<scalar>(seed, start, int_scalar2(end.x, start.y));
+            scalar2 bd = detail::hash_normalize<scalar>(seed, int_scalar2(start.x, end.y), end);
+            scalar2 vertical = lerp(ac, bd, t.y);
+
+            derivative.x = (vertical.y - vertical.x) * dt.x;
+            scalar2 dyT = (bd - ac) * dt.y;
+            derivative.y = lerp(dyT.x, dyT.y, t.x);
+
+            return lerp(vertical.x, vertical.y, t.x);
 
         }
 
-        template<typename scalar, typename VectorType>
-        L_NODISCARD L_ALWAYS_INLINE constexpr scalar _value_3d_impl_(VectorType value, vector<scalar, 3>* derivative) noexcept
+        template<typename scalar, typename int_scalar = int_least<sizeof(scalar)>, typename VectorType>
+        L_NODISCARD L_ALWAYS_INLINE constexpr scalar _value_3d_impl_(int_scalar seed, VectorType value) noexcept
         {
-            const auto floored = ifloor<int32>(value);
-            const auto iv = vector<scalar, 3>(floored.x & 255, floored.y & 255, floored.z & 255);
-            const auto fv = value - floored;
+            using scalar3 = vector<scalar, 3>;
+            using int_scalar3 = vector<int_scalar, 3>;
 
-            const auto coords = smoothstep(fv);
-            const auto coordsDerivative = smoothstep_derivative(fv);
+            int_scalar3 floored = ifloor<int_scalar>(value);
+            int_scalar3 start = floored * primes<int_scalar>.xyz;
+            int_scalar3 end = start + primes<int_scalar>.xyz;
 
-            const uint8 A = (_value_permutation_[iv.x & 255] + iv.y) & 255;
-            const uint8 B = (_value_permutation_[(iv.x + 1) & 255] + iv.y) & 255;
+            scalar3 t = smoothstep(value - static_cast<scalar3>(floored));
 
-            const uint8 AA = (_value_permutation_[A] + iv.z) & 255;
-            const uint8 AB = (_value_permutation_[(A + 1) & 255] + iv.z) & 255;
+            vector<scalar, 4> i = lerp(detail::hash_normalize<scalar>(seed, start,                                int_scalar3(start.x, end.y, start.z), int_scalar3(start.x, start.y, end.z), int_scalar3(start.x, end.y, end.z)),
+                                       detail::hash_normalize<scalar>(seed, int_scalar3(end.x, start.y, start.z), int_scalar3(end.x, end.y, start.z),   int_scalar3(end.x, start.y, end.z),   end), t.x);
 
-            const uint8 BA = (_value_permutation_[B] + iv.z) & 255;
-            const uint8 BB = (_value_permutation_[(B + 1) & 255] + iv.z) & 255;
+            vector<scalar, 2> j = lerp(i.xz, i.yw, t.y);
 
-            const auto p0 = _grad_impl_(_value_permutation_[AA], fv.x, fv.y, fv.z);
-            const auto p1 = _grad_impl_(_value_permutation_[BA], fv.x - 1, fv.y, fv.z);
-            const auto p2 = _grad_impl_(_value_permutation_[AB], fv.x, fv.y - 1, fv.z);
-            const auto p3 = _grad_impl_(_value_permutation_[BB], fv.x - 1, fv.y - 1, fv.z);
-            const auto p4 = _grad_impl_(_value_permutation_[(AA + 1) & 255], fv.x, fv.y, fv.z - 1);
-            const auto p5 = _grad_impl_(_value_permutation_[(BA + 1) & 255], fv.x - 1, fv.y, fv.z - 1);
-            const auto p6 = _grad_impl_(_value_permutation_[(AB + 1) & 255], fv.x, fv.y - 1, fv.z - 1);
-            const auto p7 = _grad_impl_(_value_permutation_[(BB + 1) & 255], fv.x - 1, fv.y - 1, fv.z - 1);
+            return lerp(j.x, j.y, t.z);
+        }
 
-            const auto q0 = lerp(p0, p1, u);
-            const auto q1 = lerp(p2, p3, u);
-            const auto q2 = lerp(p4, p5, u);
-            const auto q3 = lerp(p6, p7, u);
+        template<typename scalar, typename int_scalar = int_least<sizeof(scalar)>, typename VectorType>
+        L_NODISCARD L_ALWAYS_INLINE constexpr scalar _value_3d_impl_(int_scalar seed, VectorType value, vector<scalar, 3>& derivative) noexcept
+        {
+            using scalar2 = vector<scalar, 2>;
+            using scalar3 = vector<scalar, 3>;
+            using scalar4 = vector<scalar, 4>;
+            using int_scalar3 = vector<int_scalar, 3>;
 
-            const auto r0 = lerp(q0, q1, v);
-            const auto r1 = lerp(q2, q3, v);
+            int_scalar3 floored = ifloor<int_scalar>(value);
+            int_scalar3 start = floored * primes<int_scalar>.xyz;
+            int_scalar3 end = start + primes<int_scalar>.xyz;
 
-            return value_detail::Lerp(r0, r1, w);
+            scalar3 _t = value - static_cast<scalar3>(floored);
+            scalar3 t = smoothstep(_t);
+            scalar3 dt = smoothstep_derivative(_t);
+
+            scalar4 aceg = detail::hash_normalize<scalar>(seed, start,                                int_scalar3(start.x, end.y, start.z), int_scalar3(end.x, start.y, start.z), int_scalar3(end.x, end.y, start.z));
+            scalar4 bdfh = detail::hash_normalize<scalar>(seed, int_scalar3(start.x, start.y, end.z), int_scalar3(start.x, end.y, end.z),   int_scalar3(end.x, start.y, end.z),   end);
+
+            scalar4 k = lerp(aceg, bdfh, t.z);
+
+            scalar2 j = lerp(k.xz, k.yw, t.y);
+
+            derivative.x = (j.y - j.x) * dt.x;
+            scalar2 dyT = (k.yw - k.xz) * dt.y;
+            derivative.y = lerp(dyT.x, dyT.y, t.x);
+            scalar4 dzT = (bdfh - aceg) * dt.zero;
+            scalar2 dzTT = lerp(dzT.xz, dzT.yw, t.y);
+            derivative.z = lerp(dzTT.x, dzTT.y, t.x);
+
+            return lerp(j.x, j.y, t.x);
         }
     }
 
     template<typename VectorType>
-    L_NODISCARD L_ALWAYS_INLINE constexpr auto value(VectorType&& value) noexcept
+    L_NODISCARD L_ALWAYS_INLINE constexpr auto value(VectorType&& value, int_least<sizeof(vector_scalar_t<VectorType>)> seed = 0) noexcept
     {
-        constexpr size_type dimensions = make_vector_t<VectorType>::size;
-        using scalar = typename make_vector_t<VectorType>::scalar;
+        constexpr size_type dimensions = vector_size_v<VectorType>;
+        using scalar = vector_scalar_t<VectorType>;
         static_assert(is_vector_or_scalar_v<VectorType> && make_vector_t<VectorType>::size <= 3, "Input type must be a vector of size 3 or lower.");
         if constexpr (dimensions == 1)
-            return detail::_value_1d_impl_(value, nullptr);
+            return detail::_value_1d_impl_(seed, value);
         else if constexpr (dimensions == 2)
-            return detail::_value_2d_impl_(::std::forward<VectorType>(value), nullptr);
+            return detail::_value_2d_impl_(seed, ::std::forward<VectorType>(value));
         else if constexpr (dimensions == 3)
-            return detail::_value_3d_impl_(::std::forward<VectorType>(value), nullptr);
+            return detail::_value_3d_impl_(seed, ::std::forward<VectorType>(value));
         else
             return typename make_vector_t<VectorType>::scalar{};
     }
 
     template<typename VectorType>
-    L_NODISCARD L_ALWAYS_INLINE constexpr auto value(VectorType&& value, decay_vector_t<VectorType>& derivative) noexcept
+    L_NODISCARD L_ALWAYS_INLINE constexpr auto value(VectorType&& value, decay_vector_t<VectorType>& derivative, int_least<sizeof(vector_scalar_t<VectorType>)> seed = 0) noexcept
     {
-        constexpr size_type dimensions = make_vector_t<VectorType>::size;
-        using scalar = typename make_vector_t<VectorType>::scalar;
-        static_assert(is_vector_or_scalar_v<VectorType> && make_vector_t<VectorType>::size <= 3, "Input type must be a vector of size 3 or lower.");
+        constexpr size_type dimensions = vector_size_v<VectorType>;
+        using scalar = vector_scalar_t<VectorType>;
+        static_assert(is_vector_or_scalar_v<VectorType> && dimensions <= 3, "Input type must be a vector of size 3 or lower.");
         if constexpr (dimensions == 1)
-            return detail::_value_1d_impl_(value, &derivative);
+            return detail::_value_1d_impl_(seed, value, derivative);
         else if constexpr (dimensions == 2)
-            return detail::_value_2d_impl_(::std::forward<VectorType>(value), &derivative);
+            return detail::_value_2d_impl_(seed, ::std::forward<VectorType>(value), derivative);
         else if constexpr (dimensions == 3)
-            return detail::_value_3d_impl_(::std::forward<VectorType>(value), &derivative);
+            return detail::_value_3d_impl_(seed, ::std::forward<VectorType>(value), derivative);
         else
             return typename make_vector_t<VectorType>::scalar{};
     }

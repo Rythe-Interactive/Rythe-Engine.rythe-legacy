@@ -3,13 +3,10 @@
 #include <core/math/vector/swizzle/swizzle_base.hpp>
 
 #define _MATH_SWIZZLE_1_1_(type)\
-struct{::legion::core::math::swizzle<type, 1, 0> x;};\
-\
-struct{::legion::core::math::swizzle<type, 1, 0> u;};\
-\
-struct{::legion::core::math::swizzle<type, 1, 0> r;};\
-\
-struct{::legion::core::math::swizzle<type, 1, 0> s;};\
+struct{ type x; };\
+struct{ type u; };\
+struct{ type r; };\
+struct{ type s; };\
 
 #define _MATH_SWIZZLE_1_2_(type)\
 struct{::legion::core::math::swizzle<type, 1, 0, 0> xx;};\

@@ -23,11 +23,11 @@ namespace legion::core::math
             _MATH_SWIZZLE_3_4_(scalar);
         };
 
-        constexpr vector() noexcept : xyz(static_cast<scalar>(0), static_cast<scalar>(0), static_cast<scalar>(0)) {}
+        constexpr vector() noexcept : vector(static_cast<scalar>(0), static_cast<scalar>(0), static_cast<scalar>(0)) {}
 
         constexpr vector(const vector&) noexcept = default;
 
-        explicit constexpr vector(scalar s) noexcept : xyz(static_cast<scalar>(s), static_cast<scalar>(s), static_cast<scalar>(s)) {}
+        explicit constexpr vector(scalar s) noexcept : vector(s, s, s) {}
 
         explicit constexpr vector(const vector<scalar, 2>& v, scalar s = static_cast<scalar>(0)) noexcept;
         constexpr vector(scalar s, const vector<scalar, 2>& v) noexcept;
@@ -77,11 +77,11 @@ namespace legion::core::math
             _MATH_SWIZZLE_3_4_(scalar);
         };
 
-        constexpr vector() noexcept : xyz(static_cast<scalar>(0), static_cast<scalar>(0), static_cast<scalar>(0)) {}
+        constexpr vector() noexcept : vector(static_cast<scalar>(0), static_cast<scalar>(0), static_cast<scalar>(0)) {}
 
         constexpr vector(const vector&) noexcept = default;
 
-        explicit constexpr vector(scalar s) noexcept : xyz(static_cast<scalar>(s), static_cast<scalar>(s), static_cast<scalar>(s)) {}
+        explicit constexpr vector(scalar s) noexcept : vector(static_cast<scalar>(s), static_cast<scalar>(s), static_cast<scalar>(s)) {}
 
         explicit constexpr vector(const vector<scalar, 2>& v, scalar s = static_cast<scalar>(0)) noexcept;
         constexpr vector(scalar s, const vector<scalar, 2>& v) noexcept;
@@ -89,7 +89,7 @@ namespace legion::core::math
 
         template<typename _Scal, ::std::enable_if_t<!::std::is_same_v<scalar, _Scal>, bool> = true>
         constexpr vector(const vector<_Scal, size>& other) noexcept
-            : xyz(static_cast<scalar>(other.x), static_cast<scalar>(other.y), static_cast<scalar>(other.z)) {}
+            : vector(static_cast<scalar>(other.x), static_cast<scalar>(other.y), static_cast<scalar>(other.z)) {}
 
         template<typename vec_type, ::std::enable_if_t<is_vector_v<vec_type> && (size != vec_type::size), bool> = true>
         constexpr vector(const vec_type& other) noexcept;

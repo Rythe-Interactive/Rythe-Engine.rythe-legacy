@@ -129,6 +129,25 @@ namespace legion::core::math
     constexpr static bool is_vector_or_scalar_v = is_vector_or_scalar<T>::value;
 
     template<typename T>
+    struct vector_scalar
+    {
+        using type = typename make_vector_t<T>::scalar;
+    };
+
+    template<typename T>
+    using vector_scalar_t = typename vector_scalar<T>::type;
+
+
+    template<typename T>
+    struct vector_size
+    {
+        constexpr static size_type value = make_vector_t<T>::size;
+    };
+
+    template<typename T>
+    constexpr static size_type vector_size_v = vector_size<T>::value;
+
+    template<typename T>
     struct decay_vector
     {
         using type = remove_cvr_t<decltype(detail::_decay_vector_impl<remove_cvr_t<T>>())>;
@@ -311,6 +330,21 @@ namespace legion::core::math
 
     namespace detail
     {
+        template<size_type size>
+        constexpr auto _int_least_impl()
+        {
+            if constexpr (size <= 1)
+                return int_least8();
+            else if constexpr (size <= 2)
+                return int_least16();
+            else if constexpr (size <= 4)
+                return int_least32();
+            else if constexpr (size <= 8)
+                return int_least64();
+            else
+                static_assert(size <= 8, "unsupported type size");
+        }
+
         template<typename TypeA, typename TypeB>
         constexpr auto _highest_epsilon_impl()
         {
@@ -333,6 +367,12 @@ namespace legion::core::math
                 return epsilon_v<B>;
         }
     }
+
+    template<size_type size>
+    using int_least = typename decltype(detail::_int_least_impl<size>());
+
+    template<size_type size>
+    using uint_least = std::make_unsigned_t<int_least<size>>;
 
     template<typename TypeA, typename TypeB>
     struct highest_epsilon

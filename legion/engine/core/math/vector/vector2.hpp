@@ -23,13 +23,13 @@ namespace legion::core::math
             _MATH_SWIZZLE_2_4_(scalar);
         };
 
-        constexpr vector() noexcept : xy(static_cast<scalar>(0), static_cast<scalar>(0)) {}
+        constexpr vector() noexcept : vector(static_cast<scalar>(0)) {}
 
         constexpr vector(const vector&) noexcept = default;
 
-        explicit constexpr vector(scalar s) noexcept : xy(static_cast<scalar>(s), static_cast<scalar>(s)) {}
+        explicit constexpr vector(scalar s) noexcept : vector(s, s) {}
 
-        constexpr vector(scalar _x, scalar _y) noexcept : xy(_x, _y) {}
+        constexpr vector(scalar _x, scalar _y) noexcept : x(_x), y(_y) {}
 
         template<typename vec_type, ::std::enable_if_t<is_vector_v<vec_type> && (size != vec_type::size || !std::is_same_v<scalar, typename vec_type::scalar>), bool> = true>
         constexpr vector(const vec_type& other) noexcept

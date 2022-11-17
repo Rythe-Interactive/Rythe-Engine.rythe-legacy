@@ -247,7 +247,7 @@
     <ClInclude Include="math\noise\noise.hpp" />
     <ClInclude Include="math\noise\perlin.hpp" />
     <ClInclude Include="math\noise\value.hpp" />
-    <ClInclude Include="math\noise\spacial_hash.hpp" />
+    <ClInclude Include="math\noise\common.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="platform\cpp.hint" />
@@ -324,6 +324,5 @@
     <None Include="math\interpolation\quintic.inl" />
     <None Include="math\noise\perlin.inl" />
     <None Include="math\noise\value.inl" />
-    <None Include="math\noise\spacial_hash.inl" />
   </ItemGroup>
 </Project>

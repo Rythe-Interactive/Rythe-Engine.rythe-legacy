@@ -27,12 +27,12 @@ namespace legion::core::math
         };
 
         constexpr vector() noexcept
-            : xyzw(static_cast<scalar>(0), static_cast<scalar>(0), static_cast<scalar>(0), static_cast<scalar>(0)) {}
+            : vector(static_cast<scalar>(0), static_cast<scalar>(0), static_cast<scalar>(0), static_cast<scalar>(0)) {}
 
         constexpr vector(const vector&) noexcept = default;
 
         explicit constexpr vector(scalar s) noexcept
-            : xyzw(static_cast<scalar>(s), static_cast<scalar>(s), static_cast<scalar>(s), static_cast<scalar>(s)) {}
+            : vector(static_cast<scalar>(s), static_cast<scalar>(s), static_cast<scalar>(s), static_cast<scalar>(s)) {}
 
         explicit constexpr vector(const vector<scalar, 3>& v, scalar s = static_cast<scalar>(0)) noexcept;
         constexpr vector(scalar s, const vector<scalar, 3>& v) noexcept;
@@ -89,12 +89,12 @@ namespace legion::core::math
         };
 
         constexpr vector() noexcept
-            : xyzw(static_cast<scalar>(0), static_cast<scalar>(0), static_cast<scalar>(0), static_cast<scalar>(0)) {}
+            : vector(static_cast<scalar>(0), static_cast<scalar>(0), static_cast<scalar>(0), static_cast<scalar>(0)) {}
 
         constexpr vector(const vector&) noexcept = default;
 
         explicit constexpr vector(scalar s) noexcept
-            : xyzw(static_cast<scalar>(s), static_cast<scalar>(s), static_cast<scalar>(s), static_cast<scalar>(s)) {}
+            : vector(static_cast<scalar>(s), static_cast<scalar>(s), static_cast<scalar>(s), static_cast<scalar>(s)) {}
 
 
         explicit constexpr vector(const vector<scalar, 3>& v, scalar s = static_cast<scalar>(0)) noexcept;

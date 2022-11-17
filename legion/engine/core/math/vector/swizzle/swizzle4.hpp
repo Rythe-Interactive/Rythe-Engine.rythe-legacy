@@ -3,21 +3,9 @@
 #include <core/math/vector/swizzle/swizzle_base.hpp>
 
 #define _MATH_SWIZZLE_4_1_(type)\
-struct{::legion::core::math::swizzle<type, 4, 0> x;};\
-struct{::legion::core::math::swizzle<type, 4, 1> y;};\
-struct{::legion::core::math::swizzle<type, 4, 2> z;};\
-struct{::legion::core::math::swizzle<type, 4, 3> w;};\
-\
-struct{::legion::core::math::swizzle<type, 4, 0> r;};\
-struct{::legion::core::math::swizzle<type, 4, 1> g;};\
-struct{::legion::core::math::swizzle<type, 4, 2> b;};\
-struct{::legion::core::math::swizzle<type, 4, 3> a;};\
-\
-struct{::legion::core::math::swizzle<type, 4, 0> s;};\
-struct{::legion::core::math::swizzle<type, 4, 1> t;};\
-struct{::legion::core::math::swizzle<type, 4, 2> p;};\
-struct{::legion::core::math::swizzle<type, 4, 3> q;};\
-
+struct{ type x, y, z, w; };\
+struct{ type r, g, b, a; };\
+struct{ type s, t, p, q; };\
 
 #define _MATH_SWIZZLE_4_2_(type)\
 struct{::legion::core::math::swizzle<type, 4, 0, 0> xx;};\
