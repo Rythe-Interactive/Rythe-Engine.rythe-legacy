@@ -82,13 +82,15 @@ namespace legion::core
     {
         static id_type posBufferId = nameHash("posBuffer");
         static id_type velBufferId = nameHash("velBuffer");
+        static id_type emitterPosId = nameHash("emitterPos");
         auto& posBuffer = emitter.has_buffer<position>(posBufferId) ? emitter.get_buffer<position>(posBufferId) : emitter.create_buffer<position>("posBuffer");
         auto& velBuffer = emitter.has_buffer<velocity>(velBufferId) ? emitter.get_buffer<velocity>(velBufferId) : emitter.create_buffer<velocity>("velBuffer");
+        auto& posUniform = emitter.get_uniform<position>(emitterPosId);
 
         for (size_type idx = start; idx < end; idx++)
         {
             auto randpoint = math::diskRand(.2f);
-            posBuffer[idx] = math::vec3(randpoint.x, math::linearRand(0.f, 0.8f), randpoint.y);
+            posBuffer[idx] = posUniform + math::vec3(randpoint.x, math::linearRand(0.f, 0.8f), randpoint.y);
             auto direction = math::vec3::up /*+ math::normalize(math::vec3(math::linearRand(-1.f, 1.f), 0.f, math::linearRand(-1.f, 1.f)))*/;
             velBuffer[idx] = direction * initForce;
         }

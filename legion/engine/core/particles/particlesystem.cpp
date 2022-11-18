@@ -22,6 +22,12 @@ namespace legion::core
         {
             auto& emitter = ent.get_component<particle_emitter>().get();
 
+            id_type emitterPosId = nameHash("emitterPos");
+            if (!emitter.has_uniform<position>(emitterPosId))
+            {
+                emitter.create_uniform<position>("emitterPos", ent.get_component<position>().get());
+            }
+
             if (deltaTime > 1.f)
                 continue;
 

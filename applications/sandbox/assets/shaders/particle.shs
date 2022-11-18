@@ -42,18 +42,18 @@ shader(vertex)
 
 shader(fragment)
 {
-    uniform bool isAnimated = false;
+    uniform bool isAnimated;
     uniform sampler2DArray _textureArray;
-    uniform int frameCount = 1;
-    uniform blend = false;
+    uniform int frameCount;
+    uniform bool blend;
  
-    uniform bool useSolidColor = true;
-    uniform vec4 _color= vec4(1.0);
+    uniform bool useSolidColor;
+    uniform vec4 _color;
 
-    uniform bool useTexture = false;
+    uniform bool useTexture;
     uniform sampler2D _texture;
 
-    uniform bool isSoftParticle = false;
+    uniform bool isSoftParticle;
 
     void main(void)
     {
@@ -68,7 +68,7 @@ shader(fragment)
                 if(blend)
                 {
                     vec4 previous = texture(_textureArray, vec3(stdio(uv), frame-1.0));
-                    color = pow(mix(current, previous,round(1+frame)-frame), vec4(vec3(2.2),1.0));
+                    color = pow(mix(current, previous, round(1+frame)-frame), vec4(vec3(2.2),1.0));
                 }
                 else
                 {
