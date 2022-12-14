@@ -1,4 +1,4 @@
-[![legion logo banner](https://cdn.discordapp.com/attachments/682321169541890070/767684570199359499/banner.png)](https://legion-engine.com)
+[![rythe logo banner](https://media.discordapp.net/attachments/1042900549693079702/1052519407496212490/Logo_for_dark_bg.png?width=1440&height=592)](https://rythe-interactive.com)
 [![build](https://github.com/Legion-Engine/Legion-Engine/workflows/build-action/badge.svg)](https://github.com/Legion-Engine/Legion-Engine/actions?query=workflow%3Abuild-action)
 [![analyze](https://github.com/Legion-Engine/Legion-Engine/workflows/analyze-action/badge.svg)](https://github.com/Legion-Engine/Legion-Engine/actions?query=workflow%3Aanalyze-action)
 [![docs](https://github.com/Legion-Engine/Legion-Engine/workflows/docs-action/badge.svg)](https://docs.legion-engine.com)
