@@ -138,6 +138,7 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="async\ring_sync_lock.hpp" />
     <ClInclude Include="async\thread_util.hpp" />
     <ClInclude Include="async\wait_priority.hpp" />
+    <ClInclude Include="common\debugrendering.hpp" />
     <ClInclude Include="common\hash.hpp" />
     <ClInclude Include="common\string_literal.hpp" />
     <ClInclude Include="containers\delegate.hpp" />
@@ -194,6 +195,12 @@ del /q ".\xcopyexclude"</Command>
     <ClInclude Include="ecs\prototypes\component_prototype.hpp" />
     <ClInclude Include="ecs\prototypes\entity_prototype.hpp" />
     <ClInclude Include="engine\enginesubsystem.hpp" />
+    <ClInclude Include="particles\particlebuffer.hpp" />
+    <ClInclude Include="particles\particleemitter.hpp" />
+    <ClInclude Include="particles\particlepolicy.hpp" />
+    <ClInclude Include="particles\particles.hpp" />
+    <ClInclude Include="particles\particlesystem.hpp" />
+    <ClInclude Include="particles\particleuniform.hpp" />
     <ClInclude Include="scheduling\clock.hpp" />
     <ClInclude Include="scheduling\process.hpp" />
     <ClInclude Include="scheduling\processchain.hpp" />
@@ -571,6 +578,8 @@ del /q ".\xcopyexclude"</Command>
     <ClCompile Include="compute\program.cpp" />
     <ClCompile Include="logging\logging.cpp" />
     <ClCompile Include="math\glm\detail\glm.cpp" />
+    <ClCompile Include="particles\particleemitter.cpp" />
+    <ClCompile Include="particles\particlesystem.cpp" />
     <ClCompile Include="scenemanagement\scenemanager.cpp" />
     <ClCompile Include="scheduling\clock.cpp" />
     <ClCompile Include="scheduling\process.cpp" />
@@ -738,6 +747,10 @@ del /q ".\xcopyexclude"</Command>
     <None Include="math\glm\gtx\vector_angle.inl" />
     <None Include="math\glm\gtx\vector_query.inl" />
     <None Include="math\glm\gtx\wrap.inl" />
+    <None Include="particles\particlebuffer.inl" />
+    <None Include="particles\particleemitter.inl" />
+    <None Include="particles\particlepolicy.inl" />
+    <None Include="particles\particleuniform.inl" />
     <None Include="platform\cpp.hint" />
     <None Include="scheduling\process.inl" />
     <None Include="scheduling\processchain.inl" />

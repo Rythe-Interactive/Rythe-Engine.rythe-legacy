@@ -7,6 +7,8 @@
 #include <core/filesystem/provider_registry.hpp>
 #include <core/filesystem/basic_resolver.hpp>
 #include <core/compute/context.hpp>
+#include <core/particles/particles.hpp>
+
 
 namespace legion::core
 {
@@ -22,6 +24,7 @@ namespace legion::core
         assets::AssetCache<image>::addLoader<StbImageLoader>();
 
         createProcessChain("Update");
+        reportSystem<ParticleSystem>();
     }
 
     priority_type CoreModule::priority()
